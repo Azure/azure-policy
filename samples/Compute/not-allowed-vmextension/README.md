@@ -26,3 +26,18 @@ $New-AzureRmPolicyAssignment -Name restrictExtensions `
                              -PolicyDefinition $definition `
                              -PolicyParameterObject $policyParams
 ````
+## How to create Policy Definitions using AzureCLI
+
+````
+
+Az policy definition create –name restrictExtension –policyUri 'github.com/raw/foo/azurepolicy.rules.json' – parametersUri 'github.com/raw/bar/azurepolicy.parameters.json'
+
+````
+
+## How to create Policy Assignment using AzureCLI
+
+````
+
+Az policy assignment create –policy <policyId> --name restrictExtension –scope <scope> --parameters $params
+
+````
