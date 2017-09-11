@@ -1,0 +1,37 @@
+{
+    "if": {
+        "anyOf": [
+            {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/virtualNetworks"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/virtualNetworks/subnets[*].networkSecurityGroup.id",
+                            "equals": "[parameters('nsgId')]"
+                        }
+                    }
+                ]
+            },
+            {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/virtualNetworks/subnets"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id",
+                            "equals": "[parameters('nsgId')]"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "then": {
+        "effect": "deny"
+    }
+}
