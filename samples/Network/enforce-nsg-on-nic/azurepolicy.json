@@ -1,0 +1,37 @@
+{
+    "properties": {
+        "displayName": "NSG X on Every Nic",
+        "description": "This policy enforces a specific NSG on every Nic",
+        "parameters": {
+            "subnetId": {
+                "type": "String",
+                "metadata": {
+                    "description": "Resource Id of the subnet",
+                    "displayName": "Subnet Id",
+                    "strongType": "subnet"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/networkInterfaces"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/networkInterfaces/networkSecurityGroup.id",
+                            "equals": "[parameters('subnetId')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    },
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "[guid('policy')]"
+}
