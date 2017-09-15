@@ -1,0 +1,64 @@
+{
+    "properties": {
+        "displayName": "Audit if extension does not exist",
+        "description": "This policy audits if the anti malware extension.",
+        "parameters": {
+            "publisher": {
+                "type": "string",
+                "metadata": {
+                    "description": "The publisher of the extension",
+                    "strongType": "type",
+                    "displayName": "Extension Publisher"
+                }
+            },
+            "type": {
+                "type": "string",
+                "metadata": {
+                    "description": "The type of the extension",
+                    "strongType": "type",
+                    "displayName": "Extension Type"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/virtualMachines"
+                    },
+                    {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "in": [
+                            "MicrosoftWindowsServer"
+                        ]
+                    },
+                    {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                            "WindowsServer"
+                        ]
+                    },
+                ]
+            },
+            "then": {
+                "effect": "AuditIfNotExists",
+                "details": {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                                "equals": "[parameters('publisher')]"
+                            },
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                                "equals": "[parameters('type')]"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
