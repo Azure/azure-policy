@@ -1,6 +1,6 @@
-# Ensure storage blog encryption
+# Deny virtual networks to use user-defined route table
 
-This policy ensures there's no blob storage being created, without encryption enabled.
+This policy will deny user-defined routing tables for virtual networks.
 
 ## Deploy Policy to Azure
 
@@ -9,9 +9,9 @@ This policy ensures there's no blob storage being created, without encryption en
 ## How to create Policy Definition using PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name ensureBlobEncryption `
-                                          -DisplayName "Ensure Storage blob encryption is enabled" `
-                                          -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/ensure-blob-encryption/azurepolicy.rules.json'
+$definition = New-AzureRmPolicyDefinition -Name denyUserDefinedRouteTable `
+                                          -DisplayName "Deny user-defined routing tables" `
+                                          -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/no-route-table-in-ER-Network/azurepolicy.rules.json'
 ````
 
 ## How to create Policy Definitions using AzureCLI

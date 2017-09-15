@@ -1,19 +1,28 @@
 {
-    "if": {
-        "allOf": [
-            {
-                "field": "type",
-                "equals": "Microsoft.Compute/virtualMachines"
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "custom-image-from-rg",
+    "properties": {
+        "displayName": "Allow custom VM image",
+        "description": "This policy allows only usage of a custom VM image",
+        "parameters": {},
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/virtualMachines"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Compute/imageId",
+                            "contains": "resourceGroups/testImage"
+                        }
+                    }
+                ]
             },
-            {
-                "not": {
-                    "field": "Microsoft.Compute/imageId",
-                    "contains": "resourceGroups/testImage"
-                }
+            "then": {
+                "effect": "deny"
             }
-        ]
-    },
-    "then": {
-        "effect": "deny"
+        }
     }
-} 
+}

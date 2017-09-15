@@ -1,17 +1,29 @@
 {
-    "if": {
-        "allOf": [
-            {
-                "field": "type",
-                "in":[ "Microsoft.Compute/virtualMachines","Microsoft.Compute/VirtualMachineScaleSets"]
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "deny-hybrid-use-benefit",
+    "properties": {
+        "displayName": "Deny hybrid use benefit",
+        "description": "This policy will deny usage of hybrid use benefit.",
+        "parameters": {},
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "in": [
+                            "Microsoft.Compute/virtualMachines",
+                            "Microsoft.Compute/VirtualMachineScaleSets"
+                        ]
+                    },
+                    {
+                        "field": "Microsoft.Compute/licenseType",
+                        "exists": true
+                    }
+                ]
             },
-            {
-                "field": "Microsoft.Compute/licenseType",
-                "exists": true
+            "then": {
+                "effect": "deny"
             }
-        ]
-    },
-    "then": {
-        "effect": "deny"
+        }
     }
 }
