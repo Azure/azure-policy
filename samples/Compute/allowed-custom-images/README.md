@@ -19,6 +19,6 @@ $definition = New-AzureRmPolicyDefinition -Name approvedVMImages `
 
 ````cli
 
-Az policy definition create –name restrictExtension –policyUri 'github.com/raw/foo/azurepolicy.rules.json' – parametersUri 'github.com/raw/bar/azurepolicy.parameters.json'
+Az policy definition create –name approvedVMImages –policyUri 'github.com/raw/foo/azurepolicy.rules.json' – parametersUri 'github.com/raw/bar/azurepolicy.parameters.json'
 
 ````
