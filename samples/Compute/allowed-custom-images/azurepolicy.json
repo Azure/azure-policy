@@ -1,19 +1,34 @@
 {
-    "if": {
-        "allOf": [
-            {
-                "field": "type",
-                "equals": "Microsoft.Compute/virtualMachines"
-            },
-            {
-                "not": {
-                    "field": "Microsoft.Compute/imageId",
-                    "in": ["<imageId1>","<imageId2>"]
+    "properties": {
+        "displayName": "Approved VM images",
+        "description": "This policy governs the approved VM images",
+        "parameters": {
+            "imageIds": {
+                "type": "array",
+                "metadata": {
+                    "description": "The list of approved VM images",
+                    "displayName": "Approved VM images"
                 }
             }
-        ]
-    },
-    "then": {
-        "effect": "deny"
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/virtualMachines"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Compute/imageId",
+                            "in": "[parameters('imageIds')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
     }
-} 
+}
