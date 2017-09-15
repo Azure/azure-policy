@@ -1,6 +1,6 @@
-# Ensure storage blog encryption
+# Enforce Network Watcher in vNet regions
 
-This policy ensures there's no blob storage being created, without encryption enabled.
+This policy will enforce Network Watchers in regions where virtual networks are created.
 
 ## Deploy Policy to Azure
 
@@ -9,9 +9,9 @@ This policy ensures there's no blob storage being created, without encryption en
 ## How to create Policy Definition using PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name ensureBlobEncryption `
-                                          -DisplayName "Ensure Storage blob encryption is enabled" `
-                                          -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/ensure-blob-encryption/azurepolicy.rules.json'
+$definition = New-AzureRmPolicyDefinition -Name enforceNetworkWatcher `
+                                          -DisplayName "Enforce Network Watcher in vNet regions" `
+                                          -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/network-watcher-in-vnet-regions/azurepolicy.rules.json'
 ````
 
 ## How to create Policy Definitions using AzureCLI
