@@ -9,7 +9,7 @@ This policy controls which VM extensions that are not allowed at the preferred s
 ## How to create Policy Definition using PowerShell
 
 ````
-$definition = New-AzureRmPolicyDefinition -Name restrictExtensions `
+$definition = New-AzureRmPolicySetDefinition -Name restrictExtensions `
                                           -DisplayName extenstionrestrictions `
                                           -PolicyUri 'github.com/raw/foo/azurepolicy.rules.json' `
                                           -ParameterUri 'github.com/raw/bar/azurepolicy.parameters.json'
