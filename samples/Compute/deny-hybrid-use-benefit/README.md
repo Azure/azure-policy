@@ -18,6 +18,6 @@ $definition = New-AzureRmPolicyDefinition -Name denyHybridUseBenefit `
 
 ````cli
 
-Az policy definition create –name auditVmExtension –policyUri 'github.com/raw/foo/azurepolicy.rules.json' – parametersUri 'github.com/raw/bar/azurepolicy.parameters.json'
+Az policy definition create –name auditVmExtension –policy 'github.com/raw/foo/azurepolicy.rules.json' – parameters 'github.com/raw/bar/azurepolicy.parameters.json'
 
 ````
