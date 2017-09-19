@@ -8,9 +8,9 @@ This policy will Audit transparent data encryption status for SQL databases. It 
 
 ## How to create Policy Definition using PowerShell
 
-````powershell
+```powershell
 New-AzureRmPolicyDefinition -Name audit-sql-tde-status -DisplayName "Audit transparent data encryption status" -Description "Audit transparent data encryption status for SQL databases" -Policy "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/audit-sql-TDE-status/azurepolicy.rules.json"
-````
+```
 
 ## How to create Policy Definitions using AzureCLI
 
