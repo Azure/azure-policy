@@ -1,0 +1,40 @@
+{
+    "name": "audit-sql-db-auditing",
+    "properties": {
+        "displayName": "Audit SQL DB Level Audit Setting",
+        "description": "Audit DB level audit setting for SQL databases",
+        "parameters": {
+            "setting": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Audit Setting",
+                    "allowedValue": [
+                        "enabled",
+                        "disabled"
+                    ]
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "equals": "Microsoft.SQL/servers/databases"
+            },
+            "then": {
+                "effect": "AuditIfNotExists",
+                "details": {
+                    "type": "servers/databases/auditingSettings",
+                    "name": "current",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Sql/auditingSettings.state",
+                                "equals": "[parameters('setting')]"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

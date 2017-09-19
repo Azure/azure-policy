@@ -1,0 +1,40 @@
+{
+    "name": "audit-sql-db-threat-detection",
+    "properties": {
+        "displayName": "Audit DB level threat detection setting",
+        "description": "Audit threat detection setting for SQL databases",
+        "parameters": {
+            "setting": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Threat Detection Setting",
+                    "allowedValue": [
+                        "enabled",
+                        "disabled"
+                    ]
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "equals": "Microsoft.SQL/servers/databases"
+            },
+            "then": {
+                "effect": "AuditIfNotExists",
+                "details": {
+                    "type": "servers/databases/securityAlertPolicies",
+                    "name": "default",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Sql/securityAlertPolicies.state",
+                                "equals": "[parameters('setting')]"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
