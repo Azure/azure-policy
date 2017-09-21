@@ -1,6 +1,6 @@
-# Allowed Application Gateway SKUs
+# Allowed SQL DB SKUs
 
-This policy enables you to specify a set of application Gateway SKUs that your organization can deploy.
+This policy enables you to specify a set of SQL DB SKUs
 
 ## Deploy Policy to Azure
 
@@ -9,13 +9,13 @@ This policy enables you to specify a set of application Gateway SKUs that your o
 ## How to create Policy Definition using PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name auditNetworkWatcher -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/application-gateway-skus/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/application-gateway-skus/azurepolicy.parameters.json'
+$definition = New-AzureRmPolicyDefinition -Name sql-db-skus -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/sql-db-skus/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/sql-db-skus/azurepolicy.parameters.json'
 ````
 
 ## How to create Policy Definitions using AzureCLI
 
 ````cli
 
-Az policy definition create –name auditNworkWatcher -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/application-gateway-skus/azurepolicy.rules.json' -params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/application-gateway-skus/azurepolicy.parameters.json'
+Az policy definition create –name sql-db-skus -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/sql-db-skus/azurepolicy.rules.json' -params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/sql-db-skus/azurepolicy.parameters.json'
 
 ````
