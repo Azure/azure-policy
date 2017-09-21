@@ -1,6 +1,6 @@
-# Audit VM Extensions
+# Audit transparent data encryption status
 
-This policy will Audit transparent data encryption status for SQL databases. It uses AuditIfNot Exists, which will trigger a delayed evaluation. 
+This policy will audit transparent data encryption status for SQL databases.
 
 ## Deploy Policy to Azure
 
@@ -9,13 +9,13 @@ This policy will Audit transparent data encryption status for SQL databases. It 
 ## How to create Policy Definition using PowerShell
 
 ```powershell
-New-AzureRmPolicyDefinition -Name audit-sql-tde-status -DisplayName "Audit transparent data encryption status" -Description "Audit transparent data encryption status for SQL databases" -Policy "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/audit-sql-TDE-status/azurepolicy.rules.json"
+New-AzureRmPolicyDefinition -Name audit-sql-db-tde-status -DisplayName "Audit transparent data encryption status" -Description "Audit transparent data encryption status for SQL databases" -Policy "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/audit-sql-db-tde-status/azurepolicy.rules.json"
 ```
 
 ## How to create Policy Definitions using AzureCLI
 
 ````cli
 
-Az policy definition create –name audit-sql-tde-status –policy "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/audit-sql-TDE-status/azurepolicy.rules.json"
+Az policy definition create –name audit-sql-db-tde-status –policy "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/SQL/audit-sql-db-tde-status/azurepolicy.rules.json"
 
 ````
