@@ -16,6 +16,6 @@ $definition = New-AzureRmPolicyDefinition -Name allowCustomImage -Policy 'https:
 
 ````cli
 
-Az policy definition create –name auditVmExtension -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/custom-image-from-rg/azurepolicy.rules.json' –params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/custom-image-from-rg/azurepolicy.parameters.json'
+Az policy definition create –name allowCustomImage -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/custom-image-from-rg/azurepolicy.rules.json' –params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/custom-image-from-rg/azurepolicy.parameters.json'
 
 ````
