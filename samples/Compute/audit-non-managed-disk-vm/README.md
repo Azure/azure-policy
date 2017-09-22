@@ -9,7 +9,7 @@ Managed disk can help you simplify your VM disk managedment. Orgnizations can us
 ## How to create Policy Definition using PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name manageddiskvm -DisplayName "Create VM using Managed Disk" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/audit-non-managed-disk-vm/azurepolicy.rules.json'
+$definition = New-AzureRmPolicyDefinition -Name manageddiskvm -DisplayName "Audit non managed disk VM" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/audit-non-managed-disk-vm/azurepolicy.rules.json'
 ````
 
 ## How to create Policy Definitions using AzureCLI
