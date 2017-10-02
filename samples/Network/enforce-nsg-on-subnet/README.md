@@ -9,16 +9,13 @@ This policy will enforce that a Network Security Group is associated with subnet
 ## How to create Policy Definition using PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name nsgSubnetEnforcement `
-                                          -DisplayName "Enforce a NSG on virtual subnet" `
-                                          -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json' `
-                                          -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json'
+$definition = New-AzureRmPolicyDefinition -Name nsgSubnetEnforcement -DisplayName "Enforce a NSG on virtual subnet" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json'
 ````
 
 ## How to create Policy Definitions using AzureCLI
 
 ````cli
 
-Az policy definition create –name auditNworkWatcher –policyUri 'github.com/raw/foo/azurepolicy.rules.json' – parametersUri 'github.com/raw/bar/azurepolicy.parameters.json'
+Az policy definition create –name nsgSubnetEnforcement -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json'  -params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json'
 
 ````
