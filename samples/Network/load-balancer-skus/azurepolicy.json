@@ -1,0 +1,35 @@
+{
+    "properties": {
+        "displayName": "Allowed Load Balancer SKUs",
+        "description": "This policy enables you to specify a set of load balancer SKUs that your organization can deploy.",
+        "parameters": {
+            "listOfAllowedSKUs": {
+                "type": "Array",
+                "metadata": {
+                    "description": "The list of SKUs that can be specified for load balancer.",
+                    "displayName": "Allowed SKUs",
+                    "strongType": "LoadBalancerSKU"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/loadbalancers"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/loadbalancers/sku.name",
+                            "in": "[parameters('listOfAllowedSKUs')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "Deny"
+            }
+        }
+    }
+}

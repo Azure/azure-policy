@@ -1,0 +1,41 @@
+{
+    "name": "audit-diagnostic-setting",
+    "properties": {
+        "displayName": "Audit diagnostic setting",
+        "description": "Audit diagnostic setting for selected resource types",
+        "parameters": {
+            "listOfResourceTypes": {
+                "type": "Array",
+                "metadata": {
+                    "displayName": "Resource Types",
+                    "strongType":"resourceTypes"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": "[parameters('listOfResourceTypes')]"
+            },
+            "then": {
+                "effect": "AuditIfNotExists",
+                "details": {
+                    "type": "Microsoft.Insights/diagnosticSettings",
+                    "name": "service",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                                "equals": "true"
+                            },
+                             {
+                                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                                "equals": "true"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
