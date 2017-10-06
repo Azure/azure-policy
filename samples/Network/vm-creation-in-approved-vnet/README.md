@@ -1,24 +1,28 @@
-# Deny virtual networks to use user-defined route table
+# Use approved subnet for VM network interfaces
 
-This policy will deny user-defined routing tables for virtual networks.
+This policy enforces VM network interfaces to use subnet
 
-## Deploy Policy to Azure
+## Try on Portal
 
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade)
 
-## How to create Policy Definition using PowerShell
+## Try on PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "vm-creation-in-approved-vnet" -DisplayName "Deny user-defined routing tables" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/vm-creation-in-approved-vnet/azurepolicy.rules.json' -parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/vm-creation-in-approved-vnet/azurepolicy.parameters.json'
-
-New-AzureRmPolicyAssignment -Name test -Scope <scope> -PolicyDefinition $definition -subnetId <subnet-id>
-
+$definition = New-AzureRmPolicyDefinition -Name "vm-creation-in-approved-vnet" -DisplayName "Use approved subnet for VM network interfaces" -description "This policy enforces VM network interfaces to use subnet" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/vm-creation-in-approved-vnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/vm-creation-in-approved-vnet/azurepolicy.parameters.json' -Mode All
+$definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment 
 ````
 
-## How to create Policy Definitions using AzureCLI
+
+
+## Try with CLI
 
 ````cli
 
-Az policy definition create –name "vm-creation-in-approved-vnet" -rules 'github.com/raw/foo/azurepolicy.rules.json' –params 'github.com/raw/bar/azurepolicy.parameters.json'
+az policy definition create --name 'vm-creation-in-approved-vnet' --display-name 'Use approved subnet for VM network interfaces' --description 'This policy enforces VM network interfaces to use subnet' --rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/vm-creation-in-approved-vnet/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/vm-creation-in-approved-vnet/azurepolicy.parameters.json' --mode All
+
+az policy assignment create --name <assignmentname> --scope <scope> --policy "vm-creation-in-approved-vnet" 
 
 ````

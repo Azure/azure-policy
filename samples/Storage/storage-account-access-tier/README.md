@@ -1,23 +1,28 @@
-# Deny usage of cool access tier
+# Deny cool access tiering for storage accounts
 
-This policy will deny storage accounts using cool access tiering
+Ensures there's no usage of cool access tiering for storage.
 
-## Deploy Policy to Azure
+## Try on Portal
 
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade)
 
-## How to create Policy Definition using PowerShell
+## Try on PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name denyCoolTiering `
-                                          -DisplayName "Deny cool access tiering for storage" `
-                                          -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/storage-account-access-tier/azurepolicy.rules.json'
+$definition = New-AzureRmPolicyDefinition -Name "storage-account-access-tier" -DisplayName "Deny cool access tiering for storage accounts" -description "Ensures there's no usage of cool access tiering for storage." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/storage-account-access-tier/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/storage-account-access-tier/azurepolicy.parameters.json' -Mode All
+$definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment 
 ````
 
-## How to create Policy Definitions using AzureCLI
+
+
+## Try with CLI
 
 ````cli
 
-Az policy definition create –name auditNworkWatcher –policyUri 'github.com/raw/foo/azurepolicy.rules.json' – parametersUri 'github.com/raw/bar/azurepolicy.parameters.json'
+az policy definition create --name 'storage-account-access-tier' --display-name 'Deny cool access tiering for storage accounts' --description 'Ensures there's no usage of cool access tiering for storage.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/storage-account-access-tier/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Storage/storage-account-access-tier/azurepolicy.parameters.json' --mode All
+
+az policy assignment create --name <assignmentname> --scope <scope> --policy "storage-account-access-tier" 
 
 ````
