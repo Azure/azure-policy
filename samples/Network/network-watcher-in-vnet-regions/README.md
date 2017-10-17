@@ -6,7 +6,7 @@ This policy automatically creates a network watcher instance for virtual network
 
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade)
 
-## Try on PowerShell
+## Try with PowerShell
 
 ````powershell
 $definition = New-AzureRmPolicyDefinition -Name "network-watcher-in-vnet-regions" -DisplayName "Ensure network watcher is created" -description "This policy automatically creates a network watcher instance for virtual networks if one does not exist." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/network-watcher-in-vnet-regions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/network-watcher-in-vnet-regions/azurepolicy.parameters.json' -Mode All
