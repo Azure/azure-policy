@@ -1,4 +1,4 @@
-# Storage Account SKUs 
+# Allowed SKUs for Storage Accounts and Virtual Machines
 
 This policy allows you to speficy what skus are allowed for storage accounts and virtual machines
 
@@ -12,7 +12,7 @@ This policy allows you to speficy what skus are allowed for storage accounts and
 $policydefinitions = "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/PolicyInitiatives/skus-for-mutiple-types/azurepolicyset.definitions.json"
 $policysetparameters = "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/PolicyInitiatives/skus-for-mutiple-types/azurepolicyset.parameters.json"
 
-$policyset= New-AzureRmPolicySetDefinition -Name "skus-for-mutiple-types" -DisplayName "Storage Account SKUs " -Description "This policy allows you to speficy what skus are allowed for storage accounts and virtual machines" -PolicyDefinition $policydefinitions -Parameter $policysetparameters 
+$policyset= New-AzureRmPolicySetDefinition -Name "skus-for-mutiple-types" -DisplayName "Allowed SKUs for Storage Accounts and Virtual Machines" -Description "This policy allows you to speficy what skus are allowed for storage accounts and virtual machines" -PolicyDefinition $policydefinitions -Parameter $policysetparameters 
  
 New-AzureRmPolicyAssignment -PolicySetDefinition $policyset -Name <assignmentname> -Scope <scope>  -LISTOFALLOWEDSKUS_1 <VM SKUs> -LISTOFALLOWEDSKUS_2 <Storage Account SKUs >  -Sku @{"Name"="A1";"Tier"="Standard"}
 ````
