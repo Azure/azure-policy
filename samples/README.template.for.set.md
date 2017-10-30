@@ -9,8 +9,8 @@
 ## Try with PowerShell
 
 ````powershell
-$policydefinitions = "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/{{path}}/azurepolicyset.definitions.json"
-$policysetparameters = "https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/{{path}}/azurepolicyset.parameters.json"
+$policydefinitions = "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/{{path}}/azurepolicyset.definitions.json"
+$policysetparameters = "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/{{path}}/azurepolicyset.parameters.json"
 
 $policyset= New-AzureRmPolicySetDefinition -Name "{{policyName}}" -DisplayName "{{displayName}}" -Description "{{description}}" -PolicyDefinition $policydefinitions -Parameter $policysetparameters 
  
