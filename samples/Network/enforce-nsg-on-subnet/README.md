@@ -1,21 +1,28 @@
-# Enforce NSG association with subnets
+# NSG X on every subnet
 
-This policy will enforce that a Network Security Group is associated with subnets.
+This policy enforces a specific NSG on every subnet
 
-## Deploy Policy to Azure
+## Try on Portal
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true&microsoft_azure_policy_policyinsights=true&feature.microsoft_azure_security_policy=true&microsoft_azure_marketplace_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FNetwork%2Fenforce-nsg-on-subnet%2Fazurepolicy.json)
 
-## How to create Policy Definition using PowerShell
+## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name nsgSubnetEnforcement -DisplayName "Enforce a NSG on virtual subnet" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json'
+$definition = New-AzureRmPolicyDefinition -Name "enforce-nsg-on-subnet" -DisplayName "NSG X on every subnet" -description "This policy enforces a specific NSG on every subnet" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json' -Mode All
+$definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -nsgId <NSG Id> -PolicyDefinition $definition
+$assignment 
 ````
 
-## How to create Policy Definitions using AzureCLI
+
+
+## Try with CLI
 
 ````cli
 
-Az policy definition create –name nsgSubnetEnforcement -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json'  -params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json'
+az policy definition create --name 'enforce-nsg-on-subnet' --display-name 'NSG X on every subnet' --description 'This policy enforces a specific NSG on every subnet' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json' --mode All
+
+az policy assignment create --name <assignmentname> --scope <scope> --policy "enforce-nsg-on-subnet" 
 
 ````

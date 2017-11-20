@@ -1,21 +1,28 @@
-# Enforce NSG association with virtual network interfaces
+# NSG X on every nic
 
-This policy will enforce that a Network Security Group is associated with virtual network interface cards.
+This policy enforces a specific NSG on every virtual network interface
 
-## Deploy Policy to Azure
+## Try on Portal
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true&microsoft_azure_policy_policyinsights=true&feature.microsoft_azure_security_policy=true&microsoft_azure_marketplace_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FNetwork%2Fenforce-nsg-on-nic%2Fazurepolicy.json)
 
-## How to create Policy Definition using PowerShell
+## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name nsgNicEnforcement -DisplayName "Enforce NSG on virtual network interfaces" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-nic/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-nic/azurepolicy.parameters.json'
+$definition = New-AzureRmPolicyDefinition -Name "enforce-nsg-on-nic" -DisplayName "NSG X on every nic" -description "This policy enforces a specific NSG on every virtual network interface" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-nic/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-nic/azurepolicy.parameters.json' -Mode All
+$definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -nsgId <Network Security Group Id> -PolicyDefinition $definition
+$assignment 
 ````
 
-## How to create Policy Definitions using AzureCLI
+
+
+## Try with CLI
 
 ````cli
 
-Az policy definition create –name nsgNicEnforcement -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-nic/azurepolicy.rules.json' -params 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Network/enforce-nsg-on-nic/azurepolicy.parameters.json'
+az policy definition create --name 'enforce-nsg-on-nic' --display-name 'NSG X on every nic' --description 'This policy enforces a specific NSG on every virtual network interface' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-nic/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-nic/azurepolicy.parameters.json' --mode All
+
+az policy assignment create --name <assignmentname> --scope <scope> --policy "enforce-nsg-on-nic" 
 
 ````

@@ -1,21 +1,28 @@
-# Deny Hybrid Use Benefit
+# Deny hybrid use benefit
 
-This policy will deny Hybrid Use Benefit usage
+This policy will deny usage of hybrid use benefit.
 
-## Deploy Policy to Azure
+## Try on Portal
 
-[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade)
+[![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true&microsoft_azure_policy_policyinsights=true&feature.microsoft_azure_security_policy=true&microsoft_azure_marketplace_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FCompute%2Fdeny-hybrid-use-benefit%2Fazurepolicy.json)
 
-## How to create Policy Definition using PowerShell
+## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name denyHybridUseBenefit -DisplayName "Deny hybrid use benefit" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/deny-hybrid-use-benefit/azurepolicy.rules.json'
+$definition = New-AzureRmPolicyDefinition -Name "deny-hybrid-use-benefit" -DisplayName "Deny hybrid use benefit" -description "This policy will deny usage of hybrid use benefit." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deny-hybrid-use-benefit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deny-hybrid-use-benefit/azurepolicy.parameters.json' -Mode All
+$definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
+$assignment 
 ````
 
-## How to create Policy Definitions using AzureCLI
+
+
+## Try with CLI
 
 ````cli
 
-Az policy definition create –name auditVmExtension -rules 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/Compute/deny-hybrid-use-benefit/azurepolicy.rules.json'
+az policy definition create --name 'deny-hybrid-use-benefit' --display-name 'Deny hybrid use benefit' --description 'This policy will deny usage of hybrid use benefit.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deny-hybrid-use-benefit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deny-hybrid-use-benefit/azurepolicy.parameters.json' --mode All
+
+az policy assignment create --name <assignmentname> --scope <scope> --policy "deny-hybrid-use-benefit" 
 
 ````
