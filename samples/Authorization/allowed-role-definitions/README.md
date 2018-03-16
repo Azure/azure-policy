@@ -1,6 +1,6 @@
 # Allowed Role Definitions
 
-This policy defines a white list of role deifnitions that can be used in IAM
+This policy defines a white list of role definitions that can be used in IAM
 
 ## Try on Portal
 
@@ -9,7 +9,7 @@ This policy defines a white list of role deifnitions that can be used in IAM
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "allowed-role-definitions" -DisplayName "Allowed Role Definitions" -description "This policy defines a white list of role deifnitions that can be used in IAM" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "allowed-role-definitions" -DisplayName "Allowed Role Definitions" -description "This policy defines a white list of role definitions that can be used in IAM" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.parameters.json' -Mode All
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -roleDefinitionIds <Approved Role Definitions> -PolicyDefinition $definition
 $assignment 
@@ -21,7 +21,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'allowed-role-definitions' --display-name 'Allowed Role Definitions' --description 'This policy defines a white list of role deifnitions that can be used in IAM' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'allowed-role-definitions' --display-name 'Allowed Role Definitions' --description 'This policy defines a white list of role deffnitions that can be used in IAM' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.parameters.json' --mode All
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "allowed-role-definitions" 
 
