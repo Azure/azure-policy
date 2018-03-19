@@ -1,0 +1,34 @@
+{
+    "properties": {
+        "displayName": "Use approved subnet for VM network interfaces",
+        "description": "This policy enforces VM network interfaces to use subnet",
+        "parameters": {
+            "subnetId": {
+                "type": "string",
+                "metadata": {
+                    "description": "Resource Id for Subnet",
+                    "displayName": "Subnet Id"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/networkInterfaces"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].subnet.id",
+                            "equals": "[parameters('subnetId')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    }
+}

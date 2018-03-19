@@ -1,0 +1,41 @@
+{
+    "properties": {
+        "mode": "all",
+        "parameters": {
+            "subnetIds": {
+                "type": "Array",
+                "metadata": {
+                    "description": "List of Subnets",
+                    "displayName": "List of Subnets that can use a public IP"
+                }
+            }
+        },
+        "displayName": "Only Allow public IP in specific subnets",
+        "description": "Only allow public IP to be used in specific subnets",
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/networkInterfaces"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].publicIpAddress.id",
+                            "exists": false
+                        }
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].subnet.id",
+                            "in": "[parameters('subnetIds')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    }
+}

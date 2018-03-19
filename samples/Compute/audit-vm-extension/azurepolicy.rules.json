@@ -1,24 +1,40 @@
 {
-    "if": {
-        "field": "type",
-        "equals": "Microsoft.Compute/virtualMachines"
-    },
-    "then": {
-        "effect": "AuditIfNotExists",
-        "details": {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "existenceCondition": {
-                "allOf": [
-                    {
-                        "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                        "equals": "[parameters('publisher')]"
-                    },
-                    {
-                        "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                        "equals": "[parameters('type')]"
-                    }
-                ]
-            }
-        }
-    }
+	"if": {
+		"allOf": [
+			{
+				"field": "type",
+				"equals": "Microsoft.Compute/virtualMachines"
+			},
+			{
+				"field": "Microsoft.Compute/imagePublisher",
+				"in": [
+					"MicrosoftWindowsServer"
+				]
+			},
+			{
+				"field": "Microsoft.Compute/imageOffer",
+				"in": [
+					"WindowsServer"
+				]
+			}
+		]
+	},
+	"then": {
+		"effect": "auditIfNotExists",
+		"details": {
+			"type": "Microsoft.Compute/virtualMachines/extensions",
+			"existenceCondition": {
+				"allOf": [
+					{
+						"field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+						"equals": "[parameters('publisher')]"
+					},
+					{
+						"field": "Microsoft.Compute/virtualMachines/extensions/type",
+						"equals": "[parameters('type')]"
+					}
+				]
+			}
+		}
+	}
 }
