@@ -22,6 +22,6 @@ To contribute and get started, please visit our [**contribution guide**](./1-con
 
 ## Requesting Policy Aliases
 
-To request a new alias, please follow the guidlines and use this [**template**](./contribution-guid/request-alias.md)
+To request a new alias, please follow the guidlines and use this [**template**](./1-contribution-guide/request-alias.md)
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
