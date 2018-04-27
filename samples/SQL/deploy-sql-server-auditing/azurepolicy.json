@@ -1,0 +1,173 @@
+{
+   "properties": {
+      "displayName": "[Preview]: Deploy Auditing on SQL servers",
+      "description": "This policy ensures that Auditing is enabled on SQL Servers for enhanced security & compliance. It will automatically create a storage account in the same region as the SQL server to store audit records.",
+      "metadata": {
+         "category": "SQL"
+      },
+      "parameters": {
+         "retentionDays": {
+            "type": "string",
+            "defaultValue": "180",
+            "metadata": {
+               "description": "The value in days of the retention period (0 indicates unlimited retention)",
+               "displayName": "Retention days (optional, 180 days if unspecified)"
+            }
+         },
+         "storageAccountsResourceGroup": {
+            "type": "string",
+            "metadata": {
+               "displayName": "Resource group name for storage accounts",
+               "description": "Auditing writes database events to an audit log in your Azure Storage account (a storage account will be created in each region where a SQL Server is created that will be shared by all servers in that region). Important - for proper operation of Auditing do not delete or rename the resource group or the storage accounts.",
+               "strongType": "existingResourceGroups"
+            }
+         },
+         "locations": {
+            "type": "array",
+            "defaultValue": [
+               "australiacentral",
+               "australiacentral2",
+               "australiaeast",
+               "australiasoutheast",
+               "brazilsouth",
+               "canadacentral",
+               "canadaeast",
+               "centralindia",
+               "centralus",
+               "eastasia",
+               "eastus",
+               "eastus2",
+               "francecentral",
+               "francesouth",
+               "japaneast",
+               "japanwest",
+               "koreacentral",
+               "koreasouth",
+               "northcentralus",
+               "northeurope",
+               "southcentralus",
+               "southindia",
+               "southeastasia",
+               "uksouth",
+               "ukwest",
+               "westcentralus",
+               "westeurope",
+               "westindia",
+               "westus",
+               "westus2"
+            ],
+            "metadata": {
+               "strongType": "location",
+               "displayName": "Applicable locations",
+               "description": "This policy will only be applied to servers in the selected locations."
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Sql/servers"
+               },
+               {
+                  "field": "location",
+                  "in": "[parameters('locations')]"
+               }
+            ]
+         },
+         "then": {
+            "effect": "DeployIfNotExists",
+            "details": {
+               "type": "Microsoft.Sql/servers/auditingSettings",
+               "name": "Default",
+               "existenceCondition": {
+                  "field": "Microsoft.Sql/auditingSettings.state",
+                  "equals": "Enabled"
+               },
+               "deployment": {
+                  "properties": {
+                     "mode": "incremental",
+                     "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                           "serverName": {
+                              "type": "string"
+                           },
+                           "auditRetentionDays": {
+                              "type": "string"
+                           },
+                           "storageAccountsResourceGroup": {
+                              "type": "string"
+                           },
+                           "location": {
+                              "type": "string"
+                           }
+                        },
+                        "variables": {
+                           "retentionDays": "[int(parameters('auditRetentionDays'))]",
+                           "subscriptionId": "[subscription().subscriptionId]",
+                           "uniqueStorage": "[uniqueString(variables('subscriptionId'), parameters('location'), parameters('storageAccountsResourceGroup'))]",
+                           "locationCode": "[substring(parameters('location'), 0, 3)]",
+                           "storageName": "[tolower(concat('sqlaudit', variables('locationCode'), variables('uniqueStorage')))]"
+                        },
+                        "resources": [
+                           {
+                              "apiVersion": "2017-05-10",
+                              "name": "sqlServerAuditingStorageAccount",
+                              "type": "Microsoft.Resources/deployments",
+                              "resourceGroup": "[parameters('storageAccountsResourceGroup')]",
+                              "properties": {
+                                 "mode": "Incremental",
+                                 "parameters": {
+                                    "location": {
+                                       "value": "[parameters('location')]"
+                                    },
+                                    "storageName": {
+                                       "value": "[variables('storageName')]"
+                                    }
+                                 },
+                                 "templateLink": {
+                                    "uri": "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-auditing/createStorage.template.json",
+                                    "contentVersion": "1.0.0.0"
+                                 }
+                              }
+                           },
+                           {
+                              "name": "[concat(parameters('serverName'), '/Default')]",
+                              "type": "Microsoft.Sql/servers/auditingSettings",
+                              "apiVersion": "2017-03-01-preview",
+                              "properties": {
+                                 "state": "Enabled",
+                                 "storageEndpoint": "[reference('sqlServerAuditingStorageAccount').outputs.storageAccountEndPoint.value]",
+                                 "storageAccountAccessKey": "[reference('sqlServerAuditingStorageAccount').outputs.storageAccountKey.value]",
+                                 "retentionDays": "[variables('retentionDays')]",
+                                 "auditActionsAndGroups": null,
+                                 "storageAccountSubscriptionId": "[subscription().subscriptionId]",
+                                 "isStorageSecondaryKeyInUse": false
+                              }
+                           }
+                        ]
+                     },
+                     "parameters": {
+                        "serverName": {
+                           "value": "[field('name')]"
+                        },
+                        "auditRetentionDays": {
+                           "value": "[parameters('retentionDays')]"
+                        },
+                        "storageAccountsResourceGroup": {
+                           "value": "[parameters('storageAccountsResourceGroup')]"
+                        },
+                        "location": {
+                           "value": "[field('location')]"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}

@@ -1,0 +1,106 @@
+{
+   "if": {
+      "allOf": [
+         {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+         },
+         {
+            "field": "location",
+            "in": "[parameters('locations')]"
+         }
+      ]
+   },
+   "then": {
+      "effect": "DeployIfNotExists",
+      "details": {
+         "type": "Microsoft.Sql/servers/auditingSettings",
+         "name": "Default",
+         "existenceCondition": {
+            "field": "Microsoft.Sql/auditingSettings.state",
+            "equals": "Enabled"
+         },
+         "deployment": {
+            "properties": {
+               "mode": "incremental",
+               "template": {
+                  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "parameters": {
+                     "serverName": {
+                        "type": "string"
+                     },
+                     "auditRetentionDays": {
+                        "type": "string"
+                     },
+                     "storageAccountsResourceGroup": {
+                        "type": "string"
+                     },
+                     "location": {
+                        "type": "string"
+                     }
+                  },
+                  "variables": {
+                     "retentionDays": "[int(parameters('auditRetentionDays'))]",
+                     "subscriptionId": "[subscription().subscriptionId]",
+                     "uniqueStorage": "[uniqueString(variables('subscriptionId'), parameters('location'), parameters('storageAccountsResourceGroup'))]",
+                     "locationCode": "[substring(parameters('location'), 0, 3)]",
+                     "storageName": "[tolower(concat('sqlaudit', variables('locationCode'), variables('uniqueStorage')))]"
+                  },
+                  "resources": [
+                     {
+                        "apiVersion": "2017-05-10",
+                        "name": "sqlServerAuditingStorageAccount",
+                        "type": "Microsoft.Resources/deployments",
+                        "resourceGroup": "[parameters('storageAccountsResourceGroup')]",
+                        "properties": {
+                           "mode": "Incremental",
+                           "parameters": {
+                              "location": {
+                                 "value": "[parameters('location')]"
+                              },
+                              "storageName": {
+                                 "value": "[variables('storageName')]"
+                              }
+                           },
+                           "templateLink": {
+                              "uri": "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-auditing/createStorage.template.json",
+                              "contentVersion": "1.0.0.0"
+                           }
+                        }
+                     },
+                     {
+                        "name": "[concat(parameters('serverName'), '/Default')]",
+                        "type": "Microsoft.Sql/servers/auditingSettings",
+                        "apiVersion": "2017-03-01-preview",
+                        "properties": {
+                           "state": "Enabled",
+                           "storageEndpoint": "[reference('sqlServerAuditingStorageAccount').outputs.storageAccountEndPoint.value]",
+                           "storageAccountAccessKey": "[reference('sqlServerAuditingStorageAccount').outputs.storageAccountKey.value]",
+                           "retentionDays": "[variables('retentionDays')]",
+                           "auditActionsAndGroups": null,
+                           "storageAccountSubscriptionId": "[subscription().subscriptionId]",
+                           "isStorageSecondaryKeyInUse": false
+                        }
+                     }
+                  ]
+               },
+               "parameters": {
+                  "serverName": {
+                     "value": "[field('name')]"
+                  },
+                  "auditRetentionDays": {
+                     "value": "[parameters('retentionDays')]"
+                  },
+                  "storageAccountsResourceGroup": {
+                     "value": "[parameters('storageAccountsResourceGroup')]"
+                  },
+                  "location": {
+                     "value": "[field('location')]"
+                  }
+               }
+            }
+         }
+      }
+   }
+}

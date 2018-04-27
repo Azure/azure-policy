@@ -1,39 +1,24 @@
 {
-    "properties": {
-        "displayName": "Audit SQL Server Level Audit Setting",
-        "description": "Audit Audit Setting for SQL Server",
-        "parameters": {
-            "setting": {
-                "type": "String",
-                "allowedValues": [
-                    "enabled",
-                    "disabled"
-                ],
-                "metadata": {
-                    "displayName": "Audit Setting"
-                }
+   "properties": {
+      "displayName": "Audit SQL server level Auditing settings",
+      "description": "Audits the existence of SQL Auditing at the server level",
+      "parameters": {},
+      "policyRule": {
+         "if": {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+         },
+         "then": {
+            "effect": "AuditIfNotExists",
+            "details": {
+               "type": "Microsoft.Sql/servers/auditingSettings",
+               "name": "default",
+               "existenceCondition": {
+                  "field": "Microsoft.Sql/auditingSettings.state",
+                  "equals": "Enabled"
+               }
             }
-        },
-        "policyRule": {
-            "if": {
-                "field": "type",
-                "equals": "Microsoft.SQL/servers"
-            },
-            "then": {
-                "effect": "auditIfNotExists",
-                "details": {
-                    "type": "Microsoft.SQL/servers/auditingSettings",
-                    "name": "current",
-                    "existenceCondition": {
-                        "allOf": [
-                            {
-                                "field": "Microsoft.Sql/auditingSettings.state",
-                                "equals": "[parameters('setting')]"
-                            }
-                        ]
-                    }
-                }
-            }
-        }
-    }
+         }
+      }
+   }
 }
