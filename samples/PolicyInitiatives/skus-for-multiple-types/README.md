@@ -20,14 +20,7 @@ New-AzureRmPolicyAssignment -PolicySetDefinition $policyset -Name <assignmentnam
 ## Try with CLI
 
 ````
-az policy set-definition create --name 'skus-for-multiple-types' --display-name 'Allowed SKUs for Storage Accounts and Virtual Machines' --description 'This policy allows you to speficy what skus are allowed for storage accounts and virtual machines' --definitions 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/PolicyInitiatives/skus-for-multiple-types/azurepolicyset.definitions.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/PolicyInitiatives/skus-for-multiple-types/azurepolicyset.parameters.json'
+az policy set-definition create --name "skus-for-multiple-types" --display-name "Allowed SKUs for Storage Accounts and Virtual Machines" --description "This policy allows you to speficy what skus are allowed for storage accounts and virtual machines" --definitions "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/PolicyInitiatives/skus-for-multiple-types/azurepolicyset.definitions.json" --params "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/PolicyInitiatives/skus-for-multiple-types/azurepolicyset.parameters.json"
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy-set-definition 'skus-for-multiple-types' --params '{
-      "LISTOFALLOWEDSKUS_1": {
-         "value": <VM SKU Array>
-      },
-      "LISTOFALLOWEDSKUS_2": {
-         "value": <Storage Account SKU Array>
-      },
-   }'
+az policy assignment create --name <assignmentName> --scope <scope> --policy-set-definition "skus-for-multiple-types" --params "{ 'LISTOFALLOWEDSKUS_1': { 'value': <VM SKU Array> }, 'LISTOFALLOWEDSKUS_2': { 'value': <Storage Account SKU Array> } }"
 ````
