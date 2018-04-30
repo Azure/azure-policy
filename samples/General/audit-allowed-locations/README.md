@@ -32,6 +32,6 @@ $assignment
 
 az policy definition create --name 'audit-location-deployments' --display-name 'Audit for allowed locations' --description 'This policy enables you to audit the locations where your resources have been deployed. Use this to understand what is within your environment and if it matches company guidelines.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Location/audit-allowed-locations/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Location/audit-allowed-locations/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-location-deployments"
+az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-location-deployments" --params '{"listOfAllowedLocations":{"value": [ "ukwest", "eastus"]}}'
 
 ````
