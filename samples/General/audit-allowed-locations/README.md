@@ -9,9 +9,12 @@ This policy enables you to audit the locations where your resources have been de
 ## Try with PowerShell
 
 ````powershell
+#Define allowed publishers
+$allowedlocations = "UK West", "East US", "North Europe"
+
 $definition = New-AzureRmPolicyDefinition -Name "audit-location-deployments" -DisplayName "Audit for allowed locations" -description "This policy enables you to audit the locations where your resources have been deployed. Use this to understand what is within your environment and if it matches company guidelines." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Location/audit-allowed-locations/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Location/audit-allowed-locations/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -listOfAllowedLocations $allowedlocations -PolicyDefinition $definition
 $assignment
 
 ````
