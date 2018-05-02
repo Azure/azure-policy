@@ -73,6 +73,6 @@ Apply the policy using CLI
 
 az policy definition create --name 'allowed-image-publishers-policy' --display-name 'Allowed image publishers only' --description 'This policy ensures that only allowed image publisher offerings are selected from the image repository.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "allowed-image-publishers-policy" --params '{"listOfAllowedimagePublisher":{"value": [ 'redhat', 'MicrosoftWindowsServer']}}'
+az policy assignment create --name <assignmentname> --scope <scope> --policy "allowed-image-publishers-policy" --params '{"listOfAllowedimagePublisher":{'value': [ 'redhat', 'MicrosoftWindowsServer']}}'
 
 ````
