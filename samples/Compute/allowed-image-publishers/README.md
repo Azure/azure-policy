@@ -67,6 +67,8 @@ $assignment
 
 ## Example number 3 with CLI
 
+Apply the policy using CLI
+
 ````cli
 
 az policy definition create --name 'allowed-image-publishers-policy' --display-name 'Allowed image publishers only' --description 'This policy ensures that only allowed image publisher offerings are selected from the image repository.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.parameters.json' --mode Indexed
