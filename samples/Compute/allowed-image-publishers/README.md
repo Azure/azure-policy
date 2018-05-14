@@ -9,7 +9,7 @@ Ensure that only the image publishers that you allow within your environment can
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "allowed-image-publishers-policy" -DisplayName "Only allow certain image publishers offerings to be deployed" -description "This policy ensures that only allowed image publisher offerings are selected from the image repository" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "allowed-image-publishers-policy" -DisplayName "Only allow images from certain image publishers to be deployed" -description "This policy ensures that only certain image publisher offerings are usable from the image repository" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.parameters.json' -Mode All
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -listOfAllowedimagePublisher <parameters> -PolicyDefinition $definition
 $assignment
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'allowed-image-publishers-policy' --display-name 'Only allow certain image publishers offerings to be deployed' --description 'This policy ensures that only allowed image publisher offerings are selected from the image repository' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'allowed-image-publishers-policy' --display-name 'Only allow images from certain image publishers to be deployed' --description 'This policy ensures that only certain image publisher offerings are usable from the image repository' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/allowed-image-publishers/azurepolicy.parameters.json' --mode All
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "allowed-image-publishers-policy" --params <parameters>
 
