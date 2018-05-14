@@ -21,60 +21,12 @@
                "description": "Auditing writes database events to an audit log in your Azure Storage account (a storage account will be created in each region where a SQL Server is created that will be shared by all servers in that region). Important - for proper operation of Auditing do not delete or rename the resource group or the storage accounts.",
                "strongType": "existingResourceGroups"
             }
-         },
-         "locations": {
-            "type": "array",
-            "defaultValue": [
-               "australiacentral",
-               "australiacentral2",
-               "australiaeast",
-               "australiasoutheast",
-               "brazilsouth",
-               "canadacentral",
-               "canadaeast",
-               "centralindia",
-               "centralus",
-               "eastasia",
-               "eastus",
-               "eastus2",
-               "francecentral",
-               "francesouth",
-               "japaneast",
-               "japanwest",
-               "koreacentral",
-               "koreasouth",
-               "northcentralus",
-               "northeurope",
-               "southcentralus",
-               "southindia",
-               "southeastasia",
-               "uksouth",
-               "ukwest",
-               "westcentralus",
-               "westeurope",
-               "westindia",
-               "westus",
-               "westus2"
-            ],
-            "metadata": {
-               "strongType": "location",
-               "displayName": "Applicable locations",
-               "description": "This policy will only be applied to servers in the selected locations."
-            }
          }
       },
       "policyRule": {
          "if": {
-            "allOf": [
-               {
-                  "field": "type",
-                  "equals": "Microsoft.Sql/servers"
-               },
-               {
-                  "field": "location",
-                  "in": "[parameters('locations')]"
-               }
-            ]
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
          },
          "then": {
             "effect": "DeployIfNotExists",
@@ -110,12 +62,13 @@
                            "subscriptionId": "[subscription().subscriptionId]",
                            "uniqueStorage": "[uniqueString(variables('subscriptionId'), parameters('location'), parameters('storageAccountsResourceGroup'))]",
                            "locationCode": "[substring(parameters('location'), 0, 3)]",
-                           "storageName": "[tolower(concat('sqlaudit', variables('locationCode'), variables('uniqueStorage')))]"
+                           "storageName": "[tolower(concat('sqlaudit', variables('locationCode'), variables('uniqueStorage')))]",
+                           "createStorageAccountDeploymentName": "[concat('sqlServerAuditingStorageAccount-', variables('locationCode'))]"
                         },
                         "resources": [
                            {
                               "apiVersion": "2017-05-10",
-                              "name": "sqlServerAuditingStorageAccount",
+                              "name": "[variables('createStorageAccountDeploymentName')]",
                               "type": "Microsoft.Resources/deployments",
                               "resourceGroup": "[parameters('storageAccountsResourceGroup')]",
                               "properties": {
@@ -140,8 +93,8 @@
                               "apiVersion": "2017-03-01-preview",
                               "properties": {
                                  "state": "Enabled",
-                                 "storageEndpoint": "[reference('sqlServerAuditingStorageAccount').outputs.storageAccountEndPoint.value]",
-                                 "storageAccountAccessKey": "[reference('sqlServerAuditingStorageAccount').outputs.storageAccountKey.value]",
+                                 "storageEndpoint": "[reference(variables('createStorageAccountDeploymentName')).outputs.storageAccountEndPoint.value]",
+                                 "storageAccountAccessKey": "[reference(variables('createStorageAccountDeploymentName')).outputs.storageAccountKey.value]",
                                  "retentionDays": "[variables('retentionDays')]",
                                  "auditActionsAndGroups": null,
                                  "storageAccountSubscriptionId": "[subscription().subscriptionId]",
