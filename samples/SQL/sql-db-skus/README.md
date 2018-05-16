@@ -23,6 +23,7 @@ $assignment
 
 az policy definition create --name 'sql-db-skus' --display-name 'Allowed SQL DB SKUs' --description 'This policy enables you to specify a set of SQL DB SKUs' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/sql-db-skus/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/sql-db-skus/azurepolicy.parameters.json' --mode All
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "sql-db-skus" 
+az policy assignment create --name '<assignmentname>' --scope '<scope>' --policy "sql-db-skus" --params "{'listofSKUName':{'value':['Standard']}, 'listofSKUId':{'value':['S0']}}"
+
 
 ````
