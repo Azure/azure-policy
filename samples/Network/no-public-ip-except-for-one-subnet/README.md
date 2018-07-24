@@ -2,7 +2,7 @@
 
 Only allow public IP to be used in specific subnets
 
-The subnetIds parameter must be provided with a list of subnets in format of resource ID (e.g /subscriptions/{subscription_id}/resourcegroups/{resource_group)/providers/microsoft.network/virtualnetworks/{vnet}/subnets/{subnet-name}
+The subnetIds parameter must be provided with a list of subnets in format of resource ID (e.g /subscriptions/{subscription_id}/resourcegroups/{resource_group)/providers/microsoft.network/virtualnetworks/{vnet}/subnets/{subnet-name})
 
 ## Try on Portal
 
