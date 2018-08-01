@@ -1,3 +1,0 @@
-$rg = Get-AzureRmResourceGroup -Name 'PriyaTestGroup'
-$definition = Get-AzureRmPolicyDefinition | Where-Object { $_.Properties.DisplayName -eq 'Enforce tag and its value' }
-New-AzureRmPolicyAssignment -Name 'enforce-required-tag' -DisplayName 'Enforces a required tag and its value' -scope '/subscriptions/d0610b27-9663-4c05-89f8-5b4be01e86a5/resourceGroups/PriyaTestGroup' -PolicyDefinition $definition
