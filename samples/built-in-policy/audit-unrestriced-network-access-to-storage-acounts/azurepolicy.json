@@ -1,0 +1,41 @@
+{
+    "properties": {
+        "displayName": "Audit unrestricted network access to storage accounts",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Audit unrestricted network access in your storage account firewall settings. Instead, configure network rules so only applications from allowed networks can access the storage account. To allow connections from specific internet or on-premise clients, access can be granted to traffic from specific Azure virtual networks or to public internet IP address ranges",
+        "metadata": {
+            "category": "Storage"
+        },
+        "parameters": { 
+            "effect": { 
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": ["Audit", "Disabled"],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            } 
+        },
+        "policyRule": {
+            "if": {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Storage/storageAccounts"
+                },
+                {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+                  "equals": "Allow"
+                }
+              ]
+            },
+            "then": {
+              "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c",
+    "name": "34c877ad-507e-4c82-993e-3452a6e0ad3c"
+}
