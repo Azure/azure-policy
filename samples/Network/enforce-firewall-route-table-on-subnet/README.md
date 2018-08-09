@@ -1,6 +1,6 @@
 # Enforce Azure Firewall Route Table on every subnet
 
-This policy enforces every subnet to be associated to a route table targeting an instance of Azure Firewall. Azure Firewall may be used to govern outbound traffic using application and network rules.
+This policy enforces every subnet to be associated to a route table. Technically, the route table may target anything (NVA or an instance of the Azure Firewall,...) but the idea here is to provide the route table associated to an instance of Azure Firewall as assignment parameter in order to let Azure Firewall govern the outbound traffic of all the subnets included in a given VNET or Subscription.
 
 
 ## Try on Portal
