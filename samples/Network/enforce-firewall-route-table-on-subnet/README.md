@@ -2,6 +2,11 @@
 
 This policy enforces every subnet to be associated to a route table. The route table may target anything (NVA, Azure Firewall, etc.).
 
+## Azure Policy Docs
+
+See more information and a complete walk-through of using this sample on
+[docs.microsoft.com](https://docs.microsoft.com/azure/azure-policy/scripts/enforce-firewall-route-table-on-subnet).
+
 ## Try on Portal
 
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/?feature.customportal=false&microsoft_azure_policy=true&microsoft_azure_policy_policyinsights=true&feature.microsoft_azure_security_policy=true&microsoft_azure_marketplace_policy=true#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FNetwork%2Fenforce-firewall-route-table-on-subnet%2Fazurepolicy.json)
