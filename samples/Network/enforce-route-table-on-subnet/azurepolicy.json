@@ -1,0 +1,54 @@
+{
+	"type": "Microsoft.Authorization/policyDefinitions",	
+	"properties": {
+		"displayName": "Enforce a route table on every subnet",
+		"description": "This policy enforces a specific Route Table on every subnet",
+		"parameters": {
+			"rtId": {
+				"type": "String",
+				"metadata": {
+					"description": "Resource Id of the route table. example:/subscriptions/yourSubscription/resourceGroups/yourResourceGroup/providers/Microsoft.Network/routeTables/aTable",
+					"displayName": "Route table Id"
+					
+				}
+			}
+		},
+		"policyRule": {
+			"if": {
+				"anyOf": [
+					{
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Network/virtualNetworks"
+							},
+							{
+								"not": {
+									"field": "Microsoft.Network/virtualNetworks/subnets[*].routeTable.id",
+									"equals": "[parameters('rtId')]"
+								}
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Network/virtualNetworks/subnets"
+							},
+							{
+								"not": {
+									"field": "Microsoft.Network/virtualNetworks/subnets/routeTable.id",
+									"equals": "[parameters('rtId')]"
+								}
+							}
+						]
+					}
+				]
+			},
+			"then": {
+				"effect": "deny"
+			}
+		}
+	}
+}
