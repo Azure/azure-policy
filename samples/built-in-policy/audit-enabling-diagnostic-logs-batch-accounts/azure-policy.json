@@ -1,0 +1,56 @@
+{
+    "properties": {
+        "displayName": "Audit enabling of diagnostic logs in Batch accounts",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised",
+        "metadata": {
+            "category": "Batch"
+        },
+        "parameters": { 
+            "effect": { 
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": ["AuditIfNotExists", "Disabled"],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            },
+            "requiredRetentionDays": {
+                "type": "String",
+                "defaultValue": "365",
+                "metadata": {
+                    "displayName": "Required retention (days)",
+                    "description": "The required diagnostic logs retention in days"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+              "field": "type",
+              "equals": "Microsoft.Batch/batchAccounts"
+            },
+            "then": {
+              "effect": "[parameters('effect')]",
+              "details":{
+                "type": "Microsoft.Insights/diagnosticSettings",
+                "existenceCondition": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                      "equals": "true"
+                    },
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days",
+                      "equals": "[parameters('requiredRetentionDays')]"
+                    }
+                  ]
+                }
+              }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/428256e6-1fac-4f48-a757-df34c2b3336d",
+    "name": "428256e6-1fac-4f48-a757-df34c2b3336d"
+}
