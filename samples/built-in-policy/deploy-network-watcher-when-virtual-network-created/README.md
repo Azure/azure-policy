@@ -9,7 +9,7 @@ This policy creates a network watcher resource in regions with virtual networks.
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-network-watcher-when-virtual-network-created" -DisplayName "[Preview]: Deploy network watcher when virtual networks are created" -description "This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "deploy-network-watcher-when-virtual-network-created" -DisplayName "[Preview]: Deploy network watcher when virtual networks are created" -description "This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'deploy-network-watcher-when-virtual-network-created' --display-name '[Preview]: Deploy network watcher when virtual networks are created' --description 'This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'deploy-network-watcher-when-virtual-network-created' --display-name '[Preview]: Deploy network watcher when virtual networks are created' --description 'This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-when-virtual-network-created/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "deploy-network-watcher-when-virtual-network-created" 
 
