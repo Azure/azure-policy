@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'audit-event-hub-autorization' --display-name 'Audit authorization rules on Event Hub namespaces' --description 'Event Hub clients should not use a namespace level access policy that provides access to all queues and topics in a namespace. To align with the least previlege security model, you shoud create access policies at the entity level for queues and topics to provide access to only the specific entity' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-event-hub-autorization/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-event-hub-autorization/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-event-hub-autorization" 
+az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> --policy "audit-event-hub-autorization" 
 
 ````
