@@ -11,7 +11,7 @@ Audit enabling of logs and retain them up to a year. This enables you to recreat
 ````powershell
 $definition = New-AzureRmPolicyDefinition -Name "audit-enabling-diagnostic-logs-batch-accounts" -DisplayName "Audit enabling of diagnostic logs in Batch accounts" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-batch-accounts/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-batch-accounts/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -effect <effect> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
 $assignment 
 ````
 
@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'audit-enabling-diagnostic-logs-batch-accounts' --display-name 'Audit enabling of diagnostic logs in Batch accounts' --description 'Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-batch-accounts/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-batch-accounts/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-enabling-diagnostic-logs-batch-accounts" 
+az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> -requiredRetentionDays <requiredRetentionDays> --policy "audit-enabling-diagnostic-logs-batch-accounts" 
 
 ````
