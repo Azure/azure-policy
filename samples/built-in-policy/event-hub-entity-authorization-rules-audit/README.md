@@ -9,7 +9,7 @@ Audit existence of authorization rules on Event Hub entities to grant least-priv
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "event-hub-entity-authorization-rules-audit" -DisplayName "Audit existence of authorization rules on Event Hub entities" -description "Audit existence of authorization rules on Event Hub entities to grant least-privileged access" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "event-hub-entity-authorization-rules-audit" -DisplayName "Audit existence of authorization rules on Event Hub entities" -description "Audit existence of authorization rules on Event Hub entities to grant least-privileged access" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'event-hub-entity-authorization-rules-audit' --display-name 'Audit existence of authorization rules on Event Hub entities' --description 'Audit existence of authorization rules on Event Hub entities to grant least-privileged access' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'event-hub-entity-authorization-rules-audit' --display-name 'Audit existence of authorization rules on Event Hub entities' --description 'Audit existence of authorization rules on Event Hub entities to grant least-privileged access' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-entity-authorization-rules-audit/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "event-hub-entity-authorization-rules-audit" 
 
