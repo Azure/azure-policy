@@ -11,7 +11,7 @@ Audit enabling of diagnostic logs on the app. This enables you to recreate activ
 ````powershell
 $definition = New-AzureRmPolicyDefinition -Name "app-service-audit-diagnostic-logs" -DisplayName "Audit enabling of diagnostic logs in App Services" -description "Audit enabling of diagnostic logs on the app. This enables you to recreate activity trails for investigation purposes if a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/app-service-audit-diagnostic-logs/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -type <type> -PolicyDefinition $definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -effect <effect> -PolicyDefinition $definition
 $assignment 
 ````
 
@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'app-service-audit-diagnostic-logs' --display-name 'Audit enabling of diagnostic logs in App Services' --description 'Audit enabling of diagnostic logs on the app. This enables you to recreate activity trails for investigation purposes if a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/app-service-audit-diagnostic-logs/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/app-service-audit-diagnostic-logs/azurepolicy.parameters.json' --mode All
 
-az policy assignment create --name <assignmentname> --scope <scope> --type <type> --policy "app-service-audit-diagnostic-logs" 
+az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> --policy "app-service-audit-diagnostic-logs" 
 
 ````
