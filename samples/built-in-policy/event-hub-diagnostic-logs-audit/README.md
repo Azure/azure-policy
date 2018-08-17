@@ -9,7 +9,7 @@ Audit enabling of logs and retain them up to a year. This enables recreation of 
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "event-hub-diagnostic-logs-audit" -DisplayName "Audit enabling of diagnostic logs in Event Hub" -description "Audit enabling of logs and retain them up to a year. This enables recreation of activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "event-hub-diagnostic-logs-audit" -DisplayName "Audit enabling of diagnostic logs in Event Hub" -description "Audit enabling of logs and retain them up to a year. This enables recreation of activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'event-hub-diagnostic-logs-audit' --display-name 'Audit enabling of diagnostic logs in Event Hub' --description 'Audit enabling of logs and retain them up to a year. This enables recreation of activity trails for investigation purposes when a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'event-hub-diagnostic-logs-audit' --display-name 'Audit enabling of diagnostic logs in Event Hub' --description 'Audit enabling of logs and retain them up to a year. This enables recreation of activity trails for investigation purposes when a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "event-hub-diagnostic-logs-audit" 
 
