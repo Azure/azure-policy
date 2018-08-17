@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'event-hub-diagnostic-logs-audit' --display-name 'Audit enabling of diagnostic logs in Event Hub' --description 'Audit enabling of logs and retain them up to a year. This enables recreation of activity trails for investigation purposes when a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/event-hub-diagnostic-logs-audit/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "event-hub-diagnostic-logs-audit" 
+az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> --requiredRetentionDays <requiredRetentionDays> --policy "event-hub-diagnostic-logs-audit" 
 
 ````
