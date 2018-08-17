@@ -9,7 +9,7 @@ Audit enabling of logs and retain them up to a year. This enables you to recreat
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "logic-apps-diagnostic-logs-audit" -DisplayName "Audit enabling of diagnostic logs in Logic Apps" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "logic-apps-diagnostic-logs-audit" -DisplayName "Audit enabling of diagnostic logs in Logic Apps" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'logic-apps-diagnostic-logs-audit' --display-name 'Audit enabling of diagnostic logs in Logic Apps' --description 'Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'logic-apps-diagnostic-logs-audit' --display-name 'Audit enabling of diagnostic logs in Logic Apps' --description 'Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/logic-apps-diagnostic-logs-audit/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "logic-apps-diagnostic-logs-audit" 
 
