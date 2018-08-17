@@ -9,7 +9,7 @@ This policy ensures encryption is enabled on all Data Lake Store accounts
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "data-lake-shore-encryption" -DisplayName "Enforce encryption on Data Lake Store accounts" -description "This policy ensures encryption is enabled on all Data Lake Store accounts" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "data-lake-shore-encryption" -DisplayName "Enforce encryption on Data Lake Store accounts" -description "This policy ensures encryption is enabled on all Data Lake Store accounts" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'data-lake-shore-encryption' --display-name 'Enforce encryption on Data Lake Store accounts' --description 'This policy ensures encryption is enabled on all Data Lake Store accounts' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'data-lake-shore-encryption' --display-name 'Enforce encryption on Data Lake Store accounts' --description 'This policy ensures encryption is enabled on all Data Lake Store accounts' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/data-lake-shore-encryption/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "data-lake-shore-encryption" 
 
