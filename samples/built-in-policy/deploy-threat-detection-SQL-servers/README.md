@@ -9,7 +9,7 @@ This policy ensures that Threat Detection is enabled on SQL Servers.
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-threat-detection-SQL-servers" -DisplayName "[Preview]: Deploy Threat Detection on SQL servers" -description "This policy ensures that Threat Detection is enabled on SQL Servers." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.parameters.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "deploy-threat-detection-SQL-servers" -DisplayName "[Preview]: Deploy Threat Detection on SQL servers" -description "This policy ensures that Threat Detection is enabled on SQL Servers." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'deploy-threat-detection-SQL-servers' --display-name '[Preview]: Deploy Threat Detection on SQL servers' --description 'This policy ensures that Threat Detection is enabled on SQL Servers.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'deploy-threat-detection-SQL-servers' --display-name '[Preview]: Deploy Threat Detection on SQL servers' --description 'This policy ensures that Threat Detection is enabled on SQL Servers.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-threat-detection-SQL-servers/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "deploy-threat-detection-SQL-servers" 
 
