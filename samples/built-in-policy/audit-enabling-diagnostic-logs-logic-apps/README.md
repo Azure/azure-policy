@@ -11,7 +11,7 @@ Audit enabling of logs and retain them up to a year. This enables you to recreat
 ````powershell
 $definition = New-AzureRmPolicyDefinition -Name "audit-enabling-diagnostic-logs-logic-apps" -DisplayName "Audit enabling of diagnostic logs in Logic Apps" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-logic-apps/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-logic-apps/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
 $assignment 
 ````
 
@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'audit-enabling-diagnostic-logs-logic-apps' --display-name 'Audit enabling of diagnostic logs in Logic Apps' --description 'Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-logic-apps/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/audit-enabling-diagnostic-logs-logic-apps/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-enabling-diagnostic-logs-logic-apps" 
+az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> --requiredRetentionDays <requiredRetentionDays> --policy "audit-enabling-diagnostic-logs-logic-apps" 
 
 ````
