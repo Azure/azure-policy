@@ -21,7 +21,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'contain-resource-group-name' --display-name 'Resource name contains resource group name' --description 'Require resources to contain the resource group's name' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/TextPatterns/contain-resource-group-name/azurepolicy.rules.json' --mode ALL
+az policy definition create --name "contain-resource-group-name" --display-name "Resource name contains resource group name" --description "Require resources to contain the resource group's name" --rules "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/TextPatterns/contain-resource-group-name/azurepolicy.rules.json" --mode ALL
 
  az policy assignment create --name <assignmentname> --scope <scope> --policy "contain-resource-group-name"
 
