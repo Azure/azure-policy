@@ -1,4 +1,4 @@
-# [Preview]: Apply Diagnostic Settings for Network Security Groups
+# Apply Diagnostic Settings for Network Security Groups
 
 This policy automatically deploys diagnostic settings to network security groups.
 
@@ -9,7 +9,7 @@ This policy automatically deploys diagnostic settings to network security groups
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "apply-diagnostic-setting-network-security-group" -DisplayName "[Preview]: Apply Diagnostic Settings for Network Security Groups" -description "This policy automatically deploys diagnostic settings to network security groups." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzureRmPolicyDefinition -Name "apply-diagnostic-setting-network-security-group" -DisplayName "Apply Diagnostic Settings for Network Security Groups" -description "This policy automatically deploys diagnostic settings to network security groups." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -storagePrefix <storagePrefix> -rgName <rgName> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'apply-diagnostic-setting-network-security-group' --display-name '[Preview]: Apply Diagnostic Settings for Network Security Groups' --description 'This policy automatically deploys diagnostic settings to network security groups.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.parameters.json' --mode Indexed
+az policy definition create --name 'apply-diagnostic-setting-network-security-group' --display-name 'Apply Diagnostic Settings for Network Security Groups' --description 'This policy automatically deploys diagnostic settings to network security groups.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --storagePrefix <storagePrefix> --rgName <rgName> --policy "apply-diagnostic-setting-network-security-group" 
 
