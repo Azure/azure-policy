@@ -9,10 +9,16 @@ This policy requires resources to contain the resource group's name. For example
 ## Try with Azure PowerShell
 
 ````powershell
-
+# Create the Policy Definition
 $definition = New-AzureRmPolicyDefinition -Name "contain-resource-group-name" -DisplayName "Resource name contains resource group name" -description "Require resources to contain the resource group's name" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/TextPatterns/contain-resource-group-name/azurepolicy.rules.json' -Mode ALL
+
+# 
 $definition
+
+# Create the Policy Assignment
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+
+# 
 $assignment
 
 ````
@@ -20,9 +26,10 @@ $assignment
 ## Try with Azure CLI
 
 ````cli
-
+# Create the Policy Definition
 az policy definition create --name "contain-resource-group-name" --display-name "Resource name contains resource group name" --description "Require resources to contain the resource group's name" --rules "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/TextPatterns/contain-resource-group-name/azurepolicy.rules.json" --mode ALL
 
- az policy assignment create --name <assignmentname> --scope <scope> --policy "contain-resource-group-name"
+# Create the Policy Assignment
+az policy assignment create --name <assignmentname> --scope <scope> --policy "contain-resource-group-name"
 
  ````
