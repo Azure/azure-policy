@@ -11,7 +11,7 @@ Audit configuration of metric alert rules on Batch account to enable the require
 ````powershell
 $definition = New-AzureRmPolicyDefinition -Name "batch-account-audit-metric-alert-rules-configuration" -DisplayName "Audit configuration of metric alert rules on Batch accounts" -description "Audit configuration of metric alert rules on Batch account to enable the required metric" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/batch-account-audit-metric-alert-rules-configuration/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/batch-account-audit-metric-alert-rules-configuration/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -effect <effect> -metricName <metricName> -PolicyDefinition $definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -metricName <metricName> -PolicyDefinition $definition
 $assignment 
 ````
 
@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'batch-account-audit-metric-alert-rules-configuration' --display-name 'Audit configuration of metric alert rules on Batch accounts' --description 'Audit configuration of metric alert rules on Batch account to enable the required metric' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/batch-account-audit-metric-alert-rules-configuration/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/batch-account-audit-metric-alert-rules-configuration/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> --metricName <metricName> --policy "batch-account-audit-metric-alert-rules-configuration" 
+az policy assignment create --name <assignmentname> --scope <scope> --params "{'metricName':{'value':'<metricName>'}}" --policy "batch-account-audit-metric-alert-rules-configuration" 
 
 ````
