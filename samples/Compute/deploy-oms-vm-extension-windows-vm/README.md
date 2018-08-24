@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'deploy-oms-vm-extension-windows-vm' --display-name 'Deploy default OMS VM Extension for Windows VMs.' --description 'This policy deploys OMS VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --logAnalytics <logAnalytics> --policy "deploy-oms-vm-extension-windows-vm" 
+az policy assignment create --name <assignmentname> --scope <scope> --params "{'logAnalytics':{'value': '<logAnalytics>'}}" --policy "deploy-oms-vm-extension-windows-vm" 
 
 ````
