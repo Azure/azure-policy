@@ -11,7 +11,7 @@ Event Hub clients should not use a namespace level access policy that provides a
 ````powershell
 $definition = New-AzureRmPolicyDefinition -Name "audit-event-hub-authorization" -DisplayName "Audit authorization rules on Event Hub namespaces" -description "Event Hub clients should not use a namespace level access policy that provides access to all queues and topics in a namespace. To align with the least privilege security model, you shoud create access policies at the entity level for queues and topics to provide access to only the specific entity" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/audit-event-hub-authorization/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/audit-event-hub-authorization/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -effect <effect> -PolicyDefinition $definition
+$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 
@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'audit-event-hub-authorization' --display-name 'Audit authorization rules on Event Hub namespaces' --description 'Event Hub clients should not use a namespace level access policy that provides access to all queues and topics in a namespace. To align with the least privilege security model, you shoud create access policies at the entity level for queues and topics to provide access to only the specific entity' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/audit-event-hub-authorization/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/audit-event-hub-authorization/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --effect <effect> --policy "audit-event-hub-authorization" 
+az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-event-hub-authorization" 
 
 ````
