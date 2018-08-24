@@ -1,0 +1,36 @@
+{
+    "properties": {
+        "displayName": "Deny installation of VM extensions",
+        "mode": "All",
+        "descrition": "Denies the installation of virtul machine extensions",
+        "parameters": {
+            "AllowedExtensions": {
+                "type": "Array",
+                "metadata": {
+                    "description": "Allowed VM Extensions.",
+                    "displayName": "Allowed Extensions",
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+            },
+            "then": {
+                "effect": "auditIfNotExists",
+                "details": {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                                "in": "[parameters('AllowedExtensions')]"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
