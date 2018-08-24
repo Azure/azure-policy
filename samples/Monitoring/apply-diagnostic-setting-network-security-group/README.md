@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'apply-diagnostic-setting-network-security-group' --display-name 'Apply Diagnostic Settings for Network Security Groups' --description 'This policy automatically deploys diagnostic settings to network security groups.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/apply-diagnostic-setting-network-security-group/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --storagePrefix <storagePrefix> --rgName <rgName> --policy "apply-diagnostic-setting-network-security-group" 
+az policy assignment create --name <assignmentname> --scope <scope> --params "{'storagePrefix':{'value':'<storagePrefix>'}}" --params "{'rgName':{'value': '<rgName>'}}" --policy "apply-diagnostic-setting-network-security-group"
 
 ````
