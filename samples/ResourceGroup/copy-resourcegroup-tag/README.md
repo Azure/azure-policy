@@ -1,6 +1,6 @@
 # Copy resource group tag to resource
 
-Copy a named tag from the resource group tag to the resource.  For example, a tag named *example* on the resource group will be copied to the resources.  Change the word *example* in the policy rule to change the name of the tag copied to a resource.
+Copy a specific tag from the resource group tag to the resource.  For example, a tag named *example* on the resource group will be copied to the resources.  Change the word *example* in the policy rule to change the name of the tag copied to a resource.
 
 ## Try on Azure Portal
 
