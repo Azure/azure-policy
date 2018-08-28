@@ -9,7 +9,7 @@ Denies the creation of network security group rules that allow all inbound traff
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "enforce-tag-value" -DisplayName "Denies NSG rule changes that allow all inbound traffic" -description "Denies people from changing NSG rules that allow all inbound traffic" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-traffic-change/azurepolicy.rules.json' -Mode All
+$definition = New-AzureRmPolicyDefinition -Name "enforce-tag-value" -DisplayName "Denies NSG rule changes that allow all inbound traffic" -description "Denies the creation of network security group rules that allow all inbound traffic" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-traffic-change/azurepolicy.rules.json' -Mode All
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'enforce-tag-value' --display-name 'Denies NSG rule changes that allow all inbound traffic' --description 'Denies people from changing NSG rules that allow all inbound traffic' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-traffic-change/azurepolicy.rules.json' --mode All
+az policy definition create --name 'enforce-tag-value' --display-name 'Denies NSG rule changes that allow all inbound traffic' --description 'Denies the creation of network security group rules that allow all inbound traffic' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-traffic-change/azurepolicy.rules.json' --mode All
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "deny-nsg-inbound-traffic-change" 
 
