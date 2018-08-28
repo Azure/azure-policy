@@ -1,6 +1,6 @@
 # Denies NSG rule changes that allow all inbound traffic
 
-Denies people from changing network security group rules that allow all inbound traffic
+Denies the creation of network security group rules that allow all inbound traffic
 
 ## Try on Portal
 
