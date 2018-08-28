@@ -3,7 +3,7 @@
 This repository contains all currently available Azure Policy samples contributed by the community. The following information is relevant to get started with contributing to this repository.
 
 - [**Contribution guide**](/1-contribution-guide/README.md#contribution-guide). Describes the minimal guidelines for contributing.
-- [**Git tutorial**](/1-contribution-guide/git-tutorial.md#git-tutorial). Step by step to get you started with Git.
+- [**Git tutorial**](https://guides.github.com/activities/hello-world/). Step by step to get you started with Git.
 - [**Useful Tools**](/1-contribution-guide/useful-tools.md#useful-tools). Useful resources and tools for Azure development.
 
 ## Create Policy Definitions and Assignments
@@ -46,6 +46,6 @@ The README.md describes your policy. A good description helps other community me
 - *Optional: Prerequisites
 - *Optional: Notes
 
-Example README: [Approved VM images - README](../samples/compute/allowed-custom-images/README.md)
+Example README: [Approved VM images - README](../samples/Compute/allowed-custom-images/README.md)
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
