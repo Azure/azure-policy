@@ -1,0 +1,29 @@
+{
+    "if": {
+      "field": "type",
+      "equals": "Microsoft.Batch/batchAccounts"
+    },
+    "then": {
+      "effect": "AuditIfNotExists",
+      "details": {
+        "type": "Microsoft.Insights/alertRules",
+        "existenceScope": "Subscription",
+        "existenceCondition": {
+          "allOf": [
+            {
+              "field": "Microsoft.Insights/alertRules/isEnabled",
+              "equals": "true"
+            },
+            {
+              "field": "Microsoft.Insights/alertRules/condition.dataSource.metricName",
+              "equals": "[parameters('metricName')]"
+            },
+            {
+              "field": "Microsoft.Insights/alertRules/condition.dataSource.resourceUri",
+              "equals": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Batch/batchAccounts/', field('name'))]"
+            }
+          ]
+        }
+      }
+    }
+}

@@ -1,0 +1,48 @@
+{
+    "properties": {
+        "displayName": "Audit configuration of metric alert rules on Batch accounts",
+        "mode": "Indexed",
+        "description": "Audit configuration of metric alert rules on Batch account to enable the required metric",
+        "metadata": {
+            "category": "Batch"
+        },
+        "parameters": { 
+            "metricName": {
+              "type": "String",
+              "metadata": {
+                "displayName": "Metric name",
+                "description": "The metric name that an alert rule must be enabled on. See https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-supported-metrics#microsoftbatchbatchaccounts for a list of metrics."
+              }
+            }           
+        },
+        "policyRule": {
+            "if": {
+              "field": "type",
+              "equals": "Microsoft.Batch/batchAccounts"
+            },
+            "then": {
+              "effect": "AuditIfNotExists",
+              "details": {
+                "type": "Microsoft.Insights/alertRules",
+                "existenceScope": "Subscription",
+                "existenceCondition": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Insights/alertRules/isEnabled",
+                      "equals": "true"
+                    },
+                    {
+                      "field": "Microsoft.Insights/alertRules/condition.dataSource.metricName",
+                      "equals": "[parameters('metricName')]"
+                    },
+                    {
+                      "field": "Microsoft.Insights/alertRules/condition.dataSource.resourceUri",
+                      "equals": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Batch/batchAccounts/', field('name'))]"
+                    }
+                  ]
+                }
+              }
+            }
+        }
+    }
+}
