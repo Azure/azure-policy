@@ -1,0 +1,44 @@
+{
+    "properties": {
+        "displayName": "Audit enabling of diagnostic logs in Logic Apps",
+        "mode": "Indexed",
+        "description": "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised",
+        "metadata": {
+            "category": "Logic Apps"
+        },
+        "parameters": { 
+            "requiredRetentionDays": {
+              "type": "String",
+              "defaultValue": "365",
+              "metadata": {
+                "displayName": "Required retention (days)",
+                "description": "The required diagnostic logs retention in days"
+              }
+            }           
+        },
+        "policyRule": {
+            "if": {
+              "field": "type",
+              "equals": "Microsoft.Logic/workflows"
+            },
+            "then": {
+              "effect": "AuditIfNotExists",
+              "details":{
+                "type": "Microsoft.Insights/diagnosticSettings",
+                "existenceCondition": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                      "equals": "true"
+                    },
+                    {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days",
+                      "equals": "[parameters('requiredRetentionDays')]"
+                    }
+                  ]
+                }
+              }
+            }
+        }
+    }
+}
