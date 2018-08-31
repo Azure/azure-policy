@@ -1,0 +1,63 @@
+{
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "platform-image-policy",
+    "properties": {
+        "displayName": "Only allow a certain VM platform image",
+        "description": "This policy ensures that only certain VM platform images are allowed from the image repository",
+        "parameters": {
+            "imagePublisher": {
+                "type": "Microsoft.Compute/imagePublisher",
+                "defaultValue": "Canonical"
+            },
+            "imageOffer": {
+                "type": "Microsoft.Compute/imageOffer",
+                "defaultValue": "UbuntuServer"
+            },
+            "imageSku": {
+                "type": "Microsoft.Compute/imageSku",
+                "defaultValue": "14.04.2-LTS"
+            },
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "in": [
+                            "Microsoft.Compute/disks",
+                            "Microsoft.Compute/virtualMachines",
+                            "Microsoft.Compute/VirtualMachineScaleSets"
+                        ]
+                    },
+                    {
+                        "not": {
+                            "allOf": [
+                                {
+                                    "field": "Microsoft.Compute/imagePublisher",
+                                    "in": [
+                                        "Canonical"
+                                    ]
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "in": [
+                                        "UbuntuServer"
+                                    ]
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSku",
+                                    "in": [
+                                        "14.04.2-LTS"
+                                    ]
+                                },
+                            ]
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    }
+}
