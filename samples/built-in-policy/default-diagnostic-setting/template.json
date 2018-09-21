@@ -15,17 +15,20 @@
             "type": "string"
         }
     },
+    "variables": {
+        "storageDeployName": "[concat('policyStorage_', uniqueString(parameters('location'), parameters('nsgName')))]"
+    },
     "resources": [
         {
             "type": "Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings",
             "name": "[concat(parameters('nsgName'),'/Microsoft.Insights/service2')]",
             "apiVersion": "2017-05-01-preview",
-            "location":"[parameters('location')]",
+            "location": "[parameters('location')]",
             "dependsOn": [
-                "deployStorageAccount"
+                "[variables('storageDeployName')]"
             ],
             "properties": {
-                "storageAccountId": "[reference('deployStorageAccount').outputs.storageAccountId.value]",
+                "storageAccountId": "[reference(variables('storageDeployName')).outputs.storageAccountId.value]",
                 "logs": [
                     {
                         "category": "NetworkSecurityGroupEvent",
@@ -48,7 +51,7 @@
         },
         {
             "apiVersion": "2017-05-10",
-            "name": "deployStorageAccount",
+            "name": "[variables('storageDeployName')]",
             "type": "Microsoft.Resources/deployments",
             "resourceGroup": "[parameters('rgName')]",
             "properties": {
@@ -101,7 +104,7 @@
                     "outputs": {
                         "storageAccountId": {
                             "type": "string",
-                            "value": "[resourceId('Microsoft.Storage/storageAccounts',concat(parameters('storagePrefix'), parameters('location')))]"
+                            "value": "[resourceId(parameters('rgName'), 'Microsoft.Storage/storageAccounts', concat(parameters('storagePrefix'), parameters('location')))]"
                         }
                     }
                 }
