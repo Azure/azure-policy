@@ -1,0 +1,42 @@
+{
+   "properties": {
+      "displayName": "Audit SQL Server firewall rule",
+      "description": "Audits the existence of a rule that enables traffic from a specific IP range to a SQL Server.",
+      "parameters": {
+         "startIpAddress": {
+            "type": "string",
+            "displayName": "Start IP Address",
+            "description": "The beginning of the IP address range. Example: 1.23.191.10"
+         },
+         "endIpAddress": {
+            "type": "string",
+            "displayName": "End IP Address",
+            "description": "The end of the IP address range. Example: 1.23.191.50"
+         }
+      },
+      "policyRule": {
+         "if": {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+         },
+         "then": {
+            "effect": "AuditIfNotExists",
+            "details": {
+               "type": "Microsoft.Sql/servers/firewallRules",
+               "existenceCondition": {
+                  "allOf": [
+                     {
+                        "field": "Microsoft.Sql/servers/firewallRules/startIpAddress",
+                        "equals": "[parameters('startIpAddress')]"
+                     },
+                     {
+                        "field": "Microsoft.Sql/servers/firewallRules/endIpAddress",
+                        "equals": "[parameters('endIpAddress')]"
+                     }
+                  ]
+               }
+            }
+         }
+      }
+   }
+}
