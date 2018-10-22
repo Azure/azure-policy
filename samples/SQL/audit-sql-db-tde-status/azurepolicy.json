@@ -1,25 +1,33 @@
 {
-    "name": "audit-sql-db-tde-status",
-    "properties": {
-        "displayName": "Audit transparent data encryption status",
-        "description": "Audit transparent data encryption status for SQL databases",
-        "parameters": {},
-        "policyRule": {
-            "if": {
-                "field": "type",
-                "equals": "Microsoft.SQL/servers/databases"
-            },
-            "then": {
-                "effect": "auditIfNotExists",
-                "details": {
-                    "type": "Microsoft.SQL/servers/databases/transparentDataEncryption",
-                    "name": "current",
-                    "existenceCondition": {
-                        "field": "Microsoft.Sql/transparentDataEncryption.status",
-                        "equals": "enabled"
-                    }
-                }
+   "name": "audit-sql-db-tde-status",
+   "properties": {
+      "displayName": "Audit transparent data encryption status",
+      "description": "Audit transparent data encryption status for SQL databases",
+      "parameters": {},
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.SQL/servers/databases"
+               },
+               {
+                  "field": "name",
+                  "notEquals": "master"
+               }
+            ]
+         },
+         "then": {
+            "effect": "auditIfNotExists",
+            "details": {
+               "type": "Microsoft.SQL/servers/databases/transparentDataEncryption",
+               "name": "current",
+               "existenceCondition": {
+                  "field": "Microsoft.Sql/transparentDataEncryption.status",
+                  "equals": "enabled"
+               }
             }
-        }
-    }
+         }
+      }
+   }
 }

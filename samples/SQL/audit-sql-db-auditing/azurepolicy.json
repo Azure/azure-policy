@@ -1,35 +1,43 @@
 {
-    "properties": {
-        "displayName": "Audit SQL DB Level Audit Setting",
-        "description": "Audit DB level audit setting for SQL databases",
-        "parameters": {
-            "setting": {
-                "type": "String",
-                 "allowedValues": [
-                        "enabled",
-                        "disabled"
-                ],
-                "metadata": {
-                    "displayName": "Audit Setting"
-                }
+   "properties": {
+      "displayName": "Audit SQL DB Level Audit Setting",
+      "description": "Audit DB level audit setting for SQL databases",
+      "parameters": {
+         "setting": {
+            "type": "String",
+            "allowedValues": [
+               "enabled",
+               "disabled"
+            ],
+            "metadata": {
+               "displayName": "Audit Setting"
             }
-        },
-        "policyRule": {
-            "if": {
-                "field": "type",
-                "equals": "Microsoft.SQL/servers/databases"
-            },
-            "then": {
-                "effect": "auditIfNotExists",
-                "details": {
-                    "type": "Microsoft.SQL/servers/databases/auditingSettings",
-                    "name": "default",
-                    "existenceCondition": {
-                        "field": "Microsoft.Sql/auditingSettings.state",
-                        "equals": "[parameters('setting')]"
-                    }
-                }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.SQL/servers/databases"
+               },
+               {
+                  "field": "name",
+                  "notEquals": "master"
+               }
+            ]
+         },
+         "then": {
+            "effect": "auditIfNotExists",
+            "details": {
+               "type": "Microsoft.SQL/servers/databases/auditingSettings",
+               "name": "default",
+               "existenceCondition": {
+                  "field": "Microsoft.Sql/auditingSettings.state",
+                  "equals": "[parameters('setting')]"
+               }
             }
-        }
-    }
+         }
+      }
+   }
 }
