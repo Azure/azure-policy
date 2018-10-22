@@ -1,17 +1,25 @@
 {
-	"if": {
-		"field": "type",
-		"equals": "Microsoft.SQL/servers/databases"
-	},
-	"then": {
-		"effect": "auditIfNotExists",
-		"details": {
-			"type": "Microsoft.SQL/servers/databases/securityAlertPolicies",
-			"name": "default",
-			"existenceCondition": {
-				"field": "Microsoft.Sql/securityAlertPolicies.state",
-				"equals": "[parameters('setting')]"
-			}
-		}
-	}
+   "if": {
+      "allOf": [
+         {
+            "field": "type",
+            "equals": "Microsoft.SQL/servers/databases"
+         },
+         {
+            "field": "name",
+            "notEquals": "master"
+         }
+      ]
+   },
+   "then": {
+      "effect": "auditIfNotExists",
+      "details": {
+         "type": "Microsoft.SQL/servers/databases/securityAlertPolicies",
+         "name": "default",
+         "existenceCondition": {
+            "field": "Microsoft.Sql/securityAlertPolicies.state",
+            "equals": "[parameters('setting')]"
+         }
+      }
+   }
 }

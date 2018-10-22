@@ -1,49 +1,53 @@
 {
-    "properties": {
-        "displayName": "Allowed SQL DB SKUs",
-        "description": "This policy enables you to specify a set of SQL DB SKUs",
-        "parameters": {
-            "listOfSKUId": {
-                "type": "Array",
-                "metadata": {
-                    "description": "The list of SKUs that can be specified for SQL Databases.",
-                    "displayName": "Allowed SKU IDs"
-                }
-            },
-            "listOfSKUName": {
-                "type": "Array",
-                "metadata": {
-                    "description": "The list of SKUs that can be specified for SQL Databases.",
-                    "displayName": "Allowed SKU Names"
-                }
+   "properties": {
+      "displayName": "Allowed SQL DB SKUs",
+      "description": "This policy enables you to specify a set of SQL DB SKUs",
+      "parameters": {
+         "listOfSKUId": {
+            "type": "Array",
+            "metadata": {
+               "description": "The list of SKUs that can be specified for SQL Databases.",
+               "displayName": "Allowed SKU IDs"
             }
-        },
-        "policyRule": {
-            "if": {
-                "allOf": [
-                    {
-                        "field": "type",
-                        "equals": "Microsoft.SQL/servers/databases"
-                    },
-                    {
-                        "not": {
-                            "anyOf": [
-                                {
-                                    "field": "Microsoft.SQL/servers/databases/requestedServiceObjectiveId",
-                                    "in": "[parameters('listOfSKUId')]"
-                                },
-                                {
-                                    "field": "Microsoft.SQL/servers/databases/requestedServiceObjectiveName",
-                                    "in": "[parameters('listOfSKUName')]"
-                                }
-                            ]
+         },
+         "listOfSKUName": {
+            "type": "Array",
+            "metadata": {
+               "description": "The list of SKUs that can be specified for SQL Databases.",
+               "displayName": "Allowed SKU Names"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.SQL/servers/databases"
+               },
+               {
+                  "field": "name",
+                  "notEquals": "master"
+               },
+               {
+                  "not": {
+                     "anyOf": [
+                        {
+                           "field": "Microsoft.SQL/servers/databases/requestedServiceObjectiveId",
+                           "in": "[parameters('listOfSKUId')]"
+                        },
+                        {
+                           "field": "Microsoft.SQL/servers/databases/requestedServiceObjectiveName",
+                           "in": "[parameters('listOfSKUName')]"
                         }
-                    }
-                ]
-            },
-            "then": {
-                "effect": "Deny"
-            }
-        }
-    }
+                     ]
+                  }
+               }
+            ]
+         },
+         "then": {
+            "effect": "Deny"
+         }
+      }
+   }
 }

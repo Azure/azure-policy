@@ -1,36 +1,44 @@
 {
-    "name": "audit-sql-db-threat-detection",
-    "properties": {
-        "displayName": "Audit DB level threat detection setting",
-        "description": "Audit threat detection setting for SQL databases",
-        "parameters": {
-            "setting": {
-                "type": "String",
-                "allowedValues": [
-                    "enabled",
-                    "disabled"
-                ],
-                "metadata": {
-                    "displayName": "Threat Detection Setting"
-                }
+   "name": "audit-sql-db-threat-detection",
+   "properties": {
+      "displayName": "Audit DB level threat detection setting",
+      "description": "Audit threat detection setting for SQL databases",
+      "parameters": {
+         "setting": {
+            "type": "String",
+            "allowedValues": [
+               "enabled",
+               "disabled"
+            ],
+            "metadata": {
+               "displayName": "Threat Detection Setting"
             }
-        },
-        "policyRule": {
-            "if": {
-                "field": "type",
-                "equals": "Microsoft.SQL/servers/databases"
-            },
-            "then": {
-                "effect": "auditIfNotExists",
-                "details": {
-                    "type": "Microsoft.SQL/servers/databases/securityAlertPolicies",
-                    "name": "default",
-                    "existenceCondition": {
-                        "field": "Microsoft.Sql/securityAlertPolicies.state",
-                        "equals": "[parameters('setting')]"
-                    }
-                }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.SQL/servers/databases"
+               },
+               {
+                  "field": "name",
+                  "notEquals": "master"
+               }
+            ]
+         },
+         "then": {
+            "effect": "auditIfNotExists",
+            "details": {
+               "type": "Microsoft.SQL/servers/databases/securityAlertPolicies",
+               "name": "default",
+               "existenceCondition": {
+                  "field": "Microsoft.Sql/securityAlertPolicies.state",
+                  "equals": "[parameters('setting')]"
+               }
             }
-        }
-    }
+         }
+      }
+   }
 }
