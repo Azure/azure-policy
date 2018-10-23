@@ -1,6 +1,6 @@
 # Audit SQL DB transparent data encryption status
 
-Audit SQL DB transparent data encryption status for SQL databases
+Audit transparent data encryption status for SQL databases
 
 ## Try on Portal
 
