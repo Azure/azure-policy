@@ -1,0 +1,79 @@
+{
+   "properties": {
+      "displayName": "Enable automatic OS upgrade on Virtual Machine Scale Sets",
+      "mode": "Indexed",
+      "description": "This policy enables automatic OS upgrade on Virtual Machine Scale Sets. New scale sets will have automatic OS upgrade enabled automatically. Existing scale sets that are not opted into automatic OS upgrade will be marked as non-compliant and can be enabled through policy remediation.",
+      "metadata": {
+         "category": "Compute"
+      },
+      "parameters": {},
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachineScaleSets"
+               },
+               {
+                  "field": "Microsoft.Compute/imageVersion",
+                  "equals": "latest"
+               }
+            ]
+         },
+         "then": {
+            "effect": "deployIfNotExists",
+            "details": {
+               "type": "Microsoft.Compute/virtualMachineScaleSets",
+               "name": "[field('name')]",
+               "existenceCondition": {
+                  "field": "Microsoft.Compute/VirtualMachineScaleSets/upgradePolicy.automaticOSUpgrade",
+                  "equals": "true"
+               },
+               "roleDefinitionIds": [
+                  "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+               ],
+               "deployment": {
+                  "properties": {
+                     "mode": "incremental",
+                     "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                           "vmssName": {
+                              "type": "string"
+                           },
+                           "location": {
+                              "type": "string"
+                           }
+                        },
+                        "resources": [
+                           {
+                              "name": "[parameters('vmssName')]",
+                              "type": "Microsoft.Compute/virtualMachineScaleSets",
+                              "location": "[parameters('location')]",
+                              "apiVersion": "2018-10-01",
+                              "properties": {
+                                 "upgradePolicy": {
+                                    "automaticOSUpgradePolicy": {
+                                       "enableAutomaticOSUpgrade": true
+                                    }
+                                 }
+                              }
+                           }
+                        ]
+                     },
+                     "parameters": {
+                        "vmssName": {
+                           "value": "[field('name')]"
+                        },
+                        "location": {
+                           "value": "[field('location')]"
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}

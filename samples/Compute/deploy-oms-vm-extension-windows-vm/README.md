@@ -1,6 +1,6 @@
-# Deploy default OMS VM Extension for Windows VMs.
+# Deploy default Log Analytics VM Extension for Windows VMs.
 
-This policy deploys OMS VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace
+This policy deploys the Log Analytics VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace.
 
 ## Try on Portal
 
@@ -9,7 +9,7 @@ This policy deploys OMS VM Extensions on Windows VMs, and connects to the select
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-oms-vm-extension-windows-vm" -DisplayName "Deploy default OMS VM Extension for Windows VMs." -description "This policy deploys OMS VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzureRmPolicyDefinition -Name "deploy-oms-vm-extension-windows-vm" -DisplayName "Deploy default Log Analytics VM Extension for Windows VMs." -description "This policy deploys the Log Analytics VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -logAnalytics <logAnalytics> -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'deploy-oms-vm-extension-windows-vm' --display-name 'Deploy default OMS VM Extension for Windows VMs.' --description 'This policy deploys OMS VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' --mode Indexed
+az policy definition create --name 'deploy-oms-vm-extension-windows-vm' --display-name 'Deploy default Log Analytics VM Extension for Windows VMs.' --description 'This policy deploys the Log Analytics VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --params "{'logAnalytics':{'value': '<logAnalytics>'}}" --policy "deploy-oms-vm-extension-windows-vm" 
 
