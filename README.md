@@ -30,7 +30,6 @@ This repository contains samples of Azure Policies that can be used as reference
 
 ### Other
 
-- [Exploring Azure Policy (Hands-on Labs)](https://www.microsoft.com/handsonlabs/SelfPacedLabs/?storyId=story://Content-Private/content/sp-azuregovernance/1-azpolicy/a-policy)
 - [Video - Build 2018](https://channel9.msdn.com/events/Build/2018/THR2030)
 
 ## Contributing
