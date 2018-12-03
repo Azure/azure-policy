@@ -20,7 +20,7 @@ What are you trying to achieve using Azure Policy?
 
 ### Alias
 
-Include details about the alias being requested.
+Include details about the alias being requested. Details on aliases are available [**here**](https://docs.microsoft.com/en-us/azure/governance/policy/concepts/definition-structure#aliases).
 - What resource provider and resource type is involved?
 - What property on that resource type do you wish to expose?
 
