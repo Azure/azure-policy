@@ -14,22 +14,23 @@ Instructions for viewing all aliases that can be used in Azure Resource Policy a
 ## How to request a new policy alias?
 
 1. File a new [*issue*](https://github.com/Azure/azure-policy/issues) to the Azure Policy Github repository
-2. The title must include the Resource Provider namespace, resourceType(s) and property name, following this pattern: "Alias request: "RP/resourceType/propertyName"
+2. Use the *Alias Request* issue template
 
-Example: **Alias request: Microsoft.Web/serverfarms/hostingEnvironmentProfile.id**
 
-3. Describe your policy scenario:
+## Example: 
 
-    - **Scenario** - What are you trying to achieve using Azure Policy for this scenario?
-    - **Definition** - What is the proposed policy definition needed to achieve your scenario?
+**Alias request: Microsoft.Web/serverfarms/hostingEnvironmentProfile.id**
 
-### Example:
+### Scenario
 
-**Scenario**
+Ensure that all App Service plans are using an appropriate App Service Environment
 
-Need to use Azure Policy to deny creation of ASP outside of ASE
+### Alias
+- RP: `Microsoft.Web`
+- Resource Type:  `serverFarms`
+- Property: `properties.hostingEnvironmentProfile.id`
     
-**Definition** 
+### Example policy definition
 
         {
             "properties": {
@@ -69,6 +70,3 @@ Need to use Azure Policy to deny creation of ASP outside of ASE
             }
         }
 
-The request would look similar to the example below:
-
-![alt text](./images/request-alias.png "Example of requesting an alias using GitHub")
