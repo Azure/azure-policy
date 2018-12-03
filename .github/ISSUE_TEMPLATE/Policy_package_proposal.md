@@ -1,5 +1,5 @@
 ---
-name: New policy proposal
+name: New built-in policy proposal
 about: If you have a new policy proposal that you think should be created.
 ---
 <!--
@@ -24,7 +24,7 @@ Tell the story about what you would like Policy to do
 
 ### Proposed parameters
 
-- `[Type]` **ParameterName**:  The description for the property.
+- `[Type]` **ParameterName**:  The description for the parameter.
 
 ### Package details if Guest Configuration
 
