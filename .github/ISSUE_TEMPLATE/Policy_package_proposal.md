@@ -12,6 +12,7 @@ about: If you have a new policy proposal that you think should be created.
     ISSUE DESCRIPTION (this template):
     Please propose the new policy package under each header below.
 -->
+
 ### Description
 
 Tell the story about what you would like Policy to do
@@ -26,6 +27,8 @@ Tell the story about what you would like Policy to do
 - `[Type]` **ParameterName**:  The description for the property.
 
 ### Package details if Guest Configuration
+
+<!-- for details see http://aka.ms/gcpol -->
 
 - DSC/Inspec/Other requirements
 
