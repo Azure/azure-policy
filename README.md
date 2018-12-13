@@ -2,31 +2,38 @@
 
 ## Abstract
 
-This repository contains samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For a full list of samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/azure-policy/json-samples) on docs.microsoft.com.
+This repository contains samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For a full list of samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
 ## Documentation
 
 ### Articles
 
-- [Azure Policy overview](https://docs.microsoft.com/azure/azure-policy/azure-policy-introduction)
-- [How to assign policies using the Azure portal](https://docs.microsoft.com/azure/azure-policy/assign-policy-definition)
-- [How to assign policies using Azure PowerShell](https://docs.microsoft.com/azure/azure-policy/assign-policy-definition-ps)
-- [How to assign policies using Azure CLI](https://docs.microsoft.com/azure/azure-policy/assign-policy-definition-cli)
-- [Definition structure](https://docs.microsoft.com/azure/azure-policy/policy-definition)
-- [Understanding Policy effects](https://docs.microsoft.com/azure/azure-policy/policy-effects)
-- [Programmatically create policies](https://docs.microsoft.com/azure/azure-policy/policy-insights)
-- [Gathering compliance data](https://docs.microsoft.com/azure/azure-policy/policy-compliance)
+- [Azure Policy overview](https://docs.microsoft.com/azure/governance/policy/overview)
+- [How to assign policies using the Azure portal](https://docs.microsoft.com/azure/governance/policy/assign-policy-portal)
+- [How to assign policies using Azure PowerShell](https://docs.microsoft.com/azure/governance/policy/assign-policy-powershell)
+- [How to assign policies using Azure CLI](https://docs.microsoft.com/azure/governance/policy/assign-policy-azurecli)
+- [Definition structure](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure)
+- [Understand Policy effects](https://docs.microsoft.com/azure/governance/policy/concepts/effects)
+- [Audit VMs with Guest Configuration](https://docs.microsoft.com/azure/governance/policy/concepts/guest-configuration)
+- [Programmatically create policies](https://docs.microsoft.com/azure/governance/policy/how-to/programmatically-create)
+- [Get compliance data](https://docs.microsoft.com/azure/governance/policy/how-to/get-compliance-data)
+- [Remediate non-compliant resources](https://docs.microsoft.com/azure/governance/policy/how-to/remediate-resources)
 
 ### References
 
 - [Azure CLI](https://docs.microsoft.com/cli/azure/policy)
-- [Azure PowerShell](https://docs.microsoft.com/powershell/module/azurerm.resources/#policies)
+- Azure PowerShell
+  - [Policy](https://docs.microsoft.com/powershell/module/azurerm.resources/#policies)
+  - [Guest Configuration (preview)](https://www.powershellgallery.com/packages/AzureRM.GuestConfiguration)
 - REST API
   - [Events](https://docs.microsoft.com/rest/api/policy-insights/policyevents)
   - [States](https://docs.microsoft.com/rest/api/policy-insights/policystates)
   - [Assignments](https://docs.microsoft.com/rest/api/resources/policyassignments)
   - [Policy Definitions](https://docs.microsoft.com/rest/api/resources/policydefinitions)
   - [Initiative Definitions](https://docs.microsoft.com/rest/api/resources/policysetdefinitions)
+  - [Policy Tracked Resources](https://docs.microsoft.com/rest/api/policy-insights/policytrackedresources)
+  - [Remediations](https://docs.microsoft.com/rest/api/policy-insights/remediations)
+  - [Guest Configuration (preview)](https://docs.microsoft.com/rest/api/guestconfiguration/)
 
 ### Other
 
