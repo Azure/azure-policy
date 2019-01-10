@@ -1,0 +1,83 @@
+{
+   "if": {
+     "field": "type",
+     "equals": "Microsoft.KeyVault/vaults"
+   },
+   "then": {
+     "effect": "DeployIfNotExists",
+     "details": {
+       "type": "Microsoft.Insights/diagnosticSettings",
+       "roleDefinitionIds": [
+         "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+       ],
+       "existenceCondition": {
+        "field": "Microsoft.Insights/diagnosticSettings/eventHubAuthorizationRuleId",
+        "equals": "[parameters('eventHubAuthorizationRuleId')]"
+      },
+       "deployment": {
+         "properties": {
+           "mode": "incremental",
+           "template": {
+             "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+             "contentVersion": "1.0.0.0",
+             "parameters": {
+               "diagnosticsSettingName": {
+                 "type": "string"
+               },
+               "eventHubAuthorizationRuleId": {
+                 "type": "string"
+               },
+               "keyVaultName": {
+                   "type": "string"
+               }
+             },
+             "variables": {},
+             "functions": [],
+             "resources": [
+               {
+                 "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
+                 "name": "[concat(parameters('keyVaultName'),'/Microsoft.Insights/', parameters('diagnosticsSettingName'))]",
+                 "apiVersion": "2017-05-01-preview",
+                 "properties": {
+                   "eventHubAuthorizationRuleId": "[parameters('eventHubAuthorizationRuleId')]",
+                   "logs": [
+                     {
+                       "category": "AuditEvent",
+                       "enabled": true,
+                       "retentionPolicy": {
+                           "enabled": false,
+                           "days": 0
+                         }
+                     }
+                   ],
+                   "metrics": [
+                     {
+                       "category": "AllMetrics",
+                       "enabled": true,
+                       "retentionPolicy": {
+                           "enabled": false,
+                           "days": 0
+                         }
+                     }
+                   ]
+                 }
+               }
+             ],
+             "outputs": {}
+           },
+           "parameters": {
+             "diagnosticsSettingName": {
+               "value": "[parameters('diagnosticsSettingName')]"
+             },
+             "eventHubAuthorizationRuleId": {
+               "value": "[parameters('eventHubAuthorizationRuleId')]"
+             },
+             "keyVaultName": {
+               "value": "[field('name')]"
+             }
+           }
+         }
+       }
+     }
+   }
+ }
