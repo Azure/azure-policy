@@ -1,0 +1,34 @@
+{
+    "properties": {
+        "displayName": "Allowed Application Gateway SKUs",
+        "description": "This policy enables you to specify a set of application Gateway SKUs that your organization can deploy.",
+        "parameters": {
+            "listOfAllowedSKUs": {
+                "type": "Array",
+                "metadata": {
+                    "description": "The list of SKUs that can be specified for application gateways.",
+                    "displayName": "Allowed SKUs"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/applicationGateways"
+                    },
+                    {
+                        "not": {
+                            "field": "Microsoft.Network/applicationGateways/sku.name",
+                            "in": "[parameters('listOfAllowedSKUs')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "Deny"
+            }
+        }
+    }
+}
