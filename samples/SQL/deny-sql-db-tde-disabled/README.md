@@ -9,9 +9,9 @@ Deny the ability to disable transparent data encryption status for SQL databases
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deny-sql-db-tde-disabled" -DisplayName "Deny SQL database transparent data encryption disablement" -description "Deny the ability to disable transparent data encryption status for SQL databases" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deny-sql-db-tde-disabled/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deny-sql-db-tde-disabled/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "deny-sql-db-tde-disabled" -DisplayName "Deny SQL database transparent data encryption disablement" -description "Deny the ability to disable transparent data encryption status for SQL databases" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deny-sql-db-tde-disabled/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deny-sql-db-tde-disabled/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
 $assignment 
 ````
 

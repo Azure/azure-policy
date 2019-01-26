@@ -9,9 +9,9 @@ DeployIfNotExists policy to automatically configure a diagnostic setting for key
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-eventhub-diagnostic-setting-for-keyvault" -DisplayName "Deploy diagnostic setting for key vault to stream to event hub" -description "Automatically configure a diagnostic setting for key vault resources which will stream to a specified event hub namespace." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/KeyVault/deploy-eventhub-diagnostic-setting-for-keyvault/azurepolicy.rules.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "deploy-eventhub-diagnostic-setting-for-keyvault" -DisplayName "Deploy diagnostic setting for key vault to stream to event hub" -description "Automatically configure a diagnostic setting for key vault resources which will stream to a specified event hub namespace." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/KeyVault/deploy-eventhub-diagnostic-setting-for-keyvault/azurepolicy.rules.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

@@ -9,9 +9,9 @@ Audit enabling of logs and retain them up to a year. This enables you to recreat
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-enabling-diagnostic-logs-data-lake-analytics" -DisplayName "Audit enabling of diagnostic logs in Data Lake Analytics" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/audit-enabling-diagnostic-logs-data-lake-analytics/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/audit-enabling-diagnostic-logs-data-lake-analytics/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "audit-enabling-diagnostic-logs-data-lake-analytics" -DisplayName "Audit enabling of diagnostic logs in Data Lake Analytics" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/audit-enabling-diagnostic-logs-data-lake-analytics/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/audit-enabling-diagnostic-logs-data-lake-analytics/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
 $assignment 
 ````
 

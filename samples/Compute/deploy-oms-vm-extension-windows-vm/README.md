@@ -9,9 +9,9 @@ This policy deploys the Log Analytics VM Extensions on Windows VMs, and connects
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-oms-vm-extension-windows-vm" -DisplayName "Deploy default Log Analytics VM Extension for Windows VMs." -description "This policy deploys the Log Analytics VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "deploy-oms-vm-extension-windows-vm" -DisplayName "Deploy default Log Analytics VM Extension for Windows VMs." -description "This policy deploys the Log Analytics VM Extensions on Windows VMs, and connects to the selected Log Analytics workspace." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-oms-vm-extension-windows-vm/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -logAnalytics <logAnalytics> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -logAnalytics <logAnalytics> -PolicyDefinition $definition
 $assignment 
 ````
 

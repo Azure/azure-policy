@@ -9,9 +9,9 @@ This policy ensures that Auditing is enabled on SQL Servers for enhanced securit
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-sql-server-auditing" -DisplayName "[Preview]: Deploy Auditing on SQL servers" -description "This policy ensures that Auditing is enabled on SQL Servers for enhanced security & compliance. It will automatically create a storage account in the same region as the SQL server to store audit records." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploysql-server-auditing/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-auditing/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "deploy-sql-server-auditing" -DisplayName "[Preview]: Deploy Auditing on SQL servers" -description "This policy ensures that Auditing is enabled on SQL Servers for enhanced security & compliance. It will automatically create a storage account in the same region as the SQL server to store audit records." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploysql-server-auditing/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-auditing/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -storageAccountsResourceGroup <resourceGroupName> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -storageAccountsResourceGroup <resourceGroupName> -PolicyDefinition $definition
 $assignment
 ````
 

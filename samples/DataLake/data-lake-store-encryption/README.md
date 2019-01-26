@@ -9,9 +9,9 @@ This policy ensures encryption is enabled on all Data Lake Store accounts
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "data-lake-store-encryption" -DisplayName "Enforce encryption on Data Lake Store accounts" -description "This policy ensures encryption is enabled on all Data Lake Store accounts" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/DataLake/data-lake-store-encryption/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/DataLake/data-lake-store-encryption/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "data-lake-store-encryption" -DisplayName "Enforce encryption on Data Lake Store accounts" -description "This policy ensures encryption is enabled on all Data Lake Store accounts" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/DataLake/data-lake-store-encryption/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/DataLake/data-lake-store-encryption/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

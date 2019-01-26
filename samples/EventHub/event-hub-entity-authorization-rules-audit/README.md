@@ -9,9 +9,9 @@ Audit existence of authorization rules on Event Hub entities to grant least-priv
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "event-hub-entity-authorization-rules-audit" -DisplayName "Audit existence of authorization rules on Event Hub entities" -description "Audit existence of authorization rules on Event Hub entities to grant least-privileged access" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/event-hub-entity-authorization-rules-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/event-hub-entity-authorization-rules-audit/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "event-hub-entity-authorization-rules-audit" -DisplayName "Audit existence of authorization rules on Event Hub entities" -description "Audit existence of authorization rules on Event Hub entities to grant least-privileged access" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/event-hub-entity-authorization-rules-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/event-hub-entity-authorization-rules-audit/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

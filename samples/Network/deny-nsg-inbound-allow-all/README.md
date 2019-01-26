@@ -9,9 +9,9 @@ Denies the creation of network security group rules that allow all inbound traff
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deny-nsg-inbound-allow-all" -DisplayName "Denies NSG rule changes that allow all inbound traffic" -description "Denies people from changing NSG rules that allow all inbound traffic" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-allow-all/azurepolicy.rules.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "deny-nsg-inbound-allow-all" -DisplayName "Denies NSG rule changes that allow all inbound traffic" -description "Denies people from changing NSG rules that allow all inbound traffic" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-allow-all/azurepolicy.rules.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

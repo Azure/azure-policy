@@ -9,9 +9,9 @@ This policy enables automatic OS upgrade on Virtual Machine Scale Sets. New scal
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-vmss-autoosupgrade" -DisplayName "Enable automatic OS upgrade on Virtual Machine Scale Sets" -description "This policy enables automatic OS upgrade on Virtual Machine Scale Sets. New scale sets will have automatic OS upgrade enabled automatically. Existing scale sets that are not opted into automatic OS upgrade will be marked as non-compliant and can be enabled through policy remediation." -Policy "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-vmss-autoosupgrade/azurepolicy.rules.json" -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "deploy-vmss-autoosupgrade" -DisplayName "Enable automatic OS upgrade on Virtual Machine Scale Sets" -description "This policy enables automatic OS upgrade on Virtual Machine Scale Sets. New scale sets will have automatic OS upgrade enabled automatically. Existing scale sets that are not opted into automatic OS upgrade will be marked as non-compliant and can be enabled through policy remediation." -Policy "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/deploy-vmss-autoosupgrade/azurepolicy.rules.json" -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -Location <location> -AssignIdentity -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -Location <location> -AssignIdentity -PolicyDefinition $definition
 $assignment
 
 # Assign the permissions to the assignment's identity
@@ -21,7 +21,7 @@ if ($roleDefinitionIds.Count -gt 0)
 {
     $roleDefinitionIds | ForEach-Object {
         $roleDefId = $_.Split("/") | Select-Object -Last 1
-        New-AzureRmRoleAssignment -Scope $assignment.Properties.Scope -ObjectId $assignment.Identity.PrincipalId -RoleDefinitionId $roleDefId
+        New-AzRoleAssignment -Scope $assignment.Properties.Scope -ObjectId $assignment.Identity.PrincipalId -RoleDefinitionId $roleDefId
     }
 }
 ````

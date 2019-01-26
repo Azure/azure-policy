@@ -11,9 +11,9 @@ The subnetIds parameter must be provided with a list of subnets in format of res
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "no-public-ip-except-for-one-subnet" -DisplayName "Only Allow public IP in specific subnets" -description "Only allow public IP to be used in specific subnets" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/no-public-ip-except-for-one-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/no-public-ip-except-for-one-subnet/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "no-public-ip-except-for-one-subnet" -DisplayName "Only Allow public IP in specific subnets" -description "Only allow public IP to be used in specific subnets" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/no-public-ip-except-for-one-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/no-public-ip-except-for-one-subnet/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -subnetIds <List of Subnets you can use public IP> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -subnetIds <List of Subnets you can use public IP> -PolicyDefinition $definition
 $assignment 
 ````
 

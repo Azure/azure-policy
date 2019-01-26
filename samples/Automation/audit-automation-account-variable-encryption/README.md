@@ -9,9 +9,9 @@ It is important to enable encryption of Automation account variable assets when 
 ## Try with Powershell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-automation-account-variable-encryption" -DisplayName "Audit encryption of Automation account variables" -description "It is important to enable encryption of Automation account variable assets when storing sensitive data." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/audit-automation-account-variable-encryption/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/audit-automation-account-variable-encryption/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "audit-automation-account-variable-encryption" -DisplayName "Audit encryption of Automation account variables" -description "It is important to enable encryption of Automation account variable assets when storing sensitive data." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/audit-automation-account-variable-encryption/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/audit-automation-account-variable-encryption/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
 $assignment 
 ````
 

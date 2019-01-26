@@ -9,9 +9,9 @@ Audit resource groups that doesn't have particular tag
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-resourceGroup-tags" -DisplayName "Audit resource groups missing tags" -description "Audit resource groups that doesn't have particular tag" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-tags/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-tags/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "audit-resourceGroup-tags" -DisplayName "Audit resource groups missing tags" -description "Audit resource groups that doesn't have particular tag" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-tags/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-tags/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -tagName <tagName> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -tagName <tagName> -PolicyDefinition $definition
 $assignment 
 ````
 

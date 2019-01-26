@@ -9,9 +9,9 @@ Audits the existence of a SQL Server [virtual network rule](https://docs.microso
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-sql-server-vnet-rule" -DisplayName "Audit SQL Server virtual network rule" -description "Audits the existence of a rule that enables traffic from a SQL Server to a specific subnet." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-server-vnet-rule/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-server-vnet-rule/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "audit-sql-server-vnet-rule" -DisplayName "Audit SQL Server virtual network rule" -description "Audits the existence of a rule that enables traffic from a SQL Server to a specific subnet." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-server-vnet-rule/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-server-vnet-rule/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

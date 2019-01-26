@@ -9,9 +9,9 @@
 ## Try on PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "{{policyName}}" -DisplayName "{{displayName}}" -description "{{description}}" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/{{path}}/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/{{path}}/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "{{policyName}}" -DisplayName "{{displayName}}" -description "{{description}}" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/{{path}}/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy-samples/master/samples/{{path}}/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 
