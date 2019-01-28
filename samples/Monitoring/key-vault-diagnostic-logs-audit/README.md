@@ -9,9 +9,9 @@ Audit enabling of logs and retain them up to a year. This enables you to recreat
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "key-vault-diagnostic-logs-audit" -DisplayName "Audit enabling of diagnostic logs in Key Vault" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/key-vault-diagnostic-logs-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/key-vault-diagnostic-logs-audit/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "key-vault-diagnostic-logs-audit" -DisplayName "Audit enabling of diagnostic logs in Key Vault" -description "Audit enabling of logs and retain them up to a year. This enables you to recreate activity trails for investigation purposes when a security incident occurs or your network is compromised" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/key-vault-diagnostic-logs-audit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/key-vault-diagnostic-logs-audit/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -requiredRetentionDays <requiredRetentionDays> -PolicyDefinition $definition
 $assignment 
 ````
 

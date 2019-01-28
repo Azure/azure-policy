@@ -13,17 +13,17 @@ This policy enforces every subnet to be associated to a route table. The route t
 
 ````powershell
 # Create the Policy Definition (Subscription scope)
-$definition = New-AzureRmPolicyDefinition -Name 'enforce-route-table-on-subnet' -DisplayName 'Route table on every subnet' -description 'This policy enforces a specific Route Table on every subnet.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-route-table-on-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-route-table-on-subnet/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name 'enforce-route-table-on-subnet' -DisplayName 'Route table on every subnet' -description 'This policy enforces a specific Route Table on every subnet.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-route-table-on-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-route-table-on-subnet/azurepolicy.parameters.json' -Mode All
 
 
 # Set the scope to a resource group; may also be a subscription or management group
-$scope = Get-AzureRmResourceGroup -Name 'YourResourceGroup'
+$scope = Get-AzResourceGroup -Name 'YourResourceGroup'
 
 # Set the Policy Parameter (JSON format)
 $policyparam = '{ "rtId": "/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Network/routeTables/YourTable"}'
 
 # Create the Policy Assignment
-$assignment = New-AzureRmPolicyAssignment -Name 'enforce-route-table-on-subnet-assignment' -DisplayName 'Enforce a route table on subnet' -Scope $scope.ResourceId -PolicyDefinition $definition -PolicyParameter $policyparam
+$assignment = New-AzPolicyAssignment -Name 'enforce-route-table-on-subnet-assignment' -DisplayName 'Enforce a route table on subnet' -Scope $scope.ResourceId -PolicyDefinition $definition -PolicyParameter $policyparam
 ````
 
 ## Try with CLI

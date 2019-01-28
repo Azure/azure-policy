@@ -9,9 +9,9 @@ This policy defines a white list of role definitions that can be used in IAM
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "allowed-role-definitions" -DisplayName "Allowed Role Definitions" -description "This policy defines a white list of role definitions that can be used in IAM" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "allowed-role-definitions" -DisplayName "Allowed Role Definitions" -description "This policy defines a white list of role definitions that can be used in IAM" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Authorization/allowed-role-definitions/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -roleDefinitionIds <Approved Role Definitions> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -roleDefinitionIds <Approved Role Definitions> -PolicyDefinition $definition
 $assignment 
 ````
 

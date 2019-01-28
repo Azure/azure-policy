@@ -10,13 +10,13 @@ Copy a specific tag from the resource group to the resource.  For example, a tag
 
 ````powershell
 # Create the Policy Definition
-$definition = New-AzureRmPolicyDefinition -Name "copy-resourcegroup-tag" -DisplayName "Copy resource group tag to resource" -description "Copy a specific tag from the resource group to the resource.  For example, a tag named example on the resource group will be copied to the resources.  Change the word example in the policy rule to change the name of the tag copied to a resource." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "copy-resourcegroup-tag" -DisplayName "Copy resource group tag to resource" -description "Copy a specific tag from the resource group to the resource.  For example, a tag named example on the resource group will be copied to the resources.  Change the word example in the policy rule to change the name of the tag copied to a resource." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' -Mode Indexed
 
 # Show Definititon
 $definition
 
 # Create the Policy Assignment
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 
 # Show Assignment
 $assignment 

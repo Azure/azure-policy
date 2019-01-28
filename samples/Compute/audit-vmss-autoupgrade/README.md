@@ -9,9 +9,9 @@ This policy audits any Virtual Machine Scale Set that does not have automatic OS
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-vmss-autoosupgrade" -DisplayName "Audit Virtual Machine Scale Sets without automatic OS upgrade enabled" -description "This policy audits any Virtual Machine Scale Set that does not have automatic OS upgrade enabled." -Policy "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/audit-vmss-autoosupgrade/azurepolicy.rules.json" -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "audit-vmss-autoosupgrade" -DisplayName "Audit Virtual Machine Scale Sets without automatic OS upgrade enabled" -description "This policy audits any Virtual Machine Scale Set that does not have automatic OS upgrade enabled." -Policy "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/audit-vmss-autoosupgrade/azurepolicy.rules.json" -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment
 ````
 

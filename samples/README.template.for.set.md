@@ -12,9 +12,9 @@
 $policydefinitions = "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/{{path}}/azurepolicyset.definitions.json"
 $policysetparameters = "https://raw.githubusercontent.com/Azure/azure-policy/master/samples/{{path}}/azurepolicyset.parameters.json"
 
-$policyset= New-AzureRmPolicySetDefinition -Name "{{policyName}}" -DisplayName "{{displayName}}" -Description "{{description}}" -PolicyDefinition $policydefinitions -Parameter $policysetparameters 
+$policyset= New-AzPolicySetDefinition -Name "{{policyName}}" -DisplayName "{{displayName}}" -Description "{{description}}" -PolicyDefinition $policydefinitions -Parameter $policysetparameters 
  
-New-AzureRmPolicyAssignment -PolicySetDefinition $policyset -Name <assignmentname> -Scope <scope> {{parameters}}  -Sku @{"Name"="A1";"Tier"="Standard"}
+New-AzPolicyAssignment -PolicySetDefinition $policyset -Name <assignmentname> -Scope <scope> {{parameters}}  -Sku @{"Name"="A1";"Tier"="Standard"}
 ````
 
 ## Try with CLI

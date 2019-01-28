@@ -9,9 +9,9 @@ Audit configuration of metric alert rules on Batch account to enable the require
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "batch-account-audit-metric-alert-rules-configuration" -DisplayName "Audit configuration of metric alert rules on Batch accounts" -description "Audit configuration of metric alert rules on Batch account to enable the required metric" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/batch-account-audit-metric-alert-rules-configuration/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/batch-account-audit-metric-alert-rules-configuration/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "batch-account-audit-metric-alert-rules-configuration" -DisplayName "Audit configuration of metric alert rules on Batch accounts" -description "Audit configuration of metric alert rules on Batch account to enable the required metric" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/batch-account-audit-metric-alert-rules-configuration/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/batch-account-audit-metric-alert-rules-configuration/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -metricName <metricName> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -metricName <metricName> -PolicyDefinition $definition
 $assignment 
 ````
 

@@ -23,7 +23,7 @@ This repository contains samples of Azure Policies that can be used as reference
 
 - [Azure CLI](https://docs.microsoft.com/cli/azure/policy)
 - Azure PowerShell
-  - [Policy](https://docs.microsoft.com/powershell/module/azurerm.resources/#policies)
+  - [Policy](https://docs.microsoft.com/powershell/module/az.resources/#policies)
   - [Guest Configuration (preview)](https://www.powershellgallery.com/packages/AzureRM.GuestConfiguration)
 - REST API
   - [Events](https://docs.microsoft.com/rest/api/policy-insights/policyevents)

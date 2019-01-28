@@ -9,9 +9,9 @@ This policy creates a network watcher resource in regions with virtual networks.
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-network-watcher-in-vnet-regions" -DisplayName "[Preview]: Deploy network watcher when virtual networks are created" -description "This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-in-vnet-regions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-in-vnet-regions/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "deploy-network-watcher-in-vnet-regions" -DisplayName "[Preview]: Deploy network watcher when virtual networks are created" -description "This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-in-vnet-regions/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/deploy-network-watcher-in-vnet-regions/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
 $assignment 
 ````
 

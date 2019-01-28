@@ -9,9 +9,9 @@ Use new Azure Resource Manager v2 for your virtual machines to provide security 
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-classic-VM" -DisplayName "Audit use of classic virtual machines" -description "Use new Azure Resource Manager v2 for your virtual machines to provide security enhancements such as: stronger access control (RBAC), better auditing, ARM-based deployment and governance, access to managed identities, access to key vault for secrets, Azure AD-based authentication and support for tags and resource groups for easier security management" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/audit-classic-VM/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/audit-classic-VM/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "audit-classic-VM" -DisplayName "Audit use of classic virtual machines" -description "Use new Azure Resource Manager v2 for your virtual machines to provide security enhancements such as: stronger access control (RBAC), better auditing, ARM-based deployment and governance, access to managed identities, access to key vault for secrets, Azure AD-based authentication and support for tags and resource groups for easier security management" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/audit-classic-VM/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/audit-classic-VM/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

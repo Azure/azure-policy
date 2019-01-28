@@ -10,9 +10,9 @@ Within this Policy, you sepcify the Tag Name and Tag Value that will be used for
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "audit-resourceGroup-resourceLocks" -DisplayName "Audit Resource Locks on Resource Groups based on Tags" -description "Audits all Resource Groups that have a specific Tag, for the CanNotDelete Resource Lock." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-resourceLocks/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-resourceLocks/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "audit-resourceGroup-resourceLocks" -DisplayName "Audit Resource Locks on Resource Groups based on Tags" -description "Audits all Resource Groups that have a specific Tag, for the CanNotDelete Resource Lock." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-resourceLocks/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/audit-resourceGroup-resourceLocks/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -tagName <tagName> -tagValue <tagValue> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -tagName <tagName> -tagValue <tagValue> -PolicyDefinition $definition
 $assignment 
 ````
 

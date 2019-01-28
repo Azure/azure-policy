@@ -9,9 +9,9 @@ This policy automatically deploys diagnostic settings to network security groups
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "default-diagnostic-setting" -DisplayName "Apply Diagnostic Settings for Network Security Groups" -description "This policy automatically deploys diagnostic settings to network security groups." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/default-diagnostic-setting/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/default-diagnostic-setting/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "default-diagnostic-setting" -DisplayName "Apply Diagnostic Settings for Network Security Groups" -description "This policy automatically deploys diagnostic settings to network security groups." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/default-diagnostic-setting/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/default-diagnostic-setting/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -storagePrefix <Storage Account Prefix for Regional Storage Accounts> -rgName <Resource Group Name for Storage Accounts( must exists) > -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -storagePrefix <Storage Account Prefix for Regional Storage Accounts> -rgName <Resource Group Name for Storage Accounts( must exists) > -PolicyDefinition $definition
 $assignment 
 ````
 

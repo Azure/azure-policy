@@ -9,9 +9,9 @@ This policy will enforce usage of hybrid use benefit.
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "enforce-hybrid-use-benefit" -DisplayName "Enforce hybrid use benefit" -description "This policy will enforce usage of hybrid use benefit." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/enforce-hybrid-use-benefit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/enforce-hybrid-use-benefit/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "enforce-hybrid-use-benefit" -DisplayName "Enforce hybrid use benefit" -description "This policy will enforce usage of hybrid use benefit." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/enforce-hybrid-use-benefit/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Compute/enforce-hybrid-use-benefit/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
 $assignment 
 ````
 

@@ -9,9 +9,9 @@ This policy ensures that Threat Detection is enabled on SQL Servers.
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzureRmPolicyDefinition -Name "deploy-sql-server-threat-detection" -DisplayName "Deploy Threat Detection on SQL servers" -description "This policy ensures that Threat Detection is enabled on SQL Servers." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-threat-detection/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-threat-detection/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "deploy-sql-server-threat-detection" -DisplayName "Deploy Threat Detection on SQL servers" -description "This policy ensures that Threat Detection is enabled on SQL Servers." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-threat-detection/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/deploy-sql-server-threat-detection/azurepolicy.parameters.json' -Mode Indexed
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
 ````
 

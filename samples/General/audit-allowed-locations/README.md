@@ -16,12 +16,12 @@ $assignmentname = "Audit Allowed Locations"
 $allowedlocations = "UK West", "East US", "North Europe"
 
 #Define ResourceGroup Policy will be applied to
-$ResourceGroup = Get-AzureRMResourceGroup -Name "RG1"
+$ResourceGroup = Get-AzResourceGroup -Name "RG1"
 
-$definition = New-AzureRmPolicyDefinition -Name "audit-location-deployments" -DisplayName "Audit for allowed locations" -description "This policy enables you to audit the locations where your resources have been deployed. Use this to understand what is within your environment and if it matches company guidelines." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/General/audit-allowed-locations/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/General/audit-allowed-locations/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "audit-location-deployments" -DisplayName "Audit for allowed locations" -description "This policy enables you to audit the locations where your resources have been deployed. Use this to understand what is within your environment and if it matches company guidelines." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/General/audit-allowed-locations/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/General/audit-allowed-locations/azurepolicy.parameters.json' -Mode Indexed
 
 $definition
-$assignment = New-AzureRMPolicyAssignment -Name $assignmentname -Scope $ResourceGroup.ResourceId -listOfAllowedLocations $allowedlocations -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name $assignmentname -Scope $ResourceGroup.ResourceId -listOfAllowedLocations $allowedlocations -PolicyDefinition $definition
 $assignment
 
 ````
