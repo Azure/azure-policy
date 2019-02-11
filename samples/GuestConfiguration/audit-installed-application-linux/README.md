@@ -1,4 +1,4 @@
-# Audit for installed application - Linux
+# Audit that applications are installed inside Linux VMs
 
 This policy audits applications installed in Linux virtual machines.
 
