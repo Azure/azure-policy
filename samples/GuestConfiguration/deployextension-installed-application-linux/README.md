@@ -1,4 +1,4 @@
-# Deploy extension to audit for installed applications - Linux
+# Deploy extension to audit for installed applications in Linux VMs
 
 This policy ensures that the requirements are deployed to audit a VM for applications that must be installed.  The requirements include a guest assignment, a managed service identity, and the guest configuration extension.
 
@@ -19,7 +19,7 @@ See more information and a complete walk-through of using this sample on
 
 ````powershell
 # Create the Policy Definition (Subscription scope)
-$definition = New-AzPolicyDefinition -Name 'deployextension-installed-application-linux' -DisplayName 'Audits whether applications are installed inside Linux VMs' -description 'This audits whether applications are installed inside Linux VMs' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name 'deployextension-installed-application-linux' -DisplayName 'Deploy extension to audit for installed applications in Linux VMs' -description 'This audits whether applications are installed inside Linux VMs' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.parameters.json' -Mode Indexed
 
 # Set the scope to a resource group; may also be a subscription or management group
 $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
@@ -35,7 +35,7 @@ $assignment = New-AzPolicyAssignment -Name 'deployextension-installed-applicatio
 
 ```cli
 # Create the Policy Definition (Subscription scope)
-definition=$(az policy definition create --name 'deployextension-installed-application-linux' --display-name 'Audit whether applications are installed inside Linux VMs' --description 'This policy audits whether applications are installed inside Linux VMs' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.parameters.json' --mode Indexed)
+definition=$(az policy definition create --name 'deployextension-installed-application-linux' --display-name 'Deploy extension to audit for installed applications in Linux VMs' --description 'This policy audits whether applications are installed inside Linux VMs' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/deployextension-installed-application-linux/azurepolicy.parameters.json' --mode Indexed)
 
 # Set the scope to a resource group; may also be a subscription or management group
 scope=$(az group show --name 'YourResourceGroup')
