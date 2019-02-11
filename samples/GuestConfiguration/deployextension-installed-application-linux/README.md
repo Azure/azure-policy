@@ -25,7 +25,7 @@ $definition = New-AzPolicyDefinition -Name 'deployextension-installed-applicatio
 $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
 
 # Set the Policy Parameter (JSON format)
-$policyparam = '{ "ApplicationName": { "value": [ "python,powershell" ] } }'
+$policyparam = '{ "ApplicationNames": { "value": [ "python,powershell" ] } }'
 
 # Create the Policy Assignment
 $assignment = New-AzPolicyAssignment -Name 'deployextension-installed-application-linux-assignment' -DisplayName 'Audit whether applications are installed inside Linux VMs Assignment' -Scope $scope.ResourceId -PolicyDefinition $definition -PolicyParameter $policyparam
@@ -41,7 +41,7 @@ definition=$(az policy definition create --name 'deployextension-installed-appli
 scope=$(az group show --name 'YourResourceGroup')
 
 # Set the Policy Parameter (JSON format)
-policyparam='{ "ApplicationName": { "value": [ "python,powershell" ] } }'
+policyparam='{ "ApplicationNames": { "value": [ "python,powershell" ] } }'
 
 # Create the Policy Assignment
 assignment=$(az policy assignment create --name 'deployextension-installed-application-linux-assignment' --display-name 'Audit whether applications are installed inside Linux VMs Assignment' --scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r` --params "$policyparam")
