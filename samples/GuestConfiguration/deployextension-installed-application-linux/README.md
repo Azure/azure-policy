@@ -1,6 +1,6 @@
 # Deploy extension to audit for installed applications in Linux VMs
 
-This policy ensures that the requirements are deployed to audit a VM for applications that must be installed.  The requirements include a guest assignment, a managed service identity, and the guest configuration extension.
+This policy ensures that the requirements are deployed to audit a VM for applications that must be installed.  The requirements include a guest configuration assignment, a managed service identity, and the guest configuration extension.
 
 This policy requires another definition to also be deployed that audits the results published in Azure Resource Manager.  Please see the policy sample
 [Audit for installed application - Linux](../audit-installed-application-linux\README.md).
