@@ -34,7 +34,7 @@ $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
 # Set the definition parameter (JSON format)
 $policyParam  = '{ "installedApplication": { "value": "python,powershell" } }'
 
-# Create the initiative assignment
+# Create the policy assignment
 $assignment = New-AzPolicyAssignment -Name 'guestconfig-installed-application-linux-deployIfNotExists-assignment' -DisplayName 'GuestConfig - Deploy VM extension to audit that Python and PowerShell are installed inside Linux VMs' -Scope $scope.ResourceID -PolicyDefinition $definition -PolicyParameter $policyParam -AssignIdentity -Location 'westus2'
 
 # Get the system-assigned managed identity created by the assignment with -AssignIdentity
