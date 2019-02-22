@@ -1,0 +1,186 @@
+{
+    "properties": {
+        "displayName": "Enforce IP restriction rule for all WebApps",
+        "mode": "all",
+        "description": "Enforce IP restriction rules",
+        "metadata": {
+            "category": "WebApps"
+        },
+        "parameters": { 
+			"ipAddress": {
+				  "type": "string",
+				  "metadata": {
+					 "description": "The required CIDR e.g. 0.0.0.0/0 value",
+					 "displayName": "Required IP Address value (CIDR)"
+				  }
+			   },
+			   "action": {
+				  "type": "string",
+				  "defaultValue": "Allow",
+				  "metadata": {
+					 "description": "The required action value for the rule",
+					 "displayName": "Required action value"
+				  }
+			   },
+			   "priority": {
+				  "type": "string",
+				  "defaultValue": "300",
+				  "metadata": {
+					"description": "The required priority value for the rule",
+					"displayName": "Required priority value"
+				  }
+			   },
+			   "rulename": {
+				  "type": "string",
+				  "defaultValue": "DefaultRule",
+				  "metadata": {
+					 "description": "The required name of the rule",
+					 "displayName": "Required name for the new rule"
+				  }
+			   },
+			   "description": {
+				  "type": "string",
+				  "metadata": {
+					 "displayName": "Rule description",
+					 "description": "Rule description"
+				  }
+			   }
+        },
+	"policyRule": {
+		"if": {
+		"allOf": [
+			{
+			  "field": "type",
+			  "equals": "Microsoft.Web/sites"
+			},
+			{
+			  "anyOf": [
+				{
+				  "field": "kind",
+				  "equals": "app"
+				},
+				{
+				  "field": "kind",
+				  "equals": "WebApp"
+				},
+				{
+				  "field": "kind",
+				  "equals": "app,linux"
+				},
+				{
+				  "field": "kind",
+				  "equals": "app,linux,container"
+				}
+			  ]
+			}
+		  ]
+		},
+		"then": {
+		   "effect": "deployIfNotExists",
+		   "details": {
+			 "type": "Microsoft.Web/sites/config",
+			 "name": "web",
+			 "existenceCondition": {
+			   "field": "Microsoft.Web/sites/config/ipSecurityRestrictions",
+			   "exists": "true"
+			 },
+			 "roleDefinitionIds": [
+			   "/providers/Microsoft.Authorization/roleDefinitions/de139f84-1756-47ae-9be6-808fbbe84772"
+			 ],
+			 "deployment": {
+			   "properties": {
+				 "mode": "incremental",
+				 "template": {
+				   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+				   "contentVersion": "1.0.0.0",
+				   "parameters": {
+					 "webAppName": {
+					   "type": "string"
+					 },
+					 "location": {
+					   "type": "string"
+					 },
+					 "kind": {
+					   "type": "string"
+					 },
+					"ipAddress": {
+					   "type": "string"
+					 },
+					"action": {
+					   "type": "string"
+					 },
+					"priority": {
+					   "type": "string"
+					 },
+					"rulename": {
+					   "type": "string"
+					 },
+					"description": {
+					   "type": "string"
+					 }
+					
+				   },
+				  
+				   "variables": {
+						  "ipAddress": "[parameters('ipAddress')]",
+						  "action": "[parameters('action')]",
+						  "priority": "[parameters('priority')]",
+						  "rulename": "[parameters('rulename')]",
+						  "description": "[parameters('description')]"
+					   },
+				   "resources": [
+					 {
+					   "name": "[replace(parameters('webAppName'),'/web', '')]",
+					   "type": "Microsoft.Web/sites",
+					   "apiVersion": "2018-02-01",
+					   "location": "[parameters('location')]",
+					   "kind": "[parameters('kind')]",
+					   "properties": {
+						 "siteConfig": {
+						   "ipSecurityRestrictions": [
+							 {
+								"ipAddress": "[variables('ipAddress')]",
+								"action": "[variables('action')]",
+								"priority": "[variables('priority')]",
+								"name": "[variables('rulename')]",
+								"description": "[variables('description')]"
+							 }
+						   ]
+						 }
+					   }
+					 }
+				   ]
+				 },
+				 "parameters": {
+					"webAppName": {
+						"value": "[field('fullName')]"
+					},
+					"kind": {
+						"value": "[field('kind')]"
+					},
+					"location": {
+						"value": "[field('location')]"
+					},
+					"ipAddress": {
+						"value": "[parameters('ipAddress')]"
+					},
+					"action": {
+						"value": "[parameters('action')]"
+					},
+					"priority": {
+						"value": "[parameters('priority')]"
+					},
+					"rulename": {
+						"value": "[parameters('rulename')]"
+					},
+					"description": {
+						"value": "[parameters('description')]"
+				   }
+				 }
+			   }
+			 }
+		   }
+		}
+	}
+	}
+}
