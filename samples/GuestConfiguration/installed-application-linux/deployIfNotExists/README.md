@@ -1,10 +1,10 @@
 # Deploy extension to audit for installed applications in Linux VMs
 
 This policy definition uses [Azure Policy Guest
-Configuration](https://docs.microsoft.com/governance/policy/concepts/guest-configuration) to
-ensures that the requirements are deployed to audit a VM for applications that must be installed.
+Configuration](https://docs.microsoft.com/governance/policy/concepts/guest-configuration) to ensures
+that the requirements are deployed to audit if a VM is missing applications that must be installed.
 The requirements include a Guest Configuration assignment, a managed identity, and the Guest
-Configuration extension. It is part of a policy initiative that deploys both the **audit** and
+Configuration extension. It's part of a policy initiative that deploys both the **audit** and
 **deployIfNotExists** policy definitions needed by Guest Configuration. Read about the initiative
 definition [here](../README.md).
 

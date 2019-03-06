@@ -1,7 +1,7 @@
-# Audit that applications are installed inside Linux VMs
+# Audit if an application is not installed inside Linux VMs
 
 This initiative uses [Azure Policy Guest Configuration](https://docs.microsoft.com/governance/policy/concepts/guest-configuration)
-to audit applications installed in Linux virtual machines.
+to audit if applications aren't installed in Linux virtual machines.
 
 Initiative ID: `/providers/Microsoft.Authorization/policySetDefinitions/c937dcb4-4398-4b39-8d63-4a6be432252e`
 
@@ -31,7 +31,7 @@ built-in policies for both **audit** and **deployIfNotExists**.
 
 ```powershell
 # Create the policy initiative (Subscription scope)
-$initDef = New-AzPolicySetDefinition -Name 'guestconfig-installed-application-linux' -DisplayName 'GuestConfig - Audit that an application is installed inside Linux VMs' -description 'This initiative will both deploy the policy requirements and audit that the specified application is installed inside Linux virtual machines.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.definitions.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.parameters.json' -Mode All
+$initDef = New-AzPolicySetDefinition -Name 'guestconfig-installed-application-linux' -DisplayName 'GuestConfig - Audit if an application is not installed inside Linux VMs' -description 'This initiative will both deploy the policy requirements and audit that the specified application is installed inside Linux virtual machines.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.definitions.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.parameters.json' -Mode All
 
 # Set the scope to a resource group; may also be a resource, subscription, or management group
 $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
@@ -53,7 +53,7 @@ $roleAssignment = New-AzRoleAssignment -ObjectId $saIdentity -Scope $scope.Resou
 
 ```cli
 # Create the policy initiative (Subscription scope)
-initdef=$(az policy set-definition create --name 'guestconfig-installed-application-linux' --display-name 'GuestConfig - Audit that an application is installed inside Linux VMs' --description 'This initiative will both deploy the policy requirements and audit that the specified application is installed inside Linux virtual machines.' --definitions 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.definitions.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.parameters.json' --mode All)
+initdef=$(az policy set-definition create --name 'guestconfig-installed-application-linux' --display-name 'GuestConfig - Audit if an application is not installed inside Linux VMs' --description 'This initiative will both deploy the policy requirements and audit that the specified application is installed inside Linux virtual machines.' --definitions 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.definitions.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/azurepolicyset.parameters.json' --mode All)
 
 # Set the scope to a resource group; may also be a subscription or management group
 scope=$(az group show --name 'YourResourceGroup')
