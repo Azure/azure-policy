@@ -1,0 +1,35 @@
+{
+  "properties": {
+    "displayName": "Audit when a given service principal is assigned to the Key Vault data plane",
+    "description": "Audit when a specified AAD object is granted any permissions to secrets, certs, or keys stored in a Key Vault through data plane access policies.",
+    "mode": "All",
+    "parameters": {
+      "aadObjectId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "AAD Object ID",
+          "description": "The objectId of the AAD user, group, or service principal to check."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Keyvault/vaults/accessPolicies[*].objectId",
+              "notEquals": "[parameters('aadObjectId')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "audit"
+      }
+    }
+  }
+}
