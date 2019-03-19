@@ -1,0 +1,56 @@
+{
+    "mode": "all",
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HDInsight/clusters"
+              },
+              {
+                "not": {
+                  "field": "Microsoft.HDInsight/clusters/computeProfile.roles[*].virtualNetworkProfile.subnet",
+                  "notIn": [
+                    "null",
+                    ""
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HDInsight/clusters"
+              },
+              {
+                "field": "Microsoft.HDInsight/clusters/computeProfile.roles[*].virtualNetworkProfile.subnet",
+                "exists": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    }
+  }
