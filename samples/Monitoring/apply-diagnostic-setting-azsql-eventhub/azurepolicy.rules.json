@@ -1,0 +1,162 @@
+{
+   "if": {
+       "allOf": [
+           {
+               "field": "type",
+               "equals": "Microsoft.Sql/servers/databases"
+           },
+           {
+               "field": "location",
+               "in": "[parameters('azureRegions')]"
+           }
+       ]
+   },
+   "then": {
+       "effect": "deployIfNotExists",
+       "details": {
+           "type": "Microsoft.Insights/diagnosticSettings",
+           "existenceCondition": {
+               "allOf": [
+                   {
+                       "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                       "equals": "[parameters('logsEnabled')]"
+                   },
+                   {
+                       "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                       "equals": "[parameters('metricsEnabled')]"
+                   },
+                   {
+                       "field": "Microsoft.Insights/diagnosticSettings/eventHubName",
+                       "equals": "[parameters('eventHubName')]"
+                   }
+               ]
+           },
+           "roleDefinitionIds": [
+               "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+           ],
+           "deployment": {
+               "properties": {
+                   "mode": "incremental",
+                   "template": {
+                       "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                       "contentVersion": "1.0.0.0",
+                       "parameters": {
+                           "fullName": {
+                               "type": "string"
+                           },
+                           "location": {
+                               "type": "string"
+                           },
+                           "eventHubName": {
+                               "type": "string"
+                           },
+                           "eventHubRuleId": {
+                               "type": "string"
+                           },
+                           "metricsEnabled": {
+                               "type": "string"
+                           },
+                           "logsEnabled": {
+                               "type": "string"
+                           },
+                           "profileName": {
+                               "type": "string"
+                           }
+                       },
+                       "variables": {},
+                       "resources": [
+                           {
+                               "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings",
+                               "apiVersion": "2017-05-01-preview",
+                               "name": "[concat(parameters('fullName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                               "location": "[parameters('location')]",
+                               "dependsOn": [],
+                               "properties": {
+                                   "eventHubName": "[parameters('eventHubName')]",
+                                   "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
+                                   "metrics": [
+                                       {
+                                           "category": "AllMetrics",
+                                           "enabled": "[parameters('metricsEnabled')]",
+                                           "retentionPolicy": {
+                                               "enabled": false,
+                                               "days": 0
+                                           }
+                                       }
+                                   ],
+                                   "logs": [
+                                       {
+                                           "category": "QueryStoreRuntimeStatistics",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "QueryStoreWaitStatistics",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "Errors",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "DatabaseWaitStatistics",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "Blocks",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "SQLInsights",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "Audit",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "SQLSecurityAuditEvents",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       },
+                                       {
+                                           "category": "Timeouts",
+                                           "enabled": "[parameters('logsEnabled')]"
+                                       }
+                                   ]
+                               }
+                           }
+                       ],
+                       "outputs": {
+                           "policy": {
+                               "type": "string",
+                               "value": "[concat(parameters('eventHubName'), 'configured for diagnostic logs for ', ': ', parameters('fullName'))]"
+                           }
+                       }
+                   },
+                   "parameters": {
+                       "EventHubName": {
+                           "value": "[parameters('eventHubName')]"
+                       },
+                       "location": {
+                           "value": "[field('location')]"
+                       },
+                       "fullName": {
+                           "value": "[field('fullName')]"
+                       },
+                       "EventHubRuleID": {
+                           "value": "[parameters('eventHubRuleId')]"
+                       },
+                       "MetricsEnabled": {
+                           "value": "[parameters('metricsEnabled')]"
+                       },
+                       "LogsEnabled": {
+                           "value": "[parameters('logsEnabled')]"
+                       },
+                       "ProfileName": {
+                           "value": "[parameters('profileName')]"
+                       }
+                   }
+               }
+           }
+       }
+   }
+}
