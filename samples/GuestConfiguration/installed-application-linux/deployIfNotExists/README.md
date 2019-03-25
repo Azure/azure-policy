@@ -1,4 +1,4 @@
-# Deploy extension to audit for installed applications in Linux VMs
+# Deploy requirements to audit Linux VMs that do not have the specified applications installed
 
 This policy definition uses [Azure Policy Guest
 Configuration](https://docs.microsoft.com/governance/policy/concepts/guest-configuration) to ensures
@@ -26,16 +26,16 @@ won't work correctly.
 
 ```powershell
 # Create the policy definition (Subscription scope)
-$definition = New-AzPolicyDefinition -Name 'guestconfig-installed-application-linux-deployIfNotExists' -DisplayName 'GuestConfig - Deploy VM extension to audit that an application is installed inside Linux VMs' -description 'Include this rule to deploy the VM extension for Microsoft Guest Configuration, the VM extension for Microsoft Azure Managed Service Identity, and the content required to audit that an application is installed inside Linux virtual machines. This policy should only be used along with its corresponding audit policy in an initiative/policy set.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name 'guestconfig-installed-application-linux-deployIfNotExists' -DisplayName 'GuestConfig - Deploy requirements to audit Linux VMs that do not have the specified applications installed' -description 'This initiative deploys the policy requirements and audits Linux virtual machines that do not have the specified applications installed.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.parameters.json' -Mode All
 
 # Set the scope to a resource group; may also be a resource, subscription, or management group
 $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
 
 # Set the definition parameter (JSON format)
-$policyParam  = '{ "installedApplication": { "value": "python,powershell" } }'
+$policyParam  = '{ "installedApplication": { "value": "python; powershell" } }'
 
 # Create the policy assignment
-$assignment = New-AzPolicyAssignment -Name 'guestconfig-installed-application-linux-deployIfNotExists-assignment' -DisplayName 'GuestConfig - Deploy VM extension to audit that Python and PowerShell are installed inside Linux VMs' -Scope $scope.ResourceID -PolicyDefinition $definition -PolicyParameter $policyParam -AssignIdentity -Location 'westus2'
+$assignment = New-AzPolicyAssignment -Name 'guestconfig-installed-application-linux-deployIfNotExists-assignment' -DisplayName 'GuestConfig - Deploy requirements to audit Linux VMs that do not have the specified applications installed' -Scope $scope.ResourceID -PolicyDefinition $definition -PolicyParameter $policyParam -AssignIdentity -Location 'westus2'
 
 # Get the system-assigned managed identity created by the assignment with -AssignIdentity
 $saIdentity = $assignment.Identity.principalId
@@ -48,14 +48,14 @@ $roleAssignment = New-AzRoleAssignment -ObjectId $saIdentity -Scope $scope.Resou
 
 ```cli
 # Create the policy definition (Subscription scope)
-definition=$(az policy definition create --name 'guestconfig-installed-application-linux-deployIfNotExists' --display-name 'GuestConfig - Deploy VM extension to audit that an application is installed inside Linux VMs' --description 'Include this rule to deploy the VM extension for Microsoft Guest Configuration, the VM extension for Microsoft Azure Managed Service Identity, and the content required to audit that an application is installed inside Linux virtual machines. This policy should only be used along with its corresponding audit policy in an initiative/policy set.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.rules.json'  --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.parameters.json' --mode All)
+definition=$(az policy definition create --name 'guestconfig-installed-application-linux-deployIfNotExists' --display-name 'GuestConfig - Deploy requirements to audit Linux VMs that do not have the specified applications installed' --description 'This initiative deploys the policy requirements and audits Linux virtual machines that do not have the specified applications installed.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.rules.json'  --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/deployIfNotExists/azurepolicy.parameters.json' --mode All)
 
 # Set the scope to a resource group; may also be a resource, subscription, or management group
 scope=$(az group show --name 'YourResourceGroup')
 
 # Set the definition parameter (JSON format)
-policyparam='{ "installedApplication": { "value": "python,powershell" } }'
+policyparam='{ "installedApplication": { "value": "python; powershell" } }'
 
 # Create the policy assignment and grant the created managed identity the 'Contributor' role on the resource group
-assignment=$(az policy assignment create --name 'guestconfig-installed-application-linux-deployIfNotExists-assignment' --display-name 'GuestConfig - Deploy VM extension to audit that Python and PowerShell are installed inside Linux VMs' --scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r`) --assign-identity --identity-scope `echo $scope | jq '.id' -r` --role 'Contributor' --location 'westus2'
+assignment=$(az policy assignment create --name 'guestconfig-installed-application-linux-deployIfNotExists-assignment' --display-name 'GuestConfig - Deploy requirements to audit Linux VMs that do not have the specified applications installed' --scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r`) --assign-identity --identity-scope `echo $scope | jq '.id' -r` --role 'Contributor' --location 'westus2'
 ```
