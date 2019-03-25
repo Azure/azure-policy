@@ -1,4 +1,4 @@
-# Audit if specified applications are not installed inside Linux VMs
+# Audit Linux VMs that do not have the specified applications installed
 
 This policy definition uses [Azure Policy Guest
 Configuration](https://docs.microsoft.com/governance/policy/concepts/guest-configuration) to audit
@@ -24,7 +24,7 @@ correctly.
 
 ```powershell
 # Create the policy definition (Subscription scope)
-$definition = New-AzPolicyDefinition -Name 'guestconfig-installed-application-linux-audit' -DisplayName 'GuestConfig - Audit if specified applications are not installed inside Linux VMs' -description 'This policy audits that the specified application is installed inside Linux virtual machines. This policy should only be used along with its corresponding deploy policy in an initiative/policy set.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/audit/azurepolicy.rules.json' -Mode All
+$definition = New-AzPolicyDefinition -Name 'guestconfig-installed-application-linux-audit' -DisplayName 'GuestConfig - Audit Linux VMs that do not have the specified applications installed' -description 'This policy audits Linux virtual machines that do not have the specified applications installed. This policy should only be used along with its corresponding deploy policy in an initiative/policy set.' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/audit/azurepolicy.rules.json' -Mode All
 
 # Set the scope to a resource group; may also be a resource, subscription, or management group
 $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
@@ -37,7 +37,7 @@ $assignment = New-AzPolicyAssignment -Name 'guestconfig-installed-application-li
 
 ```cli
 # Create the policy definition (Subscription scope)
-definition=$(az policy definition create --name 'guestconfig-installed-application-linux-audit' --display-name 'GuestConfig - Audit if specified applications are not installed inside Linux VMs' --description 'This policy audits that the specified application is installed inside Linux virtual machines. This policy should only be used along with its corresponding deploy policy in an initiative/policy set.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/audit/azurepolicy.rules.json' --mode All)
+definition=$(az policy definition create --name 'guestconfig-installed-application-linux-audit' --display-name 'GuestConfig - Audit Linux VMs that do not have the specified applications installed' --description 'This policy audits Linux virtual machines that do not have the specified applications installed. This policy should only be used along with its corresponding deploy policy in an initiative/policy set.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/GuestConfiguration/installed-application-linux/audit/azurepolicy.rules.json' --mode All)
 
 # Set the scope to a resource group; may also be a resource, subscription, or management group
 scope=$(az group show --name 'YourResourceGroup')
