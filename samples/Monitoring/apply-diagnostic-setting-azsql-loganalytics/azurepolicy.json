@@ -1,0 +1,214 @@
+{
+    "properties": {
+        "displayName": "Apply Diagnostic Settings for Azure SQL to a Log Analytics workspace",
+        "mode": "Indexed",
+        "description": "This policy automatically deploys diagnostic settings for Azure SQL to a Log Analytics workspace.",
+        "metadata": {
+            "category": "Monitoring"
+        },
+        "parameters": {
+            "profileName": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Profile Name for Config",
+                    "description": "The profile name Azure Diagnostics"
+                }
+            },
+            "logAnalytics": {
+                "type": "string",
+                "metadata": {
+                    "displayName": "logAnalytics",
+                    "description": "The target Log Analytics Workspace for Azure Diagnostics",
+                    "strongType": "omsWorkspace"
+                }
+            },
+            "azureRegions": {
+                "type": "Array",
+                "metadata": {
+                    "displayName": "Allowed Locations",
+                    "description": "The list of locations that can be specified when deploying resources",
+                    "strongType": "location"
+                }
+            },
+            "metricsEnabled": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Enable Metrics",
+                    "description": "Enable Metrics - True or False"
+                },
+                "allowedValues": [
+                    "True",
+                    "False"
+                ],
+                "defaultValue": "False"
+            },
+            "logsEnabled": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Enable Logs",
+                    "description": "Enable Logs - True or False"
+                },
+                "allowedValues": [
+                    "True",
+                    "False"
+                ],
+                "defaultValue": "True"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Sql/servers/databases"
+                    },
+                    {
+                        "field": "location",
+                        "in": "[parameters('AzureRegions')]"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deployIfNotExists",
+                "details": {
+                    "type": "Microsoft.Insights/diagnosticSettings",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                                "equals": "[parameters('LogsEnabled')]"
+                            },
+                            {
+                                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                                "equals": "[parameters('MetricsEnabled')]"
+                            },
+                            {
+                                "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                                "equals": "[parameters('logAnalytics')]"
+                            }
+                        ]
+                    },
+                    "roleDefinitionIds": [
+                        "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "deployment": {
+                        "properties": {
+                            "mode": "incremental",
+                            "template": {
+                                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "parameters": {
+                                    "fullName": {
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "type": "string"
+                                    },
+                                    "logAnalytics": {
+                                        "type": "string"
+                                    },
+                                    "metricsEnabled": {
+                                        "type": "string"
+                                    },
+                                    "logsEnabled": {
+                                        "type": "string"
+                                    },
+                                    "profileName": {
+                                        "type": "string"
+                                    }
+                                },
+                                "variables": {},
+                                "resources": [
+                                    {
+                                        "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings",
+                                        "apiVersion": "2017-05-01-preview",
+                                        "name": "[concat(parameters('fullName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                                        "location": "[parameters('location')]",
+                                        "dependsOn": [],
+                                        "properties": {
+                                            "workspaceId": "[parameters('logAnalytics')]",
+                                            "metrics": [
+                                                {
+                                                    "category": "AllMetrics",
+                                                    "enabled": "[parameters('metricsEnabled')]",
+                                                    "retentionPolicy": {
+                                                        "enabled": false,
+                                                        "days": 0
+                                                    }
+                                                }
+                                            ],
+                                            "logs": [
+                                                {
+                                                    "category": "QueryStoreRuntimeStatistics",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "QueryStoreWaitStatistics",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "Errors",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "DatabaseWaitStatistics",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "Blocks",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "SQLInsights",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "Audit",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "SQLSecurityAuditEvents",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                },
+                                                {
+                                                    "category": "Timeouts",
+                                                    "enabled": "[parameters('logsEnabled')]"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ],
+                                "outputs": {
+                                    "policy": {
+                                        "type": "string",
+                                        "value": "[concat(parameters('logAnalytics'), 'configured for diagnostic logs for ', ': ', parameters('fullName'))]"
+                                    }
+                                }
+                            },
+                            "parameters": {
+                                "logAnalytics": {
+                                    "value": "[parameters('logAnalytics')]"
+                                },
+                                "location": {
+                                    "value": "[field('location')]"
+                                },
+                                "fullName": {
+                                    "value": "[field('fullName')]"
+                                },
+                                "metricsEnabled": {
+                                    "value": "[parameters('metricsEnabled')]"
+                                },
+                                "logsEnabled": {
+                                    "value": "[parameters('logsEnabled')]"
+                                },
+                                "profileName": {
+                                    "value": "[parameters('profileName')]"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
