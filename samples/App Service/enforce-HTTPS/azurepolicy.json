@@ -1,0 +1,70 @@
+{
+  "mode": "All",
+  "policyRule": {
+	  "if": {
+		"allOf": [
+		  {
+			"field": "type",
+			"equals": "Microsoft.Web/sites"
+		  }
+		]
+	  },
+	  "then": {
+		"effect": "deployIfNotExists",
+		"details": {
+		  "type": "Microsoft.Web/sites",
+		  "name": "[field('name')]",
+		  "roleDefinitionIds": [
+			"/providers/Microsoft.Authorization/roleDefinitions/de139f84-1756-47ae-9be6-808fbbe84772"
+		  ],
+		  "existenceCondition": {
+			"field": "Microsoft.Web/sites/httpsOnly",
+			"equals": "true"
+		  },
+		  "deployment": {
+			"properties": {
+			  "mode": "incremental",
+			  "template": {
+				"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+				"contentVersion": "1.0.0.0",
+				"parameters": {
+				  "WebName": {
+					"type": "string"
+				  },
+				  "location": {
+					"type": "string"
+				  },
+				  "kind": {
+					"type": "string"
+				  }
+				},
+				"resources": [
+				  {
+					"name": "[parameters('WebName')]",
+					"type": "microsoft.Web/sites",
+					"apiVersion": "2018-02-01",
+					"location": "[parameters('location')]",
+					"kind": "[parameters('kind')]",
+					"properties": {
+					  "httpsOnly": true
+					}
+				  }
+				]
+			  },
+			  "parameters": {
+				"WebName": {
+				  "value": "[field('name')]"
+				},
+				"location": {
+				  "value": "[field('location')]"
+				},
+				"kind": {
+				  "value": "[field('kind')]"
+				}
+			  }
+			}
+		  }
+		}
+	  }
+	}
+}
