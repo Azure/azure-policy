@@ -1,4 +1,4 @@
-# Audit if specified applications are not installed inside Linux VMs
+# Audit Linux VMs that do not have the specified applications installed
 
 This initiative uses [Azure Policy Guest Configuration](https://docs.microsoft.com/governance/policy/concepts/guest-configuration)
 to audit if applications aren't installed in Linux virtual machines.
@@ -37,7 +37,7 @@ $initDef = New-AzPolicySetDefinition -Name 'guestconfig-installed-application-li
 $scope = Get-AzResourceGroup -Name 'YourResourceGroup'
 
 # Set the initiative parameter (JSON format)
-$initParam = '{ "installedApplication": { "value": "python,powershell" } }'
+$initParam = '{ "installedApplication": { "value": "python; powershell" } }'
 
 # Create the initiative assignment
 $assignment = New-AzPolicyAssignment -Name 'guestconfig-installed-application-linux-assignment' -DisplayName 'GuestConfig - Python and PowerShell apps on Linux' -Scope $scope.ResourceID -PolicySetDefinition $initDef -PolicyParameter $initParam -AssignIdentity -Location 'westus2'
@@ -59,7 +59,7 @@ initdef=$(az policy set-definition create --name 'guestconfig-installed-applicat
 scope=$(az group show --name 'YourResourceGroup')
 
 # Set the initiative parameter (JSON format)
-initparam='{ "installedApplication": { "value": "python,powershell" } }'
+initparam='{ "installedApplication": { "value": "python; powershell" } }'
 
 # Create the initiative assignment and grant the created managed identity the 'Contributor' role on the resource group
 assignment=$(az policy assignment create --name 'guestconfig-installed-application-linux-assignment' --display-name 'GuestConfig - Python and PowerShell apps on Linux' --scope `echo $scope | jq '.id' -r` --policy `echo $initdef | jq '.name' -r`) --assign-identity --identity-scope `echo $scope | jq '.id' -r` --role 'Contributor' --location 'westus2'
