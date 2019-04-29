@@ -1,0 +1,130 @@
+{
+    "if": {
+        "allOf": [
+            {
+                "field": "type",
+                "equals": "Microsoft.Network/publicIPAddresses"
+            },
+            {
+                "field": "location",
+                "in": "[parameters('azureRegions')]"
+            }
+        ]
+    },
+    "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+            "type": "Microsoft.Insights/diagnosticSettings",
+            "existenceCondition": {
+                "allOf": [
+                    {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                        "equals": "[parameters('logsEnabled')]"
+                    },
+                    {
+                        "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                        "equals": "[parameters('metricsEnabled')]"
+                    },
+                    {
+                        "field": "Microsoft.Insights/diagnosticSettings/eventHubName",
+                        "equals": "[parameters('eventHubName')]"
+                    }
+                ]
+            },
+            "roleDefinitionIds": [
+                "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+            ],
+            "deployment": {
+                "properties": {
+                    "mode": "incremental",
+                    "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "location": {
+                                "type": "string"
+                            },
+                            "eventHubName": {
+                                "type": "string"
+                            },
+                            "eventHubRuleId": {
+                                "type": "string"
+                            },
+                            "metricsEnabled": {
+                                "type": "string"
+                            },
+                            "logsEnabled": {
+                                "type": "string"
+                            },
+                            "profileName": {
+                                "type": "string"
+                            }
+                        },
+                        "variables": {},
+                        "resources": [
+                            {
+                                "type": "Microsoft.Network/publicIPAddresses/providers/diagnosticSettings",
+                                "apiVersion": "2017-05-01-preview",
+                                "name": "[concat(parameters('name'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                                "location": "[parameters('location')]",
+                                "dependsOn": [],
+                                "properties": {
+                                    "eventHubName": "[parameters('eventHubName')]",
+                                    "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
+                                    "metrics": [
+                                        {
+                                            "category": "AllMetrics",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        }
+                                    ],
+                                    "logs": [
+                                        {
+                                            "category": "DDoSProtectionNotifications",
+                                            "enabled": "[parameters('logsEnabled')]"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "outputs": {
+                            "policy": {
+                                "type": "string",
+                                "value": "[concat(parameters('eventHubName'), 'configured for diagnostic logs for ', ': ', parameters('name'))]"
+                            }
+                        }
+                    },
+                    "parameters": {
+                        "eventHubName": {
+                            "value": "[parameters('eventHubName')]"
+                        },
+                        "location": {
+                            "value": "[field('location')]"
+                        },
+                        "name": {
+                            "value": "[field('name')]"
+                        },
+                        "eventHubRuleId": {
+                            "value": "[parameters('eventHubRuleId')]"
+                        },
+                        "metricsEnabled": {
+                            "value": "[parameters('metricsEnabled')]"
+                        },
+                        "logsEnabled": {
+                            "value": "[parameters('logsEnabled')]"
+                        },
+                        "profileName": {
+                            "value": "[parameters('profileName')]"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
