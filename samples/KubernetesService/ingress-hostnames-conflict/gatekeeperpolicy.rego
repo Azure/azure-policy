@@ -15,12 +15,11 @@
             "namespace": namespace,       # identifies namespace of resource
             "name": name                  # identifies name of resource
         },
-        "resolution": {
-            "message": "The operation was disallowed by policy ‘{{AzurePolicyID}}’. Error details: ingress host conflicts with an existing ingress."    # provides human-readable message to display
-            },
+        "resolution": {"message": msg},
     }] {
         matches[["ingresses", namespace, name, matched_ingress]]
         matches[["ingresses", other_ns, other_name, other_ingress]]
         name != other_name
         other_ingress.spec.rules[_].host == matched_ingress.spec.rules[_].host
+        msg := sprintf("The operation was disallowed by policy ‘{{AzurePolicyID}}’. Error details: ingress host conflicts with an existing ingress %v in the %v namespace", [other_name, other_ns])
     }
