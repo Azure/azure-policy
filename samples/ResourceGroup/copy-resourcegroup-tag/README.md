@@ -16,7 +16,8 @@ $definition = New-AzPolicyDefinition -Name "copy-resourcegroup-tag" -DisplayName
 $definition
 
 # Create the Policy Assignment
-$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$scope = Get-AzResourceGroup -Name 'YourResourceGroup'
+$assignment = New-AzPolicyAssignment -Name "copy-resource-group-tag" -Scope $scope -PolicyDefinition $definition -tagName "CostCenter"
 
 # Show Assignment
 $assignment 
@@ -29,6 +30,6 @@ $assignment
 az policy definition create --name 'copy-resourcegroup-tag' --display-name 'Copy resource group tag to resource' --description 'Copy a tag specified in the parameter value from the resource group to the resource.  For example, a tag named costCenter on the resource group will be copied to the resources. Provide the actual tag name in tagName parameter at time of policy assignment.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' --mode Indexed
 
 # Create the Policy Assignment
-az policy assignment create --name <assignmentname> --scope <scope> --policy "copy-resourcegroup-tag" 
+az policy assignment create --name 'copy-resourcegroup-tag' --scope <scope> --policy "copy-resourcegroup-tag" --params "{'tagName':{'value': 'costCenter'}}" 
 
 ````
