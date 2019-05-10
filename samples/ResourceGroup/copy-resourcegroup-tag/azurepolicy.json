@@ -2,18 +2,26 @@
     "properties": {
         "displayName": "Copy resource group tag to resource",
         "mode": "Indexed",
-        "description": "Copy a specific tag from the resource group to the resource.  For example, a tag named example on the resource group will be copied to the resources.  Change the word example in the policy rule to change the name of the tag copied to a resource.",
+        "description": "Copy a tag specified in the parameter value from the resource group to the resource.  For example, a tag named costCenter on the resource group will be copied to the resources.",
+        "parameters": {
+            "tagName": {
+                "type": "String",
+                "metadata": {
+                    "description": "Name of the tag, such as costCenter"
+                }
+            }
+        },
         "policyRule": {
             "if": {
-                "field": "tags.example",
+                "field": "[concat('tags[', parameters('tagName'), ']')]",
                 "exists": "false"
             },
             "then": {
                 "effect": "append",
                 "details": [
                     {
-                        "field": "tags.example",
-                        "value": "[resourceGroup().tags.example]"
+                        "field": "[concat('tags[', parameters('tagName'), ']')]",
+                        "value": "[resourceGroup().tags[parameters('tagName')]]"
                     }
                 ]
             }

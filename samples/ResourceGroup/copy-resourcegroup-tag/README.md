@@ -1,6 +1,6 @@
 # Copy resource group tag to resource
 
-Copy a specific tag from the resource group to the resource.  For example, a tag named *example* on the resource group will be copied to the resources.  Change the word *example* in the policy rule to change the name of the tag copied to a resource.
+Copy a tag specified in the parameter value from the resource group to the resource.  For example, a tag named costCenter on the resource group will be copied to the resources. Provide the actual tag name in tagName parameter at time of policy assignment.
 
 ## Try on Azure Portal
 
@@ -10,13 +10,14 @@ Copy a specific tag from the resource group to the resource.  For example, a tag
 
 ````powershell
 # Create the Policy Definition
-$definition = New-AzPolicyDefinition -Name "copy-resourcegroup-tag" -DisplayName "Copy resource group tag to resource" -description "Copy a specific tag from the resource group to the resource.  For example, a tag named example on the resource group will be copied to the resources.  Change the word example in the policy rule to change the name of the tag copied to a resource." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "copy-resourcegroup-tag" -DisplayName "Copy resource group tag to resource" -description "Copy a tag specified in the parameter value from the resource group to the resource.  For example, a tag named costCenter on the resource group will be copied to the resources. Provide the actual tag name in tagName parameter at time of policy assignment." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' -Mode Indexed
 
 # Show Definititon
 $definition
 
 # Create the Policy Assignment
-$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+$scope = Get-AzResourceGroup -Name 'YourResourceGroup'
+$assignment = New-AzPolicyAssignment -Name "copy-resource-group-tag" -Scope $scope -PolicyDefinition $definition -tagName "CostCenter"
 
 # Show Assignment
 $assignment 
@@ -26,9 +27,9 @@ $assignment
 
 ````cli
 # Create the Policy Definition
-az policy definition create --name 'copy-resourcegroup-tag' --display-name 'Copy resource group tag to resource' --description 'Copy a specific tag from the resource group to the resource.  For example, a tag named example on the resource group will be copied to the resources.  Change the word example in the policy rule to change the name of the tag copied to a resource.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' --mode Indexed
+az policy definition create --name 'copy-resourcegroup-tag' --display-name 'Copy resource group tag to resource' --description 'Copy a tag specified in the parameter value from the resource group to the resource.  For example, a tag named costCenter on the resource group will be copied to the resources. Provide the actual tag name in tagName parameter at time of policy assignment.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/copy-resourcegroup-tag/azurepolicy.rules.json' --mode Indexed
 
 # Create the Policy Assignment
-az policy assignment create --name <assignmentname> --scope <scope> --policy "copy-resourcegroup-tag" 
+az policy assignment create --name 'copy-resourcegroup-tag' --scope <scope> --policy "copy-resourcegroup-tag" --params "{'tagName':{'value': 'costCenter'}}" 
 
 ````
