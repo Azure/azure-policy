@@ -1,8 +1,8 @@
 {
     "properties": {
-        "displayName": "Deploy VM extension to audit if specified applications are not installed inside Linux VMs",
+        "displayName": "Deploy requirements to audit Linux VMs that do not have the specified applications installed",
         "mode": "Indexed",
-        "description": "Include this rule to deploy the VM extension for Microsoft Guest Configuration, the VM extension for Microsoft Azure Managed Service Identity, and the content required to audit if specified applications are not installed inside Linux virtual machines. This policy should only be used along with its corresponding audit policy in an initiative/policy set. For more information on guest configuration policies, please visit http://aka.ms/gcpol",
+        "description": "This policy creates a Guest Configuration assignment to audit Linux virtual machines that do not have the specified applications installed. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative/policy set. For more information on guest configuration policies, please visit https://aka.ms/gcpol",
         "metadata": {
             "category": "Guest Configuration",
             "requiredProviders": [
@@ -14,7 +14,7 @@
                 "type": "string",
                 "metadata": {
                     "displayName": "Application names",
-                    "description": "Application names. Example: 'python', 'powershell', or a comma separated list such as 'python,powershell'."
+                    "description": "A semicolon-separated list of the names of the applications that should be installed. e.g. python; powershell"
                 }
             }
         },
@@ -246,7 +246,7 @@
                                                 "configurationParameter": [
                                                     {
                                                         "name": "[ChefInSpec]InstalledApplicationLinuxResource1;AttributesYmlContent",
-                                                        "value": "[concat('packages: [', parameters('ApplicationName'), ']')]"
+                                                        "value": "[concat('packages: [', replace(parameters('ApplicationName'), ';', ','), ']')]"
                                                     }
                                                 ]
                                             }
