@@ -51,8 +51,6 @@ To contribute and get started, please visit our [**contribution guide**](./1-con
 
 To request a new alias, please open a new issue following the instructions [**here**](./1-contribution-guide/request-alias.md)
 
-*This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
-
 ## Known Issues
 
 Azure Policy operates at a level above other Azure services by applying policy rules against PUT requests and GET responses of resource types going between Azure Resource Manager and the owning resource provider (RP). In a few cases, the behavior of a given RP is unexpected or incompatible in some way with Azure Policy. The Azure Policy team works with the RP teams to close these gaps as soon as possible after they are discovered. Issues of this nature will be listed here until closed. To get something added to this list that isn't already reported in [**Issues**](./issues), open a [**new issue**](./issues/new/choose).
@@ -90,3 +88,5 @@ All of these are in the process of being addressed with the various resource pro
   The resource type **Microsoft.Storage/storageAccounts/blobServices/containers** is implemented on two different API sets by the storage resource provider. The first is the standard Azure Resource Manager API that is managed by Azure Policy. However, the other allows creating, updating and deleting containers with Azure dataplane operations. These operations do not go through Azure Resource Manager, so they are invisible to Azure Policy. Due to the fact that current policy management is incomplete, we have removed the associated policy aliases and recommend that customers do not implement policies that target this type.
 
   The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available later this year.
+
+*This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
