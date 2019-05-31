@@ -85,8 +85,16 @@ All of these are in the process of being addressed with the various resource pro
 
 ### Containers
 
-  The resource type **Microsoft.Storage/storageAccounts/blobServices/containers** is implemented on two different API sets by the storage resource provider. The first is the standard Azure Resource Manager API that is managed by Azure Policy. However, the other allows creating, updating and deleting containers with Azure dataplane operations. These operations do not go through Azure Resource Manager, so they are invisible to Azure Policy. Due to the fact that current policy management is incomplete, we have removed the associated policy aliases and recommend that customers do not implement policies that target this type.
+The resource type **Microsoft.Storage/storageAccounts/blobServices/containers** is implemented on two different API sets by the storage resource provider. The first is the standard Azure Resource Manager API that is managed by Azure Policy. However, the other allows creating, updating and deleting containers with Azure dataplane operations. These operations do not go through Azure Resource Manager, so they are invisible to Azure Policy. Due to the fact that current policy management is incomplete, we have removed the associated policy aliases and recommend that customers do not implement policies that target this type.
 
-  The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available later this year.
+The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available later this year.
+
+### Nonstandard creation pattern
+
+In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource could be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this behavior:
+
+- Microsoft.Sql/servers/firewallRules
+
+The SQL team is working with the Azure Resource Manager team on changes that will implement filewall rule creation using a standard PUT method.
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
