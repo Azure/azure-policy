@@ -59,27 +59,27 @@ All cases of known resource types with anomalous policy behavior are listed here
 
 ### Resource Type query results incomplete/missing
 
-  In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Here are the known resource types with this problem.
+In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Here are the known resource types with this problem.
 
-  - Microsoft<span></span>.Web/sites/siteConfig
-  - Microsoft<span></span>.Web/sites/config/* (except Microsoft<span></span>.Web/sites/config/web)
+- Microsoft<span></span>.Web/sites/siteConfig
+- Microsoft<span></span>.Web/sites/config/* (except Microsoft<span></span>.Web/sites/config/web)
 
 Currently, there is no plan to change this behavior. If this scenario is important to you, please open a support ticket with the Web team.
 
 ### Resource Type not correctly published by resource provider
 
-  In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. These resource types exhibit this behavior:
+In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. These resource types exhibit this behavior:
 
-  - Microsoft.EventHub/namespaces/networkRuleSet
-  - Microsoft.ServiceBus/namespaces/networkRuleSet
-  - Microsoft.Storage/storageAccounts/blobServices
+- Microsoft.EventHub/namespaces/networkRuleSet
+- Microsoft.ServiceBus/namespaces/networkRuleSet
+- Microsoft.Storage/storageAccounts/blobServices
 
-  In many of these cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to the parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource. Here are the known resource types with this problem:
+In many of these cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to the parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource. Here are the known resource types with this problem:
 
-  - Microsoft.EventHub/namespaces/networkRuleSets
-  - Microsoft.ServiceBus/namespaces/networkRuleSets
-  - Microsoft.ApiManagement/service/portalsettings/delegation
-  - Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies
+- Microsoft.EventHub/namespaces/networkRuleSets
+- Microsoft.ServiceBus/namespaces/networkRuleSets
+- Microsoft.ApiManagement/service/portalsettings/delegation
+- Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies
 
 All of these are in the process of being addressed with the various resource provider teams. We will update this notice as things change.
 
