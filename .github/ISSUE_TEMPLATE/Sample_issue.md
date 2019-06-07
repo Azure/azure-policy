@@ -1,12 +1,12 @@
 ---
-name: Problem with a policy
-about: If you have a problem, bug, or enhancement with a policy.
+name: Problem with a policy sample
+about: If you discover a problem, bug, or enhancement with a policy sample in this repository.
 ---
 <!--
-    Your feedback and support is greatly appreciated, thanks for contributing!
+    Your feedback and support of these samples is greatly appreciated, thanks for contributing!
 
     ISSUE TITLE:
-    Please prefix the issue title with the policy package name, e.g.
+    Please prefix the issue title with the policy sample name, e.g.
     'PolicyName: Short description of my issue'
 
     ISSUE DESCRIPTION (this template):
@@ -31,7 +31,7 @@ about: If you have a problem, bug, or enhancement with a policy.
 <!--
     Please provide as much as possible about the target node, for example
     edition, version, build and language.
-    On OS with WMF 5.1 the following command can help get this information.
+    On OS with WMF 5.1 the following Powershell command can help get this information.
 
     Get-ComputerInfo -Property @(
         'OsName',

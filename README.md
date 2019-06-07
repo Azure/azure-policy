@@ -1,16 +1,26 @@
-# Azure Policy
-
-Check here for a current list of [**known issues**](#known-issues).
-
-## Alias Requests
-
-[**Requesting Policy Aliases**](#requesting-policy-aliases)
-
-## Samples
+# Azure Policy Samples
 
 This repository contains samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For a full list of samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
-### Articles
+## Contributing
+
+To get started contributing to the samples, please visit our [**contribution guide**](./1-contribution-guide/README.md#contribution-guide).
+
+## Reporting Samples Issues
+
+If you discover a problem with any of the samples published here that isn't already reported in [**Issues**](https://github.com/Azure/azure-policy/issues), open a [**New issue**](https://github.com/Azure/azure-policy/issues/new/choose).
+
+# Azure Policy Support
+
+Support for Azure Policy has transitioned to standard Azure support channels. This repository will no longer be monitored for support requests. Issues filed here are only to report specific problems with the samples published here. Any other issues will be closed with a pointer to this notice. Check [**here**](#getting-support) for information about getting support for Azure Policy.
+
+# Azure Policy Known Issues
+
+Check here for a current list of [**known issues**](#known-issues) for Azure Policy.
+
+# Azure Policy Resources
+
+## Articles
 
 - [Azure Policy overview](https://docs.microsoft.com/azure/governance/policy/overview)
 - [How to assign policies using the Azure portal](https://docs.microsoft.com/azure/governance/policy/assign-policy-portal)
@@ -23,7 +33,7 @@ This repository contains samples of Azure Policies that can be used as reference
 - [Get compliance data](https://docs.microsoft.com/azure/governance/policy/how-to/get-compliance-data)
 - [Remediate non-compliant resources](https://docs.microsoft.com/azure/governance/policy/how-to/remediate-resources)
 
-### References
+## References
 
 - [Azure CLI](https://docs.microsoft.com/cli/azure/policy)
 - Azure PowerShell
@@ -39,17 +49,44 @@ This repository contains samples of Azure Policies that can be used as reference
   - [Remediations](https://docs.microsoft.com/rest/api/policy-insights/remediations)
   - [Guest Configuration (preview)](https://docs.microsoft.com/rest/api/guestconfiguration/)
 
-### Other
+## Other
 
 - [Video - Build 2018](https://channel9.msdn.com/events/Build/2018/THR2030)
 
-## Contributing
+## Getting Support
 
-To contribute and get started, please visit our [**contribution guide**](./1-contribution-guide/README.md#contribution-guide).
+The support role of this repository has transitioned to standard Azure support channels. See below for information about getting support help for Azure Policy.
 
-## Requesting Policy Aliases
+### Alias Requests
 
-To request a new alias, please open a new issue following the instructions [**here**](./1-contribution-guide/request-alias.md)
+An alias enables you to restrict what values or conditions are permitted for a *property* on a resource. Each alias maps to the paths in different API versions for a given resource type. During policy evaluation, the policy engine gets the property path for that API version.
+See the documentation page on aliases [**here**](https://docs.microsoft.com/en-us/azure/governance/policy/concepts/definition-structure#aliases). For additional information about Azure Policy and aliases, visit this [**blog post**](https://azure.microsoft.com/en-us/blog/more-resource-policy-aliases/)
+
+Previously, this repository was the official channel to open requests for new aliases. Since the full set of aliases for most namespaces have now been published, support for requesting aliases is now handled by Azure Customer Support. Open a new Azure Customer Support ticket at https://azure.microsoft.com/en-us/support/create-ticket/ if you believe you need new aliases to be published.
+
+You can use the [```Get-AzPolicyAlias```](https://docs.microsoft.com/en-us/powershell/module/az.resources/get-azpolicyalias) Powershell cmdlet to help discover existing aliases.
+
+### General Questions
+
+If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/en-us/azure/governance/policy), there are a few places that host discuscussions focused on Azure Policy:
+
+ - Microsoft Azure Policy forum (something, somewhere)
+ - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
+ - Search or add to discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure+policy)
+
+If your questions are more in-depth or involve information that is not public, open a new Azure Customer Support ticket at https://azure.microsoft.com/en-us/support/create-ticket/.
+
+### Documentation Corrections
+
+To report issues in the Azure Policy online documentation, open a new issue at the [**Microsoft Docs GitHub**](https://github.com/MicrosoftDocs/feedback/issues).
+
+### New built-in Policy Proposals
+
+If you have ideas for new built-in policies you want to suggest to Microsoft, you can submit them to [**Azure Governance User Voice**](https://feedback.azure.com/forums/915958-azure-governance). These suggestions are actively reviewed and prioritized for implementation.
+
+### Other Support for Azure Policy
+
+If you are encountering livesite issues or difficulties in implementing new policies that may be due to problems in Azure Policy itself, open a support ticket at https://azure.microsoft.com/en-us/support/create-ticket/. If you want to submit an idea for consideration, add an idea or upvote an existing idea at [**Azure Governance User Voice**](https://feedback.azure.com/forums/915958-azure-governance).
 
 ## Known Issues
 
