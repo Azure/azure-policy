@@ -5,6 +5,8 @@ about: If you discover a problem, bug, or enhancement with a policy sample in th
 <!--
     Your feedback and support of these samples is greatly appreciated, thanks for contributing!
 
+	**Note:** support for Azure Policy has transitioned to standard Azure support channels so this repository will no longer be monitored for support requests. Issues opened here are only to report specific problems with the samples published in this repository. Any other issues will be closed with a pointer to the README. Check [**here**](https://github.com/Azure/azure-policy#getting-support) for information about getting support for Azure Policy.
+
     ISSUE TITLE:
     Please prefix the issue title with the policy sample name, e.g.
     'PolicyName: Short description of my issue'

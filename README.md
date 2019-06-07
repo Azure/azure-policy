@@ -12,7 +12,7 @@ If you discover a problem with any of the samples published here that isn't alre
 
 # Azure Policy Support
 
-Support for Azure Policy has transitioned to standard Azure support channels. This repository will no longer be monitored for support requests. Issues filed here are only to report specific problems with the samples published here. Any other issues will be closed with a pointer to this notice. Check [**here**](#getting-support) for information about getting support for Azure Policy.
+Support for Azure Policy has transitioned to standard Azure support channels so this repository will no longer be monitored for support requests. Issues opened here are only to report specific problems with the samples published in this repository. Any other issues will be closed with a pointer to this notice. Check [**here**](#getting-support) for information about getting support for Azure Policy.
 
 # Azure Policy Known Issues
 
@@ -72,7 +72,7 @@ If you have questions you haven't been able to answer from the [**Azure Policy d
 
  - Microsoft Azure Policy forum (something, somewhere)
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
- - Search or add to discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure+policy)
+ - Search or add to discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
 
 If your questions are more in-depth or involve information that is not public, open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/en-us/support/create-ticket/).
 
@@ -90,7 +90,7 @@ If you are encountering livesite issues or difficulties in implementing new poli
 
 ## Known Issues
 
-Azure Policy operates at a level above other Azure services by applying policy rules against PUT requests and GET responses of resource types going between Azure Resource Manager and the owning resource provider (RP). In a few cases, the behavior of a given RP is unexpected or incompatible in some way with Azure Policy. The Azure Policy team works with the RP teams to close these gaps as soon as possible after they are discovered. Issues of this nature will be listed here until closed. To get something added to this list that isn't already reported in [**Issues**](https://github.com/Azure/azure-policy/issues), open a [**New issue**](https://github.com/Azure/azure-policy/issues/new/choose).
+Azure Policy operates at a level above other Azure services by applying policy rules against PUT requests and GET responses of resource types going between Azure Resource Manager and the owning resource provider (RP). In a few cases, the behavior of a given RP is unexpected or incompatible in some way with Azure Policy. The Azure Policy team works with the RP teams to close these gaps as soon as possible after they are discovered. Issues of this nature will be listed here until closed.
 
 All cases of known resource types with anomalous policy behavior are listed here. Currently there is no way to make these resource types invisible at policy authoring time, so writing policies that attempt to manage these resource types cannot be prevented, despite the fact that the results of such policies will be either incomplete or incorrect.
 
