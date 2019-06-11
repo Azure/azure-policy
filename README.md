@@ -1,6 +1,6 @@
 # Azure Policy Samples
 
-This repository contains samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For a full list of samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
+This repository contains samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For additional samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
 ## Contributing
 
@@ -60,21 +60,21 @@ The support role of this repository has transitioned to standard Azure support c
 ### Alias Requests
 
 An alias enables you to restrict what values or conditions are permitted for a *property* on a resource. Each alias maps to the paths in different API versions for a given resource type. During policy evaluation, the policy engine gets the property path for that API version.
-See the documentation page on aliases [**here**](https://docs.microsoft.com/en-us/azure/governance/policy/concepts/definition-structure#aliases). For additional information about Azure Policy and aliases, visit this [**blog post**](https://azure.microsoft.com/en-us/blog/more-resource-policy-aliases/)
+See the documentation page on aliases [**here**](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure#aliases). For additional information about Azure Policy and aliases, visit this [**blog post**](https://azure.microsoft.com/blog/more-resource-policy-aliases/)
 
-Previously, this repository was the official channel to open requests for new aliases. Since the full set of aliases for most namespaces have now been published, support for requesting aliases is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/en-us/support/create-ticket/) if you believe you need new aliases to be published.
+Previously, this repository was the official channel to open requests for new aliases. Since the full set of aliases for most namespaces have now been published, support for requesting aliases is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe you need new aliases to be published.
 
-You can use the [```Get-AzPolicyAlias```](https://docs.microsoft.com/en-us/powershell/module/az.resources/get-azpolicyalias) Powershell cmdlet to help discover existing aliases.
+You can use the [```Get-AzPolicyAlias```](https://docs.microsoft.com/powershell/module/az.resources/get-azpolicyalias) Powershell cmdlet to help discover existing aliases.
 
 ### General Questions
 
-If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/en-us/azure/governance/policy), there are a few places that host discuscussions focused on Azure Policy:
+If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discuscussions focused on Azure Policy:
 
  - Microsoft Azure Policy forum (something, somewhere)
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
  - Search or add to discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
 
-If your questions are more in-depth or involve information that is not public, open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/en-us/support/create-ticket/).
+If your questions are more in-depth or involve information that is not public, open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/).
 
 ### Documentation Corrections
 
@@ -86,7 +86,7 @@ If you have ideas for new built-in policies you want to suggest to Microsoft, yo
 
 ### Other Support for Azure Policy
 
-If you are encountering livesite issues or difficulties in implementing new policies that may be due to problems in Azure Policy itself, open a support ticket at [**Azure Customer Support**](https://azure.microsoft.com/en-us/support/create-ticket/). If you want to submit an idea for consideration, add an idea or upvote an existing idea at [**Azure Governance User Voice**](https://feedback.azure.com/forums/915958-azure-governance).
+If you are encountering livesite issues or difficulties in implementing new policies that may be due to problems in Azure Policy itself, open a support ticket at [**Azure Customer Support**](https://azure.microsoft.com/support/create-ticket/). If you want to submit an idea for consideration, add an idea or upvote an existing idea at [**Azure Governance User Voice**](https://feedback.azure.com/forums/915958-azure-governance).
 
 ## Known Issues
 
