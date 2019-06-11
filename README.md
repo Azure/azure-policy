@@ -70,9 +70,9 @@ You can use the [```Get-AzPolicyAlias```](https://docs.microsoft.com/powershell/
 
 If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discuscussions focused on Azure Policy:
 
- - Microsoft Azure Policy forum (something, somewhere)
+ - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure forums**](https://techcommunity.microsoft.com/t5/Azure/ct-p/Azure)
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
- - Search or add to discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
+ - Search or add to Azure Policy discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
 
 If your questions are more in-depth or involve information that is not public, open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/).
 
