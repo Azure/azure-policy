@@ -55,12 +55,12 @@ Check here for a current list of [**known issues**](#known-issues) for Azure Pol
 
 ## Getting Support
 
-The support role of this repository has transitioned to standard Azure support channels. See below for information about getting support help for Azure Policy.
+The general Azure Policy support role of this repository has transitioned to standard Azure support channels. See below for information about getting support help for Azure Policy.
 
 ### Alias Requests
 
 An alias enables you to restrict what values or conditions are permitted for a *property* on a resource. Each alias maps to the paths in different API versions for a given resource type. During policy evaluation, the policy engine gets the property path for that API version.
-See the documentation page on aliases [**here**](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure#aliases). For additional information about Azure Policy and aliases, visit this [**blog post**](https://azure.microsoft.com/blog/more-resource-policy-aliases/)
+See the documentation page on aliases [**here**](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure#aliases). For additional information about Azure Policy and aliases, visit this [**blog post**](https://azure.microsoft.com/blog/more-resource-policy-aliases/).
 
 Previously, this repository was the official channel to open requests for new aliases. Since the full set of aliases for most namespaces have now been published, support for requesting aliases is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe you need new aliases to be published.
 
@@ -68,7 +68,7 @@ You can use the [```Get-AzPolicyAlias```](https://docs.microsoft.com/powershell/
 
 ### General Questions
 
-If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discuscussions focused on Azure Policy:
+If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discussions on Azure Policy:
 
  - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure forums**](https://techcommunity.microsoft.com/t5/Azure/ct-p/Azure)
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
