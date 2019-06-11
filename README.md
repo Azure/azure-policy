@@ -78,7 +78,7 @@ If your questions are more in-depth or involve information that is not public, o
 
 ### Documentation Corrections
 
-To report issues in the Azure Policy online documentation, open a new issue at the [**Microsoft Docs GitHub**](https://github.com/MicrosoftDocs/feedback/issues).
+To report issues in the Azure Policy online documentation, look for a feedback area at the bottom of the page. If you don't see a place to enter feedback, you can also directly open a new issue at the [**Microsoft Docs GitHub**](https://github.com/MicrosoftDocs/feedback/issues).
 
 ### New built-in Policy Proposals
 
