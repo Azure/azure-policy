@@ -64,13 +64,14 @@ See the documentation page on aliases [**here**](https://docs.microsoft.com/azur
 
 Previously, this repository was the official channel to open requests for new aliases. Since the full set of aliases for most namespaces have now been published, support for requesting aliases is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe you need new aliases to be published.
 
-You can use the [```Get-AzPolicyAlias```](https://docs.microsoft.com/powershell/module/az.resources/get-azpolicyalias) Powershell cmdlet to help discover existing aliases.
+[**This page**](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure#aliases) documents the commands for discovering existing aliases.
 
 ### General Questions
 
 If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discussions on Azure Policy:
 
  - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure forums**](https://techcommunity.microsoft.com/t5/Azure/ct-p/Azure)
+ - Join the Monthly Call on Azure Governance (register [here](https://aka.ms/joinazuregovernance))
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
  - Search or add to Azure Policy discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
 
