@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "[Limited Preview]: Ensure containers listen only on allowed ports in AKS",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.ContainerService.Data",
+    "description": "This policy enforces containers to listen only on allowed ports in an Azure Kubernetes Service cluster. Limited Preview policies only work for registered subscriptions. To register, please go to https://aka.ms/akspolicyonboarding. For instruction on using this policy, please go to https://aka.ms/akspolicydoc.",
+    "metadata": {
+      "category": "Kubernetes service"
+    },
+    "parameters": {
+      "allowedContainerPortsRegex": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed container ports regex",
+          "description": "Regex representing container ports allowed in Kubernetes cluster. E.g. Regex for allowing ports 443,446 is ^(443|446)$"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "EnforceRegoPolicy",
+        "allowedValues": [ "EnforceRegoPolicy", "Disabled" ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "policyId": "ContainerAllowedPorts",
+          "policy": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/KubernetesService/container-allowed-ports/limited-preview/gatekeeperpolicy.rego",
+          "policyParameters": {
+            "allowedContainerPortsRegex": "[parameters('allowedContainerPortsRegex')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0f636243-1b1c-4d50-880f-310f6199f2cb",
+  "name": "0f636243-1b1c-4d50-880f-310f6199f2cb"
+}

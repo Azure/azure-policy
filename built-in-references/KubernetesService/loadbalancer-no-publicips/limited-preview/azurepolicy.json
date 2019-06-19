@@ -1,0 +1,37 @@
+{
+  "properties": {
+    "displayName": "[Limited Preview]: Enforce internal load balancers in AKS",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.ContainerService.Data",
+    "description": "This policy enforces load balancers do not have public IPs in an Azure Kubernetes Service cluster. Limited Preview policies only work for registered subscriptions. To register, please go to https://aka.ms/akspolicyonboarding. For instruction on using this policy, please go to https://aka.ms/akspolicydoc.",
+    "metadata": {
+      "category": "Kubernetes service"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "EnforceRegoPolicy",
+        "allowedValues": [ "EnforceRegoPolicy", "Disabled" ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "policyId": "LoadBalancersInternal",
+          "policy": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/KubernetesService/loadbalancer-no-publicips/limited-preview/gatekeeperpolicy.rego"
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a74d8f00-2fd9-4ce4-968e-0ee1eb821698",
+  "name": "a74d8f00-2fd9-4ce4-968e-0ee1eb821698"
+}
