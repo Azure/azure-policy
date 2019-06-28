@@ -1,0 +1,46 @@
+{
+   "properties": {
+     "displayName": "allowed-sql-database-collation",
+     "policyType": "Custom",
+     "mode": "All",
+     "metadata": {
+       "category": "SQL"      
+     },
+     "parameters": {
+       "listOfAllowedCollations": {
+         "type": "Array",
+         "metadata": {
+           "displayName": "Allowed Collation Names",
+           "description": "A list of approved collations"
+         }
+       }
+     },
+     "policyRule": {
+       "if": {
+         "allOf": [
+           {
+             "field": "type",
+             "equals": "Microsoft.SQL/servers/databases"
+           },
+           {
+             "field": "name",
+             "notEquals": "master"
+           },
+           {
+             "not": {
+               "anyOf": [
+                 {
+                   "field": "Microsoft.SQL/servers/databases/collation",
+                   "in": "[parameters('listOfAllowedCollations')]"
+                 }
+               ]
+             }
+           }
+         ]
+       },
+       "then": {
+         "effect": "Deny"
+       }
+     }
+   }
+ }
