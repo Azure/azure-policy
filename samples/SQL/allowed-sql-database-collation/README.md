@@ -21,6 +21,6 @@ $assignment
 
 az policy definition create --name 'allowed-sql-database-collation' --display-name 'Allowed SQL Database collations' --description 'This policy requires that only Azure SQL databases with the approved collation are deployed' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/allowed-sql-database-collation/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/allowed-sql-database-collation/azurepolicy.parameters.json' --mode All
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "allowed-sql-database-collation" 
+az policy assignment create --name <assignmentname> --scope <scope> --listOfAllowedCollations --policy "allowed-sql-database-collation" 
 
 ````
