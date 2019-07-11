@@ -70,7 +70,7 @@ Previously, this repository was the official channel to open requests for new al
 
 If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discussions on Azure Policy:
 
- - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure forums**](https://techcommunity.microsoft.com/t5/Azure/ct-p/Azure)
+ - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure Governance conversation space**](https://techcommunity.microsoft.com/t5/Azure-Governance/bd-p/AzureGovernance)
  - Join the Monthly Call on Azure Governance (register [here](https://aka.ms/joinazuregovernance))
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
  - Search or add to Azure Policy discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
@@ -93,48 +93,63 @@ If you are encountering livesite issues or difficulties in implementing new poli
 
 Azure Policy operates at a level above other Azure services by applying policy rules against PUT requests and GET responses of resource types going between Azure Resource Manager and the owning resource provider (RP). In a few cases, the behavior of a given RP is unexpected or incompatible in some way with Azure Policy. The Azure Policy team works with the RP teams to close these gaps as soon as possible after they are discovered. Issues of this nature will be listed here until closed.
 
-All cases of known resource types with anomalous policy behavior are listed here. Currently there is no way to make these resource types invisible at policy authoring time, so writing policies that attempt to manage these resource types cannot be prevented, despite the fact that the results of such policies will be either incomplete or incorrect.
+All cases of known resource types with anomalous policy behavior are listed here. Currently there is no way to make these resource types invisible at policy authoring time, so writing policies that attempt to manage these resource types cannot be prevented, despite the fact that the results of such policies may be either incomplete or incorrect.
 
 ### Resource Type query results incomplete/missing
 
-In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Here are the known resource types with this problem.
+In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Below are listed the known resource types exhibiting this problem.
 
 - Microsoft<span></span>.Web/sites/siteConfig
 - Microsoft<span></span>.Web/sites/config/* (except Microsoft<span></span>.Web/sites/config/web)
 
-Currently, there is no plan to change this behavior. If this scenario is important to you, please open a support ticket with the Web team.
+Currently, there is no plan to change this behavior for the above Microsoft.Web resource types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Web team.
+
+- Microsoft.HDInsights/clusters/computeProfile.roles[*].scriptActions
+- Microsoft.Sql/servers/auditingSettings
+
+The potential for fixing these resource types is still under investigation.
 
 ### Resource Type not correctly published by resource provider
 
 In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. These resource types exhibit this behavior:
 
-- Microsoft.EventHub/namespaces/networkRuleSet
-- Microsoft.ServiceBus/namespaces/networkRuleSet
 - Microsoft.Storage/storageAccounts/blobServices
 
-In many of these cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to a parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource. Here are the known resource types with this problem:
+These resource types previously exhibited this behavior, but are now removed:
 
-- Microsoft.EventHub/namespaces/networkRuleSets
-- Microsoft.ServiceBus/namespaces/networkRuleSets
+- Microsoft.EventHub/namespaces/networkRuleSet (replaced by Microsoft.EventHub/namespaces/networkruleset**s**)
+- Microsoft.ServiceBus/namespaces/networkRuleSet (replaced by Microsoft.ServiceBus/namespaces/networkruleset**s**)
+
+In some cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to a parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource. Here are the known resource types with this problem:
+
 - Microsoft.ApiManagement/service/portalsettings/delegation
-- Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies
 
-All of these are in the process of being addressed with the various resource provider teams. We will update this notice as things change.
+All of the above resource types are in the process of being fixed by the various resource provider teams. We will update this notice as things change.
+
+These resource types previously exhibited this behavior but have been fixed:
+
+- Microsoft.EventHub/namespaces/networkrulesets
+- Microsoft.ServiceBus/namespaces/networkrulesets
+- Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies
 
 ### Resource management that bypasses Azure Resource Manager
 
-Resource providers are free to implement their own resource management operations outside of Azure Resource Manager ("dataplane" operations). In almost every Azure resource type, the distinction between resource management and dataplane operations is clear and the resource provider only implements resource management one way. Occasionally, a resource provider may choose to implement a type that can be managed both ways. In this case, Azure Policy controls the standard Azure Resource Manager API normally, but operations on the direct resource provider API to create, modify and delete resources of that type bypass Azure Resource Manager so they are invisible to Azure Policy. Since policy enforcement is incomplete, we recommend that customers do not implement policies targeting such a resource type. Currently there is one such known resource type:
+Resource providers are free to implement their own resource management operations outside of Azure Resource Manager ("dataplane" operations). In almost every Azure resource type, the distinction between resource management and dataplane operations is clear and the resource provider only implements resource management one way. Occasionally, a resource provider may choose to implement a type that can be managed both ways. In this case, Azure Policy controls the standard Azure Resource Manager API normally, but operations on the direct resource provider API to create, modify and delete resources of that type bypass Azure Resource Manager so they are invisible to Azure Policy. Since policy enforcement is incomplete, we recommend that customers do not implement policies targeting such a resource type. This is the list of known such resource types:
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
 The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available later this year.
 
+ - Microsoft.Sql/firewallRules
+
+Firewall rules can be created/deleted/modified via T-SQL commands, which bypasses Azure Policy. There is currently no plan to address this.
+
 ### Nonstandard creation pattern
 
-In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource could be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this behavior:
+In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource could be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this class of behavior:
 
 - Microsoft.Sql/servers/firewallRules
 
-The SQL team is working with the Azure Resource Manager team on changes that will implement firewall rule creation using a standard PUT method. This is expected to be available later this year.
+There is currently no plan to change this behavior. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL team.
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
