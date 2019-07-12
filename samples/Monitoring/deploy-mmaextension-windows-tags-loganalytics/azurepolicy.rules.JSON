@@ -1,0 +1,109 @@
+{
+  "if": {
+    "allOf": [
+      {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachines"
+      },
+      {
+        "field": "[concat('tags[', parameters('tagName'), ']')]",
+        "equals": "Windows"
+      }
+    ]
+  },
+  "then": {
+    "effect": "deployIfNotExists",
+    "details": {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "roleDefinitionIds": [
+        "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+      ],
+      "existenceCondition": {
+        "allOf": [
+          {
+            "field": "Microsoft.Compute/virtualMachines/extensions/type",
+            "equals": "MicrosoftMonitoringAgent"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+            "equals": "Microsoft.EnterpriseCloud.Monitoring"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+            "equals": "Succeeded"
+          }
+        ]
+      },
+      "deployment": {
+        "properties": {
+          "mode": "incremental",
+          "template": {
+            "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "vmName": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "logAnalytics": {
+                "type": "string"
+              },
+              "workspaceId": {
+                "type": "string"
+              }
+            },
+            "variables": {
+              "vmExtensionName": "MicrosoftMonitoringAgent",
+              "vmExtensionPublisher": "Microsoft.EnterpriseCloud.Monitoring",
+              "vmExtensionType": "MicrosoftMonitoringAgent",
+              "vmExtensionTypeHandlerVersion": "1.0"
+            },
+            "resources": [
+              {
+                "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                "type": "Microsoft.Compute/virtualMachines/extensions",
+                "location": "[parameters('location')]",
+                "apiVersion": "2018-06-01",
+                "properties": {
+                  "publisher": "[variables('vmExtensionPublisher')]",
+                  "type": "[variables('vmExtensionType')]",
+                  "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "workspaceId": "[parameters('workspaceId')]",
+                    "stopOnMultipleConnections": "true"
+                  },
+                  "protectedSettings": {
+                    "workspaceKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', parameters('loganalytics')), '2015-03-20').primarySharedKey]"
+                  }
+                }
+              }
+            ],
+            "outputs": {
+              "policy": {
+                "type": "string",
+                "value": "[concat('Enabled extension for VM', ': ', parameters('vmName'))]"
+              }
+            }
+          },
+          "parameters": {
+            "vmName": {
+              "value": "[field('name')]"
+            },
+            "location": {
+              "value": "[field('location')]"
+            },
+            "logAnalytics": {
+              "value": "[parameters('logAnalytics')]"
+            },
+            "workspaceId": {
+              "value": "[parameters('workspaceId')]"
+            }
+          }
+        }
+      }
+    }
+  }
+}
