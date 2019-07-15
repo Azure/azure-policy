@@ -95,7 +95,7 @@ Azure Policy operates at a level above other Azure services by applying policy r
 
 All cases of known resource types with anomalous policy behavior are listed here. Currently there is no way to make these resource types invisible at policy authoring time, so writing policies that attempt to manage these resource types cannot be prevented, despite the fact that the results of such policies may be either incomplete or incorrect.
 
-### Resource Type query results incomplete/missing
+### Resource Type query results incomplete, missing, or non-standard format
 
 In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Below are listed the known resource types exhibiting this problem.
 
@@ -106,6 +106,7 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 
 - Microsoft.HDInsights/clusters/computeProfile.roles[*].scriptActions
 - Microsoft.Sql/servers/auditingSettings
+- Microsoft.Compute/virtualMachines/instanceView
 
 The potential for fixing these resource types is still under investigation.
 
