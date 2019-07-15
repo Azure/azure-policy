@@ -1,0 +1,43 @@
+{
+   "properties": {
+     "displayName": "Allowed SQL Database collations",
+     "policyType": "Custom",
+     "description": "Will deny deploying databases with collations not listed as part of the allowed list",
+     "mode": "All",
+     "metadata": {
+       "category": "SQL"      
+     },
+     "parameters": {
+       "listOfAllowedCollations": {
+         "type": "Array",
+         "metadata": {
+           "displayName": "Allowed Collation Names",
+           "description": "A list of approved collations, example: Latin1_General_BIN;SQL_Latin1_General_CP1_CI_AS"
+         }
+       }
+     },
+     "policyRule": {
+       "if": {
+         "allOf": [
+           {
+             "field": "type",
+             "equals": "Microsoft.SQL/servers/databases"
+           },
+           {
+             "field": "name",
+             "notEquals": "master"
+           },
+           {
+             "not": {                                
+                   "field": "Microsoft.SQL/servers/databases/collation",
+                   "in": "[parameters('listOfAllowedCollations')]"                 
+             }
+           }
+         ]
+       },
+       "then": {
+         "effect": "Deny"
+       }
+     }
+   }
+ }
