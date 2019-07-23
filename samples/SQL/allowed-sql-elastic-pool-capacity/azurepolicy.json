@@ -1,0 +1,36 @@
+{
+   "properties": {
+     "displayName": "Allowed SQL Elastic Pool capacity",     
+     "description": "Will deny deploying elastic pools with capacity (vcores) beyond the allowed list",
+     "mode": "All",
+     "metadata": {
+       "category": "SQL"      
+     },
+     "parameters": {
+      "MaxPoolCapacityVCores": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Maximum vCores allowed for the pool",
+          "description": "Top defined approved vCores"
+        }
+      }
+     },
+     "policyRule": {
+       "if": {
+         "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/elasticPools"
+          },
+          {
+            "field": "Microsoft.Sql/servers/elasticpools/sku.capacity",
+            "greater": "[parameters('MaxPoolCapacityVCores')]"
+          }
+         ]
+       },
+       "then": {
+         "effect": "Deny"
+       }
+     }
+   }
+ }
