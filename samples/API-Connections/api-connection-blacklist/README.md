@@ -9,9 +9,9 @@ This policy allows for blacklisting of specific API connections for Microsoft Fl
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzPolicyDefinition -Name "api-connection-blacklist" -DisplayName "Blacklisted Connector" -description "This policy allows for blacklisting of specific API connections for Microsoft Flow, PowerApps and Logic Apps." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "api-connection-blacklist" -DisplayName "API Connection Blacklist" -description "This policy allows for blacklisting of specific API connections for Microsoft Flow, PowerApps and Logic Apps." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -roleDefinitionIds <Approved Role Definitions> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -connectionNames <blacklisted connection names> -PolicyDefinition $definition
 $assignment 
 ````
 
@@ -21,8 +21,8 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'allowed-role-definitions' --display-name 'Allowed Role Definitions' --description 'This policy defines a white list of role deffnitions that can be used in IAM' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'api-connection-blacklist' --display-name 'API Connection Blacklist' --description 'This policy allows for blacklisting of specific API connections for Microsoft Flow, PowerApps and Logic Apps.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/API-Connections/api-connection-blacklist/azurepolicy.parameters.json' --mode All
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "allowed-role-definitions" 
+az policy assignment create --name <assignmentname> --scope <scope> --policy "api-connection-blacklist" 
 
 ````
