@@ -1,0 +1,37 @@
+{
+  
+    "name": "api-connection-blacklist", 
+    "properties": {
+        "displayName": "API Connection Blacklist",
+        "description": "This policy allows for blacklisting of specific API connections for Microsoft Flow, PowerApps and Logic Apps.",
+        "mode": "All",
+        "parameters": {
+            "connectionNames": {
+                "type": "array",
+                "metadata": {
+                    "description": "The list of blacklisted API Connection names",
+                    "displayName": "Blacklisted API Connection Names"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Web/connections"
+                    },
+                    {
+                        "not": {
+                            "field": "name",
+                            "in": "[parameters('connectionNames')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    }   
+}
