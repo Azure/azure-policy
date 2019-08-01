@@ -145,6 +145,10 @@ The storage team is working on implementing Azure Policy on its dataplane operat
 
 Firewall rules can be created/deleted/modified via T-SQL commands, which bypasses Azure Policy. There is currently no plan to address this.
 
+- Microsoft.ServiceFabric/clusters/applications
+
+Service Fabric applications created via direct requests to the Service Fabric cluster (i.e. via New-ServiceFabricApplication) will not appear in the Azure Resource Manager representation of the Service Fabric cluster. Policy will not be able to audit/enforce these applications.
+
 ### Nonstandard creation pattern
 
 In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource could be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this class of behavior:
