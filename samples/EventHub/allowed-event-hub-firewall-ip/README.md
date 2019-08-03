@@ -27,7 +27,7 @@ $assignment = New-AzPolicyAssignment -Name 'allowed-event-hub-firewall-assignmen
 ````cli
 
 # Create the Policy Definition (Subscription scope)
-definition=$(az policy definition create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall' --description 'List of IPs allowed for event hub firewall' --rules 'https://raw.githubusercontent.com/manishshar/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/manishshar/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' --mode All)
+definition=$(az policy definition create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall' --description 'List of IPs allowed for event hub firewall' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' --mode All)
 
 # Set the scope to a resource group; may also be a subscription 
 scope=$(az group show --name 'rg-eventhub')
