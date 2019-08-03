@@ -15,7 +15,7 @@ $definition = New-AzPolicyDefinition -Name 'allowed-event-hub-firewall' -Display
 $scope = Get-AzResourceGroup -Name 'rg-eventhub'
 
 # Set the Policy Parameter (JSON format)
-$policyparam= '{ "allowedIps": { "value": [ "10.12.3.7", "22.8.1.5" ] } }'
+$policyparam = '{ "allowedIps": { "value": [ "10.12.3.7", "22.8.1.5" ] } }'
 
 # Create the Policy Assignment
 $assignment = New-AzPolicyAssignment -Name 'allowed-event-hub-firewall-assignment' -DisplayName 'Allow IPs for event hub firewall Assignment' -Scope $scope.ResourceId -PolicyDefinition $definition -PolicyParameter $policyparam
