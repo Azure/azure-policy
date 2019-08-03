@@ -1,4 +1,4 @@
-# Allowed only selected IPs for Event Hub firewall
+# Allow only selected IPs for Event Hub firewall
 
 This policy will restrict adding firewall IPs in event hub and allow only those IPs which are predefined in array of selected IPs.
 
