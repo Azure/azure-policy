@@ -19,15 +19,23 @@ $policyparam = '{ "allowedIps": { "value": [ "10.12.3.7", "22.8.1.5" ] } }'
 
 # Create the Policy Assignment
 $assignment = New-AzPolicyAssignment -Name 'allowed-event-hub-firewall-assignment' -DisplayName 'Allow IPs for event hub firewall Assignment' -Scope $scope.ResourceId -PolicyDefinition $definition -PolicyParameter $policyparam
-$assignment 
+
 ````
 
 ## Try with CLI
 
 ````cli
 
-az policy definition create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall' --description 'List of IPs allowed for event hub firewall' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' --mode All
+# Create the Policy Definition (Subscription scope)
+definition=$(az policy definition create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall' --description 'List of IPs allowed for event hub firewall' --rules 'https://raw.githubusercontent.com/manishshar/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/manishshar/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' --mode All)
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "'allowed-event-hub-firewall" 
+# Set the scope to a resource group; may also be a subscription 
+scope=$(az group show --name 'rg-eventhub')
+
+# Set the Policy Parameter (JSON format)
+policyparam='{ "allowedIps": { "value": [ "1.4.5.7" ] } }'
+
+# Create the Policy Assignment
+assignment=$(az policy assignment create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall Assignment' --scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r` --params "$policyparam")
 
 ````
