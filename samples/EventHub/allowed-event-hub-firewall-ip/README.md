@@ -33,7 +33,7 @@ definition=$(az policy definition create --name 'allowed-event-hub-firewall' --d
 scope=$(az group show --name 'rg-eventhub')
 
 # Set the Policy Parameter (JSON format)
-policyparam='{ "allowedIps": { "value": [ "1.4.5.7" ] } }'
+policyparam='{ "allowedIps": { "value": [ "10.12.3.7", "22.8.1.5" ]} }'
 
 # Create the Policy Assignment
 assignment=$(az policy assignment create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall Assignment' --scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r` --params "$policyparam")
