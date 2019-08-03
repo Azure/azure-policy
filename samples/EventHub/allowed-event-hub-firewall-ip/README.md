@@ -1,4 +1,4 @@
-# Allowed only selected IPs for Event hub firewall
+# Allowed only selected IPs for Event Hub firewall
 
 This policy allows user to specify selected IPs for event hub firewall from specified array of IPs. You specify an array of predefined IPs for event hub firewall. 
 
@@ -10,8 +10,15 @@ This policy allows user to specify selected IPs for event hub firewall from spec
 
 ````powershell
 $definition = New-AzPolicyDefinition -Name 'allowed-event-hub-firewall' -DisplayName 'Allow IP for event hub firewall' -description 'List of IPs allowed for event hub firewall' -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' -Mode All
-$definition
-$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
+
+# Set the scope to a resource group; may also be a subscription or management group
+$scope = Get-AzResourceGroup -Name 'rg-eventhub'
+
+# Set the Policy Parameter (JSON format)
+$policyparam= '{ "allowedIps": { "value": [ "10.12.3.7", "22.8.1.5" ] } }'
+
+# Create the Policy Assignment
+$assignment = New-AzPolicyAssignment -Name 'allowed-event-hub-firewall-assignment' -DisplayName 'Allow IPs for event hub firewall Assignment' -Scope $scope.ResourceId -PolicyDefinition $definition -PolicyParameter $policyparam
 $assignment 
 ````
 
@@ -19,7 +26,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall' --description 'List of IPs allowed for event hub firewall' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' --mode Indexed
+az policy definition create --name 'allowed-event-hub-firewall' --display-name 'Allow IP for event hub firewall' --description 'List of IPs allowed for event hub firewall' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/EventHub/allowed-event-hub-firewall-ip/azurepolicy.parameters.json' --mode All
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "'allowed-event-hub-firewall" 
 
