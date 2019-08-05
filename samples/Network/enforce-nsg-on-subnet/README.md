@@ -1,6 +1,8 @@
 # NSG X on every subnet
 
-This policy enforces a specific NSG on every subnet
+This policy enforces a specific NSG on every subnet.
+
+Since NSG is a regional resource, to enforce the policy at the subscription level across all regions, create one nsg with the same name on each region.
 
 ## Try on Portal
 
@@ -11,7 +13,7 @@ This policy enforces a specific NSG on every subnet
 ````powershell
 $definition = New-AzPolicyDefinition -Name "enforce-nsg-on-subnet" -DisplayName "NSG X on every subnet" -description "This policy enforces a specific NSG on every subnet" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/enforce-nsg-on-subnet/azurepolicy.parameters.json' -Mode All
 $definition
-$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -nsgId <NSG Id> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -nsgName <NSG Name> -PolicyDefinition $definition
 $assignment 
 ````
 
