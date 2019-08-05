@@ -1,6 +1,6 @@
 # Audit SQL Database is Zone Redundant
 
-This policy checks if SQL Databases are configured for Zone Redundant
+Audit if SQL databases are not configured to be zone redundant
 
 ## Try on Portal
 
@@ -9,7 +9,7 @@ This policy checks if SQL Databases are configured for Zone Redundant
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzPolicyDefinition -Name "audit-sql-database-zone-redundant" -DisplayName "Audit SQL Database is Zone Redundant" -description "This policy checks if SQL Databases are configured for Zone Redundant" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "audit-sql-database-zone-redundant" -DisplayName "SQL databases should be zone redundant" -description "Audit if SQL databases are not configured to be zone redundant" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.parameters.json' -Mode All
 $definition
 $assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
 $assignment 
@@ -19,7 +19,7 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'audit-sql-database-zone-redundant' --display-name 'Audit SQL Database is Zone Redundant' --description 'This policy checks if SQL Databases are configured for Zone Redundant' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'audit-sql-database-zone-redundant' --display-name 'SQL databases should be zone redundant' --description 'Audit if SQL databases are not configured to be zone redundant' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/SQL/audit-sql-database-zone-redundant/azurepolicy.parameters.json' --mode All
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "audit-sql-database-zone-redundant" 
 
