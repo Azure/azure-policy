@@ -1,10 +1,10 @@
 {
     "properties": {
-        "displayName": "Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag",
+        "displayName": "Deploy Microsoft Monitoring Agent on Windows VMs based on a Tag",
         "mode": "Indexed",
-        "description": "Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag with value: MMA and Name: Windows",
+        "description": "Deploy Microsoft Monitoring Agent on Windows VMs based on a Tag with value: MMA and Name: Windows",
         "metadata": {
-            "category": "Batch"
+            "category": "Monitoring"
         },
         "parameters": {
             "logAnalytics": {
@@ -23,11 +23,11 @@
                     "description": "Name of the tag, such as 'production'"
                 }
             },
-            "WorkspaceID": {
+            "tagValue": {
                 "Type": "String",
                 "metadata": {
-                    "displayName": "Log Analytics workspace",
-                    "description": "Name of the workspace, such as 'production'"
+                    "displayName": "Tag Value",
+                    "description": "Value of the Tag, such as 'production'"
                 }
             }
         },
@@ -39,7 +39,7 @@
                     },
                     {
                         "field": "[concat('tags[', parameters('tagName'), ']')]",
-                        "equals": "Windows"
+                        "equals": "[parameters('tagValue')]"
                     }
                 ]
             },
@@ -102,7 +102,7 @@
                                         "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
                                         "autoUpgradeMinorVersion": true,
                                         "settings": {
-                                            "workspaceId": "[parameters('workspaceId')]",
+                                            "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]",
                                             "stopOnMultipleConnections": "true"
                                         },
                                         "protectedSettings": {
