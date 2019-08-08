@@ -158,3 +158,11 @@ In a few instances, the creation pattern of a resource type doesn't follow norma
 There is currently no plan to change this behavior. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL team.
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
+
+### Auto generated properties that bypasses policy evaluation
+
+In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches out the resource provider, the resource provider automatically generates the property and set the default value. Because the property is not in the request payload. The policy cannot evaluate the property. Known resource aliases that exhibit this class of behavior:
+
+- Microsoft.Storage/storageAccounts/networkAcls.defaultAction
+
+Using this type of aliases in existence condition in auditIfNotExists or deployIfNotExists can work promptly. These two kind of effect will get the full resource content to evaluate the existence condition. The property will not be missing in the payload from GET request.
