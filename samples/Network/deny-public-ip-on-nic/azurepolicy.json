@@ -1,0 +1,42 @@
+{
+    "properties": {
+      "displayName": "Deny adding public IP Address to a virtual network interface",
+      "description": "Deny the ability to add a public IP Address to a virtual network interface.",
+      "policyType": "Custom",
+      "mode": "All",
+      "metadata": {
+        "category": "Network"
+      },
+      "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "Disabled",
+            "Deny"
+          ],
+          "defaultValue": "Deny"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.Network/networkInterfaces"
+            },
+            {
+              "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].publicIpAddress.id",
+              "exists": true
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    }
+}
