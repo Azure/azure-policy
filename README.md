@@ -161,10 +161,10 @@ There is currently no plan to change this behavior. If this scenario is importan
 
 ### Auto generated resource property that bypasses policy evaluation
 
-In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches the resource provider, the resource provider automatically generates the property and sets the default value. Because the property is not in the request payload, the policy cannot evaluate the property. Known resource aliases that exhibit this class of behavior:
+In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches the resource provider, the resource provider automatically generates the property and sets the default value. Because the property is not in the request payload, the policy cannot evaluate the property. Known resource fields that exhibit this class of behavior:
 
 - Microsoft.Storage/storageAccounts/networkAcls.defaultAction
 
-Using this type of aliases in existence condition in auditIfNotExists or deployIfNotExists can work promptly. These two kinds of effect will get the full resource content to evaluate the existence condition. The property will not be missing in the payload from GET request.
+Using this type of alias in existence condition in auditIfNotExists or deployIfNotExists works promptly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
 
-Using this type of aliases in audit/deny/append effect policies will work partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies, no deny or append behaviors for deny/append effect policies, because of the lacking property in the request payload.
+Using this type of alias in audit/deny/append effect policies will work partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies, no deny or append behaviors for deny/append effect policies, because of the lacking property in the request payload.
