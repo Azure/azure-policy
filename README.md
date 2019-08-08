@@ -159,7 +159,7 @@ There is currently no plan to change this behavior. If this scenario is importan
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
 
-### Auto generated properties that bypasses policy evaluation
+### Auto generated resource property that bypasses policy evaluation
 
 In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches out the resource provider, the resource provider automatically generates the property and set the default value. Because the property is not in the request payload. The policy cannot evaluate the property. Known resource aliases that exhibit this class of behavior:
 
