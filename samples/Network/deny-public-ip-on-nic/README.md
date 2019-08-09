@@ -7,7 +7,7 @@
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzPolicyDefinition -Name "deny-public-ip-on-nic" -DisplayName "Deny adding public IP Address to a virtual network interface" -description "Deny the ability to add a public IP Address to a virtual network interface." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-nsg-inbound-allow-all/azurepolicy.rules.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "deny-public-ip-on-nic" -DisplayName "Deny adding public IP Address to a virtual network interface" -description "Deny the ability to add a public IP Address to a virtual network interface." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Network/deny-public-ip-on-nic/azurepolicy.rules.json' -Mode All
 $definition
 $assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment 
