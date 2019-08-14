@@ -1,0 +1,64 @@
+{
+    "if": {
+        "field": "type",
+        "equals": "Microsoft.Web/sites"
+    },
+    "then": {
+        "effect": "DeployIfNotExists",
+        "details": {
+            "type": "Microsoft.Web/sites/config",
+            "roleDefinitionIds": [
+                "/providers/Microsoft.Authorization/roleDefinitions/de139f84-1756-47ae-9be6-808fbbe84772"
+            ],
+            "existenceCondition": {
+                "not": {
+                    "field": "Microsoft.Web/sites/config/web.ipSecurityRestrictions[*].action",
+                    "Equals": "Allow"
+                }
+            },
+            "deployment": {
+                "properties": {
+                    "mode": "incremental",
+                    "parameters": {
+                        "name": {
+                            "value": "[field('name')]"
+                        }
+                    },
+                    "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "resources": [
+                            {
+                                "name": "[concat(parameters('name'), '/web')]",
+                                "type": "Microsoft.Web/sites/config",
+                                "apiVersion": "2018-11-01",
+                                "properties": {
+                                    "scmIpSecurityRestrictionsUseMain": true,
+                                    "ipSecurityRestrictions": [
+                                        {
+                                            "ipAddress": "1.1.1.1/32",
+                                            "action": "Allow",
+                                            "priority": 1110,
+                                            "name": "Rule Name 1"
+                                        },
+                                        {
+                                            "ipAddress": "2.2.2.2/32",
+                                            "action": "Allow",
+                                            "priority": 1111,
+                                            "name": "Rule Name 2"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
