@@ -1,0 +1,37 @@
+{
+  "properties": {
+    "displayName": "Enforce Virtual Network Filtering on Cosmos DB accounts",
+    "policyType": "Custom",
+    "description": "This policy ensures Virtual Network Filtering is enabled on all Cosmos DB accounts",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "Cosmos DB"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/isVirtualNetworkFilterEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/isVirtualNetworkFilterEnabled",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}

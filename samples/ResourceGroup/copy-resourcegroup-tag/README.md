@@ -1,7 +1,8 @@
 # Copy resource group tag to resource
 
-Copy a tag specified in the parameter value from the resource group to the resource.  For example, a tag named costCenter on the resource group will be copied to the resources. Provide the actual tag name in tagName parameter at time of policy assignment.
+When a resource which is missing the specified tag is created or updated, adds that tag with its value from the resource group to the resource. Does not modify the tags of resources created before this policy was applied until those resources are changed.
 
+ In the example below, the tag named costCenter on the resource group will be copied to the resources (when they are updated). Provide the tag name in tagName parameter at time of policy assignment.
 ## Try on Azure Portal
 
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FResourceGroup%2Fcopy-resourcegroup-tag%2Fazurepolicy.json)
