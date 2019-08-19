@@ -157,4 +157,17 @@ In a few instances, the creation pattern of a resource type doesn't follow norma
 
 There is currently no plan to change this behavior. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL team.
 
+### Provider pass-through to non Azure Resource Manager resources
+
+There are examples where a resource provider publishes a resource type to Azure Resource Manager, but the resources it represents cannot be managed by Azure Resource Manager. For example, Microsoft.Web has published several resource types to Azure Resource Manager that actually represent resources of the customer's site rather than Azure Resource Manager resources. Such resources cannot or should not be managed by Azure policy, and are explicitly excluded. All known examples are listed here:
+
+- Microsoft.Web/sites/deployments
+- Microsoft.Web/sites/functions
+- Microsoft.Web/sites/instances/deployments
+- Microsoft.Web/sites/siteextensions
+- Microsoft.Web/sites/slots/deployments
+- Microsoft.Web/sites/slots/functions
+- Microsoft.Web/sites/slots/instances/deployments
+- Microsoft.Web/sites/slots/siteextensions
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
