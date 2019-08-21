@@ -1,6 +1,6 @@
-# Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag
+# Deploy Log Analytics Agent on Windows Machines based on a Tag
 
-Deploy Microsoft Monitoring Agent/Extension on Azure Virtual Machines with Windows OS and a Tag.
+Deploy Log Analytics Agent/Extension on Azure Virtual Machines with Windows OS and a Tag.
 
 TAG Example:
 Name: Windows
@@ -13,7 +13,7 @@ Value : MMA
 ## Try with PowerShell
 
 ```powershell
-$definition = New-AzPolicyDefinition -Name "Deploy-mmaextension-windows-tags-loganalytics" -DisplayName "Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag" -description "Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag with value: MMA and Name: Windows" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.parameters.json' -Mode Indexed
+$definition = New-AzPolicyDefinition -Name "Deploy-mmaextension-windows-tags-loganalytics" -DisplayName "Deploy Log Analytics Agent on Windows Machines based on a Tag" -description "Deploy Log Analytics Agent on Windows Machines based on a Tag with value: MMA and Name: Windows" -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -logAnalytics <logAnalytics> -tagName <tagName> -tagValue <tagValue> -PolicyDefinition $definition
 $assignment
@@ -23,7 +23,7 @@ $assignment
 
 ```cli
 
-az policy definition create --name 'Deploy-mmaextension-windows-tags-loganalytics' --display-name 'Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag' --description 'Deploy Microsoft Monitoring Agent on Windows Machines based on a Tag' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.parameters.json' --mode Indexed
+az policy definition create --name 'Deploy-mmaextension-windows-tags-loganalytics' --display-name 'Deploy Log Analytics Agent on Windows Machines based on a Tag' --description 'Deploy Log Analytics Agent on Windows Machines based on a Tag' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Monitoring/deploy-mmaextension-windows-tags-loganalytics/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --params "{'logAnalytics':{'value':'<logAnalytics>'},'tagName':{'value':'<tagName>'},'tagValue':{'value':'<tagValue>'}}" --policy "deploy-mmaextension-windows-tags-loganalytics"
 
