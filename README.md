@@ -171,3 +171,13 @@ There are examples where a resource provider publishes a resource type to Azure 
 - Microsoft.Web/sites/slots/siteextensions
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
+
+### Auto generated resource property that bypasses policy evaluation
+
+In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches the resource provider, the resource provider automatically generates the property and sets the default value. Because the property is not in the request payload, the policy cannot evaluate the property. Known resource fields that exhibit this class of behavior:
+
+- Microsoft.Storage/storageAccounts/networkAcls.defaultAction
+
+Using this type of alias in the existence condition of auditIfNotExists or deployIfNotExists policies works correctly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
+
+Using this type of alias in audit/deny/append effect policies works partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies and no deny or append behaviors for deny/append effect policies because of the missing property in the request payload.
