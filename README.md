@@ -165,6 +165,6 @@ In a few instances, when creating a resource from Azure Portal, the property is 
 
 - Microsoft.Storage/storageAccounts/networkAcls.defaultAction
 
-Using this type of alias in existence condition in auditIfNotExists or deployIfNotExists works promptly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
+Using this type of alias in the existence condition of auditIfNotExists or deployIfNotExists policies works correctly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
 
-Using this type of alias in audit/deny/append effect policies will work partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies, no deny or append behaviors for deny/append effect policies, because of the lacking property in the request payload.
+Using this type of alias in audit/deny/append effect policies works partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies and no deny or append behaviors for deny/append effect policies because of the missing property in the request payload.
