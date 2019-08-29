@@ -9,7 +9,7 @@ Included policy definitions:
 
 - audit:
   - ID: `/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004`
-  - Source: [policy definition](./audit/)
+  - Source: [policy definition](./auditIfNotExists/)
 - deployIfNotExists
   - ID: `/providers/Microsoft.Authorization/policyDefinitions/4d1c04de-2172-403f-901b-90608c35c721`
   - Source: [policy definition](./deployIfNotExists/)
@@ -25,7 +25,7 @@ See more information and a complete explanation of using this sample on
 [![Deploy to Azure Gov](https://docs.microsoft.com/azure/governance/policy/media/deploy/deployGovbutton.png)](https://portal.azure.us/?#blade/Microsoft_Azure_Policy/CreatePolicySetDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FGuestConfiguration%2Finstalled-application-linux%2Fazurepolicyset.json)
 
 Using these buttons to deploy via the Portal creates a copy of the initiative that includes the
-built-in policies for both **audit** and **deployIfNotExists**.
+built-in policies for both **auditIfNotExists** and **deployIfNotExists**.
 
 ## Try with Azure PowerShell
 
