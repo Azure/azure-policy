@@ -1,0 +1,22 @@
+### CIS Setting 2.2.3 - Ensure 'Act as part of the operating system' is set to 'No One' CCE-36876-1
+
+try{
+    #Adding UserRight module
+    Import-Module C:\UserRights.psm1 -ErrorAction Stop
+}
+catch{
+    Write-host "There is NO "UserRights.psm1" module on C: drive, please run "ModuleCreate.ps1" first!"
+    exit
+}
+
+
+function Audit_cis_2_2_3 {
+    $Accounts = Get-AccountsWithUserRight -Right SeTcbPrivilege | select Account
+    if($Accounts.Account){
+        return $false
+    }
+    else {
+        return $true
+    }
+ }
+Write-host "Checking CIS Setting 2.2.3 - Ensure 'Act as part of the operating system' is set to 'No One' : Policy Enforced-> " $(Audit_cis_2_2_3)
