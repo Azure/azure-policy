@@ -18,11 +18,9 @@ to manage the content used in Azure Policy as built-in content.
 [AdministratorsGroupMembersToInclude](./configurations/AdministratorsGroupMembersToInclude/AdministratorsGroupMembersToInclude.mof)<br>
 [CertificateExpiration](./configurations/CertificateExpiration/CertificateExpiration.mof)<br>
 [InstalledApplicationForLinux](./configurations/InstalledApplicationForLinux/InstalledApplicationForLinux.mof)<br>
-[installed_application_linux_inspec_controls](./configurations/installed_application_linux_inspec_controls/installed_application_linux_inspec_controls.mof)<br>
 [InstalledApplicationForWindows](./configurations/InstalledApplicationForWindows/InstalledApplicationForWindows.mof)<br>
 [MachineLastBootUpTime](./configurations/MachineLastBootUpTime/MachineLastBootUpTime.mof)<br>
 [NotInstalledApplicationForLinux](./configurations/NotInstalledApplicationForLinux/NotInstalledApplicationForLinux.mof)<br>
-[not_installed_application_linux_inspec_controls](./configurations/not_installed_application_linux_inspec_controls/not_installed_application_linux_inspec_controls.mof)<br>
 [NotInstalledApplicationForWindows](./configurations/NotInstalledApplicationForWindows/NotInstalledApplicationForWindows.mof)<br>
 [SecureWebProtocol](./configurations/SecureWebProtocol/SecureWebProtocol.mof)<br>
 [WindowsCertificateInTrustedRoot](./configurations/WindowsCertificateInTrustedRoot/WindowsCertificateInTrustedRoot.mof)<br>
