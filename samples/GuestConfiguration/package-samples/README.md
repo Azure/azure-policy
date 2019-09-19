@@ -3,7 +3,7 @@
 These samples are shared to help authors
 to create their own configurations
 and resource modules
-for us in
+for use in
 [custom Guest Configuration](https://docs.microsoft.com/en-us/azure/governance/policy/how-to/guest-configuration-create) projects.
 
 The community is welcome to contribute changes to these samples,
