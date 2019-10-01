@@ -1,6 +1,8 @@
-# Apply tag and its default value
+# Append tag and its default value
 
-Applies a required tag and its default value if it is not specified by the user.
+Appends the specified tag and value when any resource which is missing this tag is created or updated. Does not modify the tags of resources created before this policy was applied until those resources are changed. Does not apply to resource groups. New 'modify' effect policies are available that support remediation of tags on existing resources (see https://aka.ms/modifydoc).
+
+A new remediable variant of this policy can be viewed [here](../../Tags/add-tag/).
 
 ## Try on Portal
 
@@ -9,7 +11,7 @@ Applies a required tag and its default value if it is not specified by the user.
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzPolicyDefinition -Name "apply-default-tag-value" -DisplayName "Apply tag and its default value" -description "Applies a required tag and its default value if it is not specified by the user." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "apply-default-tag-value" -DisplayName "Append tag and its default value" -description "Appends the specified tag and value when any resource which is missing this tag is created or updated. Does not modify the tags of resources created before this policy was applied until those resources are changed. Does not apply to resource groups. New 'modify' effect policies are available that support remediation of tags on existing resources (see https://aka.ms/modifydoc)." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.parameters.json' -Mode Indexed
 $definition
 $assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -tagName <tagName> -tagValue <tagValue> -PolicyDefinition $definition
 $assignment 
@@ -21,8 +23,8 @@ $assignment
 
 ````cli
 
-az policy definition create --name 'apply-default-tag-value' --display-name 'Apply tag and its default value' --description 'Applies a required tag and its default value if it is not specified by the user.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'apply-default-tag-value' --display-name 'Append tag and its default value' --description 'Appends the specified tag and value when any resource which is missing this tag is created or updated. Does not modify the tags of resources created before this policy was applied until those resources are changed. Does not apply to resource groups. New 'modify' effect policies are available that support remediation of tags on existing resources (see https://aka.ms/modifydoc).' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/built-in-policy/apply-default-tag-value/azurepolicy.parameters.json' --mode Indexed
 
-az policy assignment create --name <assignmentname> --scope <scope> --policy "apply-default-tag-value" 
+az policy assignment create --name <assignmentname> --scope <scope> --policy "apply-default-tag-value" --params "{'tagName':{'value': 'myTag'}, 'tagValue':{'value': 'myValue'}}"
 
 ````
