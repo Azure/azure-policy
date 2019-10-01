@@ -170,6 +170,12 @@ There are examples where a resource provider publishes a resource type to Azure 
 - Microsoft.Web/sites/slots/instances/deployments
 - Microsoft.Web/sites/slots/siteextensions
 
+### Legacy or incorrect aliases
+
+Since custom policies use aliases directly, it is usually not possible to update them without causing unintended side effects to existing custom policies. This means that aliases referring to incorrect information or following legacy naming conventions must be left in place, even though it may cause confusion. In certain cases where an alias is known to refer to the wrong information, another alias may be created as a corrected alternative to the known bad one. In these cases, the new alias will be given the name of the bad alias with .v2 appended. For example a bad alias named Microsoft.ResourceProvider/someType/someAlias would result in the addition of a corrected version named Microsoft.ResourceProvider/someType/someAlias.v2. If an alias is added to correct a .v2 alias it will be named by replacing v2 with v3. All known corrected aliases are listed here:
+
+- Microsoft.Sql/servers/databases/requestedServiceObjectiveName.v2
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
 
 ### Auto generated resource property that bypasses policy evaluation
