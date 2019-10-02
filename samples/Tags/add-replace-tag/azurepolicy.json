@@ -1,0 +1,51 @@
+{
+   "properties": {
+      "displayName": "Add or replace a tag on resources",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Adds or replaces the specified tag and value when any resource is created or updated. Existing resources can be remediated by triggering a remediation task. Does not modify tags on resource groups.",
+      "metadata": {
+         "category": "Tags"
+      },
+      "parameters": {
+         "tagName": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Name",
+               "description": "Name of the tag, such as 'environment'"
+            }
+         },
+         "tagValue": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Value",
+               "description": "Value of the tag, such as 'production'"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "notEquals": "[parameters('tagValue')]"
+         },
+         "then": {
+            "effect": "modify",
+            "details": {
+               "roleDefinitionIds": [
+                  "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+               ],
+               "operations": [
+                  {
+                     "operation": "addOrReplace",
+                     "field": "[concat('tags[', parameters('tagName'), ']')]",
+                     "value": "[parameters('tagValue')]"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008",
+   "type": "Microsoft.Authorization/policyDefinitions",
+   "name": "5ffd78d9-436d-4b41-a421-5baa819e3008"
+}
