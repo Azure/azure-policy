@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "displayName": "Audit when a given service principal is not assigned to the Key Vault data plane",
+    "description": "Audit when a specified AAD object is not granted permissions to secrets, certs, or keys stored in a Key Vault through data plane access policies. This policy will not validate the permissions granted by the access policy, only the existance of at least one access policy for that object.",
+    "mode": "All",
+    "parameters": {
+      "aadObjectId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "AAD Object ID",
+          "description": "The objectId of the AAD user, group, or service principal to check."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "field": "Microsoft.Keyvault/vaults/accessPolicies[*].objectId",
+            "notEquals": "[parameters('aadObjectId')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "audit"
+      }
+    }
+  }
+}
