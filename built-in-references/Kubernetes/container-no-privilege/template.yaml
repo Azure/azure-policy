@@ -1,0 +1,31 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurecontainernoprivilege
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureContainerNoPrivilege
+        listKind: K8sAzureContainerNoPrivilegeList
+        plural: k8sazurecontainernoprivilege
+        singular: k8sazurecontainernoprivilege
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurecontainernoprivilege
+
+        violation[{"msg": msg, "details": {}}] {
+            input.review.object.metadata.namespace != "kube-system"
+            c := input_containers[_]
+            c.securityContext.privileged
+            msg := sprintf("Privileged container is not allowed: %v, securityContext: %v", [c.name, c.securityContext])
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
