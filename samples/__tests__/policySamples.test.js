@@ -50,7 +50,7 @@ allSamplesFiles.forEach(filePath => {
    }
 });
 
-for (let dirPath in samplesDirectoriesByPath) {
+for (const dirPath in samplesDirectoriesByPath) {
    samplesDirectories.push([dirPath, samplesDirectoriesByPath[dirPath]]);
 }
 
