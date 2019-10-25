@@ -106,6 +106,13 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 
 - Microsoft.HDInsights/clusters/computeProfile.roles[*].scriptActions
 - Microsoft.Sql/servers/auditingSettings
+  - This type will work correctly as the related resource in `AuditIfNotExists` and `DeployIfNotExists` policies, as long as a `name` for the resource is provided, e.g:
+  ```       "effect": "AuditIfNotExists",
+            "details": {
+              "type": "Microsoft.Sql/servers/auditingSettings",
+              "name": "default"
+            }
+   ```
 - Microsoft.Compute/virtualMachines/instanceView
 
 The potential for fixing these resource types is still under investigation.
@@ -178,11 +185,15 @@ Since custom policies use aliases directly, it is usually not possible to update
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
 
-### Auto generated resource property that bypasses policy evaluation
+### Optional or auto-generated resource property that bypasses policy evaluation
 
-In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches the resource provider, the resource provider automatically generates the property and sets the default value. Because the property is not in the request payload, the policy cannot evaluate the property. Known resource fields that exhibit this class of behavior:
+In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches the resource provider, the resource provider generates the property and sets the value. Because the property is not in the request payload, the policy cannot evaluate the property. Known resource fields that exhibit this class of behavior:
 
 - Microsoft.Storage/storageAccounts/networkAcls.defaultAction
+- Microsoft.Authorization/roleAssignments/principalType
+- Microsoft.Compute/virtualMachines/storageProfile.osDisk.diskSizeGB
+- Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.diskSizeGB
+- Microsoft.Compute/virtualMachineScaleSets/virtualMachines/storageProfile.osDisk.diskSizeGB
 
 Using this type of alias in the existence condition of auditIfNotExists or deployIfNotExists policies works correctly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
 
