@@ -24,10 +24,17 @@ spec:
         package k8sazureserviceallowedports
 
         violation[{"msg": msg}] {
-          input.review.object.metadata.namespace != "kube-system"
-          port = input.review.object.spec.ports[_]
+          service := input.review.object
+          service.metadata.namespace != "kube-system"
+          not service_is_kubernetes(service)
+          port = service.spec.ports[_]
           format_int(port.port, 10, portstr)
           satisfied := [good | allowedPort := input.parameters.allowedPorts[_]; good := (portstr == allowedPort)]
           not any(satisfied)
-          msg := sprintf("Port %v for service %v has not been allowed.", [portstr, input.review.object.metadata.name])
+          msg := sprintf("Port %v for service %v has not been allowed.", [portstr, service.metadata.name])
+        }
+
+        service_is_kubernetes(service) = true {
+          service.metadata.namespace == "default"
+          service.metadata.name == "kubernetes"
         }
