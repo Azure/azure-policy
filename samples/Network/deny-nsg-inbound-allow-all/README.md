@@ -1,6 +1,6 @@
-# Denies NSG rule changes that allow all inbound traffic
+# Denies NSG rule additions/updates that allow all inbound traffic
 
-Denies the creation of network security group rules that allow all inbound traffic
+Denies the addition/update of  a single network security group rule that allow all inbound traffic. To block the creation of NSG, then use another policy. 
 
 ## Try on Portal
 
