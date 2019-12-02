@@ -1,10 +1,12 @@
 # Azure Policy Samples
 
-This repository contains samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For additional samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
+This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For additional samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
+
+For custom policy samples, check out our Community repo! (https://github.com/Azure/Community-Policy)
 
 ## Contributing
 
-To get started contributing to the samples, please visit our [**contribution guide**](./1-contribution-guide/README.md#contribution-guide).
+To contribute, please submit your policies to our Community repo! (https://github.com/Azure/Community-Policy) 
 
 ## Reporting Samples Issues
 
