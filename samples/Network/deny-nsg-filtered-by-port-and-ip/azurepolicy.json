@@ -1,0 +1,76 @@
+{
+    "properties": {
+        "displayName": "Denies NSG rule changes that allow all inbound traffic to designed ports from ips not in white list",
+        "description": "Denies the creation of network security group rules that allow all inbound traffic to designed ports from ips not in white list",
+        "mode": "All",
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Network/networkSecurityGroups/securityRules"
+                    },
+                    {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Network/networkSecurityGroups/securityRules/access",
+                                "equals": "Allow"
+                            },
+                            {
+                                "field": "Microsoft.Network/networkSecurityGroups/securityRules/direction",
+                                "equals": "Inbound"
+                            },
+                            {
+                                "anyOf": [
+                                    {
+                                        "field": "Microsoft.Network/networkSecurityGroups/securityRules/destinationPortRange",
+                                        "in": "[parameters('ports')]"
+                                    },
+                                    {
+                                        "not": {
+                                            "field": "Microsoft.Network/networkSecurityGroups/securityRules/destinationPortRanges[*]",
+                                            "notIn": "[parameters('ports')]"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "anyOf": [
+                                    {
+                                        "allOf": [
+                                            {
+                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourceAddressPrefix",
+                                                "notIn": "[parameters('ips')]"
+                                            },
+                                            {
+                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourceAddressPrefixes[*]",
+                                                "exists": false
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "allOf": [
+                                            {
+                                                "not": {
+                                                    "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourceAddressPrefixes[*]",
+                                                    "in": "[parameters('ips')]"
+                                                }
+                                            },
+                                            {
+                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules/sourceAddressPrefix",
+                                                "exists": false
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deny"
+            }
+        }
+    }
+}
