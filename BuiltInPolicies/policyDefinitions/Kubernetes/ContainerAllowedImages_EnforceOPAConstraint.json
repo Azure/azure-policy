@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "[Preview]: [AKS Engine] Ensure only allowed container images in Kubernetes cluster",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy ensures only allowed container images are running in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "allowedContainerImagesRegex": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed container images regex",
+          "description": "Regex representing container images allowed in a Kubernetes cluster. E.g. Regex for azure container registry images is ^.+azurecr.io/.+$"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "enforceOPAConstraint",
+        "allowedValues": [ "enforceOPAConstraint", "disabled" ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [ "AKS Engine" ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-allowed-images/template.yaml",
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-allowed-images/constraint.yaml",
+          "values": {
+            "allowedContainerImagesRegex": "[parameters('allowedContainerImagesRegex')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/febd0533-8e55-448f-b837-bd0e06f16469",
+  "name": "febd0533-8e55-448f-b837-bd0e06f16469"
+}

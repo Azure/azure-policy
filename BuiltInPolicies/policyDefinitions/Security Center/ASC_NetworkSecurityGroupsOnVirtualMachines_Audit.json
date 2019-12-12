@@ -1,0 +1,47 @@
+{
+    "properties": {
+        "displayName": "Virtual machines should be associated with a Network Security Group",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "Protect your VM from potential threats by restricting access to it with a Network Security Group (NSG). NSGs contain a list of Access Control List (ACL) rules that allow or deny network traffic to your VM from other instances, in or outside the same subnet.",
+        "metadata": {
+            "category": "Security Center"
+        },
+        "parameters": { 
+            "effect": { 
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": ["AuditIfNotExists", "Disabled"],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            } 
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": [
+                    "Microsoft.Compute/virtualMachines",
+                    "Microsoft.ClassicCompute/virtualMachines"
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Security/complianceResults",
+                    "name": "networkSecurityGroupsOnVirtualMachines",
+                    "existenceCondition": {
+                        "field": "Microsoft.Security/complianceResults/resourceStatus",
+                        "in": [
+                            "OffByPolicy",
+                            "Healthy"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/f6de0be7-9a8a-4b8a-b349-43cf02d22f7c",
+    "name": "f6de0be7-9a8a-4b8a-b349-43cf02d22f7c"
+}
