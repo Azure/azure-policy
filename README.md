@@ -6,7 +6,7 @@ For custom policy samples, check out our Community repo! (https://github.com/Azu
 
 ## Contributing
 
-To contribute, please submit your policies to our Community repo! (https://github.com/Azure/Community-Policy) 
+To contribute, please submit your policies to our Community repo! (https://github.com/Azure/Community-Policy)
 
 ## Reporting Samples Issues
 
@@ -130,17 +130,14 @@ These resource types previously exhibited this behavior, but are now removed:
 - Microsoft.EventHub/namespaces/networkRuleSet (replaced by Microsoft.EventHub/namespaces/networkruleset**s**)
 - Microsoft.ServiceBus/namespaces/networkRuleSet (replaced by Microsoft.ServiceBus/namespaces/networkruleset**s**)
 
-In some cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to a parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource. Here are the known resource types with this problem:
-
-- Microsoft.ApiManagement/service/portalsettings/delegation
-
-All of the above resource types are in the process of being fixed by the various resource provider teams. We will update this notice as things change.
+In some cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to a parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource.
 
 These resource types previously exhibited this behavior but have been fixed:
 
 - Microsoft.EventHub/namespaces/networkrulesets
 - Microsoft.ServiceBus/namespaces/networkrulesets
 - Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies
+- Microsoft.ApiManagement/service/portalsettings/delegation
 
 ### Resource management that bypasses Azure Resource Manager
 
@@ -148,7 +145,9 @@ Resource providers are free to implement their own resource management operation
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
-The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available later this year.
+The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available in the middle of 2020.
+
+Note that Azure policies for dataplane operations of certain targeted resource providers is also under active development.
 
  - Microsoft.Sql/firewallRules
 
@@ -165,7 +164,7 @@ In a few instances, the creation pattern of a resource type doesn't follow norma
 - Microsoft.Sql/servers/firewallRules
 - Microsoft.Automation/certificates
 
-There is currently no plan to change this behavior. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL team.
+There is currently no plan to change this behavior. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL or Automation team.
 
 ### Provider pass-through to non Azure Resource Manager resources
 
