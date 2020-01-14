@@ -1,0 +1,72 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/86a912f6-9a06-4e26-b447-11b16ba8659f",
+  "name": "86a912f6-9a06-4e26-b447-11b16ba8659f",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {},
+    "displayName": "Deploy SQL DB transparent data encryption",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Sql/transparentDataEncryption.status",
+            "equals": "Enabled"
+          },
+          "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/9b7fa17d-e63e-47b0-bb0a-15c516ac86ec"
+          ],
+          "name": "current",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "fullDbName": {
+                  "value": "[field('fullName')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "fullDbName": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
+                    "apiVersion": "2014-04-01",
+                    "name": "[concat(parameters('fullDbName'), '/current')]",
+                    "properties": {
+                      "status": "Enabled"
+                    }
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "DeployIfNotExists"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/databases"
+          },
+          {
+            "field": "name",
+            "notEquals": "master"
+          }
+        ]
+      }
+    },
+    "description": "Enables transparent data encryption on SQL databases",
+    "mode": "Indexed"
+  }
+}

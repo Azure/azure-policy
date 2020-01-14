@@ -1,0 +1,396 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e425e402-a050-45e5-b010-bd3f934589fc",
+  "name": "e425e402-a050-45e5-b010-bd3f934589fc",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "1.0.0",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ]
+    },
+    "parameters": {
+      "UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the behavior of the elevation prompt for administrators.",
+          "displayName": "UAC: Behavior of the elevation prompt for administrators in Admin Approval Mode"
+        },
+        "defaultValue": "2"
+      },
+      "UACRunAllAdministratorsInAdminApprovalMode": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the behavior of all User Account Control (UAC) policy settings for the computer.",
+          "displayName": "UAC: Run all administrators in Admin Approval Mode"
+        },
+        "defaultValue": "1"
+      },
+      "UACAdminApprovalModeForTheBuiltinAdministratorAccount": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the behavior of Admin Approval Mode for the built-in Administrator account.",
+          "displayName": "UAC: Admin Approval Mode for the Built-in Administrator account"
+        },
+        "defaultValue": "1"
+      },
+      "UACDetectApplicationInstallationsAndPromptForElevation": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the behavior of application installation detection for the computer.",
+          "displayName": "UAC: Detect application installations and prompt for elevation"
+        },
+        "defaultValue": "1"
+      }
+    },
+    "displayName": "Deploy prerequisites to audit Windows VMs configurations in 'Security Options - User Account Control'",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('User Account Control: Admin Approval Mode for the Built-in Administrator account;ExpectedValue', '=', parameters('UACAdminApprovalModeForTheBuiltinAdministratorAccount'), ',', 'User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode;ExpectedValue', '=', parameters('UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode'), ',', 'User Account Control: Detect application installations and prompt for elevation;ExpectedValue', '=', parameters('UACDetectApplicationInstallationsAndPromptForElevation'), ',', 'User Account Control: Run all administrators in Admin Approval Mode;ExpectedValue', '=', parameters('UACRunAllAdministratorsInAdminApprovalMode')))]"
+          },
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "AzureBaseline_SecurityOptionsUserAccountControl",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "configurationName": {
+                  "value": "AzureBaseline_SecurityOptionsUserAccountControl"
+                },
+                "UACAdminApprovalModeForTheBuiltinAdministratorAccount": {
+                  "value": "[parameters('UACAdminApprovalModeForTheBuiltinAdministratorAccount')]"
+                },
+                "UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode": {
+                  "value": "[parameters('UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode')]"
+                },
+                "UACRunAllAdministratorsInAdminApprovalMode": {
+                  "value": "[parameters('UACRunAllAdministratorsInAdminApprovalMode')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "UACDetectApplicationInstallationsAndPromptForElevation": {
+                  "value": "[parameters('UACDetectApplicationInstallationsAndPromptForElevation')]"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "UACAdminApprovalModeForTheBuiltinAdministratorAccount": {
+                    "type": "string"
+                  },
+                  "UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode": {
+                    "type": "string"
+                  },
+                  "UACRunAllAdministratorsInAdminApprovalMode": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "UACDetectApplicationInstallationsAndPromptForElevation": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('UACAdminApprovalModeForTheBuiltinAdministratorAccount')]",
+                            "name": "User Account Control: Admin Approval Mode for the Built-in Administrator account;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode')]",
+                            "name": "User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('UACDetectApplicationInstallationsAndPromptForElevation')]",
+                            "name": "User Account Control: Detect application installations and prompt for elevation;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('UACRunAllAdministratorsInAdminApprovalMode')]",
+                            "name": "User Account Control: Run all administrators in Admin Approval Mode;ExpectedValue"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('microsoft.hybridcompute/machines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('UACAdminApprovalModeForTheBuiltinAdministratorAccount')]",
+                            "name": "User Account Control: Admin Approval Mode for the Built-in Administrator account;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('UACBehaviorOfTheElevationPromptForAdministratorsInAdminApprovalMode')]",
+                            "name": "User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('UACDetectApplicationInstallationsAndPromptForElevation')]",
+                            "name": "User Account Control: Detect application installations and prompt for elevation;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('UACRunAllAdministratorsInAdminApprovalMode')]",
+                            "name": "User Account Control: Run all administrators in Admin Approval Mode;ExpectedValue"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2017-03-30",
+                    "type": "Microsoft.Compute/virtualMachines"
+                  },
+                  {
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "protectedSettings": {},
+                      "typeHandlerVersion": "1.1",
+                      "type": "ConfigurationforWindows"
+                    },
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ],
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2015-05-01-preview",
+                    "type": "Microsoft.Compute/virtualMachines/extensions"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsDesktop",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "notLike": "2008*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "notLike": "SQL2008*",
+                        "field": "Microsoft.Compute/imageOffer"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "dsvm-windows"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "true",
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "false",
+                            "field": "Microsoft.Compute/imageSKU"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "notLike": "2008*",
+                                "field": "Microsoft.Compute/imageSKU"
+                              },
+                              {
+                                "notLike": "SQL2008*",
+                                "field": "Microsoft.Compute/imageOffer"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "windows*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines with non-compliant settings in Group Policy category: 'Security Options - User Account Control'. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "mode": "Indexed"
+  }
+}

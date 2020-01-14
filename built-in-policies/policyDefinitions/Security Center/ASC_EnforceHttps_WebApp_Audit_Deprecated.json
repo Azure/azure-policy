@@ -1,0 +1,73 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2fde8a98-6892-426a-83ba-050e640c0ce0",
+  "name": "2fde8a98-6892-426a-83ba-050e640c0ce0",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "[Deprecated]: Web Application should only be accessible over HTTPS",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "OnlyHttpsForWebApplication"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "app"
+              },
+              {
+                "field": "kind",
+                "equals": "WebApp"
+              },
+              {
+                "field": "kind",
+                "equals": "app,linux"
+              },
+              {
+                "field": "kind",
+                "equals": "app,linux,container"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "Use of HTTPS ensures server/service authentication and protects data in transit from network layer eavesdropping attacks.",
+    "mode": "All"
+  }
+}

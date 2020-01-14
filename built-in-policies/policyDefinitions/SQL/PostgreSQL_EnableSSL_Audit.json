@@ -1,0 +1,49 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d158790f-bfb0-486c-8631-2dc6b4e8e6af",
+  "name": "d158790f-bfb0-486c-8631-2dc6b4e8e6af",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Enforce SSL connection should be enabled for PostgreSQL database servers",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DBforPostgreSQL/servers"
+          },
+          {
+            "exists": "true",
+            "field": "Microsoft.DBforPostgreSQL/servers/sslEnforcement"
+          },
+          {
+            "field": "Microsoft.DBforPostgreSQL/servers/sslEnforcement",
+            "notEquals": "Enabled"
+          }
+        ]
+      }
+    },
+    "description": "This policy audits any PostgreSQL server that is not enforcing SSL connection. Azure Database for PostgreSQL prefers connecting your client applications to the PostgreSQL service using Secure Sockets Layer (SSL). Enforcing SSL connections between your database server and your client applications helps protect against 'man-in-the-middle' attacks by encrypting the data stream between the server and your application",
+    "mode": "Indexed"
+  }
+}

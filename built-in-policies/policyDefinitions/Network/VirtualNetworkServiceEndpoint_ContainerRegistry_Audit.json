@@ -1,0 +1,54 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c4857be7-912a-4c75-87e6-e30292bcdf78",
+  "name": "c4857be7-912a-4c75-87e6-e30292bcdf78",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Network",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Container Registry should use a virtual network service endpoint",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/networkRuleSet.defaultAction",
+                "notEquals": "Deny"
+              },
+              {
+                "exists": "false",
+                "field": "Microsoft.ContainerRegistry/registries/networkRuleSet.virtualNetworkRules[*].action"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy audits any Container Registry not configured to use a virtual network service endpoint.",
+    "mode": "Indexed"
+  }
+}

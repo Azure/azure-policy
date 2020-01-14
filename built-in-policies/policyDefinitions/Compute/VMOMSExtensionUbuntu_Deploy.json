@@ -1,0 +1,131 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3d8640fc-63f6-4734-8dcb-cfd3d8c78f38",
+  "name": "3d8640fc-63f6-4734-8dcb-cfd3d8c78f38",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Compute",
+      "version": "1.0.0",
+      "deprecated": true
+    },
+    "parameters": {
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace",
+          "displayName": "Log Analytics workspace"
+        }
+      }
+    },
+    "displayName": "Deploy default Log Analytics Agent for Ubuntu VMs",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "equals": "OmsAgentForLinux"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              }
+            ]
+          },
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "logAnalytics": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "outputs": {
+                  "policy": {
+                    "value": "[concat('Enabled monitoring for Linux VM', ': ', parameters('vmName'))]",
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "apiVersion": "2017-12-01",
+                    "location": "[parameters('location')]",
+                    "name": "[concat(parameters('vmName'),'/omsPolicy')]",
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {
+                        "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]"
+                      },
+                      "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                      "protectedSettings": {
+                        "workspaceKey": "[listKeys(parameters('logAnalytics'), '2015-03-20').primarySharedKey]"
+                      },
+                      "typeHandlerVersion": "1.4",
+                      "type": "OmsAgentForLinux"
+                    }
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "Canonical"
+          },
+          {
+            "field": "Microsoft.Compute/imageOffer",
+            "equals": "UbuntuServer"
+          },
+          {
+            "field": "Microsoft.Compute/imageSKU",
+            "in": [
+              "18.04-LTS",
+              "16.04-LTS",
+              "16.04.0-LTS",
+              "14.04.2-LTS",
+              "12.04.5-LTS"
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy deploys the Log Analytics Agent on Ubuntu VMs, and connects to the selected Log Analytics workspace",
+    "mode": "Indexed"
+  }
+}

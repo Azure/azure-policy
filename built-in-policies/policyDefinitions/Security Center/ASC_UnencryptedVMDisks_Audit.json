@@ -1,0 +1,48 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d",
+  "name": "0961003e-5a0a-4549-abde-af6a37f2724d",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Disk encryption should be applied on virtual machines",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "encryption"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    "description": "VMs without an enabled disk encryption will be monitored by Azure Security Center as recommendations",
+    "mode": "All"
+  }
+}

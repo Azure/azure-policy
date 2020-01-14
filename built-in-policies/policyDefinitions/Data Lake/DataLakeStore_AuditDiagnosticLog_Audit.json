@@ -1,0 +1,90 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/057ef27e-665e-4328-8ea3-04b3122bd9fb",
+  "name": "057ef27e-665e-4328-8ea3-04b3122bd9fb",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Data Lake"
+    },
+    "parameters": {
+      "requiredRetentionDays": {
+        "type": "String",
+        "metadata": {
+          "description": "The required diagnostic logs retention in days",
+          "displayName": "Required retention (days)"
+        },
+        "defaultValue": "365"
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Diagnostic logs in Azure Data Lake Store should be enabled",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                    "equals": "true"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days",
+                        "equals": "0"
+                      },
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days",
+                        "equals": "[parameters('requiredRetentionDays')]"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                    "equals": "true"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "not": {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                      "equals": "true"
+                    }
+                  },
+                  {
+                    "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                    "equals": "true"
+                  }
+                ]
+              }
+            ]
+          },
+          "type": "Microsoft.Insights/diagnosticSettings"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DataLakeStore/accounts"
+      }
+    },
+    "description": "Audit enabling of diagnostic logs. This enables you to recreate activity trails to use for investigation purposes; when a security incident occurs or when your network is compromised",
+    "mode": "Indexed"
+  }
+}

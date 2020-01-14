@@ -1,0 +1,59 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/726aca4c-86e9-4b04-b0c5-073027359532",
+  "name": "726aca4c-86e9-4b04-b0c5-073027359532",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Tags"
+    },
+    "parameters": {
+      "tagValue": {
+        "type": "String",
+        "metadata": {
+          "description": "Value of the tag, such as 'production'",
+          "displayName": "Tag Value"
+        }
+      },
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "description": "Name of the tag, such as 'environment'",
+          "displayName": "Tag Name"
+        }
+      }
+    },
+    "displayName": "Add a tag to resource groups",
+    "policyRule": {
+      "then": {
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "operation": "add",
+              "value": "[parameters('tagValue')]"
+            }
+          ]
+        },
+        "effect": "modify"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+          },
+          {
+            "exists": "false",
+            "field": "[concat('tags[', parameters('tagName'), ']')]"
+          }
+        ]
+      }
+    },
+    "description": "Adds the specified tag and value when any resource group missing this tag is created or updated. Existing resource groups can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed.",
+    "mode": "All"
+  }
+}

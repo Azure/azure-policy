@@ -1,0 +1,52 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed",
+  "name": "44452482-524f-4bf4-b852-0bff7cc4a3ed",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "[Deprecated]: Monitor permissive network access in Azure Security Center",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "permissiveNetworkAccess"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.ClassicCompute/virtualMachines"
+        ]
+      }
+    },
+    "description": "Network Security Groups with too permissive rules will be monitored by Azure Security Center as recommendations",
+    "mode": "All"
+  }
+}

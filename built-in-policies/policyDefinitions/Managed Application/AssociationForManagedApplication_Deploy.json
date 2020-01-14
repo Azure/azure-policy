@@ -1,0 +1,120 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/17763ad9-70c0-4794-9397-53d765932634",
+  "name": "17763ad9-70c0-4794-9397-53d765932634",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Managed Application"
+    },
+    "parameters": {
+      "associationNamePrefix": {
+        "type": "String",
+        "metadata": {
+          "description": "Prefix to be added to the name of the association resource being created.",
+          "displayName": "Association name prefix"
+        },
+        "defaultValue": "DeployedByPolicy"
+      },
+      "targetManagedApplicationId": {
+        "type": "String",
+        "metadata": {
+          "description": "Resource ID of the managed application to which resources need to be associated.",
+          "displayName": "Managed application ID"
+        }
+      },
+      "resourceTypesToAssociate": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of resource types to be associated to the managed application.",
+          "strongType": "resourceTypes",
+          "displayName": "Resource types to associate"
+        }
+      }
+    },
+    "displayName": "Deploy associations for a managed application",
+    "policyRule": {
+      "then": {
+        "details": {
+          "type": "Microsoft.CustomProviders/Associations",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "[concat(parameters('associationNamePrefix'), '-', uniqueString(parameters('targetManagedApplicationId')))]",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "associationNamePrefix": {
+                  "value": "[parameters('associationNamePrefix')]"
+                },
+                "targetManagedApplicationId": {
+                  "value": "[parameters('targetManagedApplicationId')]"
+                },
+                "resourceTypesToAssociate": {
+                  "value": "[field('type')]"
+                },
+                "associatedResourceName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "associationNamePrefix": {
+                    "type": "string"
+                  },
+                  "resourceTypesToAssociate": {
+                    "type": "string"
+                  },
+                  "targetManagedApplicationId": {
+                    "type": "string"
+                  },
+                  "associatedResourceName": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "variables": {
+                  "resourceName": "[concat(parameters('associatedResourceName'), '/microsoft.customproviders/', parameters('associationNamePrefix'), '-', uniqueString(parameters('targetManagedApplicationId')))]",
+                  "resourceType": "[concat(parameters('resourceTypesToAssociate'), '/providers/associations')]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2017-05-10",
+                    "name": "[concat(deployment().Name, '-2')]",
+                    "properties": {
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "resources": [
+                          {
+                            "type": "[variables('resourceType')]",
+                            "apiVersion": "2018-09-01-preview",
+                            "name": "[variables('resourceName')]",
+                            "properties": {
+                              "targetResourceId": "[parameters('targetManagedApplicationId')]"
+                            }
+                          }
+                        ]
+                      },
+                      "mode": "Incremental"
+                    }
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "field": "type",
+        "in": "[parameters('resourceTypesToAssociate')]"
+      }
+    },
+    "description": "Deploys an association resource that associates selected resource types to the specified managed application.  This policy deployment does not support nested resource types.",
+    "mode": "Indexed"
+  }
+}

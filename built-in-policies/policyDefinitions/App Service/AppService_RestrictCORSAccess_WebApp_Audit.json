@@ -1,0 +1,52 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5744710e-cc2f-4ee8-8809-3b11e89f4bc9",
+  "name": "5744710e-cc2f-4ee8-8809-3b11e89f4bc9",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "CORS should not allow every resource to access your Web Applications",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/web.cors.allowedOrigins[*]",
+            "notEquals": "*"
+          },
+          "type": "Microsoft.Web/sites/config"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "app*"
+          }
+        ]
+      }
+    },
+    "description": "Cross-Origin Resource Sharing (CORS) should not allow all domains to access your web application. Allow only required domains to interact with your web app.",
+    "mode": "Indexed"
+  }
+}

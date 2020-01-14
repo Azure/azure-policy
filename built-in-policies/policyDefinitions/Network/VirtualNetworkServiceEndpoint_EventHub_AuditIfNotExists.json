@@ -1,0 +1,44 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d63edb4a-c612-454d-b47d-191a724fcbf0",
+  "name": "d63edb4a-c612-454d-b47d-191a724fcbf0",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Event Hub should use a virtual network service endpoint",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "exists": "true",
+            "field": "Microsoft.EventHub/namespaces/virtualNetworkRules/virtualNetworkSubnetId"
+          },
+          "type": "Microsoft.EventHub/namespaces/virtualNetworkRules"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.EventHub/namespaces"
+      }
+    },
+    "description": "This policy audits any Event Hub not configured to use a virtual network service endpoint.",
+    "mode": "Indexed"
+  }
+}

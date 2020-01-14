@@ -1,0 +1,168 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ed7c8c13-51e7-49d1-8a43-8490431a0da2",
+  "name": "ed7c8c13-51e7-49d1-8a43-8490431a0da2",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Key Vault"
+    },
+    "parameters": {
+      "metricsEnabled": {
+        "type": "String",
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "metadata": {
+          "description": "Whether to enable metrics stream to the Event Hub - True or False",
+          "displayName": "Enable metrics"
+        },
+        "defaultValue": "False"
+      },
+      "eventHubRuleId": {
+        "type": "String",
+        "metadata": {
+          "description": "The Event Hub authorization rule Id for Azure Diagnostics. The authorization rule needs to be at Event Hub namespace level. e.g. /subscriptions/{subscription Id}/resourceGroups/{resource group}/providers/Microsoft.EventHub/namespaces/{Event Hub namespace}/authorizationrules/{authorization rule}",
+          "assignPermissions": true,
+          "strongType": "Microsoft.EventHub/Namespaces/AuthorizationRules",
+          "displayName": "Event Hub Authorization Rule Id"
+        }
+      },
+      "profileName": {
+        "type": "String",
+        "metadata": {
+          "description": "The diagnostic settings profile name",
+          "displayName": "Profile name"
+        },
+        "defaultValue": "setbypolicy"
+      },
+      "logsEnabled": {
+        "type": "String",
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "metadata": {
+          "description": "Whether to enable logs stream to the Event Hub  - True or False",
+          "displayName": "Enable logs"
+        },
+        "defaultValue": "True"
+      }
+    },
+    "displayName": "Deploy Diagnostic Settings for Key Vault to Event Hub",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "[parameters('logsEnabled')]"
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                "equals": "[parameters('metricsEnabled')]"
+              }
+            ]
+          },
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "[parameters('profileName')]",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "metricsEnabled": {
+                  "value": "[parameters('metricsEnabled')]"
+                },
+                "vaultName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "logsEnabled": {
+                  "value": "[parameters('logsEnabled')]"
+                },
+                "profileName": {
+                  "value": "[parameters('profileName')]"
+                },
+                "eventHubRuleId": {
+                  "value": "[parameters('eventHubRuleId')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "metricsEnabled": {
+                    "type": "string"
+                  },
+                  "vaultName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "logsEnabled": {
+                    "type": "string"
+                  },
+                  "profileName": {
+                    "type": "string"
+                  },
+                  "eventHubRuleId": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "outputs": {
+                  "policy": {
+                    "value": "[concat('Enabled diagnostic settings for ', parameters('vaultName'))]",
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "properties": {
+                      "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
+                      "metrics": [
+                        {
+                          "category": "AllMetrics",
+                          "enabled": "[parameters('metricsEnabled')]",
+                          "retentionPolicy": {
+                            "days": 0,
+                            "enabled": false
+                          }
+                        }
+                      ],
+                      "logs": [
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "AuditEvent"
+                        }
+                      ]
+                    },
+                    "name": "[concat(parameters('vaultName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [],
+                    "apiVersion": "2017-05-01-preview",
+                    "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.KeyVault/vaults"
+      }
+    },
+    "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Event Hub when any Key Vault which is missing this diagnostic settings is created or updated.",
+    "mode": "Indexed"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4f9dc7db-30c1-420c-b61a-e1d640128d26",
+  "name": "4f9dc7db-30c1-420c-b61a-e1d640128d26",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Tags"
+    },
+    "parameters": {
+      "tagValue": {
+        "type": "String",
+        "metadata": {
+          "description": "Value of the tag, such as 'production'",
+          "displayName": "Tag Value"
+        }
+      },
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "description": "Name of the tag, such as 'environment'",
+          "displayName": "Tag Name"
+        }
+      }
+    },
+    "displayName": "Add a tag to resources",
+    "policyRule": {
+      "then": {
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "operation": "add",
+              "value": "[parameters('tagValue')]"
+            }
+          ]
+        },
+        "effect": "modify"
+      },
+      "if": {
+        "exists": "false",
+        "field": "[concat('tags[', parameters('tagName'), ']')]"
+      }
+    },
+    "description": "Adds the specified tag and value when any resource missing this tag is created or updated. Existing resources can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed. Does not modify tags on resource groups.",
+    "mode": "Indexed"
+  }
+}

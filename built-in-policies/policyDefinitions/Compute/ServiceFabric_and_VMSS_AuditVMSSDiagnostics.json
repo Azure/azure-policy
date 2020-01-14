@@ -1,0 +1,71 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7c1b1214-f927-48bf-8882-84f0af6588b1",
+  "name": "7c1b1214-f927-48bf-8882-84f0af6588b1",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Diagnostic logs in Virtual Machine Scale Sets should be enabled",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                    "equals": "IaaSDiagnostics"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                    "equals": "Microsoft.Azure.Diagnostics"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                    "equals": "LinuxDiagnostic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                    "in": [
+                      "Microsoft.OSTCExtensions",
+                      "Microsoft.Azure.Diagnostics"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachineScaleSets"
+      }
+    },
+    "description": "It is recommended to enable Logs so that activity trail can be recreated when investigations are required in the event of an incident or a compromise.",
+    "mode": "Indexed"
+  }
+}

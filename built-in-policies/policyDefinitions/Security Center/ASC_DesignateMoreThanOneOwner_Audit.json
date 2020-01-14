@@ -1,0 +1,48 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/09024ccc-0c5f-475e-9457-b7c0d9ed487b",
+  "name": "09024ccc-0c5f-475e-9457-b7c0d9ed487b",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "There should be more than one owner assigned to your subscription",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "DesignateMoreThanOneOwner"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      }
+    },
+    "description": "It is recommended to designate more than one subscription owner in order to have administrator access redundancy.",
+    "mode": "All"
+  }
+}

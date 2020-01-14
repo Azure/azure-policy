@@ -1,0 +1,48 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9",
+  "name": "404c3081-a854-4457-ae30-26a93ef643f9",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "The effect determines what happens when the policy rule is evaluated to match",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Secure transfer to storage accounts should be enabled",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+              "equals": "True"
+            }
+          }
+        ]
+      }
+    },
+    "description": "Audit requirment of Secure transfer in your storage account. Secure transfer is an option that forces your storage account to accept requests only from secure connections (HTTPS). Use of HTTPS ensures authentication between the server and the service and protects data in transit from network layer attacks such as man-in-the-middle, eavesdropping, and session-hijacking",
+    "mode": "Indexed"
+  }
+}

@@ -1,0 +1,279 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3be22e3b-d919-47aa-805e-8985dbeb0ad9",
+  "name": "3be22e3b-d919-47aa-805e-8985dbeb0ad9",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "listOfImageIdToInclude": {
+        "type": "Array",
+        "metadata": {
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'",
+          "displayName": "Optional: List of VM images that have supported Windows OS to add to scope"
+        },
+        "defaultValue": []
+      }
+    },
+    "displayName": "[Preview]: Deploy Dependency Agent for Windows VM Scale Sets (VMSS)",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "equals": "DependencyAgentWindows"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.Azure.Monitoring.DependencyAgent"
+              }
+            ]
+          },
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+          ],
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "parameters": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                    "apiVersion": "2018-06-01",
+                    "location": "[parameters('location')]",
+                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                    "properties": {
+                      "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
+                      "type": "[variables('vmExtensionType')]",
+                      "publisher": "[variables('vmExtensionPublisher')]",
+                      "autoUpgradeMinorVersion": true
+                    }
+                  }
+                ],
+                "variables": {
+                  "vmExtensionName": "DependencyAgent",
+                  "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                  "vmExtensionTypeHandlerVersion": "9.7",
+                  "vmExtensionType": "DependencyAgentWindows"
+                },
+                "contentVersion": "1.0.0.0",
+                "outputs": {
+                  "policy": {
+                    "value": "[concat('Enabled extension for: ', parameters('vmName'))]",
+                    "type": "string"
+                  }
+                },
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imageId",
+                "in": "[parameters('listOfImageIdToInclude')]"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "in": [
+                      "2008-R2-SP1",
+                      "2008-R2-SP1-smalldisk",
+                      "2012-Datacenter",
+                      "2012-Datacenter-smalldisk",
+                      "2012-R2-Datacenter",
+                      "2012-R2-Datacenter-smalldisk",
+                      "2016-Datacenter",
+                      "2016-Datacenter-Server-Core",
+                      "2016-Datacenter-Server-Core-smalldisk",
+                      "2016-Datacenter-smalldisk",
+                      "2016-Datacenter-with-Containers",
+                      "2016-Datacenter-with-RDSH",
+                      "2019-Datacenter",
+                      "2019-Datacenter-Core",
+                      "2019-Datacenter-Core-smalldisk",
+                      "2019-Datacenter-Core-with-Containers",
+                      "2019-Datacenter-Core-with-Containers-smalldisk",
+                      "2019-Datacenter-smalldisk",
+                      "2019-Datacenter-with-Containers",
+                      "2019-Datacenter-with-Containers-smalldisk",
+                      "2019-Datacenter-zhcn"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServerSemiAnnual"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "in": [
+                      "Datacenter-Core-1709-smalldisk",
+                      "Datacenter-Core-1709-with-Containers-smalldisk",
+                      "Datacenter-Core-1803-with-Containers-smalldisk"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServerHPCPack"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServerHPCPack"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftSQLServer"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2016"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2016-BYOL"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2012R2"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2012R2-BYOL"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftRServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "MLServer-WS2016"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftVisualStudio"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "VisualStudio",
+                      "Windows"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftDynamicsAX"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Dynamics"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "equals": "Pre-Req-AX7-Onebox-U8"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "windows-data-science-vm"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsDesktop"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Windows-10"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "Deploy Dependency Agent for Windows VM Scale Sets if the VM Image (OS) is in the list defined and the agent is not installed. The list of OS images will be updated over time as support is updated. Note: if your scale set upgradePolicy is set to Manual, you need to apply the extension to the all VMs in the set by calling upgrade on them. In CLI this would be az vmss update-instances.",
+    "mode": "Indexed"
+  }
+}

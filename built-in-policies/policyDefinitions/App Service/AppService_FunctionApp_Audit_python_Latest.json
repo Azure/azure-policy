@@ -1,0 +1,105 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7238174a-fd10-4ef0-817e-fc820a951d73",
+  "name": "7238174a-fd10-4ef0-817e-fc820a951d73",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "WindowsPythonLatestVersion": {
+        "type": "String",
+        "metadata": {
+          "description": "Latest supported Python version for App Services",
+          "displayName": "Windows Latest Python version"
+        },
+        "defaultValue": "3.6"
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      },
+      "LinuxPythonLatestVersion": {
+        "type": "String",
+        "metadata": {
+          "description": "Latest supported Python version for App Services",
+          "displayName": "Linux Latest Python version"
+        },
+        "defaultValue": "3.8"
+      }
+    },
+    "displayName": "Ensure that 'Python version' is the latest, if used as a part of the Function app",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "notContains": "PYTHON",
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "equals": "[concat('PYTHON|', parameters('LinuxPythonLatestVersion'))]"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "equals": ""
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
+                    "equals": "[parameters('WindowsPythonLatestVersion')]"
+                  }
+                ]
+              }
+            ]
+          },
+          "type": "Microsoft.Web/sites/config",
+          "name": "web"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "functionapp*"
+          }
+        ]
+      }
+    },
+    "description": "Periodically, newer versions are released for Python software either due to security flaws or to include additional functionality. Using the latest Python version for Function apps is recommended in order to to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+    "mode": "Indexed"
+  }
+}

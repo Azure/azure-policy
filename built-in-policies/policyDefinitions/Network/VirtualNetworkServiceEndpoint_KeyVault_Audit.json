@@ -1,0 +1,53 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ea4d6841-2173-4317-9747-ff522a45120f",
+  "name": "ea4d6841-2173-4317-9747-ff522a45120f",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Key Vault should use a virtual network service endpoint",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              },
+              {
+                "exists": "false",
+                "field": "Microsoft.KeyVault/vaults/networkAcls.virtualNetworkRules[*].id"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy audits any Key Vault not configured to use a virtual network service endpoint.",
+    "mode": "Indexed"
+  }
+}

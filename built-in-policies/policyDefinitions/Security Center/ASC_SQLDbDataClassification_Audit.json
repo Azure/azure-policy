@@ -1,0 +1,52 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cc9835f2-9f6b-4cc8-ab4a-f8ef615eb349",
+  "name": "cc9835f2-9f6b-4cc8-ab4a-f8ef615eb349",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Sensitive data in your SQL databases should be classified",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "sqlDataClassification"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Sql/servers/databases",
+          "Microsoft.Sql/managedInstances/databases"
+        ]
+      }
+    },
+    "description": "Azure Security Center monitors the data discovery and classification scan results for your SQL databases and provides recommendations to classify the sensitive data in your databases for better monitoring and security",
+    "mode": "Indexed"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/aeb23562-188d-47cb-80b8-551f16ef9fff",
+  "name": "aeb23562-188d-47cb-80b8-551f16ef9fff",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Email notifications to admins and subscription owners should be enabled in SQL managed instance advanced data security settings",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Sql/managedInstances/securityAlertPolicies/emailAccountAdmins",
+            "equals": "true"
+          },
+          "type": "Microsoft.Sql/managedInstances/securityAlertPolicies",
+          "name": "default"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/managedInstances"
+      }
+    },
+    "description": "Audit that 'email notification to admins and subscription owners' is enabled in the SQL managed instance advanced threat protection settings. This ensures that any detections of anomalous activities on SQL managed instance are reported as soon as possible to the admins.",
+    "mode": "Indexed"
+  }
+}

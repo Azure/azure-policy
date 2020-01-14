@@ -1,0 +1,51 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/feedbf84-6b99-488c-acc2-71c829aa5ffc",
+  "name": "feedbf84-6b99-488c-acc2-71c829aa5ffc",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Vulnerabilities on your SQL databases should be remediated",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "sqlVulnerabilityAssessment"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Sql/servers/databases",
+          "Microsoft.Sql/managedinstances/databases"
+        ]
+      }
+    },
+    "description": "Monitor Vulnerability Assessment scan results and recommendations for how to remediate database vulnerabilities.",
+    "mode": "Indexed"
+  }
+}

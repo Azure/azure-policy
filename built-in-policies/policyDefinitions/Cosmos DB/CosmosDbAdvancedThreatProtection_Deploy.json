@@ -1,0 +1,77 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b5f04e03-92a3-4b09-9410-2cc5e5047656",
+  "name": "b5f04e03-92a3-4b09-9410-2cc5e5047656",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cosmos DB"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "displayName": "Deploy Advanced Threat Protection for Cosmos DB Accounts",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/advancedThreatProtectionSettings/isEnabled",
+            "equals": "true"
+          },
+          "type": "Microsoft.Security/advancedThreatProtectionSettings",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "name": "current",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "cosmosDbAccountName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "cosmosDbAccountName": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "type": "Microsoft.DocumentDB/databaseAccounts/providers/advancedThreatProtectionSettings",
+                    "apiVersion": "2019-01-01",
+                    "name": "[concat(parameters('cosmosDbAccountName'), '/Microsoft.Security/current')]",
+                    "properties": {
+                      "isEnabled": true
+                    }
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DocumentDB/databaseAccounts"
+      }
+    },
+    "description": "This policy enables Advanced Threat Protection across Cosmos DB accounts.",
+    "mode": "Indexed"
+  }
+}

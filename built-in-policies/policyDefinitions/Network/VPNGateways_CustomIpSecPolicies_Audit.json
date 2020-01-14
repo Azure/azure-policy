@@ -1,0 +1,111 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/50b83b09-03da-41c1-b656-c293c914862b",
+  "name": "50b83b09-03da-41c1-b656-c293c914862b",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "PFSGroup": {
+        "type": "Array",
+        "metadata": {
+          "description": "PFS Group",
+          "displayName": "PFS Group"
+        }
+      },
+      "DHGroup": {
+        "type": "Array",
+        "metadata": {
+          "description": "DH Group",
+          "displayName": "DH Group"
+        }
+      },
+      "IKEIntegrity": {
+        "type": "Array",
+        "metadata": {
+          "description": "IKE Integrity",
+          "displayName": "IKE Integrity"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      },
+      "IKEEncryption": {
+        "type": "Array",
+        "metadata": {
+          "description": "IKE Encryption",
+          "displayName": "IKE Encryption"
+        }
+      },
+      "IPsecIntegrity": {
+        "type": "Array",
+        "metadata": {
+          "description": "IPsec Integrity",
+          "displayName": "IPsec Integrity"
+        }
+      },
+      "IPsecEncryption": {
+        "type": "Array",
+        "metadata": {
+          "description": "IPsec Encryption",
+          "displayName": "IPsec Encryption"
+        }
+      }
+    },
+    "displayName": "A custom IPsec/IKE policy must be applied to all Azure virtual network gateway connections",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/connections"
+          },
+          {
+            "anyOf": [
+              {
+                "notIn": "[parameters('IPsecEncryption')]",
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ipsecEncryption"
+              },
+              {
+                "notIn": "[parameters('IPsecIntegrity')]",
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ipsecIntegrity"
+              },
+              {
+                "notIn": "[parameters('IKEEncryption')]",
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ikeEncryption"
+              },
+              {
+                "notIn": "[parameters('IKEIntegrity')]",
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ikeIntegrity"
+              },
+              {
+                "notIn": "[parameters('DHGroup')]",
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].dhGroup"
+              },
+              {
+                "notIn": "[parameters('PFSGroup')]",
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].pfsGroup"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy ensures that all Azure virtual network gateway connections use a custom Internet Protocol Security(Ipsec)/Internet Key Exchange(IKE) policy. Supported algorithms and key strengths - https://aka.ms/AA62kb0",
+    "mode": "All"
+  }
+}

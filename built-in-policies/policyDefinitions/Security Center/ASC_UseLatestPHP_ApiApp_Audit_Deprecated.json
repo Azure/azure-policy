@@ -1,0 +1,66 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3fe37002-5d00-4b37-a301-da09e3a0ca66",
+  "name": "3fe37002-5d00-4b37-a301-da09e3a0ca66",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "deprecated": true,
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "[Deprecated]: Audit API Applications that are not using latest supported PHP Framework",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "UseLatestPHP"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "api"
+              },
+              {
+                "field": "kind",
+                "equals": "apiApp"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "Use the latest supported PHP version for the latest security classes. Using older classes and types can make your application vulnerable.",
+    "mode": "All"
+  }
+}

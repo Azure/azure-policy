@@ -1,0 +1,97 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9d0b6ea4-93e2-4578-bf2f-6bb17d22b4bc",
+  "name": "9d0b6ea4-93e2-4578-bf2f-6bb17d22b4bc",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "JavaLatestVersion": {
+        "type": "String",
+        "metadata": {
+          "description": "Latest supported Java version for App Services",
+          "displayName": "Latest Java version"
+        },
+        "defaultValue": "11"
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Ensure that 'Java version' is the latest, if used as a part of the Funtion app",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "notContains": "JAVA",
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.javaVersion",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "like": "[concat('*', parameters('JavaLatestVersion'))]"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.javaVersion",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "equals": ""
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.javaVersion",
+                    "like": "[concat(parameters('JavaLatestVersion'), '*')]"
+                  }
+                ]
+              }
+            ]
+          },
+          "type": "Microsoft.Web/sites/config",
+          "name": "web"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "functionapp*"
+          }
+        ]
+      }
+    },
+    "description": "Periodically, newer versions are released for Java software either due to security flaws or to include additional functionality. Using the latest Java version for Function apps is recommended in order to to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+    "mode": "Indexed"
+  }
+}

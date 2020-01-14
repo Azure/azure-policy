@@ -1,0 +1,53 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4d24b6d4-5e53-4a4f-a7f4-618fa573ee4b",
+  "name": "4d24b6d4-5e53-4a4f-a7f4-618fa573ee4b",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "FTPS should be required in your Web App",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/ftpsState",
+            "equals": "FtpsOnly"
+          },
+          "type": "Microsoft.Web/sites/config",
+          "name": "web"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "app*"
+          }
+        ]
+      }
+    },
+    "description": "Enable FTPS enforcement for enhanced security",
+    "mode": "Indexed"
+  }
+}

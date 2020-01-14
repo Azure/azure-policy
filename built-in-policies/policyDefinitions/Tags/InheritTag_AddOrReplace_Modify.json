@@ -1,0 +1,52 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cd3aa116-8754-49c9-a813-ad46512ece54",
+  "name": "cd3aa116-8754-49c9-a813-ad46512ece54",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Tags"
+    },
+    "parameters": {
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "description": "Name of the tag, such as 'environment'",
+          "displayName": "Tag Name"
+        }
+      }
+    },
+    "displayName": "Inherit a tag from the resource group",
+    "policyRule": {
+      "then": {
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "operation": "addOrReplace",
+              "value": "[resourceGroup().tags[parameters('tagName')]]"
+            }
+          ]
+        },
+        "effect": "modify"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "notEquals": "[resourceGroup().tags[parameters('tagName')]]"
+          },
+          {
+            "value": "[resourceGroup().tags[parameters('tagName')]]",
+            "notEquals": ""
+          }
+        ]
+      }
+    },
+    "description": "Adds or replaces the specified tag and value from the parent resource group when any resource is created or updated. Existing resources can be remediated by triggering a remediation task.",
+    "mode": "Indexed"
+  }
+}

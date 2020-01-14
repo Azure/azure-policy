@@ -1,0 +1,57 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/617c02be-7f02-4efd-8836-3180d47b6c68",
+  "name": "617c02be-7f02-4efd-8836-3180d47b6c68",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Service Fabric"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Service Fabric clusters should have the ClusterProtectionLevel property set to EncryptAndSign",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ServiceFabric/clusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ServiceFabric/clusters/fabricSettings[*].name",
+                "notEquals": "Security"
+              },
+              {
+                "field": "Microsoft.ServiceFabric/clusters/fabricSettings[*].parameters[*].name",
+                "notEquals": "ClusterProtectionLevel"
+              },
+              {
+                "field": "Microsoft.ServiceFabric/clusters/fabricSettings[*].parameters[*].value",
+                "notEquals": "EncryptAndSign"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "Service Fabric provides three levels of protection (None, Sign and EncryptAndSign) for node-to-node communication using a primary cluster certificate. Set the protection level to ensure that all node-to-node messages are encrypted and digitally signed",
+    "mode": "Indexed"
+  }
+}

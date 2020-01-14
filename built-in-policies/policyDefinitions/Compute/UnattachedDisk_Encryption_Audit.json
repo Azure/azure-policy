@@ -1,0 +1,57 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2c89a2e5-7285-40fe-afe0-ae8654b92fb2",
+  "name": "2c89a2e5-7285-40fe-afe0-ae8654b92fb2",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Unattached disks should be encrypted",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/disks"
+          },
+          {
+            "field": "Microsoft.Compute/disks/diskState",
+            "equals": "Unattached"
+          },
+          {
+            "anyOf": [
+              {
+                "exists": "false",
+                "field": "Microsoft.Compute/disks/encryptionSettingsCollection.enabled"
+              },
+              {
+                "field": "Microsoft.Compute/disks/encryptionSettingsCollection.enabled",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy audits any unattached disk without encryption enabled.",
+    "mode": "Indexed"
+  }
+}

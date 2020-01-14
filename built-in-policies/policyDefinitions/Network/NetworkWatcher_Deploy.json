@@ -1,0 +1,62 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a9b99dd8-06c5-4317-8629-9d86a3c6e7d9",
+  "name": "a9b99dd8-06c5-4317-8629-9d86a3c6e7d9",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {},
+    "displayName": "Deploy network watcher when virtual networks are created",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "location",
+            "equals": "[field('location')]"
+          },
+          "type": "Microsoft.Network/networkWatchers",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+          ],
+          "resourceGroupName": "networkWatcherRG",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                "parameters": {
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "type": "Microsoft.Network/networkWatchers",
+                    "apiVersion": "2016-09-01",
+                    "location": "[parameters('location')]",
+                    "name": "[concat('networkWatcher_', parameters('location'))]"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "DeployIfNotExists"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Network/virtualNetworks"
+      }
+    },
+    "description": "This policy creates a network watcher resource in regions with virtual networks. You need to ensure existence of a resource group named networkWatcherRG, which will be used to deploy network watcher instances.",
+    "mode": "Indexed"
+  }
+}

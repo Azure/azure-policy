@@ -1,0 +1,49 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1a833ff1-d297-4a0f-9944-888428f8e0ff",
+  "name": "1a833ff1-d297-4a0f-9944-888428f8e0ff",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "[Preview]: Access to App Services should be restricted",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "restrictAccessToAppServices"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Web/sites"
+      }
+    },
+    "description": "Azure security center has discovered that the networking configuration of some of your app services are overly permissive and allow inbound traffic from ranges that are too broad",
+    "mode": "All"
+  }
+}

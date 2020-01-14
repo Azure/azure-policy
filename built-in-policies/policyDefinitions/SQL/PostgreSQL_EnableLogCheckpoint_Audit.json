@@ -1,0 +1,45 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/eb6f77b9-bd53-4e35-a23d-7f65d5f0e43d",
+  "name": "eb6f77b9-bd53-4e35-a23d-7f65d5f0e43d",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Log checkpoints should be enabled for PostgreSQL database servers",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/servers/configurations/value",
+            "equals": "ON"
+          },
+          "type": "Microsoft.DBforPostgreSQL/servers/configurations",
+          "name": "log_checkpoints"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/servers"
+      }
+    },
+    "description": "This policy helps audit any PostgreSQL databases in your environment without log_checkpoints setting enabled.",
+    "mode": "Indexed"
+  }
+}

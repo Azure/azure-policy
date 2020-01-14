@@ -1,0 +1,45 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e756b945-1b1b-480b-8de8-9a0859d5f7ad",
+  "name": "e756b945-1b1b-480b-8de8-9a0859d5f7ad",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Advanced Threat Protection types should be set to 'All' in SQL server Advanced Data Security settings",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Sql/servers/securityAlertPolicies/disabledAlerts[*]",
+            "equals": ""
+          },
+          "type": "Microsoft.Sql/servers/securityAlertPolicies",
+          "name": "default"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      }
+    },
+    "description": "It is recommended to enable all Advanced Threat Protection types on your SQL servers. Enabling all types protects against SQL injection, database vulnerabilities, and any other anomalous activities.",
+    "mode": "Indexed"
+  }
+}

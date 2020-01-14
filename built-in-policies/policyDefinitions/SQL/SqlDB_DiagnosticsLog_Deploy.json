@@ -1,0 +1,208 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9a7c7a7d-49e5-4213-bea8-6a502b6272e0",
+  "name": "9a7c7a7d-49e5-4213-bea8-6a502b6272e0",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "metricsEnabled": {
+        "type": "String",
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "metadata": {
+          "description": "Whether to enable metrics stream to the Event Hub - True or False",
+          "displayName": "Enable metrics"
+        },
+        "defaultValue": "False"
+      },
+      "eventHubRuleId": {
+        "type": "String",
+        "metadata": {
+          "description": "The Event Hub authorization rule Id for Azure Diagnostics. The authorization rule needs to be at Event Hub namespace level. e.g. /subscriptions/{subscription Id}/resourceGroups/{resource group}/providers/Microsoft.EventHub/namespaces/{Event Hub namespace}/authorizationrules/{authorization rule}",
+          "assignPermissions": true,
+          "strongType": "Microsoft.EventHub/Namespaces/AuthorizationRules",
+          "displayName": "Event Hub Authorization Rule Id"
+        }
+      },
+      "profileName": {
+        "type": "String",
+        "metadata": {
+          "description": "The diagnostic settings profile name",
+          "displayName": "Profile name"
+        },
+        "defaultValue": "setbypolicy"
+      },
+      "logsEnabled": {
+        "type": "String",
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "metadata": {
+          "description": "Whether to enable logs stream to the Event Hub  - True or False",
+          "displayName": "Enable logs"
+        },
+        "defaultValue": "True"
+      }
+    },
+    "displayName": "Deploy Diagnostic Settings for Azure SQL Database to Event Hub",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "[parameters('logsEnabled')]"
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                "equals": "[parameters('metricsEnabled')]"
+              }
+            ]
+          },
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "[parameters('profileName')]",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "metricsEnabled": {
+                  "value": "[parameters('metricsEnabled')]"
+                },
+                "eventHubRuleId": {
+                  "value": "[parameters('eventHubRuleId')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "logsEnabled": {
+                  "value": "[parameters('logsEnabled')]"
+                },
+                "profileName": {
+                  "value": "[parameters('profileName')]"
+                },
+                "fullName": {
+                  "value": "[field('fullName')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "metricsEnabled": {
+                    "type": "string"
+                  },
+                  "eventHubRuleId": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "fullName": {
+                    "type": "string"
+                  },
+                  "logsEnabled": {
+                    "type": "string"
+                  },
+                  "profileName": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "outputs": {
+                  "policy": {
+                    "value": "[concat('Enabled diagnostic settings for ', parameters('fullName'))]",
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "properties": {
+                      "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
+                      "metrics": [
+                        {
+                          "category": "AllMetrics",
+                          "enabled": "[parameters('metricsEnabled')]",
+                          "retentionPolicy": {
+                            "days": 0,
+                            "enabled": false
+                          }
+                        }
+                      ],
+                      "logs": [
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "QueryStoreRuntimeStatistics"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "QueryStoreWaitStatistics"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "Errors"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "DatabaseWaitStatistics"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "Blocks"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "SQLInsights"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "Audit"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "SQLSecurityAuditEvents"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "Timeouts"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "AutomaticTuning"
+                        },
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "Deadlocks"
+                        }
+                      ]
+                    },
+                    "name": "[concat(parameters('fullName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [],
+                    "apiVersion": "2017-05-01-preview",
+                    "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "DeployIfNotExists"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers/databases"
+      }
+    },
+    "description": "Deploys the diagnostic settings for Azure SQL Database to stream to a regional Event Hub on any Azure SQL Database which is missing this diagnostic settings is created or updated.",
+    "mode": "Indexed"
+  }
+}

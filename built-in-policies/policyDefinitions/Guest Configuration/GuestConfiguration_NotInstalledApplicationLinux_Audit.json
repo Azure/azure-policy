@@ -1,0 +1,215 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5b842acb-0fe7-41b0-9f40-880ec4ad84d8",
+  "name": "5b842acb-0fe7-41b0-9f40-880ec4ad84d8",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Guest Configuration"
+    },
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+            "equals": "Compliant"
+          },
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "not_installed_application_linux"
+        },
+        "effect": "auditIfNotExists"
+      },
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "microsoft-aks",
+                      "AzureDatabricks",
+                      "qubole-inc",
+                      "datastax",
+                      "couchbase",
+                      "scalegrid",
+                      "checkpoint",
+                      "paloaltonetworks"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "OpenLogic"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "CentOS*"
+                      },
+                      {
+                        "notLike": "6*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "RedHat"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "RHEL"
+                      },
+                      {
+                        "notLike": "6*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "RedHat"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "osa"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "credativ"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "Debian"
+                      },
+                      {
+                        "notLike": "7*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "Suse"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "SLES*"
+                      },
+                      {
+                        "notLike": "11*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "Canonical"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "UbuntuServer"
+                      },
+                      {
+                        "notLike": "12*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "linux-data-science-vm-ubuntu",
+                          "azureml"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloudera"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "cloudera-centos-os"
+                      },
+                      {
+                        "notLike": "6*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloudera"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "cloudera-altus-centos-os"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "linux*"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "linux*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "displayName": "Show audit results from Linux VMs that have the specified applications installed",
+    "description": "This policy should only be used along with its corresponding deploy policy in an initiative. This definition allows Azure Policy to process the results of auditing Linux virtual machines that have the specified applications installed. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "mode": "All"
+  }
+}

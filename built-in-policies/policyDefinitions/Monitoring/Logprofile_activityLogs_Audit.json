@@ -1,0 +1,44 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7796937f-307b-4598-941c-67d3a05ebfe7",
+  "name": "7796937f-307b-4598-941c-67d3a05ebfe7",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Azure subscriptions should have a log profile for Activity Log",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "exists": "true",
+            "field": "Microsoft.Insights/logProfiles/categories"
+          },
+          "type": "Microsoft.Insights/logProfiles"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      }
+    },
+    "description": "This policy ensures if a log profile is enabled for exporting activity logs. It audits if there is no log profile created to export the logs either to a storage account or to an event hub.",
+    "mode": "All"
+  }
+}

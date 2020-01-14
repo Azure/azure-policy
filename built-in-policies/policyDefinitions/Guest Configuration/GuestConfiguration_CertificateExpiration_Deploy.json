@@ -1,0 +1,422 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c5fbc59e-fb6f-494f-81e2-d99a671bdaa8",
+  "name": "c5fbc59e-fb6f-494f-81e2-d99a671bdaa8",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "1.0.0",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ]
+    },
+    "parameters": {
+      "CertificateThumbprintsToInclude": {
+        "type": "string",
+        "metadata": {
+          "description": "A semicolon-separated list of certificate thumbprints to check under the specified path. If a value is not specified, all certificates under the certificate store path will be checked. If a value is specified, no certificates other than those with the thumbprints specified will be checked. e.g. THUMBPRINT1;THUMBPRINT2;THUMBPRINT3",
+          "displayName": "Certificate thumbprints to include"
+        },
+        "defaultValue": ""
+      },
+      "CertificateThumbprintsToExclude": {
+        "type": "string",
+        "metadata": {
+          "description": "A semicolon-separated list of certificate thumbprints to ignore. e.g. THUMBPRINT1;THUMBPRINT2;THUMBPRINT3",
+          "displayName": "Certificate thumbprints to exclude"
+        },
+        "defaultValue": ""
+      },
+      "ExpirationLimitInDays": {
+        "type": "string",
+        "metadata": {
+          "description": "An integer indicating the number of days within which to check for certificates that are expiring. For example, if this value is 30, any certificate expiring within the next 30 days will cause this policy to be non-compliant.",
+          "displayName": "Expiration limit in days"
+        },
+        "defaultValue": "30"
+      },
+      "IncludeExpiredCertificates": {
+        "type": "string",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "description": "Must be 'true' or 'false'. True indicates that any found certificates that have already expired will also make this policy non-compliant. False indicates that certificates that have expired will be be ignored.",
+          "displayName": "Include expired certificates"
+        },
+        "defaultValue": "false"
+      },
+      "CertificateStorePath": {
+        "type": "string",
+        "metadata": {
+          "description": "The path to the certificate store containing the certificates to check the expiration dates of. Default value is 'Cert:' which is the root certificate store path, so all certificates on the machine will be checked. Other example paths: 'Cert:\\LocalMachine', 'Cert:\\LocalMachine\\TrustedPublisher', 'Cert:\\CurrentUser'",
+          "displayName": "Certificate store path"
+        },
+        "defaultValue": "Cert:"
+      }
+    },
+    "displayName": "Deploy prerequisites to audit Windows VMs that contain certificates expiring within the specified number of days",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('[CertificateStore]CertificateStore1;CertificateStorePath', '=', parameters('CertificateStorePath'), ',', '[CertificateStore]CertificateStore1;ExpirationLimitInDays', '=', parameters('ExpirationLimitInDays'), ',', '[CertificateStore]CertificateStore1;CertificateThumbprintsToInclude', '=', parameters('CertificateThumbprintsToInclude'), ',', '[CertificateStore]CertificateStore1;CertificateThumbprintsToExclude', '=', parameters('CertificateThumbprintsToExclude'), ',', '[CertificateStore]CertificateStore1;IncludeExpiredCertificates', '=', parameters('IncludeExpiredCertificates')))]"
+          },
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "CertificateExpiration",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "configurationName": {
+                  "value": "CertificateExpiration"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                },
+                "CertificateThumbprintsToExclude": {
+                  "value": "[parameters('CertificateThumbprintsToExclude')]"
+                },
+                "CertificateThumbprintsToInclude": {
+                  "value": "[parameters('CertificateThumbprintsToInclude')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "CertificateStorePath": {
+                  "value": "[parameters('CertificateStorePath')]"
+                },
+                "ExpirationLimitInDays": {
+                  "value": "[parameters('ExpirationLimitInDays')]"
+                },
+                "IncludeExpiredCertificates": {
+                  "value": "[parameters('IncludeExpiredCertificates')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "CertificateThumbprintsToExclude": {
+                    "type": "string"
+                  },
+                  "CertificateThumbprintsToInclude": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "CertificateStorePath": {
+                    "type": "string"
+                  },
+                  "ExpirationLimitInDays": {
+                    "type": "string"
+                  },
+                  "IncludeExpiredCertificates": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('CertificateStorePath')]",
+                            "name": "[CertificateStore]CertificateStore1;CertificateStorePath"
+                          },
+                          {
+                            "value": "[parameters('ExpirationLimitInDays')]",
+                            "name": "[CertificateStore]CertificateStore1;ExpirationLimitInDays"
+                          },
+                          {
+                            "value": "[parameters('CertificateThumbprintsToInclude')]",
+                            "name": "[CertificateStore]CertificateStore1;CertificateThumbprintsToInclude"
+                          },
+                          {
+                            "value": "[parameters('CertificateThumbprintsToExclude')]",
+                            "name": "[CertificateStore]CertificateStore1;CertificateThumbprintsToExclude"
+                          },
+                          {
+                            "value": "[parameters('IncludeExpiredCertificates')]",
+                            "name": "[CertificateStore]CertificateStore1;IncludeExpiredCertificates"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('microsoft.hybridcompute/machines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('CertificateStorePath')]",
+                            "name": "[CertificateStore]CertificateStore1;CertificateStorePath"
+                          },
+                          {
+                            "value": "[parameters('ExpirationLimitInDays')]",
+                            "name": "[CertificateStore]CertificateStore1;ExpirationLimitInDays"
+                          },
+                          {
+                            "value": "[parameters('CertificateThumbprintsToInclude')]",
+                            "name": "[CertificateStore]CertificateStore1;CertificateThumbprintsToInclude"
+                          },
+                          {
+                            "value": "[parameters('CertificateThumbprintsToExclude')]",
+                            "name": "[CertificateStore]CertificateStore1;CertificateThumbprintsToExclude"
+                          },
+                          {
+                            "value": "[parameters('IncludeExpiredCertificates')]",
+                            "name": "[CertificateStore]CertificateStore1;IncludeExpiredCertificates"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2017-03-30",
+                    "type": "Microsoft.Compute/virtualMachines"
+                  },
+                  {
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "protectedSettings": {},
+                      "typeHandlerVersion": "1.1",
+                      "type": "ConfigurationforWindows"
+                    },
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ],
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2015-05-01-preview",
+                    "type": "Microsoft.Compute/virtualMachines/extensions"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsDesktop",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "notLike": "2008*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "notLike": "SQL2008*",
+                        "field": "Microsoft.Compute/imageOffer"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "dsvm-windows"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "true",
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "false",
+                            "field": "Microsoft.Compute/imageSKU"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "notLike": "2008*",
+                                "field": "Microsoft.Compute/imageSKU"
+                              },
+                              {
+                                "notLike": "SQL2008*",
+                                "field": "Microsoft.Compute/imageOffer"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "windows*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines that contain certificates expiring within the specified number of days. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "mode": "Indexed"
+  }
+}

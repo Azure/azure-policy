@@ -1,0 +1,70 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/001802d1-4969-4c82-a700-c29c6c6f9bbd",
+  "name": "001802d1-4969-4c82-a700-c29c6c6f9bbd",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "deprecated": true,
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "[Deprecated]: Audit Web Sockets state for a Function App",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          },
+          "type": "Microsoft.Security/complianceResults",
+          "name": "DisableWebSockets"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "functionapp"
+              },
+              {
+                "field": "kind",
+                "equals": "functionapp,linux"
+              },
+              {
+                "field": "kind",
+                "equals": "functionapp,linux,container"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "The Web Sockets protocol is vulnerable to different types of security threats. Use of Web Sockets within an Function app must be carefully reviewed.",
+    "mode": "All"
+  }
+}

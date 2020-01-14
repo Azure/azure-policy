@@ -1,0 +1,176 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a1dae6c7-13f3-48ea-a149-ff8442661f60",
+  "name": "a1dae6c7-13f3-48ea-a149-ff8442661f60",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "metricsEnabled": {
+        "type": "string",
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "metadata": {
+          "description": "Whether to enable metrics stream to the Event Hub - True or False",
+          "displayName": "Enable metrics"
+        },
+        "defaultValue": "False"
+      },
+      "eventHubRuleId": {
+        "type": "string",
+        "metadata": {
+          "description": "The Event Hub authorization rule Id for Azure Diagnostics. The authorization rule needs to be at Event Hub namespace level. e.g. /subscriptions/{subscription Id}/resourceGroups/{resource group}/providers/Microsoft.EventHub/namespaces/{Event Hub namespace}/authorizationrules/{authorization rule}",
+          "assignPermissions": true,
+          "strongType": "Microsoft.EventHub/Namespaces/AuthorizationRules",
+          "displayName": "Event Hub Authorization Rule Id"
+        }
+      },
+      "profileName": {
+        "type": "string",
+        "metadata": {
+          "description": "The diagnostic settings profile name",
+          "displayName": "Profile name"
+        },
+        "defaultValue": "setbypolicy_eventHub"
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "DeployIfNotExists"
+      },
+      "logsEnabled": {
+        "type": "string",
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "metadata": {
+          "description": "Whether to enable logs stream to the Event Hub  - True or False",
+          "displayName": "Enable logs"
+        },
+        "defaultValue": "True"
+      }
+    },
+    "displayName": "Deploy Diagnostic Settings for Logic Apps to Event Hub",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "[parameters('logsEnabled')]"
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                "equals": "[parameters('metricsEnabled')]"
+              }
+            ]
+          },
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "[parameters('profileName')]",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "metricsEnabled": {
+                  "value": "[parameters('metricsEnabled')]"
+                },
+                "eventHubRuleId": {
+                  "value": "[parameters('eventHubRuleId')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "logsEnabled": {
+                  "value": "[parameters('logsEnabled')]"
+                },
+                "profileName": {
+                  "value": "[parameters('profileName')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "parameters": {
+                  "metricsEnabled": {
+                    "type": "string"
+                  },
+                  "eventHubRuleId": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "logsEnabled": {
+                    "type": "string"
+                  },
+                  "profileName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "properties": {
+                      "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
+                      "metrics": [
+                        {
+                          "category": "AllMetrics",
+                          "enabled": "[parameters('metricsEnabled')]",
+                          "retentionPolicy": {
+                            "days": 0,
+                            "enabled": false
+                          }
+                        }
+                      ],
+                      "logs": [
+                        {
+                          "enabled": "[parameters('logsEnabled')]",
+                          "category": "WorkflowRuntime"
+                        }
+                      ]
+                    },
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [],
+                    "apiVersion": "2017-05-01-preview",
+                    "type": "Microsoft.Logic/workflows/providers/diagnosticSettings"
+                  }
+                ],
+                "variables": {},
+                "contentVersion": "1.0.0.0",
+                "outputs": {},
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#"
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Logic/workflows"
+      }
+    },
+    "description": "Deploys the diagnostic settings for Logic Apps to stream to a regional Event Hub when any Logic Apps which is missing this diagnostic settings is created or updated.",
+    "mode": "Indexed"
+  }
+}

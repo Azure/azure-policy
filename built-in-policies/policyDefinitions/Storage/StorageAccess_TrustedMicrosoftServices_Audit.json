@@ -1,0 +1,50 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c9d007d0-c057-4772-b18c-01e546713bcd",
+  "name": "c9d007d0-c057-4772-b18c-01e546713bcd",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "The effect determines what happens when the policy rule is evaluated to match",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Storage accounts should allow access from trusted Microsoft services",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "exists": "true",
+            "field": "Microsoft.Storage/storageAccounts/networkAcls.bypass"
+          },
+          {
+            "notContains": "AzureServices",
+            "field": "Microsoft.Storage/storageAccounts/networkAcls.bypass"
+          }
+        ]
+      }
+    },
+    "description": "Some Microsoft services that interact with storage accounts operate from networks that can't be granted access through network rules. To help this type of service work as intended, allow the set of trusted Microsoft services to bypass the network rules. These services will then use strong authentication to access the storage account.",
+    "mode": "Indexed"
+  }
+}

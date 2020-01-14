@@ -1,0 +1,63 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a70ca396-0a34-413a-88e1-b956c1e683be",
+  "name": "a70ca396-0a34-413a-88e1-b956c1e683be",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "The Log Analytics agent should be installed on virtual machines",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "in": [
+                  "MicrosoftMonitoringAgent",
+                  "OmsAgentForLinux"
+                ]
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "exists": "true",
+                "field": "Microsoft.Compute/virtualMachines/extensions/settings.workspaceId"
+              }
+            ]
+          },
+          "type": "Microsoft.Compute/virtualMachines/extensions"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachines"
+      }
+    },
+    "description": "This policy audits any Windows/Linux virtual machines if the Log Analytics agent is not installed.",
+    "mode": "Indexed"
+  }
+}

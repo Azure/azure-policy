@@ -1,0 +1,374 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f56a3ab2-89d1-44de-ac0d-2ada5962e22a",
+  "name": "f56a3ab2-89d1-44de-ac0d-2ada5962e22a",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "1.0.0",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ]
+    },
+    "parameters": {
+      "NetworkAccessSharesThatCanBeAccessedAnonymously": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies which network shares can be accessed by anonymous users. The default configuration for this policy setting has little effect because all users have to be authenticated before they can access shared resources on the server.",
+          "displayName": "Network access: Shares that can be accessed anonymously"
+        },
+        "defaultValue": "0"
+      },
+      "NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies which registry paths and sub-paths will be accessible over the network, regardless of the users or groups listed in the access control list (ACL) of the `winreg` registry key.",
+          "displayName": "Network access: Remotely accessible registry paths and sub-paths"
+        },
+        "defaultValue": "System\\CurrentControlSet\\Control\\Print\\Printers|#|System\\CurrentControlSet\\Services\\Eventlog|#|Software\\Microsoft\\OLAP Server|#|Software\\Microsoft\\Windows NT\\CurrentVersion\\Print|#|Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows|#|System\\CurrentControlSet\\Control\\ContentIndex|#|System\\CurrentControlSet\\Control\\Terminal Server|#|System\\CurrentControlSet\\Control\\Terminal Server\\UserConfig|#|System\\CurrentControlSet\\Control\\Terminal Server\\DefaultUserConfiguration|#|Software\\Microsoft\\Windows NT\\CurrentVersion\\Perflib|#|System\\CurrentControlSet\\Services\\SysmonLog"
+      },
+      "NetworkAccessRemotelyAccessibleRegistryPaths": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies which registry paths will be accessible over the network, regardless of the users or groups listed in the access control list (ACL) of the `winreg` registry key.",
+          "displayName": "Network access: Remotely accessible registry paths"
+        },
+        "defaultValue": "System\\CurrentControlSet\\Control\\ProductOptions|#|System\\CurrentControlSet\\Control\\Server Applications|#|Software\\Microsoft\\Windows NT\\CurrentVersion"
+      }
+    },
+    "displayName": "Deploy prerequisites to audit Windows VMs configurations in 'Security Options - Network Access'",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('Network access: Remotely accessible registry paths;ExpectedValue', '=', parameters('NetworkAccessRemotelyAccessibleRegistryPaths'), ',', 'Network access: Remotely accessible registry paths and sub-paths;ExpectedValue', '=', parameters('NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths'), ',', 'Network access: Shares that can be accessed anonymously;ExpectedValue', '=', parameters('NetworkAccessSharesThatCanBeAccessedAnonymously')))]"
+          },
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "AzureBaseline_SecurityOptionsNetworkAccess",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "NetworkAccessSharesThatCanBeAccessedAnonymously": {
+                  "value": "[parameters('NetworkAccessSharesThatCanBeAccessedAnonymously')]"
+                },
+                "configurationName": {
+                  "value": "AzureBaseline_SecurityOptionsNetworkAccess"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths": {
+                  "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths')]"
+                },
+                "NetworkAccessRemotelyAccessibleRegistryPaths": {
+                  "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPaths')]"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "NetworkAccessSharesThatCanBeAccessedAnonymously": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths": {
+                    "type": "string"
+                  },
+                  "NetworkAccessRemotelyAccessibleRegistryPaths": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPaths')]",
+                            "name": "Network access: Remotely accessible registry paths;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths')]",
+                            "name": "Network access: Remotely accessible registry paths and sub-paths;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('NetworkAccessSharesThatCanBeAccessedAnonymously')]",
+                            "name": "Network access: Shares that can be accessed anonymously;ExpectedValue"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('microsoft.hybridcompute/machines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPaths')]",
+                            "name": "Network access: Remotely accessible registry paths;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths')]",
+                            "name": "Network access: Remotely accessible registry paths and sub-paths;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('NetworkAccessSharesThatCanBeAccessedAnonymously')]",
+                            "name": "Network access: Shares that can be accessed anonymously;ExpectedValue"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2017-03-30",
+                    "type": "Microsoft.Compute/virtualMachines"
+                  },
+                  {
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "protectedSettings": {},
+                      "typeHandlerVersion": "1.1",
+                      "type": "ConfigurationforWindows"
+                    },
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ],
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2015-05-01-preview",
+                    "type": "Microsoft.Compute/virtualMachines/extensions"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsDesktop",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "notLike": "2008*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "notLike": "SQL2008*",
+                        "field": "Microsoft.Compute/imageOffer"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "dsvm-windows"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "true",
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "false",
+                            "field": "Microsoft.Compute/imageSKU"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "notLike": "2008*",
+                                "field": "Microsoft.Compute/imageSKU"
+                              },
+                              {
+                                "notLike": "SQL2008*",
+                                "field": "Microsoft.Compute/imageOffer"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "windows*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines with non-compliant settings in Group Policy category: 'Security Options - Network Access'. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "mode": "Indexed"
+  }
+}

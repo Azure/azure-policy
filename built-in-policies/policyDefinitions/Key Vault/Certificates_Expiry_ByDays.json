@@ -1,0 +1,46 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f772fb64-8e40-40ad-87bc-7706e1949427",
+  "name": "f772fb64-8e40-40ad-87bc-7706e1949427",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Key Vault",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "daysToExpire": {
+        "type": "Integer",
+        "metadata": {
+          "description": "The number of days for a certificate to expire.",
+          "displayName": "Days to expire"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "audit"
+      }
+    },
+    "displayName": "Manage certificates that are within a specified number of days of expiration",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "lessOrEquals": "[addDays(utcNow(), parameters('daysToExpire'))]",
+        "field": "Microsoft.KeyVault.Data/vaults/certificates/attributes.expiresOn"
+      }
+    },
+    "description": "This policy manages certificates that are within a specified number of days to their expiration date.",
+    "mode": "Microsoft.KeyVault.Data"
+  }
+}

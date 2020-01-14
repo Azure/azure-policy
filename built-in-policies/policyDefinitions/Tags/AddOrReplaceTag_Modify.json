@@ -1,0 +1,51 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5ffd78d9-436d-4b41-a421-5baa819e3008",
+  "name": "5ffd78d9-436d-4b41-a421-5baa819e3008",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Tags"
+    },
+    "parameters": {
+      "tagValue": {
+        "type": "String",
+        "metadata": {
+          "description": "Value of the tag, such as 'production'",
+          "displayName": "Tag Value"
+        }
+      },
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "description": "Name of the tag, such as 'environment'",
+          "displayName": "Tag Name"
+        }
+      }
+    },
+    "displayName": "Add or replace a tag on resources",
+    "policyRule": {
+      "then": {
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "operation": "addOrReplace",
+              "value": "[parameters('tagValue')]"
+            }
+          ]
+        },
+        "effect": "modify"
+      },
+      "if": {
+        "field": "[concat('tags[', parameters('tagName'), ']')]",
+        "notEquals": "[parameters('tagValue')]"
+      }
+    },
+    "description": "Adds or replaces the specified tag and value when any resource is created or updated. Existing resources can be remediated by triggering a remediation task. Does not modify tags on resource groups.",
+    "mode": "Indexed"
+  }
+}

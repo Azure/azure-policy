@@ -1,0 +1,77 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/361c2074-3595-4e5d-8cab-4f21dffc835c",
+  "name": "361c2074-3595-4e5d-8cab-4f21dffc835c",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "displayName": "Deploy Advanced Threat Protection on Storage Accounts",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Security/advancedThreatProtectionSettings/isEnabled",
+            "equals": "true"
+          },
+          "type": "Microsoft.Security/advancedThreatProtectionSettings",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "name": "current",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "storageAccountName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "storageAccountName": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "type": "Microsoft.Storage/storageAccounts/providers/advancedThreatProtectionSettings",
+                    "apiVersion": "2019-01-01",
+                    "name": "[concat(parameters('storageAccountName'), '/Microsoft.Security/current')]",
+                    "properties": {
+                      "isEnabled": true
+                    }
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Storage/storageAccounts"
+      }
+    },
+    "description": "This policy enables Advanced Threat Protection on Storage Accounts.",
+    "mode": "Indexed"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1151cede-290b-4ba0-8b38-0ad145ac888f",
+  "name": "1151cede-290b-4ba0-8b38-0ad145ac888f",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Key Vault",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "allowedKeyTypes": {
+        "type": "Array",
+        "allowedValues": [
+          "RSA",
+          "RSA-HSM",
+          "EC",
+          "EC-HSM"
+        ],
+        "metadata": {
+          "description": "The list of allowed certificate key types.",
+          "displayName": "Allowed key types"
+        },
+        "defaultValue": [
+          "RSA",
+          "RSA-HSM"
+        ]
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "audit"
+      }
+    },
+    "displayName": "Manage allowed certificate key types",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "notIn": "[parameters('allowedKeyTypes')]",
+        "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType"
+      }
+    },
+    "description": "This policy manages the allowed key types for certificates.",
+    "mode": "Microsoft.KeyVault.Data"
+  }
+}

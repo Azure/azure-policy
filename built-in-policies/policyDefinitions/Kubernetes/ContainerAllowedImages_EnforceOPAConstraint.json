@@ -1,0 +1,53 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/febd0533-8e55-448f-b837-bd0e06f16469",
+  "name": "febd0533-8e55-448f-b837-bd0e06f16469",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "allowedContainerImagesRegex": {
+        "type": "String",
+        "metadata": {
+          "description": "Regex representing container images allowed in a Kubernetes cluster. E.g. Regex for azure container registry images is ^.+azurecr.io/.+$",
+          "displayName": "Allowed container images regex"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "enforceOPAConstraint",
+          "disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "enforceOPAConstraint"
+      }
+    },
+    "displayName": "[Preview]: [AKS Engine] Ensure only allowed container images in Kubernetes cluster",
+    "policyRule": {
+      "then": {
+        "details": {
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-allowed-images/constraint.yaml",
+          "values": {
+            "allowedContainerImagesRegex": "[parameters('allowedContainerImagesRegex')]"
+          },
+          "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-allowed-images/template.yaml"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "in": [
+          "AKS Engine"
+        ]
+      }
+    },
+    "description": "This policy ensures only allowed container images are running in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
+    "mode": "Microsoft.Kubernetes.Data"
+  }
+}

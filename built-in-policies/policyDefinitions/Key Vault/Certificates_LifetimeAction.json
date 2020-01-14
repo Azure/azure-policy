@@ -1,0 +1,77 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/12ef42cb-9903-4e39-9c26-422d29570417",
+  "name": "12ef42cb-9903-4e39-9c26-422d29570417",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Key Vault",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "minimumDaysBeforeExpiry": {
+        "type": "Integer",
+        "metadata": {
+          "description": "Enter the days before expiration of the certificate when you want to trigger the policy action. For example, to trigger a policy action 90 days before the certificate's expiration, enter '90'.",
+          "displayName": "The minimum days before expiry"
+        }
+      },
+      "maximumPercentageLife": {
+        "type": "Integer",
+        "metadata": {
+          "description": "Enter the percentage of lifetime of the certificate when you want to trigger the policy action. For example, to trigger a policy action at 80% of the certificate's valid life, enter '80'.",
+          "displayName": "The maximum lifetime percentage"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "audit"
+      }
+    },
+    "displayName": "Manage certificate lifetime action triggers",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "exists": true,
+                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.daysBeforeExpiry"
+              },
+              {
+                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.daysBeforeExpiry",
+                "less": "[parameters('minimumDaysBeforeExpiry')]"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "exists": true,
+                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.lifetimePercentage"
+              },
+              {
+                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.lifetimePercentage",
+                "greater": "[parameters('maximumPercentageLife')]"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy manages the configuration for certificate lifetime action triggers before certificate expiration.",
+    "mode": "Microsoft.KeyVault.Data"
+  }
+}

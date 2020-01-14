@@ -1,0 +1,418 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e3d95ab7-f47a-49d8-a347-784177b6c94c",
+  "name": "e3d95ab7-f47a-49d8-a347-784177b6c94c",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "1.0.0",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ]
+    },
+    "parameters": {
+      "PasswordMustMeetComplexityRequirements": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies whether a user account password must be complex. If required, a complex password must not contain part of  user's account name or full name; be at least 6 characters long; contain a mix of uppercase, lowercase, number, and non-alphabetic characters.",
+          "displayName": "Password must meet complexity requirements"
+        },
+        "defaultValue": "1"
+      },
+      "MaximumPasswordAge": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the maximum number of days that may elapse before a user account password must be changed. The format of the value is two integers separated by a comma, denoting an inclusive range.",
+          "displayName": "Maximum password age"
+        },
+        "defaultValue": "1,70"
+      },
+      "MinimumPasswordLength": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the minimum number of characters that a user account password may contain.",
+          "displayName": "Minimum password length"
+        },
+        "defaultValue": "14"
+      },
+      "MinimumPasswordAge": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies the minimum number of days that must elapse before a user account password can be changed.",
+          "displayName": "Minimum password age"
+        },
+        "defaultValue": "1"
+      },
+      "EnforcePasswordHistory": {
+        "type": "string",
+        "metadata": {
+          "description": "Specifies limits on password reuse - how many times a new password must be created for a user account before the password can be repeated.",
+          "displayName": "Enforce password history"
+        },
+        "defaultValue": "24"
+      }
+    },
+    "displayName": "Deploy prerequisites to audit Windows VMs configurations in 'Security Settings - Account Policies'",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('Enforce password history;ExpectedValue', '=', parameters('EnforcePasswordHistory'), ',', 'Maximum password age;ExpectedValue', '=', parameters('MaximumPasswordAge'), ',', 'Minimum password age;ExpectedValue', '=', parameters('MinimumPasswordAge'), ',', 'Minimum password length;ExpectedValue', '=', parameters('MinimumPasswordLength'), ',', 'Password must meet complexity requirements;ExpectedValue', '=', parameters('PasswordMustMeetComplexityRequirements')))]"
+          },
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "name": "AzureBaseline_SecuritySettingsAccountPolicies",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "configurationName": {
+                  "value": "AzureBaseline_SecuritySettingsAccountPolicies"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                },
+                "MaximumPasswordAge": {
+                  "value": "[parameters('MaximumPasswordAge')]"
+                },
+                "MinimumPasswordAge": {
+                  "value": "[parameters('MinimumPasswordAge')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "MinimumPasswordLength": {
+                  "value": "[parameters('MinimumPasswordLength')]"
+                },
+                "PasswordMustMeetComplexityRequirements": {
+                  "value": "[parameters('PasswordMustMeetComplexityRequirements')]"
+                },
+                "EnforcePasswordHistory": {
+                  "value": "[parameters('EnforcePasswordHistory')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "MaximumPasswordAge": {
+                    "type": "string"
+                  },
+                  "MinimumPasswordAge": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "MinimumPasswordLength": {
+                    "type": "string"
+                  },
+                  "PasswordMustMeetComplexityRequirements": {
+                    "type": "string"
+                  },
+                  "EnforcePasswordHistory": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('EnforcePasswordHistory')]",
+                            "name": "Enforce password history;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('MaximumPasswordAge')]",
+                            "name": "Maximum password age;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('MinimumPasswordAge')]",
+                            "name": "Minimum password age;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('MinimumPasswordLength')]",
+                            "name": "Minimum password length;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('PasswordMustMeetComplexityRequirements')]",
+                            "name": "Password must meet complexity requirements;ExpectedValue"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('microsoft.hybridcompute/machines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "properties": {
+                      "guestConfiguration": {
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "value": "[parameters('EnforcePasswordHistory')]",
+                            "name": "Enforce password history;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('MaximumPasswordAge')]",
+                            "name": "Maximum password age;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('MinimumPasswordAge')]",
+                            "name": "Minimum password age;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('MinimumPasswordLength')]",
+                            "name": "Minimum password length;ExpectedValue"
+                          },
+                          {
+                            "value": "[parameters('PasswordMustMeetComplexityRequirements')]",
+                            "name": "Password must meet complexity requirements;ExpectedValue"
+                          }
+                        ],
+                        "name": "[parameters('configurationName')]"
+                      }
+                    },
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments"
+                  },
+                  {
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2017-03-30",
+                    "type": "Microsoft.Compute/virtualMachines"
+                  },
+                  {
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "protectedSettings": {},
+                      "typeHandlerVersion": "1.1",
+                      "type": "ConfigurationforWindows"
+                    },
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ],
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2015-05-01-preview",
+                    "type": "Microsoft.Compute/virtualMachines/extensions"
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "deployIfNotExists"
+      },
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsDesktop",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "notLike": "2008*",
+                        "field": "Microsoft.Compute/imageSKU"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "notLike": "SQL2008*",
+                        "field": "Microsoft.Compute/imageOffer"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "dsvm-windows"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "true",
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "exists": "false",
+                            "field": "Microsoft.Compute/imageSKU"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "notLike": "2008*",
+                                "field": "Microsoft.Compute/imageSKU"
+                              },
+                              {
+                                "notLike": "SQL2008*",
+                                "field": "Microsoft.Compute/imageOffer"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "windows*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines with non-compliant settings in Group Policy category: 'Security Settings - Account Policies'. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "mode": "Indexed"
+  }
+}

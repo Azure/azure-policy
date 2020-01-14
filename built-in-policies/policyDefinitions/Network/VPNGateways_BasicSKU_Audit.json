@@ -1,0 +1,49 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e345b6c3-24bd-4c93-9bbb-7e5e49a17b78",
+  "name": "e345b6c3-24bd-4c93-9bbb-7e5e49a17b78",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Azure VPN gateways should not use 'basic' SKU",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/virtualNetworkGateways"
+          },
+          {
+            "field": "Microsoft.Network/virtualNetworkGateways/gatewayType",
+            "equals": "Vpn"
+          },
+          {
+            "field": "Microsoft.Network/virtualNetworkGateways/sku.tier",
+            "equals": "Basic"
+          }
+        ]
+      }
+    },
+    "description": "This policy ensures that VPN gateways do not use 'basic' SKU.",
+    "mode": "All"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ac4a19c2-fa67-49b4-8ae5-0b2e78c49457",
+  "name": "ac4a19c2-fa67-49b4-8ae5-0b2e78c49457",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "[Preview]: Role-Based Access Control (RBAC) should be used on Kubernetes Services",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "exists": "false",
+                "field": "Microsoft.ContainerService/managedClusters/enableRBAC"
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/enableRBAC",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "To provide granular filtering on the actions that users can perform, use Role-Based Access Control (RBAC) to manage permissions in Kubernetes Service Clusters and configure relevant authorization policies.",
+    "mode": "All"
+  }
+}

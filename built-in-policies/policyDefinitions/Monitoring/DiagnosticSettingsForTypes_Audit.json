@@ -1,0 +1,47 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7f89b1eb-583c-429a-8828-af049802c1d9",
+  "name": "7f89b1eb-583c-429a-8828-af049802c1d9",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "listOfResourceTypes": {
+        "type": "Array",
+        "metadata": {
+          "strongType": "resourceTypes",
+          "displayName": "Resource Types"
+        }
+      }
+    },
+    "displayName": "Audit diagnostic setting",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "true"
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                "equals": "true"
+              }
+            ]
+          },
+          "type": "Microsoft.Insights/diagnosticSettings"
+        },
+        "effect": "AuditIfNotExists"
+      },
+      "if": {
+        "field": "type",
+        "in": "[parameters('listOfResourceTypes')]"
+      }
+    },
+    "description": "Audit diagnostic setting for selected resource types",
+    "mode": "All"
+  }
+}

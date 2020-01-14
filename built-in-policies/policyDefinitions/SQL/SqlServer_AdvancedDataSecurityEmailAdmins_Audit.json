@@ -1,0 +1,45 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c8343d2f-fdc9-4a97-b76f-fc71d1163bfc",
+  "name": "c8343d2f-fdc9-4a97-b76f-fc71d1163bfc",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Email notifications to admins and subscription owners should be enabled in SQL server advanced data security settings",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Sql/servers/securityAlertPolicies/emailAccountAdmins",
+            "equals": "true"
+          },
+          "type": "Microsoft.Sql/servers/securityAlertPolicies",
+          "name": "default"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      }
+    },
+    "description": "Audit that 'email notification to admins and subscription owners' is enabled in the SQL server advanced threat protection settings. This ensures that any detections of anomalous activities on SQL server are reported as soon as possible to the admins.",
+    "mode": "Indexed"
+  }
+}

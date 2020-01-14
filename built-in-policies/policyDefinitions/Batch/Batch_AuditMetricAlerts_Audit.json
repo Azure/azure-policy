@@ -1,0 +1,64 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/26ee67a2-f81a-4ba8-b9ce-8550bd5ee1a7",
+  "name": "26ee67a2-f81a-4ba8-b9ce-8550bd5ee1a7",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Batch"
+    },
+    "parameters": {
+      "metricName": {
+        "type": "String",
+        "metadata": {
+          "description": "The metric name that an alert rule must be enabled on",
+          "displayName": "Metric name"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Metric alert rules should be configured on Batch accounts",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/alertRules/isEnabled",
+                "equals": "true"
+              },
+              {
+                "field": "Microsoft.Insights/alertRules/condition.dataSource.metricName",
+                "equals": "[parameters('metricName')]"
+              },
+              {
+                "field": "Microsoft.Insights/alertRules/condition.dataSource.resourceUri",
+                "equals": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Batch/batchAccounts/', field('name'))]"
+              }
+            ]
+          },
+          "type": "Microsoft.Insights/alertRules",
+          "existenceScope": "Subscription"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Batch/batchAccounts"
+      }
+    },
+    "description": "Audit configuration of metric alert rules on Batch account to enable the required metric",
+    "mode": "Indexed"
+  }
+}

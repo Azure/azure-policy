@@ -1,0 +1,66 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/36d49e87-48c4-4f2e-beed-ba4ed02b71f5",
+  "name": "36d49e87-48c4-4f2e-beed-ba4ed02b71f5",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {},
+    "displayName": "Deploy Threat Detection on SQL servers",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "field": "Microsoft.Sql/securityAlertPolicies.state",
+            "equals": "Enabled"
+          },
+          "type": "Microsoft.Sql/servers/securityAlertPolicies",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/056cd41c-7e88-42e1-933e-88ba6a50c9c3"
+          ],
+          "name": "Default",
+          "deployment": {
+            "properties": {
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  }
+                },
+                "contentVersion": "1.0.0.0",
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Sql/servers/securityAlertPolicies",
+                    "apiVersion": "2017-03-01-preview",
+                    "name": "[concat(parameters('serverName'), '/Default')]",
+                    "properties": {
+                      "state": "Enabled",
+                      "emailAccountAdmins": true
+                    }
+                  }
+                ]
+              },
+              "mode": "incremental"
+            }
+          }
+        },
+        "effect": "DeployIfNotExists"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      }
+    },
+    "description": "This policy ensures that Threat Detection is enabled on SQL Servers.",
+    "mode": "Indexed"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3abeb944-26af-43ee-b83d-32aaf060fb94",
+  "name": "3abeb944-26af-43ee-b83d-32aaf060fb94",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "[Preview]: Pod Security Policies should be defined on Kubernetes Services",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "exists": "false",
+                "field": "Microsoft.ContainerService/managedClusters/enablePodSecurityPolicy"
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/enablePodSecurityPolicy",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "description": "Define Pod Security Policies to reduce the attack vector by removing unnecessary application privileges. It is recommended to configure Pod Security Policies to only allow pods to access the resources which they have permissions to access.",
+    "mode": "All"
+  }
+}

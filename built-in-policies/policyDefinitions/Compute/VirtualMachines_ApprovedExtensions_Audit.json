@@ -1,0 +1,53 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c0e996f8-39cf-4af9-9f45-83fbde810432",
+  "name": "c0e996f8-39cf-4af9-9f45-83fbde810432",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "parameters": {
+      "approvedExtensions": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Approved extensions",
+          "description": "The list of approved extension types that can be installed. Example: AzureDiskEncryption"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "The effect determines what happens when the policy rule is evaluated to match",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Only approved VM extensions should be installed",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines/extensions"
+          },
+          {
+            "notIn": "[parameters('approvedExtensions')]",
+            "field": "Microsoft.Compute/virtualMachines/extensions/type"
+          }
+        ]
+      }
+    },
+    "description": "This policy governs the virtual machine extensions that are not approved.",
+    "mode": "Indexed"
+  }
+}

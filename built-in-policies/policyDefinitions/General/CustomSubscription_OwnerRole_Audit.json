@@ -1,0 +1,77 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/10ee2ea2-fb4d-45b8-a7e9-a2e770044cd9",
+  "name": "10ee2ea2-fb4d-45b8-a7e9-a2e770044cd9",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "General"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "Audit"
+      }
+    },
+    "displayName": "Custom subscription owner roles should not exist",
+    "policyRule": {
+      "then": {
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Authorization/roleDefinitions"
+          },
+          {
+            "field": "Microsoft.Authorization/roleDefinitions/type",
+            "equals": "CustomRole"
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/permissions[*].actions[*]",
+                  "notEquals": "*"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/permissions.actions[*]",
+                  "notEquals": "*"
+                }
+              }
+            ]
+          },
+          {
+            "not": {
+              "notIn": [
+                "[concat(subscription().id,'/')]",
+                "[subscription().id]",
+                "/"
+              ],
+              "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]"
+            }
+          },
+          {
+            "not": {
+              "notLike": "/providers/Microsoft.Management/*",
+              "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]"
+            }
+          }
+        ]
+      }
+    },
+    "description": "This policy ensures that no custom subscription owner roles exist.",
+    "mode": "All"
+  }
+}

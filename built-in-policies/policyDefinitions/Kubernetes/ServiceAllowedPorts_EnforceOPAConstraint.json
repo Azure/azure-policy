@@ -1,0 +1,53 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/233a2a17-77ca-4fb1-9b6b-69223d272a44",
+  "name": "233a2a17-77ca-4fb1-9b6b-69223d272a44",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "allowedServicePortsList": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of service ports allowed in a Kubernetes cluster.",
+          "displayName": "Allowed service ports list"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "enforceOPAConstraint",
+          "disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "enforceOPAConstraint"
+      }
+    },
+    "displayName": "[Preview]: [AKS Engine] Ensure services listen only on allowed ports in Kubernetes cluster",
+    "policyRule": {
+      "then": {
+        "details": {
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/service-allowed-ports/constraint.yaml",
+          "values": {
+            "allowedServicePorts": "[parameters('allowedServicePortsList')]"
+          },
+          "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/service-allowed-ports/template.yaml"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "in": [
+          "AKS Engine"
+        ]
+      }
+    },
+    "description": "This policy enforces services to listen only on allowed ports in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
+    "mode": "Microsoft.Kubernetes.Data"
+  }
+}

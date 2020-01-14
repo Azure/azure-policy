@@ -1,0 +1,63 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/efbde977-ba53-4479-b8e9-10b957924fbf",
+  "name": "efbde977-ba53-4479-b8e9-10b957924fbf",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "The Log Analytics agent should be installed on Virtual Machine Scale Sets",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "in": [
+                  "MicrosoftMonitoringAgent",
+                  "OmsAgentForLinux"
+                ]
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "exists": "true",
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/settings.workspaceId"
+              }
+            ]
+          },
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachineScaleSets"
+      }
+    },
+    "description": "This policy audits any Windows/Linux Virtual Machine Scale Sets if the Log Analytics agent is not installed.",
+    "mode": "Indexed"
+  }
+}

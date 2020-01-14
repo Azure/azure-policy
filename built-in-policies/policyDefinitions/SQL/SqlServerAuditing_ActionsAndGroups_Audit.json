@@ -1,0 +1,63 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7ff426e2-515f-405a-91c8-4f2333442eb5",
+  "name": "7ff426e2-515f-405a-91c8-4f2333442eb5",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "SQL Auditing settings should have Action-Groups configured to capture critical activities",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "allOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Sql/servers/auditingSettings/auditActionsAndGroups[*]",
+                  "notEquals": "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Sql/servers/auditingSettings/auditActionsAndGroups[*]",
+                  "notEquals": "FAILED_DATABASE_AUTHENTICATION_GROUP"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Sql/servers/auditingSettings/auditActionsAndGroups[*]",
+                  "notEquals": "BATCH_COMPLETED_GROUP"
+                }
+              }
+            ]
+          },
+          "type": "Microsoft.Sql/servers/auditingSettings",
+          "name": "default"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      }
+    },
+    "description": "The AuditActionsAndGroups property should contain at least SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP, FAILED_DATABASE_AUTHENTICATION_GROUP, BATCH_COMPLETED_GROUP to ensure a thorough audit logging",
+    "mode": "Indexed"
+  }
+}

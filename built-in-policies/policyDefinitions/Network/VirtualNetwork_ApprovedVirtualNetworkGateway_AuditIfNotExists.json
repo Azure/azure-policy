@@ -1,0 +1,54 @@
+{
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f1776c76-f58c-4245-a8d0-2b207198dc8b",
+  "name": "f1776c76-f58c-4245-a8d0-2b207198dc8b",
+  "properties": {
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "virtualNetworkGatewayId": {
+        "type": "string",
+        "metadata": {
+          "description": "Resource Id of the virtual network gateway. Example: /subscriptions/YourSubscriptionId/resourceGroups/YourResourceGroup/providers/Microsoft.Network/virtualNetworkGateways/Name",
+          "displayName": "Virtual network gateway Id"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "description": "Enable or disable the execution of the policy",
+          "displayName": "Effect"
+        },
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "displayName": "Virtual networks should use specified virtual network gateway",
+    "policyRule": {
+      "then": {
+        "details": {
+          "existenceCondition": {
+            "not": {
+              "notContains": "[concat(parameters('virtualNetworkGatewayId'), '/')]",
+              "field": "Microsoft.Network/virtualNetworks/subnets/ipConfigurations[*].id"
+            }
+          },
+          "type": "Microsoft.Network/virtualNetworks/subnets",
+          "name": "GatewaySubnet"
+        },
+        "effect": "[parameters('effect')]"
+      },
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Network/virtualNetworks"
+      }
+    },
+    "description": "This policy audits any virtual network if the default route does not point to the specified virtual network gateway.",
+    "mode": "Indexed"
+  }
+}
