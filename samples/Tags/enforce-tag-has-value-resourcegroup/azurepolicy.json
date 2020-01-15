@@ -1,0 +1,58 @@
+{
+   "properties": {
+       "displayName": "Enforce tag has a value on a resource group",
+       "policyType": "BuiltIn",
+       "mode": "All",
+       "description": "Enforces a required tag has a non empty value.",
+       "metadata": {
+           "category": "Tags"
+       },
+       "parameters": {
+           "tagName": {
+               "type": "String",
+               "metadata": {
+                   "displayName": "Tag Name",
+                   "description": "Name of the tag, such as 'environment'"
+               }
+           },
+           "effect": {
+               "type": "String",
+               "defaultValue": "Deny",
+               "allowedValues": [
+                   "Audit",
+                   "Deny"
+               ],
+               "metadata": {
+                   "displayName": "Effect",
+                   "description": "Audit or deny the execution of the policy"
+               }
+           }
+       },
+       "policyRule": {
+           "if": {
+               "allOf": [
+                   {
+                       "field": "type",
+                       "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+                   },
+                   {
+                       "anyOf": [
+                           {
+                               "field": "[concat('tags[', parameters('tagName'), ']')]",
+                               "exists": "false"
+                           },
+                           {
+                               "field": "[concat('tags[', parameters('tagName'), ']')]",
+                               "equals": ""
+                           }
+                       ]
+                   }
+               ]
+           },
+           "then": {
+               "effect": "[parameters('effect')]"
+           }
+       }
+   },
+   "type": "Microsoft.Authorization/policyDefinitions"
+}
