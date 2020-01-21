@@ -1,0 +1,262 @@
+{
+    "properties": {
+        "displayName": "Deploy prerequisites to enable Guest Configuration Policy on Linux VMs.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "This policy creates a system-assigned managed identity and deploys the VM extension for Guest Configuration on Linux VMs. This is a prerequisites for Guest Configuration Policy and must be assigned to the scope before using any Guest Configuration policy. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol.",
+        "metadata": {
+            "category": "Guest Configuration",
+            "requiredProviders": [
+                "Microsoft.GuestConfiguration"
+            ]
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/virtualMachines"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "field": "Microsoft.Compute/imagePublisher",
+                                "in": [
+                                    "microsoft-aks",
+                                    "AzureDatabricks",
+                                    "qubole-inc",
+                                    "datastax",
+                                    "couchbase",
+                                    "scalegrid",
+                                    "checkpoint",
+                                    "paloaltonetworks"
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "OpenLogic"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "like": "CentOS*"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "6*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "RedHat"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "RHEL"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "6*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "RedHat"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "osa"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "credativ"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "Debian"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "7*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "Suse"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "like": "SLES*"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "11*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "Canonical"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "UbuntuServer"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "12*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "microsoft-dsvm"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "in": [
+                                            "linux-data-science-vm-ubuntu",
+                                            "azureml"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "cloudera"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "cloudera-centos-os"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "6*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "cloudera"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "cloudera-altus-centos-os"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "microsoft-ads"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "like": "linux*"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deployIfNotExists",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "AzurePolicyforLinux",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                                "equals": "Microsoft.GuestConfiguration"
+                            },
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                                "equals": "ConfigurationforLinux"
+                            }
+                        ]
+                    },
+                    "deployment": {
+                        "properties": {
+                            "mode": "incremental",
+                            "parameters": {
+                                "vmName": {
+                                    "value": "[field('name')]"
+                                },
+                                "location": {
+                                    "value": "[field('location')]"
+                                }
+                            },
+                            "template": {
+                                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "parameters": {
+                                    "vmName": {
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "type": "string"
+                                    }
+                                },
+                                "resources": [
+                                    {
+                                        "apiVersion": "2017-03-30",
+                                        "type": "Microsoft.Compute/virtualMachines",
+                                        "identity": {
+                                            "type": "SystemAssigned"
+                                        },
+                                        "name": "[parameters('vmName')]",
+                                        "location": "[parameters('location')]"
+                                    },
+                                    {
+                                        "apiVersion": "2015-05-01-preview",
+                                        "name": "[concat(parameters('vmName'), '/AzurePolicyforLinux')]",
+                                        "type": "Microsoft.Compute/virtualMachines/extensions",
+                                        "location": "[parameters('location')]",
+                                        "properties": {
+                                            "publisher": "Microsoft.GuestConfiguration",
+                                            "type": "ConfigurationforLinux",
+                                            "typeHandlerVersion": "1.0",
+                                            "autoUpgradeMinorVersion": true,
+                                            "settings": {},
+                                            "protectedSettings": {}
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/fb27e9e0-526e-4ae1-89f2-a2a0bf0f8a50",
+    "name": "fb27e9e0-526e-4ae1-89f2-a2a0bf0f8a50"
+}
