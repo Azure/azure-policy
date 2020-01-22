@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Access through Internet facing endpoint should be restricted",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "Azure Security center has identified some of your Network Security Groups' inbound rules to be too permissive. Inbound rules should not allow access from 'Any' or 'Internet' ranges. This can potentially enable attackers to easily target your resources.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Security Center"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": [
+                    "Microsoft.Compute/virtualMachines",
+                    "Microsoft.ClassicCompute/virtualMachines"
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Security/complianceResults",
+                    "name": "unprotectedNetworkEndpoint",
+                    "existenceCondition": {
+                        "field": "Microsoft.Security/complianceResults/resourceStatus",
+                        "in": [
+                            "OffByPolicy",
+                            "Healthy"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/9daedab3-fb2d-461e-b861-71790eead4f6",
+    "name": "9daedab3-fb2d-461e-b861-71790eead4f6"
+}

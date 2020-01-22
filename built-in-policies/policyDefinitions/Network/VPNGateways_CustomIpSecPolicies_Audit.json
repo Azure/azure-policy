@@ -1,0 +1,111 @@
+{
+  "properties": {
+    "displayName": "A custom IPsec/IKE policy must be applied to all Azure virtual network gateway connections",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy ensures that all Azure virtual network gateway connections use a custom Internet Protocol Security(Ipsec)/Internet Key Exchange(IKE) policy. Supported algorithms and key strengths - https://aka.ms/AA62kb0",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "IPsecEncryption": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "IPsec Encryption",
+          "description": "IPsec Encryption"
+        }
+      },
+      "IPsecIntegrity": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "IPsec Integrity",
+          "description": "IPsec Integrity"
+        }
+      },
+      "IKEEncryption": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "IKE Encryption",
+          "description": "IKE Encryption"
+        }
+      },
+      "IKEIntegrity": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "IKE Integrity",
+          "description": "IKE Integrity"
+        }
+      },
+      "DHGroup": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "DH Group",
+          "description": "DH Group"
+        }
+      },
+      "PFSGroup": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "PFS Group",
+          "description": "PFS Group"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/connections"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ipsecEncryption",
+                "notIn": "[parameters('IPsecEncryption')]"
+              },
+              {
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ipsecIntegrity",
+                "notIn": "[parameters('IPsecIntegrity')]"
+              },
+              {
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ikeEncryption",
+                "notIn": "[parameters('IKEEncryption')]"
+              },
+              {
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].ikeIntegrity",
+                "notIn": "[parameters('IKEIntegrity')]"
+              },
+              {
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].dhGroup",
+                "notIn": "[parameters('DHGroup')]"
+              },
+              {
+                "field": "Microsoft.Network/connections/ipsecPolicies[*].pfsGroup",
+                "notIn": "[parameters('PFSGroup')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/50b83b09-03da-41c1-b656-c293c914862b",
+  "name": "50b83b09-03da-41c1-b656-c293c914862b"
+}

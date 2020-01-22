@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "Storage accounts should be migrated to new Azure Resource Manager resources",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Use new Azure Resource Manager for your storage accounts to provide security enhancements such as: stronger access control (RBAC), better auditing, Azure Resource Manager based deployment and governance, access to managed identities, access to key vault for secrets, Azure AD-based authentication and support for tags and resource groups for easier security management",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.ClassicStorage/storageAccounts",
+              "Microsoft.Storage/StorageAccounts"
+            ]
+          },
+          {
+            "value": "[field('type')]",
+            "equals": "Microsoft.ClassicStorage/storageAccounts"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/37e0d2fe-28a5-43d6-a273-67d37d1f5606",
+  "name": "37e0d2fe-28a5-43d6-a273-67d37d1f5606"
+}

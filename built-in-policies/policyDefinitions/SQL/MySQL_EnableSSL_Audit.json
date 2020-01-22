@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "Enforce SSL connection should be enabled for MySQL database servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any MySQL server that is not enforcing SSL connection. Azure Database for MySQL supports connecting your Azure Database for MySQL server to client applications using Secure Sockets Layer (SSL). Enforcing SSL connections between your database server and your client applications helps protect against 'man in the middle' attacks by encrypting the data stream between the server and your application.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DBforMySQL/servers"
+          },
+          {
+            "field": "Microsoft.DBforMySQL/servers/sslEnforcement",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.DBforMySQL/servers/sslEnforcement",
+            "notEquals": "Enabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e802a67a-daf5-4436-9ea6-f6d821dd0c5d",
+  "name": "e802a67a-daf5-4436-9ea6-f6d821dd0c5d"
+}
