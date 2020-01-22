@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "Activity log should be retained for at least one year",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy audits the activity log if the retention is not set for 365 days or forever (retention days set to 0).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/logProfiles",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Insights/logProfiles/retentionPolicy.enabled",
+                    "equals": "true"
+                  },
+                  {
+                    "field": "Microsoft.Insights/logProfiles/retentionPolicy.days",
+                    "equals": "365"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Insights/logProfiles/retentionPolicy.enabled",
+                    "equals": "false"
+                  },
+                  {
+                    "field": "Microsoft.Insights/logProfiles/retentionPolicy.days",
+                    "equals": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b02aacc0-b073-424e-8298-42b22829ee0a",
+  "name": "b02aacc0-b073-424e-8298-42b22829ee0a"
+}

@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "Advanced data security settings for SQL managed instance should contain an email address to receive security alerts",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Ensure that an email address is provided for the 'Send alerts to' field in the Advanced Data Security server settings. This email address receives alert notifications when anomalous activities are detected on SQL managed instances.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/managedInstances"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/managedInstances/securityAlertPolicies",
+          "name": "default",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Sql/managedInstances/securityAlertPolicies/emailAddresses[*]",
+                "notEquals": ""
+              },
+              {
+                "field": "Microsoft.Sql/managedInstances/securityAlertPolicies/emailAddresses[*]",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3965c43d-b5f4-482e-b74a-d89ee0e0b3a8",
+  "name": "3965c43d-b5f4-482e-b74a-d89ee0e0b3a8"
+}

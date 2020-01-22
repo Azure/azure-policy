@@ -1,0 +1,56 @@
+{
+   "properties": {
+      "displayName": "Audit SQL DB Level Audit Setting",
+      "policyType": "BuiltIn",
+      "mode": "All",
+      "description": "Audit DB level audit setting for SQL databases",
+      "metadata": {
+         "version": "1.0.0-deprecated",
+         "category": "SQL",
+         "deprecated": true
+      },
+      "parameters": {
+         "setting": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Audit Setting"
+            },
+            "allowedValues": [
+               "enabled",
+               "disabled"
+            ]
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Sql/servers/databases"
+               },
+               {
+                  "field": "name",
+                  "notEquals": "master"
+               }
+            ]
+         },
+         "then": {
+            "effect": "AuditIfNotExists",
+            "details": {
+               "type": "Microsoft.Sql/servers/databases/auditingSettings",
+               "name": "default",
+               "existenceCondition": {
+                  "allOf": [
+                     {
+                        "field": "Microsoft.Sql/auditingSettings.state",
+                        "equals": "[parameters('setting')]"
+                     }
+                  ]
+               }
+            }
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a12",
+   "name": "06a78e20-9358-41c9-923c-fb736d382a12"
+}

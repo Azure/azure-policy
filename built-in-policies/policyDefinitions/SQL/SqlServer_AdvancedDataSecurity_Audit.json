@@ -1,0 +1,45 @@
+{
+  "properties": {
+    "displayName": "Advanced data security should be enabled on your SQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit SQL servers without Advanced Data Security",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/servers/securityAlertPolicies",
+          "name": "Default",
+          "existenceCondition": {
+            "field": "Microsoft.Sql/servers/securityAlertPolicies/state",
+            "equals": "Enabled"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/abfb4388-5bf4-4ad7-ba82-2cd2f41ceae9",
+  "name": "abfb4388-5bf4-4ad7-ba82-2cd2f41ceae9"
+}

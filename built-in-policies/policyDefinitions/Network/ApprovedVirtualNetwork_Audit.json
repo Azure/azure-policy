@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "Virtual machines should be connected to an approved virtual network",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any virtual machine connected to a virtual network that is not approved.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      },
+      "virtualNetworkId": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Virtual network Id",
+          "description": "Resource Id of the virtual network. Example: /subscriptions/YourSubscriptionId/resourceGroups/YourResourceGroupName/providers/Microsoft.Network/virtualNetworks/Name"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/networkInterfaces"
+          },
+          {
+            "not": {
+              "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].subnet.id",
+              "like": "[concat(parameters('virtualNetworkId'),'/*')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d416745a-506c-48b6-8ab1-83cb814bcaa3",
+  "name": "d416745a-506c-48b6-8ab1-83cb814bcaa3"
+}
