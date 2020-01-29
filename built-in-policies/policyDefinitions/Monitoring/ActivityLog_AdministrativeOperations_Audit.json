@@ -1,0 +1,117 @@
+{
+  "properties": {
+    "displayName": "An activity log alert should exist for specific Administrative operations",
+    "description": "This policy audits specific Administrative operations with no activity log alerts configured.",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      },
+      "operationName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Operation Name",
+          "description": "Administrative Operation name for which activity log alert should be configured"
+        },
+        "allowedValues": [
+          "Microsoft.Sql/servers/firewallRules/write",
+          "Microsoft.Sql/servers/firewallRules/delete",
+          "Microsoft.Network/networkSecurityGroups/write",
+          "Microsoft.Network/networkSecurityGroups/delete",
+          "Microsoft.ClassicNetwork/networkSecurityGroups/write",
+          "Microsoft.ClassicNetwork/networkSecurityGroups/delete",
+          "Microsoft.Network/networkSecurityGroups/securityRules/write",
+          "Microsoft.Network/networkSecurityGroups/securityRules/delete",
+          "Microsoft.ClassicNetwork/networkSecurityGroups/securityRules/write",
+          "Microsoft.ClassicNetwork/networkSecurityGroups/securityRules/delete"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/ActivityLogAlerts",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/ActivityLogAlerts/enabled",
+                "equals": "true"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                            "equals": "category"
+                          },
+                          {
+                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].equals",
+                            "equals": "Administrative"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                            "equals": "operationName"
+                          },
+                          {
+                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].equals",
+                            "equals": "[parameters('operationName')]"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "equals": 2
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                  "equals": "category"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                  "equals": "operationName"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b954148f-4c11-4c38-8221-be76711e194a",
+  "name": "b954148f-4c11-4c38-8221-be76711e194a"
+}
