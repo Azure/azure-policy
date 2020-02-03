@@ -1,6 +1,6 @@
 # Denies NSG rule additions/updates that allow all inbound traffic
 
-Denies the addition/update of  a single network security group rule that allow all inbound traffic. To block the creation of NSG, then use another policy(https://github.com/Azure/Community-Policy/blob/master/Policies/Network/block-NSG-creations-updates). 
+Denies the addition/update of  a single network security group rule that allow all inbound traffic. To block the creation of NSG, then use another policy(https://github.com/Azure/Community-Policy/blob/master/Policies/Network/block-nsg-creations-updates). 
 
 ## Try on Portal
 
