@@ -5,7 +5,7 @@
         "mode": "Indexed",
         "description": "This policy creates a Guest Configuration assignment to audit Linux virtual machines that do not have the specified applications installed. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
         "metadata": {
-            "version": "1.0.0",
+            "version": "1.1.0",
             "category": "Guest Configuration",
             "requiredProviders": [
                 "Microsoft.GuestConfiguration"
@@ -190,6 +190,43 @@
                                                 "like": "linux*"
                                             }
                                         ]
+                                    },
+                                    {
+                                        "allOf": [
+                                            {
+                                                "anyOf": [
+                                                    {
+                                                        "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
+                                                        "exists": "true"
+                                                    },
+                                                    {
+                                                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                                        "like": "Linux*"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "anyOf": [
+                                                    {
+                                                        "field": "Microsoft.Compute/imagePublisher",
+                                                        "exists": "false"
+                                                    },
+                                                    {
+                                                        "field": "Microsoft.Compute/imagePublisher",
+                                                        "notIn": [
+                                                            "OpenLogic",
+                                                            "RedHat",
+                                                            "credativ",
+                                                            "Suse",
+                                                            "Canonical",
+                                                            "microsoft-dsvm",
+                                                            "cloudera",
+                                                            "microsoft-ads"
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
                                     }
                                 ]
                             }
@@ -212,11 +249,11 @@
             "then": {
                 "effect": "deployIfNotExists",
                 "details": {
-                    "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
-                    "name": "installed_application_linux",
                     "roleDefinitionIds": [
                         "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
                     ],
+                    "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+                    "name": "installed_application_linux",
                     "existenceCondition": {
                         "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
                         "equals": "[base64(concat('[ChefInSpec]InstalledApplicationLinuxResource1;AttributesYmlContent', '=', concat('packages: [', replace(parameters('ApplicationName'), ';', ','), ']')))]"
