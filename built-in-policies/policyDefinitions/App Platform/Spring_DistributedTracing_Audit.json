@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Audit Azure Spring Cloud instances where distributed tracing is not enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "With the distributed tracing tools in Azure Spring Cloud, you can easily debug and monitor complex issues. Azure Spring Cloud integrates Azure Spring Cloud Sleuth with Azure's Application Insights. This integration provides powerful distributed tracing capability from the Azure portal.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "App Platform",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AppPlatform/Spring"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.AppPlatform/Spring/trace.enabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.AppPlatform/Spring/trace.state",
+                "notEquals": "Succeeded"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0f2d8593-4667-4932-acca-6a9f187af109",
+  "name": "0f2d8593-4667-4932-acca-6a9f187af109"
+}

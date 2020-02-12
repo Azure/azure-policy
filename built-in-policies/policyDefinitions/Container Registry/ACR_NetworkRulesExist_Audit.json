@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Container Registries should not allow unrestricted network access",
+    "description": "Audit Container Registries that do not have any Network (IP or VNET) Rules configured and allow all network access by default. Container Registries with at least one IP / Firewall rule or configured virtual network will be deemed compliant. For more information on Container Registry Network rules, please visit: https://aka.ms/acr/vnet.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Container Registry",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries"
+          },
+          {
+            "anyof": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/networkRuleSet.defaultAction",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/networkRuleSet.defaultAction",
+                "equals": "Allow"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d0793b48-0edc-4296-a390-4c75d1bdfd71",
+  "name": "d0793b48-0edc-4296-a390-4c75d1bdfd71"
+}
