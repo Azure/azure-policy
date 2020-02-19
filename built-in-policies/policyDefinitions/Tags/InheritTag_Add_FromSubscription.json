@@ -1,0 +1,52 @@
+{
+   "properties": {
+      "displayName": "Inherit a tag from the subscription if missing",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Adds the specified tag with its value from the containing subscription when any resource missing this tag is created or updated. Existing resources can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed.",
+      "metadata": {
+         "category": "Tags",
+         "version": "1.0.0"
+      },
+      "parameters": {
+         "tagName": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Name",
+               "description": "Name of the tag, such as 'environment'"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "[concat('tags[', parameters('tagName'), ']')]",
+                  "exists": "false"
+               },
+               {
+                  "value": "[subscription().tags[parameters('tagName')]]",
+                  "notEquals": ""
+               }
+            ]
+         },
+         "then": {
+            "effect": "modify",
+            "details": {
+               "roleDefinitionIds": [
+                  "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+               ],
+               "operations": [
+                  {
+                     "operation": "add",
+                     "field": "[concat('tags[', parameters('tagName'), ']')]",
+                     "value": "[subscription().tags[parameters('tagName')]]"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/40df99da-1232-49b1-a39a-6da8d878f469",
+   "name": "40df99da-1232-49b1-a39a-6da8d878f469"
+}

@@ -26,12 +26,38 @@
           "strongType": "omsWorkspace",
           "assignPermissions": true
         }
+      },
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Exclusion Tag Name",
+          "description": "Name of the tag to use for excluding vaults from this policy. This should be used along with the Exclusion Tag Value parameter."
+        },
+        "defaultValue": ""
+      },
+      "tagValue": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Exclusion Tag Value",
+          "description": "Value of the tag to use for excluding vaults from this policy. This should be used along with the Exclusion Tag Name parameter."
+        },
+        "defaultValue": ""
       }
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.RecoveryServices/vaults"
+          "allof": [
+            {
+              "field": "type",
+              "equals": "Microsoft.RecoveryServices/vaults"
+            },
+            {
+              "not": {
+                "field": "[concat('tags[',parameters('tagName'), ']')]",
+                "equals": "[parameters('tagValue')]"
+              }
+            }
+          ]
       },
       "then": {
         "effect": "deployIfNotExists",

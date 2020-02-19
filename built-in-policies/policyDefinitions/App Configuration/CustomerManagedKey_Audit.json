@@ -1,0 +1,45 @@
+{
+  "properties": {
+    "displayName": "App Configuration should use a customer managed key",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any App Configuration instance that does not use a customer managed key.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Configuration"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AppConfiguration/configurationStores"
+          },
+          {
+            "field": "Microsoft.AppConfiguration/configurationStores/encryption.keyVaultProperties.keyIdentifier",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/967a4b4b-2da9-43c1-b7d0-f98d0d74d0b1",
+  "name": "967a4b4b-2da9-43c1-b7d0-f98d0d74d0b1"
+}
