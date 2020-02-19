@@ -1,0 +1,52 @@
+{
+   "properties": {
+      "displayName": "Inherit a tag from the subscription",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Adds or replaces the specified tag and value from the containing subscription when any resource is created or updated. Existing resources can be remediated by triggering a remediation task.",
+      "metadata": {
+         "category": "Tags",
+         "version": "1.0.0"
+      },
+      "parameters": {
+         "tagName": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Name",
+               "description": "Name of the tag, such as 'environment'"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "[concat('tags[', parameters('tagName'), ']')]",
+                  "notEquals": "[subscription().tags[parameters('tagName')]]"
+               },
+               {
+                  "value": "[subscription().tags[parameters('tagName')]]",
+                  "notEquals": ""
+               }
+            ]
+         },
+         "then": {
+            "effect": "modify",
+            "details": {
+               "roleDefinitionIds": [
+                  "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+               ],
+               "operations": [
+                  {
+                     "operation": "addOrReplace",
+                     "field": "[concat('tags[', parameters('tagName'), ']')]",
+                     "value": "[subscription().tags[parameters('tagName')]]"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/b27a0cbd-a167-4dfa-ae64-4337be671140",
+   "name": "b27a0cbd-a167-4dfa-ae64-4337be671140"
+}
