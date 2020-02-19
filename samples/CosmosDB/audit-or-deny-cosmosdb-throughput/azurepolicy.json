@@ -1,0 +1,126 @@
+{
+  "properties": {
+    "displayName": "Handle Cosmos DB Throughput Exceeding Max",
+    "policyType": "Custom",
+    "description": "This policy handles (audits or denies) when throughput provisioned on Cosmos DB database or collection exceeds max",
+    "mode": "All",
+    "metadata": {
+      "category": "Cosmos DB"
+    },
+    "parameters": {
+      "throughPutMax": {
+        "type": "integer",
+        "defaultValue": 400,
+        "metadata": {
+          "displayName": "Max RUs",
+          "description": "Max RUs"
+        }
+      },
+      "throughputType": {
+        "type": "string",
+        "defaultValue": "Shared",
+        "allowedValues": [
+          "Dedicated",
+          "Shared"
+        ],
+        "metadata": {
+          "displayName": "Shared (Database) or Dedicated (Collection) Throughput",
+          "description": "Shared (Database) or Dedicated (Collection) Throughput"
+        }
+      },
+      "effectType": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny"
+        ],
+        "metadata": {
+          "displayName": "Policy Effect",
+          "description": "Policy Effect: Audit or Deny"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('throughputType')]",
+                    "equals": "Shared"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/tables/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('throughputType')]",
+                    "equals": "Dedicated"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                          },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/tables/throughputSettings/default.resource.throughput",
+                        "greater": "[parameters('throughPutMax')]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effectType')]"
+      }
+    }
+  }
+}
