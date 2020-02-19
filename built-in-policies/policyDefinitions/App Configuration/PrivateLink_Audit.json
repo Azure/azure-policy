@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "displayName": "App Configuration should use a private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any App Configuration instance that does not use a private link.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Configuration"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.AppConfiguration/configurationStores"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.AppConfiguration/configurationStores/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.AppConfiguration/configurationStores/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ca610c1d-041c-4332-9d88-7ed3094967c7",
+  "name": "ca610c1d-041c-4332-9d88-7ed3094967c7"
+}
