@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Deploys the diagnostic settings for Stream Analytics to stream to a regional Event Hub when any Stream Analytics which is missing this diagnostic settings is created or updated.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Monitoring"
     },
     "parameters": {
@@ -38,6 +38,15 @@
           "assignPermissions": true
         }
       },
+      "eventHubLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Event Hub Location",
+          "description": "The location the Event Hub resides in. Only Stream Analytics in this location will be linked to this Event Hub.",
+          "strongType": "location"
+        },
+        "defaultValue": ""
+      },
       "metricsEnabled": {
         "type": "string",
         "defaultValue": "False",
@@ -65,8 +74,24 @@
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.StreamAnalytics/streamingjobs"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.StreamAnalytics/streamingjobs"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('eventHubLocation')]",
+                "equals": ""
+              },
+              {
+                "field": "location",
+                "equals": "[parameters('eventHubLocation')]"
+              }
+            ]
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",
