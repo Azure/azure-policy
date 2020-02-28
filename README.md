@@ -149,7 +149,7 @@ The storage team is working on implementing Azure Policy on its dataplane operat
 
 Note that Azure policies for dataplane operations of certain targeted resource providers is also under active development.
 
- - Microsoft.Sql/firewallRules
+ - Microsoft.Sql/servers/firewallRules
 
 Firewall rules can be created/deleted/modified via T-SQL commands, which bypasses Azure Policy. There is currently no plan to address this.
 
