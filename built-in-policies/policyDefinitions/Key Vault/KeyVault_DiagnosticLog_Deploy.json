@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Event Hub when any Key Vault which is missing this diagnostic settings is created or updated.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Key Vault"
     },
     "parameters": {
@@ -25,6 +25,15 @@
           "strongType": "Microsoft.EventHub/Namespaces/AuthorizationRules",
           "assignPermissions": true
         }
+      },
+      "eventHubLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Event Hub Location",
+          "description": "The location the Event Hub resides in. Only Key Vaults in this location will be linked to this Event Hub.",
+          "strongType": "location"
+        },
+        "defaultValue": ""
       },
       "metricsEnabled": {
         "type": "String",
@@ -53,8 +62,24 @@
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.KeyVault/vaults"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('eventHubLocation')]",
+                "equals": ""
+              },
+              {
+                "field": "location",
+                "equals": "[parameters('eventHubLocation')]"
+              }
+            ]
+          }
+        ]
       },
       "then": {
         "effect": "deployIfNotExists",
