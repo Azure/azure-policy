@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy enforces the specified labels are provided for pods in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "2.0.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -28,13 +28,22 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. Providing a value for this parameter is optional."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
       "if": {
         "field": "type",
         "in": [
-          "AKS Engine"
+          "AKS Engine",
+          "Microsoft.Kubernetes/connectedClusters"
         ]
       },
       "then": {
@@ -43,7 +52,8 @@
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/pod-enforce-labels/template.yaml",
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/pod-enforce-labels/constraint.yaml",
           "values": {
-            "labels": "[parameters('labelsList')]"
+            "labels": "[parameters('labelsList')]",
+            "excludedNamespaces": "[parameters('excludedNamespaces')]"
           }
         }
       }
