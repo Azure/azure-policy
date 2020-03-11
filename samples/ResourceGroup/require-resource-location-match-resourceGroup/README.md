@@ -11,7 +11,7 @@ Denies deployment of resource to Resource Group is location does not match that 
 ````powershell
 $definition = New-AzPolicyDefinition -Name "require-resource-location-match-resourceGroup" -DisplayName "Require Resource Location to match Resource Group" -description "Denies deployment of resource to Resource Group is location does not match that of the Resource Group. This is useful to prevent accidental misconfiguration leading to increased cost and latency." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/ResourceGroup/require-resource-location-match-resourceGroup/azurepolicy.rules.json' -Mode Indexed
 $definition
-$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -tagName <tagName> -tagValue <tagValue> -PolicyDefinition $definition
+$assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope> -PolicyDefinition $definition
 $assignment
 ````
 
