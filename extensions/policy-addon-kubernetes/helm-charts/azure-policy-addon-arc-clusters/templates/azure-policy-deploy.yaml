@@ -1,0 +1,69 @@
+{{- if (and (ne .Values.azurepolicy.env.resourceid "<your_resource_id>") (and (ne .Values.azurepolicy.env.tenantid "<your_tenant_id>") (and (ne .Values.azurepolicy.env.clientid "<your_client_id>") (ne .Values.azurepolicy.env.clientsecret "<your_client_secret>")))) }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: azure-policy
+  namespace: kube-system
+type: Opaque
+data:
+  client-secret: {{ .Values.azurepolicy.env.clientsecret | b64enc | quote }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: azure-policy
+  name: azure-policy
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-policy
+  template:
+    metadata:
+      labels:
+        app: azure-policy
+      name: azure-policy
+    spec:
+      serviceAccountName: azure-policy
+      containers:
+      - name: azure-policy
+        image: {{ .Values.azurepolicy.image.name }}:{{ .Values.azurepolicy.image.tag }}
+        resources:
+          requests:
+            cpu: 30m
+            memory: 50Mi
+          limits:
+            cpu: 100m
+            memory: 200Mi
+        imagePullPolicy: Always
+        env:
+        - name: K8S_POLICY_PREFIX
+          value: azurepolicy
+        - name: RESOURCE_ID
+          value: {{ .Values.azurepolicy.env.resourceid }}
+        - name: RESOURCE_TYPE
+          value: Microsoft.Kubernetes/connectedClusters
+        - name: CLIENT_ID
+          value: {{ .Values.azurepolicy.env.clientid }}
+        - name: TENANT_ID
+          value: {{ .Values.azurepolicy.env.tenantid }}
+        - name: DATAPLANE_ENDPOINT
+          value: https://gov-prod-policy-data.trafficmanager.net
+        - name: CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: azure-policy
+              key: client-secret
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CURRENT_IMAGE
+          value: {{ .Values.azurepolicy.image.name }}:{{ .Values.azurepolicy.image.tag }}
+{{- end }}

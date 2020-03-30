@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy enforces load balancers do not have public IPs in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "2.0.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -21,20 +21,32 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. Providing a value for this parameter is optional."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
       "if": {
         "field": "type",
         "in": [
-          "AKS Engine"
+          "AKS Engine",
+          "Microsoft.Kubernetes/connectedClusters"
         ]
       },
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/load-balancer-no-public-ips/template.yaml",
-          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/load-balancer-no-public-ips/constraint.yaml"
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/load-balancer-no-public-ips/constraint.yaml",
+          "values": {
+            "excludedNamespaces": "[parameters('excludedNamespaces')]"
+          }
         }
       }
     }

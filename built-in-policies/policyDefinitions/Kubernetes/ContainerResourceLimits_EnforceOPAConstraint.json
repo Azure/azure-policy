@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy ensures container CPU and memory resource limits are defined and do not exceed the specified limits in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "2.0.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -35,13 +35,22 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. Providing a value for this parameter is optional."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
       "if": {
         "field": "type",
         "in": [
-          "AKS Engine"
+          "AKS Engine",
+          "Microsoft.Kubernetes/connectedClusters"
         ]
       },
       "then": {
@@ -51,7 +60,8 @@
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-resource-limits/constraint.yaml",
           "values": {
             "cpuLimit": "[parameters('cpuLimit')]",
-            "memoryLimit": "[parameters('memoryLimit')]"
+            "memoryLimit": "[parameters('memoryLimit')]",
+            "excludedNamespaces": "[parameters('excludedNamespaces')]"
           }
         }
       }

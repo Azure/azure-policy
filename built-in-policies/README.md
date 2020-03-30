@@ -2,7 +2,7 @@
 
 This folder contains all of the built-in policy definitions and initiatives (a.k.a policySetDefinitions) available in Azure's public cloud. They are organized into folders by category.
 
-Starting in January 2020 this repo will be updated each time changes are deployed to Azure. You can view the commit history for each policy to see changes over time.
+Starting in January 2020 this repo will be updated each time changes are deployed to Azure. You can view the commit history for each policy to see changes over time. There is a [atom feed](https://github.com/Azure/azure-policy/commits/master/built-in-policies.atom) of all the commits in the built-in-policies folder which can be used for a RSS feed. 
 
 ## Versioning
 
