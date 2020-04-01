@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Gets Azure Cosmos DB Resource Provider Aliases that can be used in a custom policy definition
+
 subscription_id="$(az account show -o tsv --query "id")"
 
 az provider show --namespace Microsoft.DocumentDB --expand "resourceTypes/aliases" --query "resourceTypes[].aliases[].name"
