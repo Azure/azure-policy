@@ -1,6 +1,6 @@
 # 
 # The job in this YAML file adds the 'control-plane' label to 'kube-system' and 'azure-arc' namespaces.
-# The job is executed in helm pre-install and pre-upgrade cycle.
+# The job is executed in helm pre-install phase of helm life cycle.
 #
 # For namespaces with 'control-plane' label...
 #     1. Kubernetes admission requests with violations are not denied by Gatekeeper.
@@ -12,16 +12,18 @@ metadata:
   name: azure-policy-patch-label-account
   namespace: kube-system
   annotations:
-    "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "20"
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: azure-policy-patch-label-cluster-role
   annotations:
+    "helm.sh/hook-weight": "25"
     "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 rules:
 - apiGroups: [""]
   resources: ["namespaces"]
@@ -33,8 +35,9 @@ metadata:
   name: azure-policy-patch-label-role-binding
   namespace: kube-system
   annotations:
+    "helm.sh/hook-weight": "30"
     "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 subjects:
 - kind: ServiceAccount
   name: azure-policy-patch-label-account
@@ -50,8 +53,9 @@ metadata:
   name: azure-policy-patch-label-role-binding
   namespace: azure-arc
   annotations:
+    "helm.sh/hook-weight": "30"
     "helm.sh/hook": pre-install
-    "helm.sh/hook-weight": "20"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 subjects:
 - kind: ServiceAccount
   name: azure-policy-patch-label-account
@@ -67,7 +71,8 @@ metadata:
   name: azure-policy-patch-label
   namespace: kube-system
   annotations:
-    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "35"
+    "helm.sh/hook": pre-install
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
