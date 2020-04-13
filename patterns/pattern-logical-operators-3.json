@@ -1,0 +1,30 @@
+{
+    "properties": {
+        "displayName": "Audit Azure Spring Cloud instances where distributed tracing is not enabled",
+        "description": "Distributed tracing tools in Azure Spring Cloud allow debugging and monitoring the complex interconnections between microservices in an application. Distributed tracing tools should be enabled and in a healthy state.",
+        "mode": "Indexed",
+        "policyRule": {
+            "if": {
+                "allOf": [{
+                        "field": "type",
+                        "equals": "Microsoft.AppPlatform/Spring"
+                    },
+                    {
+                        "anyOf": [{
+                                "field": "Microsoft.AppPlatform/Spring/trace.enabled",
+                                "notEquals": "true"
+                            },
+                            {
+                                "field": "Microsoft.AppPlatform/Spring/trace.state",
+                                "notEquals": "Succeeded"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "audit"
+            }
+        }
+    }
+}
