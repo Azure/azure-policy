@@ -1,3 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    admission.gatekeeper.sh/ignore: no-self-managing
+    control-plane: controller-manager
+    gatekeeper.sh/system: "yes"
+  name: gatekeeper-system
+---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -102,7 +111,7 @@ metadata:
   labels:
     gatekeeper.sh/system: "yes"
   name: gatekeeper-admin
-  namespace: kube-system
+  namespace: gatekeeper-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -111,7 +120,7 @@ metadata:
   labels:
     gatekeeper.sh/system: "yes"
   name: gatekeeper-manager-role
-  namespace: kube-system
+  namespace: gatekeeper-system
 rules:
 - apiGroups:
   - ""
@@ -227,7 +236,7 @@ metadata:
   labels:
     gatekeeper.sh/system: "yes"
   name: gatekeeper-manager-rolebinding
-  namespace: kube-system
+  namespace: gatekeeper-system
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -235,7 +244,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gatekeeper-admin
-  namespace: kube-system
+  namespace: gatekeeper-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -250,7 +259,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: gatekeeper-admin
-  namespace: kube-system
+  namespace: gatekeeper-system
 ---
 apiVersion: v1
 kind: Secret
@@ -258,7 +267,7 @@ metadata:
   labels:
     gatekeeper.sh/system: "yes"
   name: gatekeeper-webhook-server-cert
-  namespace: kube-system
+  namespace: gatekeeper-system
 ---
 apiVersion: v1
 kind: Service
@@ -266,7 +275,7 @@ metadata:
   labels:
     gatekeeper.sh/system: "yes"
   name: gatekeeper-webhook-service
-  namespace: kube-system
+  namespace: gatekeeper-system
 spec:
   ports:
   - port: 443
@@ -282,7 +291,7 @@ metadata:
     control-plane: controller-manager
     gatekeeper.sh/system: "yes"
   name: gatekeeper-controller-manager
-  namespace: kube-system
+  namespace: gatekeeper-system
 spec:
   replicas: 1
   selector:
@@ -291,18 +300,23 @@ spec:
       gatekeeper.sh/system: "yes"
   template:
     metadata:
+      annotations:
+        container.seccomp.security.alpha.kubernetes.io/manager: runtime/default
       labels:
         control-plane: controller-manager
         gatekeeper.sh/system: "yes"
     spec:
       containers:
       - args:
+        - --log-denies
         - --audit-interval={{ .Values.gatekeeper.args.auditIntervalSeconds }}
         - --port=8443
         - --logtostderr
         - --constraint-violations-limit={{ .Values.gatekeeper.args.constraintViolationsLimit }}
         - --audit-from-cache=false
+        - --exempt-namespace=gatekeeper-system
         - --exempt-namespace=kube-system
+        - --exempt-namespace=azure-arc
         command:
         - /manager
         env:
@@ -345,6 +359,9 @@ spec:
             memory: {{ .Values.gatekeeper.resources.memoryRequests }}
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
           runAsGroup: 999
           runAsNonRoot: true
           runAsUser: 1000
@@ -369,10 +386,9 @@ metadata:
   name: gatekeeper-validating-webhook-configuration
 webhooks:
 - clientConfig:
-    caBundle: Cg==
     service:
       name: gatekeeper-webhook-service
-      namespace: kube-system
+      namespace: gatekeeper-system
       path: /v1/admit
   failurePolicy: Ignore
   name: validation.gatekeeper.sh
@@ -395,10 +411,9 @@ webhooks:
   sideEffects: None
   timeoutSeconds: 5
 - clientConfig:
-    caBundle: Cg==
     service:
       name: gatekeeper-webhook-service
-      namespace: kube-system
+      namespace: gatekeeper-system
       path: /v1/admitlabel
   failurePolicy: Fail
   name: check-ignore-label.gatekeeper.sh
