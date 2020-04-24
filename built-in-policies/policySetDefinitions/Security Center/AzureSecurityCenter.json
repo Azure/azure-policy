@@ -4,10 +4,34 @@
     "policyType": "BuiltIn",
     "description": "Monitor all the available security recommendations in Azure Security Center. This is the default policy for Azure Security Center.",
     "metadata": {
-      "version": "2.0.1",
+      "version": "4.0.0",
       "category": "Security Center"
     },
     "parameters": {
+      "azurePolicyforWindowsMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Policy for Windows extension should be installed on your Windows virtual machines",
+          "description": "Enable or disable virtual machines reporting that the Azure Policy for Windows extension is installed"
+        }
+      },
+      "windowsDefenderExploitGuardMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Windows Defender Exploit Guard should be enabled on your Windows virtual machines",
+          "description": "Enable or disable virtual machines reporting that Windows Defender Exploit Guard is enabled"
+        }
+      },
       "vmssSystemUpdatesMonitoringEffect": {
         "type": "string",
         "defaultValue": "AuditIfNotExists",
@@ -319,6 +343,7 @@
         "defaultValue": "Audit",
         "allowedValues": [
           "Audit",
+          "Deny",
           "Disabled"
         ],
         "metadata": {
@@ -523,6 +548,7 @@
         "defaultValue": "Audit",
         "allowedValues": [
           "Audit",
+          "Deny",
           "Disabled"
         ],
         "metadata": {
@@ -535,6 +561,7 @@
         "defaultValue": "Audit",
         "allowedValues": [
           "Audit",
+          "Deny",
           "Disabled"
         ],
         "metadata": {
@@ -637,6 +664,7 @@
         "defaultValue": "Disabled",
         "allowedValues": [
           "Audit",
+          "Deny",
           "Disabled"
         ],
         "metadata": {
@@ -1622,6 +1650,18 @@
           "displayName": "Audit Dependency Agent for Linux VMs monitoring",
           "description": "Enable or disable Dependency Agent for Linux VMs"
         }
+      },
+      "AzureFirewallEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "All Internet traffic should be routed via your deployed Azure Firewall",
+          "description": "Enable or disable All Internet traffic should be routed via your deployed Azure Firewall"
+        }
       }
     },
     "policyDefinitions": [
@@ -1640,6 +1680,24 @@
         "parameters": {
           "effect": {
             "value": "[parameters('vmssEndpointProtectionMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5fc23db3-dd4d-4c56-bcc7-43626243e601",
+        "policyDefinitionReferenceId": "azurePolicyforWindowsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azurePolicyforWindowsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bed48b13-6647-468e-aa2f-1af1d3f4dd40",
+        "policyDefinitionReferenceId": "windowsDefenderExploitGuardMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('windowsDefenderExploitGuardMonitoringEffect')]"
           }
         }
       },
@@ -2032,7 +2090,7 @@
             "value": "[parameters('serverVulnerabilityAssessmentEffect')]"
           }
         }
-      },      
+      },
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9daedab3-fb2d-461e-b861-71790eead4f6",
         "policyDefinitionReferenceId": "nextGenerationFirewallMonitoring",
@@ -2464,7 +2522,7 @@
             "value": "[parameters('restrictAccessToManagementPortsMonitoringEffect')]"
           }
         }
-      },      
+      },
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bd352bd5-2853-4985-bf0d-73806b4a5744",
         "policyDefinitionReferenceId": "disableIPForwardingMonitoring",
@@ -2516,6 +2574,15 @@
         "parameters": {
           "effect": {
             "value": "[parameters('ASCDependencyAgentAuditLinuxEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fc5e4038-4584-4632-8c85-c0448d374b2c",
+        "policyDefinitionReferenceId": "AzureFirewallEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('AzureFirewallEffect')]"
           }
         }
       }
