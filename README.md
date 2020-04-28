@@ -115,6 +115,8 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
               "name": "default"
             }
    ```
+- Microsoft.DataLakeStore/accounts
+  - This type behaves similarly to Microsoft.Sql/servers/autidintSettings. Compliance of some fields cannot be determined except in AuditIfNotExits and DeployIfNotExists.
 - Microsoft.Compute/virtualMachines/instanceView
 
 The potential for fixing these resource types is still under investigation.
