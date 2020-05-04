@@ -1,25 +1,27 @@
 {
-  "if": {
-    "allOf": [
-          {
-            "field": "type",
-            "equals": "Microsoft.DocumentDB/databaseAccounts"
-          },
-          {
-            "anyOf": [
-              {
-                "field": "Microsoft.DocumentDB/databaseAccounts/ipRangeFilter",
-                "exists": "false"
-              },
-              {
-                "field": "Microsoft.DocumentDB/databaseAccounts/ipRangeFilter",
-                "equals": ""
-              }
-            ]
-          }
+   "if": {
+        "allOf": [
+            {
+                "field": "type",
+                "equals": "Microsoft.DocumentDB/databaseAccounts"
+            },
+            {
+                "count": {
+                    "field": "Microsoft.DocumentDB/databaseAccounts/ipRules[*]",
+                    "where": {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/ipRules[*].ipAddressOrRange",
+                        "notin": [
+                            // example: "52.176.6.30",
+                            //"52.169.50.45",
+                            //"52.187.184.26"
+                        ]
+                    }
+                },
+                "greater": 0
+            }
         ]
-  },
-  "then": {
-    "effect": "audit"
-  }
+    },
+    "then": {
+        "effect": "deny"
+    }
 }
