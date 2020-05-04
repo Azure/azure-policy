@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Bring your own key data protection should be enabled for MySQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits MySQL servers in your environment without bring your own key data protection enabled. For more details, visit https://aka.ms/mysqlbyok.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforMySQL/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforMySQL/servers/keys",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.DBforMySQL/servers/keys/serverKeyType",
+                "equals": "AzureKeyVault"
+              },
+              {
+                "field": "Microsoft.DBforMySQL/servers/keys/uri",
+                "notEquals": ""
+              },
+              {
+                "field": "Microsoft.DBforMySQL/servers/keys/uri",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/83cef61d-dbd1-4b20-a4fc-5fbc7da10833",
+  "name": "83cef61d-dbd1-4b20-a4fc-5fbc7da10833"
+}
