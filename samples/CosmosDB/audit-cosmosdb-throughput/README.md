@@ -1,6 +1,8 @@
 # Audit Cosmos DB Throughput Exceeding Max
 
-Audit when Cosmos DB Shared or Dedicated [Throughput](https://docs.microsoft.com/azure/cosmos-db/set-throughput) exceeds the specified maximum.
+Audit or Deny when Cosmos DB Shared or Dedicated [Throughput](https://docs.microsoft.com/azure/cosmos-db/set-throughput) exceeds the specified maximum.
+
+In addition to the following code blocks, several utility scripts are provided for convenience in the [utility](./utility) folder. These can be helpful with inspecting Azure Resource Provider aliases, getting Azure Policy definition and assignment information, and deploying new Azure Policy custom definitions and assignments. The utility scripts are provided in both Azure Powershell as well as in Bash/Azure CLI.
 
 ## Try on Portal
 
@@ -11,8 +13,6 @@ Audit when Cosmos DB Shared or Dedicated [Throughput](https://docs.microsoft.com
 [Reference: New-AzPolicyDefinition](https://docs.microsoft.com/powershell/module/az.resources/new-azpolicydefinition)
 
 [Reference: New-AzPolicyAssignment](https://docs.microsoft.com/powershell/module/az.resources/new-azpolicyassignment)
-
-In addition to the following code blocks, [New-PolicyDefinition.ps1](New-PolicyDefinition.ps1) and [New-PolicyAssignment.ps1](New-PolicyAssignment.ps1) are available in this repo.
 
 ````powershell
 $definition = New-AzPolicyDefinition `
@@ -43,8 +43,6 @@ New-AzPolicyAssignment `
 [Reference: az policy definition create](https://docs.microsoft.com/cli/azure/policy/definition?view=azure-cli-latest#az-policy-definition-create)
 
 [Reference: az policy assignment create](https://docs.microsoft.com/cli/azure/policy/assignment?view=azure-cli-latest#az-policy-assignment-create)
-
-In addition to the following code blocks, [new-policy-definition.sh](new_policy_definition.sh) and [new-policy-assignment.sh](new_policy_assignment.sh) are available in this repo.
 
 ````cli
 az policy definition create \
