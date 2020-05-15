@@ -1,19 +1,33 @@
 {
-	"if": {
-		"allOf": [
-			{
-				"field": "type",
-				"equals": "Microsoft.Storage/storageAccounts"
-			},
-			{
-				"not": {
-					"field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
-					"equals": "true"
-				}
-			}
-		]
-	},
-	"then": {
-		"effect": "deny"
-	}
+    "if": {
+        "allOf": [
+            {
+                "field": "type",
+                "equals": "Microsoft.Storage/storageAccounts"
+            },
+            {
+                "anyOf": [
+                    {
+                        "allOf": [
+                            {
+                                "value": "[requestContext().apiVersion]",
+                                "less": "2019-04-01"
+                            },
+                            {
+                                "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                                "exists": "false"
+                            }
+                        ]
+                    },
+                    {
+                        "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                        "equals": "false"
+                    }
+                ]
+            }
+        ]
+    },
+    "then": {
+        "effect": "deny"
+    }
 }
