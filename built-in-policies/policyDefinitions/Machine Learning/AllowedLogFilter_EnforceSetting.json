@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Configure log filter expressions and datastore to be used for full logs for specified Azure Machine Learning computes",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.MachineLearningServices.Data",
+    "description": "This policy helps provide log filter expression and datastore to be used for full logs in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Machine Learning",
+      "preview": true
+    },
+    "parameters": {
+      "computeNames": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Compute names where Azure ML jobs run",
+          "description": "List of compute names where this policy should be applied. Ex. cpu-cluster;gpu-cluster. If no value is provided to this parameter then policy is applicable to all computes."
+        },
+        "defaultValue": []
+      },
+      "logFilters": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Log filter expressions",
+          "description": "List of log filter expressions used to filter logs. Ex. ^prefix1.*$"
+        },
+        "defaultValue": []
+      },
+      "datastore": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Datastore",
+          "description": "Datastore used to store filtered logs. Ex. LogsDatastore which is configured in AML."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "enforceSetting",
+        "allowedValues": [
+          "enforceSetting",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/name",
+            "in": "[parameters('computeNames')]"
+          },
+          {
+            "value": "[length(parameters('computeNames'))]",
+            "equals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "setting": {
+            "name": "logFilter",
+            "value": {
+              "filters": "[parameters('logFilters')]",
+              "datastore": "[parameters('datastore')]"
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1d413020-63de-11ea-bc55-0242ac130003",
+  "name": "1d413020-63de-11ea-bc55-0242ac130003"
+}

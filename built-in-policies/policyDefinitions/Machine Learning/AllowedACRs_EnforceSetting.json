@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "Configure allowed registries for specified Azure Machine Learning computes",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.MachineLearningServices.Data",
+    "description": "This policy helps provide registries that are allowed in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Machine Learning",
+      "preview": true
+    },
+    "parameters": {
+      "computeNames": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Compute names where Azure ML jobs run",
+          "description": "List of compute names where this policy should be applied. Ex. cpu-cluster;gpu-cluster. If no value is provided to this parameter then policy is applicable to all computes."
+        },
+        "defaultValue": []
+      },
+      "allowedACRs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Azure Container Registries",
+          "description": "List of Azure Container Registries that can be used with Azure ML. Ex. amlrepo.azurecr.io;amlrepo.azurecr.io/foo"
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "enforceSetting",
+        "allowedValues": [
+          "enforceSetting",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/name",
+            "in": "[parameters('computeNames')]"
+          },
+          {
+            "value": "[length(parameters('computeNames'))]",
+            "equals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "setting": {
+            "name": "allowedACRs",
+            "value": "[parameters('allowedACRs')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5853517a-63de-11ea-bc55-0242ac130003",
+  "name": "5853517a-63de-11ea-bc55-0242ac130003"
+}
