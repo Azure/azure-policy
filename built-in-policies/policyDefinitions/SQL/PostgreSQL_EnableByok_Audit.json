@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Bring your own key data protection should be enabled for PostgreSQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits PostgreSQL servers in your environment without bring your own key data protection enabled. For more details, visit https://aka.ms/postgresqlbyok.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/servers/keys",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.DBforPostgreSQL/servers/keys/serverKeyType",
+                "equals": "AzureKeyVault"
+              },
+              {
+                "field": "Microsoft.DBforPostgreSQL/servers/keys/uri",
+                "notEquals": ""
+              },
+              {
+                "field": "Microsoft.DBforPostgreSQL/servers/keys/uri",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/18adea5e-f416-4d0f-8aa8-d24321e3e274",
+  "name": "18adea5e-f416-4d0f-8aa8-d24321e3e274"
+}
