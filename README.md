@@ -1,6 +1,6 @@
 # Azure Policy Samples
 
-This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For additional samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
+This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For easy search of all built-in  with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
 For custom policy samples, check out our Community repo! (https://github.com/Azure/Community-Policy)
 
@@ -11,10 +11,6 @@ To contribute, please submit your policies to our Community repo! (https://githu
 ## Reporting Samples Issues
 
 If you discover a problem with any of the samples published here that isn't already reported in [**Issues**](https://github.com/Azure/azure-policy/issues), open a [**New issue**](https://github.com/Azure/azure-policy/issues/new/choose).
-
-# Azure Policy Support
-
-Support for Azure Policy has transitioned to standard Azure support channels so this repository will no longer be monitored for support requests. Issues opened here are only to report specific problems with the samples published in this repository. Any other issues will be closed with a pointer to this notice. Check [**here**](#getting-support) for information about getting support for Azure Policy.
 
 # Azure Policy Known Issues
 
@@ -51,9 +47,6 @@ Check here for a current list of [**known issues**](#known-issues) for Azure Pol
   - [Remediations](https://docs.microsoft.com/rest/api/policy-insights/remediations)
   - [Guest Configuration (preview)](https://docs.microsoft.com/rest/api/guestconfiguration/)
 
-## Other
-
-- [Video - Build 2018](https://channel9.msdn.com/events/Build/2018/THR2030)
 
 ## Getting Support
 
@@ -215,3 +208,34 @@ These are resource types that have significant policy scenarios, but are not sup
 - Microsoft.ServiceBus/namespaces/topics/subscriptions/rules
 
 Work to increase the scale that policy can be performantly applied to resource types is in progress. Planned availability date is not yet determined.
+
+
+### Indexed Resource types always non-complaint to tagging policies 
+
+There are some resource types that even though are indexed, do not support Tagging Policies. Here are the list of those with issue: 
+* Master SQL DB
+* Microsoft.alertsmanagement/smartdetectoralertrules
+* Microsoft.AnalysisServices/servers (Cannot use periods '.') 
+* Microsoft.compute/virtualmachines/extensions
+* Microsoft.DataMigration 
+* Microsoft.DBforPostgreSQL/servers 
+* Microsoft.Insights/actiongroups
+* Microsoft.Insights/activitylogalerts
+* Microsoft.Insights/alertrules
+* Microsoft.Insights/autoscalesettings
+* Microsoft.Insights/components 
+* Microsoft.Insights/guestDiagnosticSettings
+* Microsoft.Insights/metricalerts (All tags will be automatically lowercased)
+* Microsoft.Logic/workflows
+* Microsoft.Netowork/trafficManagerProfiles/heatmapps
+* Microsoft.Network/frontdoors
+* Microsoft.Network/networkWatchers
+* Microsoft.Network/networkWatchers/flowLogs
+* Microsoft.Network/trafficManagerProfiles/ (Does not support spaces ' ')
+* Microsoft.offazure/vmwaresites
+* Microsoft.OperationsManagement/solutions
+* Microsoft.Portal/dashboards (All tags will be automatically lowercased)
+* Microsoft.Sql/virtualClusters
+* Microsoft.Web/certificates (Does not support numbers)
+
+To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
