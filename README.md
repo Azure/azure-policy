@@ -140,7 +140,7 @@ Resource providers are free to implement their own resource management operation
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
-The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available in the middle of 2020.
+The storage team is working on implementing blob public access control on storage account to address this scenario. This is expected to first be available in August 2020.
 
 Note that Azure policies for dataplane operations of certain targeted resource providers is also under active development.
 
@@ -239,3 +239,4 @@ There are some resource types that even though are indexed, do not support Taggi
 * Microsoft.Web/certificates (Does not support numbers)
 
 To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
+
