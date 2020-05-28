@@ -94,7 +94,7 @@ All cases of known resource types with anomalous policy behavior are listed here
 
 In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Below are listed the known resource types exhibiting this problem.
 
-- Microsoft<span></span>.Web/sites/siteConfig
+- Microsoft<span></span>.Web/sites (siteConfig property)
 - Microsoft<span></span>.Web/sites/config/* (except Microsoft<span></span>.Web/sites/config/web)
 
 Currently, there is no plan to change this behavior for the above Microsoft.Web resource types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Web team.
