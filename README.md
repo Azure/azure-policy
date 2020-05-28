@@ -240,3 +240,6 @@ There are some resource types that even though are indexed, do not support Taggi
 
 To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
 
+### Alias changes  
+
+May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your any custom definition to support the property as an array.  
