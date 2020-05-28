@@ -6,4 +6,7 @@ The Azure Policy Add-on enacts the following functions:
 - Deploys policies in the cluster as [constraint template](https://github.com/open-policy-agent/gatekeeper#constraint-templates) and [constraint](https://github.com/open-policy-agent/gatekeeper#constraints) custom resources.
 - Reports auditing and compliance details back to Azure Policy service.
     
-The Azure Policy Add-on can be installed on AKS Engine and Azure Arc for Kubernetes clusters using the helm charts present in this repo.
+> [!NOTE]
+> Azure Policy for Kubernetes is in Preview and supports only built-in policy definitions.
+    
+The Azure Policy Add-on can be installed on AKS Engine and Azure Arc enabled Kubernetes clusters using the helm charts present in this repo. For detailed instructions, please visit [Understand Azure Policy for Kubernetes clusters](https://aka.ms/kubepolicydoc).
