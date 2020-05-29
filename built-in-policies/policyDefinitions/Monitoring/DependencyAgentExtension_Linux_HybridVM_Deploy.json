@@ -1,11 +1,11 @@
 {
     "properties": {
-        "displayName": "Deploy Dependency agent to Windows Azure Arc machines",
+        "displayName": "Deploy Dependency agent to hybrid Linux Azure Arc machines",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "This policy deploys the Dependency agent to Windows Azure Arc machines if the agent isn't installed.",
+        "description": "This policy deploys the Dependency agent to Linux Azure Arc machines if the agent isn't installed.",
         "metadata": {
-            "version": "1.0.1-preview",
+            "version": "1.0.0-preview",
             "category": "Monitoring",
             "preview": true
         },
@@ -18,7 +18,7 @@
                     },
                     {
                         "field": "Microsoft.HybridCompute/imageOffer",
-                        "like": "windows*"
+                        "like": "linux*"
                     }
                 ]
             },
@@ -33,7 +33,7 @@
                         "allOf": [
                             {
                                 "field": "Microsoft.HybridCompute/machines/extensions/type",
-                                "equals": "DependencyAgentWindows"
+                                "equals": "DependencyAgentLinux"
                             },
                             {
                                 "field": "Microsoft.HybridCompute/machines/extensions/publisher",
@@ -60,33 +60,22 @@
                                     }
                                 },
                                 "variables": {
-                                    "DaExtensionName": "DependencyAgent",
-                                    "DaExtensionType": "DependencyAgentWindows"
-                                },
+                                    "vmExtensionName": "DependencyAgent",
+                                    "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                                    "vmExtensionType": "DependencyAgentLinux"
+                                 },
                                 "resources": [
                                     {
-                                        "type": "Microsoft.HybridCompute/machines",
-                                        "apiVersion": "2020-03-11-preview",
-                                        "name": "[parameters('vmName')]",
+                                        "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                                        "type": "Microsoft.HybridCompute/machines/extensions",
                                         "location": "[parameters('location')]",
-                                        "resources": [
-                                            {
-                                                "type": "extensions",
-                                                "apiVersion": "2020-03-11-preview",
-                                                "name": "[variables('DaExtensionName')]",
-                                                "location": "[parameters('location')]",
-                                                "dependsOn": [
-                                                    "[concat('Microsoft.HybridCompute/machines/', parameters('vmName'))]"
-                                                ],
-                                                "properties": {
-                                                    "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
-                                                    "type": "[variables('DaExtensionType')]",
-                                                    "autoUpgradeMinorVersion": true,
-                                                    "settings": {}
-                                                }
-                                            }
-                                        ]
-                                    }
+                                        "apiVersion": "2019-12-12",
+                                        "properties": {
+                                           "publisher": "[variables('vmExtensionPublisher')]",
+                                           "type": "[variables('vmExtensionType')]",
+                                           "settings": {}
+                                        }
+                                     }
                                 ],
                                 "outputs": {
                                     "policy": {
@@ -109,6 +98,6 @@
             }
         }
     },
-    "id": "/providers/Microsoft.Authorization/policyDefinitions/91cb9edd-cd92-4d2f-b2f2-bdd8d065a3d4",
-    "name": "91cb9edd-cd92-4d2f-b2f2-bdd8d065a3d4"
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/deacecc0-9f84-44d2-bb82-46f32d766d43",
+    "name": "deacecc0-9f84-44d2-bb82-46f32d766d43"
 }
