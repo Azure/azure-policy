@@ -1,6 +1,6 @@
 # Azure Policy Samples
 
-This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For additional samples with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
+This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For easy search of all built-in  with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
 For custom policy samples, check out our Community repo! (https://github.com/Azure/Community-Policy)
 
@@ -11,10 +11,6 @@ To contribute, please submit your policies to our Community repo! (https://githu
 ## Reporting Samples Issues
 
 If you discover a problem with any of the samples published here that isn't already reported in [**Issues**](https://github.com/Azure/azure-policy/issues), open a [**New issue**](https://github.com/Azure/azure-policy/issues/new/choose).
-
-# Azure Policy Support
-
-Support for Azure Policy has transitioned to standard Azure support channels so this repository will no longer be monitored for support requests. Issues opened here are only to report specific problems with the samples published in this repository. Any other issues will be closed with a pointer to this notice. Check [**here**](#getting-support) for information about getting support for Azure Policy.
 
 # Azure Policy Known Issues
 
@@ -51,9 +47,6 @@ Check here for a current list of [**known issues**](#known-issues) for Azure Pol
   - [Remediations](https://docs.microsoft.com/rest/api/policy-insights/remediations)
   - [Guest Configuration (preview)](https://docs.microsoft.com/rest/api/guestconfiguration/)
 
-## Other
-
-- [Video - Build 2018](https://channel9.msdn.com/events/Build/2018/THR2030)
 
 ## Getting Support
 
@@ -101,7 +94,7 @@ All cases of known resource types with anomalous policy behavior are listed here
 
 In some cases, certain RPs may return incomplete or otherwise limited or missing information about resources of a given type. The Azure Policy engine is unable to determine the compliance of any resources of such a type. Below are listed the known resource types exhibiting this problem.
 
-- Microsoft<span></span>.Web/sites/siteConfig
+- Microsoft<span></span>.Web/sites (siteConfig property)
 - Microsoft<span></span>.Web/sites/config/* (except Microsoft<span></span>.Web/sites/config/web)
 
 Currently, there is no plan to change this behavior for the above Microsoft.Web resource types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Web team.
@@ -147,7 +140,7 @@ Resource providers are free to implement their own resource management operation
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
-The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available in the middle of 2020.
+The storage team is working on implementing blob public access control on storage account to address this scenario. This is expected to first be available in August 2020.
 
 Note that Azure policies for dataplane operations of certain targeted resource providers is also under active development.
 
@@ -202,3 +195,51 @@ In a few instances, when creating a resource from Azure Portal, the property is 
 Using this type of alias in the existence condition of auditIfNotExists or deployIfNotExists policies works correctly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
 
 Using this type of alias in audit/deny/append effect policies works partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies and no deny or append behaviors for deny/append effect policies because of the missing property in the request payload.
+
+### Resource types that exceed current enforcement and compliance scale
+
+There some resource types that are generated at very high scale. These are not suitable for management by Azure Policy because the enforcement and compliance checks create overhead that can negatively impact the performance of the API itself. Most of these are not significant policy scenarios, but there are a few exceptions.
+
+These are resource types that have significant policy scenarios, but are not supported by Azure Policy due to the above scalability considerations:
+
+- Microsoft.ServiceBus/namespaces/topics
+- Microsoft.ServiceBus/namespaces/topics/authorizationRules
+- Microsoft.ServiceBus/namespaces/topics/subscriptions
+- Microsoft.ServiceBus/namespaces/topics/subscriptions/rules
+
+Work to increase the scale that policy can be performantly applied to resource types is in progress. Planned availability date is not yet determined.
+
+
+### Indexed Resource types always non-complaint to tagging policies 
+
+There are some resource types that even though are indexed, do not support Tagging Policies. Here are the list of those with issue: 
+* Master SQL DB
+* Microsoft.alertsmanagement/smartdetectoralertrules
+* Microsoft.AnalysisServices/servers (Cannot use periods '.') 
+* Microsoft.compute/virtualmachines/extensions
+* Microsoft.DataMigration 
+* Microsoft.DBforPostgreSQL/servers 
+* Microsoft.Insights/actiongroups
+* Microsoft.Insights/activitylogalerts
+* Microsoft.Insights/alertrules
+* Microsoft.Insights/autoscalesettings
+* Microsoft.Insights/components 
+* Microsoft.Insights/guestDiagnosticSettings
+* Microsoft.Insights/metricalerts (All tags will be automatically lowercased)
+* Microsoft.Logic/workflows
+* Microsoft.Netowork/trafficManagerProfiles/heatmapps
+* Microsoft.Network/frontdoors
+* Microsoft.Network/networkWatchers
+* Microsoft.Network/networkWatchers/flowLogs
+* Microsoft.Network/trafficManagerProfiles/ (Does not support spaces ' ')
+* Microsoft.offazure/vmwaresites
+* Microsoft.OperationsManagement/solutions
+* Microsoft.Portal/dashboards (All tags will be automatically lowercased)
+* Microsoft.Sql/virtualClusters
+* Microsoft.Web/certificates (Does not support numbers)
+
+To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
+
+### Alias changes  
+
+May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your any custom definition to support the property as an array.  

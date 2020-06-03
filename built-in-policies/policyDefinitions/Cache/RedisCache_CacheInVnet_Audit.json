@@ -1,0 +1,47 @@
+{
+    "properties": {
+      "displayName": "Azure Cache for Redis should reside within a virtual network",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "This policy audits whether the Azure Cache for Redis resource has a non-public endpoint by being deployed into a virtual network.",
+      "metadata": {
+        "version": "1.0.0",
+        "category": "Cache"
+      },
+      "parameters": {
+        "effect": {
+          "type": "string",
+          "defaultValue": "Audit",
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "metadata": {
+            "displayName": "Effect",
+            "description": "The effect determines what happens when the policy rule is evaluated to match."
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.Cache/redis"
+            },
+            {
+              "field": "Microsoft.Cache/Redis/subnetId",
+              "exists": "false"
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/7d092e0a-7acd-40d2-a975-dca21cae48c4",
+    "name": "7d092e0a-7acd-40d2-a975-dca21cae48c4"
+  }
+  

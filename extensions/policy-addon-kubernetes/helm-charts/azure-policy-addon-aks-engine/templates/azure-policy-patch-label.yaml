@@ -1,5 +1,5 @@
 # 
-# The job in this YAML file tries to add 'admission.policy.azure.com/ignore' label to 'kube-system' and 'azure-arc' namespaces.
+# The job in this YAML file tries to add 'admission.policy.azure.com/ignore' label to 'kube-system' namespace.
 # The job is executed in helm pre-install phase of helm life cycle.
 #
 # For namespaces with 'admission.policy.azure.com/ignore' label...
@@ -47,24 +47,6 @@ roleRef:
   name: azure-policy-patch-label-cluster-role
   apiGroup: rbac.authorization.k8s.io
 ---
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: azure-policy-patch-label-role-binding
-  namespace: azure-arc
-  annotations:
-    "helm.sh/hook-weight": "30"
-    "helm.sh/hook": pre-install
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-subjects:
-- kind: ServiceAccount
-  name: azure-policy-patch-label-account
-  namespace: kube-system
-roleRef:
-  kind: ClusterRole
-  name: azure-policy-patch-label-cluster-role
-  apiGroup: rbac.authorization.k8s.io
----
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -94,7 +76,7 @@ spec:
             - |
               set -o pipefail
               token=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-              namespaces="kube-system azure-arc"
+              namespaces="kube-system"
               for namespace in ${namespaces}
               do
                 echo "Retrieving namespace ${namespace} details"
