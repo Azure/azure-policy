@@ -18,7 +18,7 @@ $assignment
 ## Try with CLI
 
 ````cli
-az policy definition create --name 'onboard-to-automation-dsc' --display-name 'Onboard Azure VM and Arc connected machines to Azure Automation DSC' --description 'Deploys the DSC extension to onboard nodes to Azure Automation DSC. Does not assign a configuration.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/onboard-to-automation-dsc/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/onboard-to-automation-dsc/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'onboard-to-automation-dsc' --display-name 'Onboard Azure VM and Arc connected machines to Azure Automation DSC' --description 'Deploys the DSC extension to onboard nodes to Azure Automation DSC. Does not assign a configuration.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/onboard-to-automation-dsc/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/onboard-to-automation-dsc/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "onboard-to-automation-dsc" 
 ````

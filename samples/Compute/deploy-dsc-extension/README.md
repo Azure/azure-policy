@@ -18,7 +18,7 @@ $assignment
 ## Try with CLI
 
 ````cli
-az policy definition create --name 'deploy-dsc-extension' --display-name 'Deploy DSC Extension to Azure VM and Arc connected machines' --description 'Deploys the DSC extension to and assigns configuration artifact from url location.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/deploy-dsc-extension/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/deploy-dsc-extension/azurepolicy.parameters.json' --mode All
+az policy definition create --name 'deploy-dsc-extension' --display-name 'Deploy DSC Extension to Azure VM and Arc connected machines' --description 'Deploys the DSC extension to and assigns configuration artifact from url location.' --rules 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/deploy-dsc-extension/azurepolicy.rules.json' --params 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Automation/deploy-dsc-extension/azurepolicy.parameters.json' --mode Indexed
 
 az policy assignment create --name <assignmentname> --scope <scope> --policy "deploy-dsc-extension" 
 ````
