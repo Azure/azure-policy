@@ -5,7 +5,7 @@
     "mode": "All",
     "description": "This policy ensures that no custom subscription owner roles exist.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "General"
     },
     "parameters": {
@@ -50,20 +50,24 @@
             ]
           },
           {
-            "not": {
-              "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]",
-              "notIn": [
-                "[concat(subscription().id,'/')]",
-                "[subscription().id]",
-                "/"
-              ]
-            }
-          },
-          {
-            "not": {
-              "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]",
-              "notLike": "/providers/Microsoft.Management/*"
-            }
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]",
+                  "notIn": [
+                    "[concat(subscription().id,'/')]",
+                    "[subscription().id]",
+                    "/"
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]",
+                  "notLike": "/providers/Microsoft.Management/*"
+                }
+              }
+            ]
           }
         ]
       },

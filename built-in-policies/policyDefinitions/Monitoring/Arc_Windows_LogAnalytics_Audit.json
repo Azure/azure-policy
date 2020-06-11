@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Log Analytics agent should be installed on your Windows Azure Arc machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits Windows Azure Arc machines if the Log Analytics agent is not installed.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Monitoring",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "MicrosoftMonitoringAgent"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d69b1763-b96d-40b8-a2d9-ca31e9fd0d3e",
+  "name": "d69b1763-b96d-40b8-a2d9-ca31e9fd0d3e"
+}
