@@ -246,4 +246,9 @@ May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a str
 
 ### Tag Contributor Role
 
-Current limitation causes errors using the Tag Contributor role with Tag related policies.  We are aware of this issue and are working to resolve this. (ETA: End of calendar year). If assigning Tag Contributor role to managed identities handling remediation tasks on "Modify" effect policies, please assign Contributor role to the managed identity. 
+Current limitation causes errors using the Tag Contributor role with Tag related policies.  We are aware of this issue and are working to resolve this. (ETA: End of calendar year). If assigning Tag Contributor role to managed identities handling remediation tasks on "Modify" effect policies, please assign Contributor role to the managed identity.
+
+### Subscription tagging support
+
+Subscription tagging is not yet supported using "Append" or "Modify" policies. Details on subscription tagging without using Azure Policy can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources).
+
