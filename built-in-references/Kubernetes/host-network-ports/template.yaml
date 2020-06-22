@@ -1,0 +1,52 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurehostnetworkingports
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureHostNetworkingPorts
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowHostNetwork:
+              type: boolean
+            minPort:
+              type: integer
+            maxPort:
+              type: integer
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurehostnetworkingports
+
+        violation[{"msg": msg, "details": {}}] {
+          container := input_containers[_]
+            input_share_hostnetwork(container)
+            msg := sprintf("The specified hostNetwork and hostPort are not allowed, pod: %v, container: %v. Allowed values: %v", [input.review.object.metadata.name, container.name, input.parameters])
+        }
+
+        input_share_hostnetwork(container) {
+            not input.parameters.allowHostNetwork
+            input.review.object.spec.hostNetwork
+        }
+
+        input_share_hostnetwork(container) {
+            hostPort := container.ports[_].hostPort
+            hostPort < input.parameters.minPort
+        }
+
+        input_share_hostnetwork(container) {
+            hostPort := container.ports[_].hostPort
+            hostPort > input.parameters.maxPort
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
