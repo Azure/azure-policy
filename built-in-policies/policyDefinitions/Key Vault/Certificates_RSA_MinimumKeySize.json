@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Manage minimum key size for RSA certificates",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "This policy manages the minimum key size for RSA certificates.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "parameters": {
+      "minimumRSAKeySize": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Minimum RSA key size",
+          "description": "The minimum key size for RSA certificates."
+        },
+        "allowedValues": [
+          2048,
+          3072,
+          4096
+        ]
+      },
+      "effect": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType",
+            "in": [
+              "RSA",
+              "RSA-HSM"
+            ]
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keySize",
+            "less": "[parameters('minimumRSAKeySize')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cee51871-e572-4576-855c-047c820360f0",
+  "name": "cee51871-e572-4576-855c-047c820360f0"
+}

@@ -1,0 +1,71 @@
+{
+  "properties": {
+    "displayName": "Diagnostic logs in Virtual Machine Scale Sets should be enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "It is recommended to enable Logs so that activity trail can be recreated when investigations are required in the event of an incident or a compromise.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachineScaleSets"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                    "equals": "IaaSDiagnostics"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                    "equals": "Microsoft.Azure.Diagnostics"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                    "equals": "LinuxDiagnostic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                    "in": [
+                      "Microsoft.OSTCExtensions",
+                      "Microsoft.Azure.Diagnostics"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7c1b1214-f927-48bf-8882-84f0af6588b1",
+  "name": "7c1b1214-f927-48bf-8882-84f0af6588b1"
+}

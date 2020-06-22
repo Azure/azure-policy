@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Enforce labels on pods in Kubernetes cluster",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy enforces the specified labels are provided for pods in a Kubernetes cluster. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "3.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
+    },
+    "parameters": {
+      "labelsList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of labels",
+          "description": "The list of labels to be specified on Pods in a Kubernetes cluster."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "enforceOPAConstraint",
+        "allowedValues": [
+          "enforceOPAConstraint",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. Providing a value for this parameter is optional."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "AKS Engine",
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/pod-enforce-labels/template.yaml",
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/pod-enforce-labels/constraint.yaml",
+          "values": {
+            "labels": "[parameters('labelsList')]",
+            "excludedNamespaces": "[parameters('excludedNamespaces')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/46592696-4c7b-4bf3-9e45-6c2763bdc0a6",
+  "name": "46592696-4c7b-4bf3-9e45-6c2763bdc0a6"
+}

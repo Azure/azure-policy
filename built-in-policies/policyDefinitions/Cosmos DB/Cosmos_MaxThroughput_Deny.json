@@ -1,0 +1,215 @@
+{
+	"properties": {
+        "displayName": "Azure Cosmos DB throughput should be limited",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "This policy enables you to restrict the maximum throughput your organization can specify when creating Azure Cosmos DB databases and containers through the resource provider. It blocks the creation of autoscale resources.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Cosmos DB"
+        },
+        "parameters": {
+            "throughputMax": {
+                "type": "Integer",
+                "metadata": {
+                    "displayName": "Max RUs",
+                    "description": "The maximum throughput (RU/s) that can be assigned to a container via the Resource Provider during create or update."
+                }
+            },
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Policy Effect",
+                    "description": "The desired effect of the policy."
+                },
+                "allowedValues": [
+                    "audit",
+                    "deny",
+                    "disabled"
+                ],
+                "defaultValue": "deny"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [{
+                        "anyOf": [
+                            {
+                                "field": "type",
+                                "like": "Microsoft.DocumentDB/databaseAccounts/*/throughputSettings"
+                            },
+                            {
+                                "field": "type",
+                                "in": ["Microsoft.DocumentDB/databaseAccounts/sqlDatabases", 
+                                    "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+                                    "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases",
+                                    "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections",
+                                    "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases",
+                                    "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs",
+                                    "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces",
+                                    "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables",
+                                    "Microsoft.DocumentDB/databaseAccounts/tables"]
+                            }
+                        ]
+                    },
+                    {
+                        "anyOf": [{
+                                "value": "[requestContext().apiVersion]",
+                                "less": "2019-08-01"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/cassandraKeyspaces/tables/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/gremlinDatabases/graphs/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases/collections/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            },
+                            {
+                                "value": "[if(equals(field('Microsoft.DocumentDB/databaseAccounts/tables/options.throughput'), ''), 0, int(field('Microsoft.DocumentDB/databaseAccounts/tables/options.throughput')))]",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/tables/options",
+                                "containsKey": "ProvisionedThroughputSettings"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/tables/throughputSettings/default.resource.throughput",
+                                "greater": "[parameters('throughputMax')]"
+                            },
+                            {
+                                "field": "Microsoft.DocumentDB/databaseAccounts/tables/throughputSettings/default.resource.provisionedThroughputSettings",
+                                "exists": "true"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+	"id": "/providers/Microsoft.Authorization/policyDefinitions/0b7ef78e-a035-4f23-b9bd-aff122a1b1cf",
+	"name": "0b7ef78e-a035-4f23-b9bd-aff122a1b1cf"
+}

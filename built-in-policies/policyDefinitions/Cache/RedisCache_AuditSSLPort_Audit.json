@@ -1,0 +1,46 @@
+{
+  "properties": { 
+    "displayName": "Only secure connections to your Azure Cache for Redis should be enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit enabling of only connections via SSL to Azure Cache for Redis. Use of secure connections ensures authentication between the server and the service and protects data in transit from network layer attacks such as man-in-the-middle, eavesdropping, and session-hijacking",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cache"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Cache/redis"
+          },
+          {
+            "field": "Microsoft.Cache/Redis/enableNonSslPort",
+            "equals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/22bee202-a82f-4305-9a2a-6d7f44d4dedb",
+  "name": "22bee202-a82f-4305-9a2a-6d7f44d4dedb"
+}

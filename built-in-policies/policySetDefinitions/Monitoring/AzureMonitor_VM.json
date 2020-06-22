@@ -1,0 +1,133 @@
+{
+   "properties": {
+      "displayName": "Enable Azure Monitor for VMs",
+      "policyType": "BuiltIn",
+      "description": "Enable Azure Monitor for the virtual machines (VMs) in the specified scope (management group, subscription or resource group). Takes Log Analytics workspace as parameter.",
+      "metadata": {
+         "version": "2.0.0",
+         "category": "Monitoring"
+      },
+      "parameters": {
+         "logAnalytics_1": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Log Analytics workspace",
+               "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+               "strongType": "omsWorkspace"
+            }
+         },
+         "listOfImageIdToInclude_windows": {
+            "type": "Array",
+            "defaultValue": [],
+            "metadata": {
+               "displayName": "Optional: List of VM images that have supported Windows OS to add to scope",
+               "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+            }
+         },
+         "listOfImageIdToInclude_linux": {
+            "type": "Array",
+            "defaultValue": [],
+            "metadata": {
+               "displayName": "Optional: List of VM images that have supported Linux OS to add to scope",
+               "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+            }
+         }
+      },
+      "policyDefinitions": [
+         {
+            "policyDefinitionReferenceId": "LogAnalyticsExtension_Windows_HybridVM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/69af7d4a-7b18-4044-93a9-2651498ef203",
+            "parameters": {
+               "logAnalytics": {
+                  "value": "[parameters('logAnalytics_1')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "LogAnalyticsExtension_Windows_VM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0868462e-646c-4fe3-9ced-a733534b6a2c",
+            "parameters": {
+               "logAnalytics": {
+                  "value": "[parameters('logAnalytics_1')]"
+               },
+               "listOfImageIdToInclude": {
+                  "value": "[parameters('listOfImageIdToInclude_windows')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "LogAnalyticsExtension_Linux_HybridVM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9d2b61b4-1d14-4a63-be30-d4498e7ad2cf",
+            "parameters": {
+               "logAnalytics": {
+                  "value": "[parameters('logAnalytics_1')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "LogAnalyticsExtension_Linux_VM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/053d3325-282c-4e5c-b944-24faffd30d77",
+            "parameters": {
+               "logAnalytics": {
+                  "value": "[parameters('logAnalytics_1')]"
+               },
+               "listOfImageIdToInclude": {
+                  "value": "[parameters('listOfImageIdToInclude_linux')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "DependencyAgentExtension_Windows_HybridVM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/91cb9edd-cd92-4d2f-b2f2-bdd8d065a3d4"
+         },
+         {
+            "policyDefinitionReferenceId": "DependencyAgentExtension_Windows_VM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1c210e94-a481-4beb-95fa-1571b434fb04",
+            "parameters": {
+               "listOfImageIdToInclude": {
+                  "value": "[parameters('listOfImageIdToInclude_windows')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "DependencyAgentExtension_Linux_HybridVM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/deacecc0-9f84-44d2-bb82-46f32d766d43"
+         },
+         {
+            "policyDefinitionReferenceId": "DependencyAgentExtension_Linux_VM_Deploy",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4da21710-ce6f-4e06-8cdb-5cc4c93ffbee",
+            "parameters": {
+               "listOfImageIdToInclude": {
+                  "value": "[parameters('listOfImageIdToInclude_linux')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "LogAnalytics_OSImage_Audit",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/32133ab0-ee4b-4b44-98d6-042180979d50",
+            "parameters": {
+               "listOfImageIdToInclude_windows": {
+                  "value": "[parameters('listOfImageIdToInclude_windows')]"
+               },
+               "listOfImageIdToInclude_linux": {
+                  "value": "[parameters('listOfImageIdToInclude_linux')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "DependencyAgent_OSImage_Audit",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/11ac78e3-31bc-4f0c-8434-37ab963cea07",
+            "parameters": {
+               "listOfImageIdToInclude_windows": {
+                  "value": "[parameters('listOfImageIdToInclude_windows')]"
+               },
+               "listOfImageIdToInclude_linux": {
+                  "value": "[parameters('listOfImageIdToInclude_linux')]"
+               }
+            }
+         }
+      ]
+   },
+   "id": "/providers/Microsoft.Authorization/policySetDefinitions/55f3eceb-5573-4f18-9695-226972c6d74a",
+   "name": "55f3eceb-5573-4f18-9695-226972c6d74a"
+}

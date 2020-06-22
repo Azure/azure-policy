@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "SQL server TDE protector should be encrypted with your own key",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Transparent Data Encryption (TDE) with your own key support provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/servers/encryptionProtector",
+          "name": "current",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Sql/servers/encryptionProtector/serverKeyType",
+                "equals": "AzureKeyVault"
+              },
+              {
+                "field": "Microsoft.Sql/servers/encryptionProtector/uri",
+                "notEquals": ""
+              },
+              {
+                "field": "Microsoft.Sql/servers/encryptionProtector/uri",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0d134df8-db83-46fb-ad72-fe0c9428c8dd",
+  "name": "0d134df8-db83-46fb-ad72-fe0c9428c8dd"
+}

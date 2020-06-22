@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Audit IP restrictions configuration for a Web Application",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "IP Restrictions allow you to define a list of IP addresses that are allowed to access your app. Use of IP Restrictions protects a web application from common attacks.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Security Center",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "app"
+              },
+              {
+                "field": "kind",
+                "equals": "WebApp"
+              },
+              {
+                "field": "kind",
+                "equals": "app,linux"
+              },
+              {
+                "field": "kind",
+                "equals": "app,linux,container"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "ConfigureIPRestrictions",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6a8450e2-6c61-43b4-be65-62e3a197bffe",
+  "name": "6a8450e2-6c61-43b4-be65-62e3a197bffe"
+}

@@ -1,0 +1,53 @@
+{
+   "properties": {
+      "displayName": "Enable Azure Cosmos DB throughput policy",
+      "policyType": "BuiltIn",
+      "description": "Enable throughput control for Azure Cosmos DB resources in the specified scope (Management group, Subscription or resource group). Takes max throughput as parameter. Use this policy to help enforce throughput control via the resource provider.",
+      "metadata": {
+         "version": "1.0.0",
+         "category": "Cosmos DB"
+      },
+      "parameters": {
+         "throughputMax": {
+            "type": "Integer",
+            "metadata": {
+               "displayName": "Max RUs",
+               "description": "The maximum throughput (RU/s) that can be assigned to a container via the Resource Provider during create or update."
+            }
+         },
+         "effect": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Policy Effect",
+                "description": "The desired effect of the throughput limit policy. The key based metadata write access policy is always enforced."
+            },
+            "allowedValues": [
+                "audit",
+                "deny",
+                "disabled"
+            ],
+            "defaultValue": "deny"
+        }
+      },
+      "policyDefinitions": [
+         {
+            "policyDefinitionReferenceId": "Cosmos_MaxThroughput_Deny",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0b7ef78e-a035-4f23-b9bd-aff122a1b1cf",
+            "parameters": {
+               "throughputMax": {
+                  "value": "[parameters('throughputMax')]"
+               },
+               "effect": {
+                   "value": "[parameters('effect')]"
+               }
+            }
+         },
+         {
+            "policyDefinitionReferenceId": "Cosmos_DisableMetadata_Append",
+            "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4750c32b-89c0-46af-bfcb-2e4541a818d5"
+         }
+      ]
+   },
+   "id": "/providers/Microsoft.Authorization/policySetDefinitions/cb5e1e90-7c33-491c-a15b-24885c915752",
+   "name": "cb5e1e90-7c33-491c-a15b-24885c915752"
+}

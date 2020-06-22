@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "displayName": "Private endpoint should be enabled for PostgreSQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits PostgreSQL servers not configured to use a private endpoint. For more details, visit https://aka.ms/pgprivatelink.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/servers/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0564d078-92f5-4f97-8398-b9f58a51f70b",
+  "name": "0564d078-92f5-4f97-8398-b9f58a51f70b"
+}

@@ -1,0 +1,60 @@
+{
+    "properties": {
+       "displayName": "Azure Cosmos DB allowed locations",
+       "policyType": "BuiltIn",
+       "mode": "Indexed",
+       "description": "This policy enables you to restrict the locations your organization can specify when deploying Azure Cosmos DB resources. Use to enforce your geo-compliance requirements.",
+       "metadata": {
+          "version": "1.0.0",
+          "category": "Cosmos DB"
+       },
+       "parameters": {
+        "listOfAllowedLocations": {
+          "type": "Array",
+          "metadata": {
+            "displayName": "Allowed locations",
+            "description": "The list of locations that can be specified when deploying Azure Cosmos DB resources.",
+            "strongType": "location"
+          }
+        },
+        "policyEffect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Policy Effect",
+            "description": "The desired effect of the policy."
+          },
+          "allowedValues": [
+            "deny",
+            "audit",
+            "disabled"
+          ],
+          "defaultValue": "deny"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.DocumentDB/databaseAccounts"
+            },
+            {
+              "count": {
+                  "field": "Microsoft.DocumentDB/databaseAccounts/Locations[*]",
+                  "where": {
+                      "value": "[replace(toLower(first(field('Microsoft.DocumentDB/databaseAccounts/Locations[*].locationName'))), ' ', '')]",
+                      "in": "[parameters('listOfAllowedLocations')]"
+                  }
+              },
+              "notEquals": "[length(field('Microsoft.DocumentDB/databaseAccounts/Locations[*]'))]"
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('policyEffect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/0473574d-2d43-4217-aefe-941fcdf7e684",
+    "name": "0473574d-2d43-4217-aefe-941fcdf7e684"
+ }

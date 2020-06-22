@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "Manage allowed curve names for elliptic curve cryptography certificates",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "This policy manages the allowed elliptic curve names for elliptic curve cryptography certificates.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "parameters": {
+      "allowedECNames": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed elliptic curve names",
+          "description": "The list of allowed curve names for elliptic curve cryptography certificates."
+        },
+        "allowedValues": [
+          "P-256",
+          "P-256K",
+          "P-384",
+          "P-521"
+        ],
+        "defaultValue": [
+          "P-256",
+          "P-256K",
+          "P-384",
+          "P-521"
+        ]
+      },
+      "effect": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType",
+            "in": [
+              "EC",
+              "EC-HSM"
+            ]
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.ellipticCurveName",
+            "notIn": "[parameters('allowedECNames')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bd78111f-4953-4367-9fd5-7e08808b54bf",
+  "name": "bd78111f-4953-4367-9fd5-7e08808b54bf"
+}

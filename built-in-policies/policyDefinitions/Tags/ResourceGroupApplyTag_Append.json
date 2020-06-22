@@ -1,0 +1,53 @@
+{
+   "properties": {
+      "displayName": "Append a tag and its value to resource groups",
+      "policyType": "BuiltIn",
+      "mode": "All",
+      "description": "Appends the specified tag and value when any resource group which is missing this tag is created or updated. Does not modify the tags of resource groups created before this policy was applied until those resource groups are changed. New 'modify' effect policies are available that support remediation of tags on existing resources (see https://aka.ms/modifydoc).",
+      "metadata": {
+         "version": "1.0.0",
+         "category": "Tags"
+      },
+      "parameters": {
+         "tagName": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Name",
+               "description": "Name of the tag, such as 'environment'"
+            }
+         },
+         "tagValue": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Value",
+               "description": "Value of the tag, such as 'production'"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Resources/subscriptions/resourceGroups"
+               },
+               {
+                  "field": "[concat('tags[', parameters('tagName'), ']')]",
+                  "exists": "false"
+               }
+            ]
+         },
+         "then": {
+            "effect": "append",
+            "details": [
+               {
+                  "field": "[concat('tags[', parameters('tagName'), ']')]",
+                  "value": "[parameters('tagValue')]"
+               }
+            ]
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/49c88fc8-6fd1-46fd-a676-f12d1d3a4c71",
+   "name": "49c88fc8-6fd1-46fd-a676-f12d1d3a4c71"
+}

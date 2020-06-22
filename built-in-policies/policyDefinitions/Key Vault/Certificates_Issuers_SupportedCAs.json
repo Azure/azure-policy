@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Manage certificates issued by an integrated CA",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "This policy manages certificates are issued by a specified key vault integrated Certificate Authority.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "parameters": {
+      "allowedCAs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Azure Key Vault Supported CAs",
+          "description": "The list of allowed certificate authorities supported by Azure Key Vault."
+        },
+        "allowedValues": [
+          "DigiCert",
+          "GlobalSign"
+        ],
+        "defaultValue": [
+          "DigiCert",
+          "GlobalSign"
+        ]
+      },
+      "effect": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "Microsoft.KeyVault.Data/vaults/certificates/issuer.name",
+        "notIn": "[parameters('allowedCAs')]"
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8e826246-c976-48f6-b03e-619bb92b3d82",
+  "name": "8e826246-c976-48f6-b03e-619bb92b3d82"
+}

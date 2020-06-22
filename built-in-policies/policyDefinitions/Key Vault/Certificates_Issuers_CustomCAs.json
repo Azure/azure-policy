@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Manage certificates issued by a non-integrated CA",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "This policy manages certificates are issued by a specified non-integrated Certificate Authority.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "parameters": {
+      "caCommonName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "The common name of the certificate authority",
+          "description": "The common name (CN) of the Certificate Authority (CA) provider. For example, for an issuer CN = Contoso, OU = .., DC = .., you can specify Contoso"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "Microsoft.KeyVault.Data/vaults/certificates/issuer.commonName",
+        "notContains": "[parameters('caCommonName')]"
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a22f4a40-01d3-4c7d-8071-da157eeff341",
+  "name": "a22f4a40-01d3-4c7d-8071-da157eeff341"
+}

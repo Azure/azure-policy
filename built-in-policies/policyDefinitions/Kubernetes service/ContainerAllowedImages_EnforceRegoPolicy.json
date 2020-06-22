@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "Ensure only allowed container images in AKS",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.ContainerService.Data",
+    "description": "This policy ensures only allowed container images are running in an Azure Kubernetes Service cluster. This policy is deprecated, please visit https://aka.ms/kubepolicydoc for instructions on using new Kubernetes policies.",
+    "metadata": {
+      "version": "1.0.1-deprecated",
+      "category": "Kubernetes service",
+      "deprecated": true
+    },
+    "parameters": {
+      "allowedContainerImagesRegex": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed container images regex",
+          "description": "Regex representing container images allowed in Kubernetes cluster. E.g. Regex of azure container registry images is ^.+azurecr.io/.+$"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "EnforceRegoPolicy",
+        "allowedValues": [
+          "EnforceRegoPolicy",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "policyId": "ContainerAllowedImages",
+          "policy": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/KubernetesService/container-allowed-images/limited-preview/gatekeeperpolicy.rego",
+          "policyParameters": {
+            "allowedContainerImagesRegex": "[parameters('allowedContainerImagesRegex')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5f86cb6e-c4da-441b-807c-44bd0cc14e66",
+  "name": "5f86cb6e-c4da-441b-807c-44bd0cc14e66"
+}

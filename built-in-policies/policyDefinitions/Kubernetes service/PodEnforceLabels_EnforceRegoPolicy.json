@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "Enforce labels on pods in AKS",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.ContainerService.Data",
+    "description": "This policy enforces the specified labels are provided for pods in an Azure Kubernetes Service cluster. This policy is deprecated, please visit https://aka.ms/kubepolicydoc for instructions on using new Kubernetes policies.",
+    "metadata": {
+      "version": "1.0.1-deprecated",
+      "category": "Kubernetes service",
+      "deprecated": true
+    },
+    "parameters": {
+      "commaSeparatedListOfLabels": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Comma-separated list of labels",
+          "description": "A comma-separated list of labels to be specified on Pods in Kubernetes cluster. E.g. test1,test2"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "EnforceRegoPolicy",
+        "allowedValues": [
+          "EnforceRegoPolicy",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "policyId": "PodEnforceLabels",
+          "policy": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/KubernetesService/pod-enforce-labels/limited-preview/gatekeeperpolicy.rego",
+          "policyParameters": {
+            "commaSeparatedListOfLabels": "[parameters('commaSeparatedListOfLabels')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/16c6ca72-89d2-4798-b87e-496f9de7fcb7",
+  "name": "16c6ca72-89d2-4798-b87e-496f9de7fcb7"
+}

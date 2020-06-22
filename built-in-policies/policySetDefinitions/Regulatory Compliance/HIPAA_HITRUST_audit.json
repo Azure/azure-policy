@@ -1,0 +1,1084 @@
+{
+  "properties": {
+    "displayName": "HITRUST/HIPAA",
+    "policyType": "BuiltIn",
+    "description": "This initiative includes audit and virtual machine extension deployment policies that address a subset of HITRUST/HIPAA controls. Additional policies will be added in upcoming releases. For more information, visit https://aka.ms/hipaa-blueprint.",
+    "metadata": {
+      "version": "1.0.2",
+      "category": "Regulatory Compliance"
+    },
+    "parameters": {
+      "installedApplicationsOnWindowsVM": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Application names (supports wildcards)",
+          "description": "A semicolon-separated list of the names of the applications that should be installed. e.g. 'Microsoft SQL Server 2014 (64-bit); Microsoft Visual Studio Code' or 'Microsoft SQL Server 2014*' (to match any application starting with 'Microsoft SQL Server 2014')"
+        }
+      },
+      "DeployDiagnosticSettingsforNetworkSecurityGroupsstoragePrefix": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Storage Account Prefix for Regional Storage Account to deploy diagnostic settings for Network Security Groups",
+          "description": "This prefix will be combined with the network security group location to form the created storage account name."
+        }
+      },
+      "DeployDiagnosticSettingsforNetworkSecurityGroupsrgName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Resource Group Name for Storage Account (must exist) to deploy diagnostic settings for Network Security Groups",
+          "description": "The resource group that the storage account will be created in. This resource group must already exist.",
+          "strongType": "ExistingResourceGroups"
+        }
+      },
+      "diagnosticsLogsInBatchAccountMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Diagnostic logs in Batch accounts should be enabled",
+          "description": "Enable or disable the monitoring of diagnostic logs in Batch accounts"
+        }
+      },
+      "diagnosticsLogsInBatchAccountRetentionDays": {
+        "type": "string",
+        "defaultValue": "365",
+        "metadata": {
+          "displayName": "Required retention (in days) for logs in Batch accounts",
+          "description": "The required diagnostic logs retention period in days"
+        }
+      },
+      "ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "SQL Managed Instance TDE protector should be encrypted with your own key",
+          "description": "Enable or disable the monitoring of Transparent Data Encryption (TDE) with your own key support. TDE with your own key support provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties."
+        }
+      },
+      "diskEncryptionMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Disk encryption should be applied on virtual machines",
+          "description": "Enable or disable the monitoring for VM disk encryption"
+        }
+      },
+      "diagnosticsLogsInSearchServiceMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Diagnostic logs in Search services should be enabled",
+          "description": "Enable or disable the monitoring of diagnostic logs in Azure Search service"
+        }
+      },
+      "diagnosticsLogsInSearchServiceRetentionDays": {
+        "type": "string",
+        "defaultValue": "365",
+        "metadata": {
+          "displayName": "Required retention (in days) of logs in Azure Search service",
+          "description": "The required diagnostic logs retention period in days"
+        }
+      },
+      "vulnerabilityAssessmentOnManagedInstanceMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerability assessment should be enabled on SQL Managed Instance",
+          "description": "Audit each SQL Managed Instance which doesn't have recurring vulnerability assessment scans enabled. Vulnerability assessment can discover, track, and help you remediate potential database vulnerabilities."
+        }
+      },
+      "vulnerabilityAssesmentMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities should be remediated by a Vulnerability Assessment solution",
+          "description": "Enable or disable the detection of VM vulnerabilities by a vulnerability assessment solution"
+        }
+      },
+      "EnableInsecureGuestLogons": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Enable insecure guest logons",
+          "description": "Specifies whether the SMB client will allow insecure guest logons to an SMB server."
+        },
+        "defaultValue": "0"
+      },
+      "AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Allow simultaneous connections to the Internet or a Windows Domain",
+          "description": "Specify whether to prevent computers from connecting to both a domain based network and a non-domain based network at the same time. A value of 0 allows simultaneous connections, and a value of 1 blocks them."
+        },
+        "defaultValue": "1"
+      },
+      "TurnOffMulticastNameResolution": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Turn off multicast name resolution",
+          "description": "Specifies whether LLMNR, a secondary name resolution protocol that transmits using multicast over a local subnet link on a single subnet, is enabled."
+        },
+        "defaultValue": "1"
+      },
+      "nextGenerationFirewallMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Access through Internet facing endpoint should be restricted",
+          "description": "Enable or disable overly permissive inbound NSG rules monitoring"
+        }
+      },
+      "ensureServerTDEIsEncryptedWithYourOwnKeyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "SQL server TDE protector should be encrypted with your own key",
+          "description": "Enable or disable the monitoring of Transparent Data Encryption (TDE) with your own key support. TDE with your own key support provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties."
+        }
+      },
+      "apiAppDisableRemoteDebuggingMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Remote debugging should be turned off for API App",
+          "description": "Enable or disable the monitoring of remote debugging for API App"
+        }
+      },
+      "classicComputeVMsMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Virtual machines should be migrated to new Azure Resource Manager resources",
+          "description": "Enable or disable the monitoring of classic compute VMs"
+        }
+      },
+      "disableUnrestrictedNetworkToStorageAccountMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Audit unrestricted network access to storage accounts",
+          "description": "Enable or disable the monitoring of network access to storage account"
+        }
+      },
+      "adaptiveApplicationControlsMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Adaptive Application Controls should be enabled on virtual machines",
+          "description": "Enable or disable the monitoring of application whitelisting in Azure Security Center"
+        }
+      },
+      "NetworkAccessRemotelyAccessibleRegistryPaths": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network access: Remotely accessible registry paths",
+          "description": "Specifies which registry paths will be accessible over the network, regardless of the users or groups listed in the access control list (ACL) of the `winreg` registry key."
+        },
+        "defaultValue": "System\\CurrentControlSet\\Control\\ProductOptions|#|System\\CurrentControlSet\\Control\\Server Applications|#|Software\\Microsoft\\Windows NT\\CurrentVersion"
+      },
+      "NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network access: Remotely accessible registry paths and sub-paths",
+          "description": "Specifies which registry paths and sub-paths will be accessible over the network, regardless of the users or groups listed in the access control list (ACL) of the `winreg` registry key."
+        },
+        "defaultValue": "System\\CurrentControlSet\\Control\\Print\\Printers|#|System\\CurrentControlSet\\Services\\Eventlog|#|Software\\Microsoft\\OLAP Server|#|Software\\Microsoft\\Windows NT\\CurrentVersion\\Print|#|Software\\Microsoft\\Windows NT\\CurrentVersion\\Windows|#|System\\CurrentControlSet\\Control\\ContentIndex|#|System\\CurrentControlSet\\Control\\Terminal Server|#|System\\CurrentControlSet\\Control\\Terminal Server\\UserConfig|#|System\\CurrentControlSet\\Control\\Terminal Server\\DefaultUserConfiguration|#|Software\\Microsoft\\Windows NT\\CurrentVersion\\Perflib|#|System\\CurrentControlSet\\Services\\SysmonLog"
+      },
+      "NetworkAccessSharesThatCanBeAccessedAnonymously": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network access: Shares that can be accessed anonymously",
+          "description": "Specifies which network shares can be accessed by anonymous users. The default configuration for this policy setting has little effect because all users have to be authenticated before they can access shared resources on the server."
+        },
+        "defaultValue": "0"
+      },
+      "webAppDisableRemoteDebuggingMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Remote debugging should be turned off for Web Application",
+          "description": "Enable or disable the monitoring of remote debugging for Web App"
+        }
+      },
+      "apiAppEnforceHttpsMonitoringEffectV2": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "API App should only be accessible over HTTPS V2",
+          "description": "Enable or disable the monitoring of the use of HTTPS in API App V2"
+        }
+      },
+      "identityEnableMFAForWritePermissionsMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "MFA should be enabled accounts with write permissions on your subscription",
+          "description": "Enable or disable the monitoring of MFA for accounts with write permissions in subscription"
+        }
+      },
+      "jitNetworkAccessMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Just-In-Time network access control should be applied on virtual machines",
+          "description": "Enable or disable the monitoring of network just In time access"
+        }
+      },
+      "identityEnableMFAForOwnerPermissionsMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "MFA should be enabled on accounts with owner permissions on your subscription",
+          "description": "Enable or disable the monitoring of MFA for accounts with owner permissions in subscription"
+        }
+      },
+      "kubernetesServiceRbacEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Role-Based Access Control (RBAC) should be used on Kubernetes Services",
+          "description": "Enable or disable the monitoring of Kubernetes Services without RBAC enabled"
+        }
+      },
+      "restrictAccessToManagementPortsMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Management ports should be closed on your virtual machines",
+          "description": "Enable or disable the monitoring of open management ports on Virtual Machines"
+        }
+      },
+      "vmssOsVulnerabilitiesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities in security configuration on your virtual machine scale sets should be remediated",
+          "description": "Enable or disable virtual machine scale sets OS vulnerabilities monitoring"
+        }
+      },
+      "diagnosticsLogsInEventHubMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Diagnostic logs in Event Hub should be enabled",
+          "description": "Enable or disable the monitoring of diagnostic logs in Event Hub accounts"
+        }
+      },
+      "diagnosticsLogsInEventHubRetentionDays": {
+        "type": "string",
+        "defaultValue": "365",
+        "metadata": {
+          "displayName": "Required retention (in days) of logs in Event Hub accounts",
+          "description": "The required diagnostic logs retention period in days"
+        }
+      },
+      "vmssSystemUpdatesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "System updates on virtual machine scale sets should be installed",
+          "description": "Enable or disable virtual machine scale sets reporting of system updates"
+        }
+      },
+      "diagnosticsLogsInServiceFabricMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Diagnostic logs in Virtual Machine Scale Sets should be enabled",
+          "description": "Enable or disable the monitoring of diagnostic logs in Service Fabric"
+        }
+      },
+      "systemUpdatesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "System updates should be installed on your machines",
+          "description": "Enable or disable reporting of system updates"
+        }
+      },
+      "DeployAzureBaselineSecurityOptionsAccountsAccountsGuestAccountStatus": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Accounts: Guest account status",
+          "description": "Specifies whether the local Guest account is disabled."
+        },
+        "defaultValue": "0"
+      },
+      "RecoveryConsoleAllowFloppyCopyAndAccessToAllDrivesAndAllFolders": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Recovery console: Allow floppy copy and access to all drives and all folders",
+          "description": "Specifies whether to make the Recovery Console SET command available, which allows setting of recovery console environment variables."
+        },
+        "defaultValue": "0"
+      },
+      "AuditShutDownSystemImmediatelyIfUnableToLogSecurityAudits": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Audit: Shut down system immediately if unable to log security audits",
+          "description": "Audits if the system will shut down when unable to log Security events."
+        },
+        "defaultValue": "0"
+      },
+      "DeployAzureBaselineSystemAuditPoliciesDetailedTrackingAuditProcessTermination": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Audit Process Termination",
+          "description": "Specifies whether audit events are generated when a process has exited. Recommended for monitoring termination of critical processes."
+        },
+        "allowedValues": [
+          "No Auditing",
+          "Success",
+          "Failure",
+          "Success and Failure"
+        ],
+        "defaultValue": "No Auditing"
+      },
+      "WindowsFirewallDomainUseProfileSettings": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Domain): Use profile settings",
+          "description": "Specifies whether Windows Firewall with Advanced Security uses the settings for the Domain profile to filter network traffic. If you select Off, Windows Firewall with Advanced Security will not use any of the firewall rules or connection security rules for this profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallDomainBehaviorForOutboundConnections": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Domain): Behavior for outbound connections",
+          "description": "Specifies the behavior for outbound connections for the Domain profile that do not match an outbound firewall rule. The default value of 0 means to allow connections, and a value of 1 means to block connections."
+        },
+        "defaultValue": "0"
+      },
+      "WindowsFirewallDomainApplyLocalConnectionSecurityRules": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Domain): Apply local connection security rules",
+          "description": "Specifies whether local administrators are allowed to create connection security rules that apply together with connection security rules configured by Group Policy for the Domain profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallDomainApplyLocalFirewallRules": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Domain): Apply local firewall rules",
+          "description": "Specifies whether local administrators are allowed to create local firewall rules that apply together with firewall rules configured by Group Policy for the Domain profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallDomainDisplayNotifications": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Domain): Display notifications",
+          "description": "Specifies whether Windows Firewall with Advanced Security displays notifications to the user when a program is blocked from receiving inbound connections, for the Domain profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPrivateUseProfileSettings": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Private): Use profile settings",
+          "description": "Specifies whether Windows Firewall with Advanced Security uses the settings for the Private profile to filter network traffic. If you select Off, Windows Firewall with Advanced Security will not use any of the firewall rules or connection security rules for this profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPrivateBehaviorForOutboundConnections": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Private): Behavior for outbound connections",
+          "description": "Specifies the behavior for outbound connections for the Private profile that do not match an outbound firewall rule. The default value of 0 means to allow connections, and a value of 1 means to block connections."
+        },
+        "defaultValue": "0"
+      },
+      "WindowsFirewallPrivateApplyLocalConnectionSecurityRules": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Private): Apply local connection security rules",
+          "description": "Specifies whether local administrators are allowed to create connection security rules that apply together with connection security rules configured by Group Policy for the Private profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPrivateApplyLocalFirewallRules": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Private): Apply local firewall rules",
+          "description": "Specifies whether local administrators are allowed to create local firewall rules that apply together with firewall rules configured by Group Policy for the Private profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPrivateDisplayNotifications": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Private): Display notifications",
+          "description": "Specifies whether Windows Firewall with Advanced Security displays notifications to the user when a program is blocked from receiving inbound connections, for the Private profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPublicUseProfileSettings": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Public): Use profile settings",
+          "description": "Specifies whether Windows Firewall with Advanced Security uses the settings for the Public profile to filter network traffic. If you select Off, Windows Firewall with Advanced Security will not use any of the firewall rules or connection security rules for this profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPublicBehaviorForOutboundConnections": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Public): Behavior for outbound connections",
+          "description": "Specifies the behavior for outbound connections for the Public profile that do not match an outbound firewall rule. The default value of 0 means to allow connections, and a value of 1 means to block connections."
+        },
+        "defaultValue": "0"
+      },
+      "WindowsFirewallPublicApplyLocalConnectionSecurityRules": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Public): Apply local connection security rules",
+          "description": "Specifies whether local administrators are allowed to create connection security rules that apply together with connection security rules configured by Group Policy for the Public profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPublicApplyLocalFirewallRules": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Public): Apply local firewall rules",
+          "description": "Specifies whether local administrators are allowed to create local firewall rules that apply together with firewall rules configured by Group Policy for the Public profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallPublicDisplayNotifications": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall (Public): Display notifications",
+          "description": "Specifies whether Windows Firewall with Advanced Security displays notifications to the user when a program is blocked from receiving inbound connections, for the Public profile."
+        },
+        "defaultValue": "1"
+      },
+      "WindowsFirewallDomainAllowUnicastResponse": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall: Domain: Allow unicast response",
+          "description": "Specifies whether Windows Firewall with Advanced Security permits the local computer to receive unicast responses to its outgoing multicast or broadcast messages; for the Domain profile."
+        },
+        "defaultValue": "0"
+      },
+      "WindowsFirewallPrivateAllowUnicastResponse": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall: Private: Allow unicast response",
+          "description": "Specifies whether Windows Firewall with Advanced Security permits the local computer to receive unicast responses to its outgoing multicast or broadcast messages; for the Private profile."
+        },
+        "defaultValue": "0"
+      },
+      "WindowsFirewallPublicAllowUnicastResponse": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Windows Firewall: Public: Allow unicast response",
+          "description": "Specifies whether Windows Firewall with Advanced Security permits the local computer to receive unicast responses to its outgoing multicast or broadcast messages; for the Public profile."
+        },
+        "defaultValue": "1"
+      },
+      "CertificateThumbprints": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Certificate thumbprints",
+          "description": "A semicolon-separated list of certificate thumbprints that should exist under the Trusted Root certificate store (Cert:\\LocalMachine\\Root). e.g. THUMBPRINT1;THUMBPRINT2;THUMBPRINT3"
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2835b622-407b-4114-9198-6f7064cbe0dc",
+        "policyDefinitionReferenceId": "DeploydefaultMicrosoftIaaSAntimalwareextensionforWindowsServer",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/428256e6-1fac-4f48-a757-df34c2b3336d",
+        "policyDefinitionReferenceId": "diagnosticsLogsInBatchAccountMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('diagnosticsLogsInBatchAccountMonitoringEffect')]"
+          },
+          "requiredRetentionDays": {
+            "value": "[parameters('diagnosticsLogsInBatchAccountRetentionDays')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/86b3d65f-7626-441e-b690-81a8b71cff60",
+        "policyDefinitionReferenceId": "systemUpdatesMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('systemUpdatesMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a7ff3161-0087-490a-9ad9-ad6217f4f43a",
+        "policyDefinitionReferenceId": "RequireencryptiononDataLakeStoreaccounts",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/048248b0-55cd-46da-b1ff-39efd52db260",
+        "policyDefinitionReferenceId": "ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d",
+        "policyDefinitionReferenceId": "diskEncryptionMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('diskEncryptionMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/17k78e20-9358-41c9-923c-fb736d382a12",
+        "policyDefinitionReferenceId": "AuditSQLTransparentDataEncryptionStatus",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/12f7e5d0-42a7-4630-80d8-54fb7cff9bd6",
+        "policyDefinitionReferenceId": "Deploy_InstalledApp",
+        "parameters": {
+          "installedApplication": {
+            "value": "[parameters('installedApplicationsOnWindowsVM')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5e393799-e3ca-4e43-a9a5-0ec4648a57d9",
+        "policyDefinitionReferenceId": "Audit_InstalledApp",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/21e2995e-683e-497a-9e81-2f42ad07050a",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SecurityOptionsAudit",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/498b810c-59cd-4222-9338-352ba146ccf3",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SecurityOptionsAudit",
+        "parameters": {
+          "AuditShutDownSystemImmediatelyIfUnableToLogSecurityAudits": {
+            "value": "[parameters('AuditShutDownSystemImmediatelyIfUnableToLogSecurityAudits')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/225e937e-d32e-4713-ab74-13ce95b3519a",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SystemAuditPoliciesAccountManagement",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0a9991e6-21be-49f9-8916-a06d934bcf29",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SystemAuditPoliciesAccountManagement",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a9a33475-481d-4b81-9116-0bf02ffe67e8",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SystemAuditPoliciesDetailedTracking",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/42a07bbf-ffcf-459a-b4b1-30ecd118a505",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SystemAuditPoliciesDetailedTracking",
+        "parameters": {
+          "AuditProcessTermination": {
+            "value": "[parameters('DeployAzureBaselineSystemAuditPoliciesDetailedTrackingAuditProcessTermination')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b4330a05-a843-4bc8-bf9a-cacce50c67f4",
+        "policyDefinitionReferenceId": "diagnosticsLogsInSearchServiceMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('diagnosticsLogsInSearchServiceMonitoringEffect')]"
+          },
+          "requiredRetentionDays": {
+            "value": "[parameters('diagnosticsLogsInSearchServiceRetentionDays')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0015ea4d-51ff-4ce3-8d8c-f3f8f0179a56",
+        "policyDefinitionReferenceId": "AuditVirtualMachinesWithoutDisasterRecoveryConfigured",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1b7aa243-30e4-4c9e-bca8-d0d3022b634a",
+        "policyDefinitionReferenceId": "vulnerabilityAssessmentOnManagedInstanceMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('vulnerabilityAssessmentOnManagedInstanceMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/760a85ff-6162-42b3-8d70-698e268f648c",
+        "policyDefinitionReferenceId": "vulnerabilityAssessmentMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('vulnerabilityAssesmentMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6fe4ef56-7576-4dc4-8e9c-26bad4b087ce",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SecurityOptionsMicrosoftNetworkServer",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/86880e5c-df35-43c5-95ad-7e120635775e",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SecurityOptionsMicrosoftNetworkServer",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7229bd6a-693d-478a-87f0-1dc1af06f3b8",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_AdministrativeTemplatesNetwork",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/985285b7-b97a-419c-8d48-c88cc934c8d8",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_AdministrativeTemplatesNetwork",
+        "parameters": {
+          "EnableInsecureGuestLogons": {
+            "value": "[parameters('EnableInsecureGuestLogons')]"
+          },
+          "AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain": {
+            "value": "[parameters('AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain')]"
+          },
+          "TurnOffMulticastNameResolution": {
+            "value": "[parameters('TurnOffMulticastNameResolution')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a9b99dd8-06c5-4317-8629-9d86a3c6e7d9",
+        "policyDefinitionReferenceId": "Deploynetworkwatcherwhenvirtualnetworksarecreated",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8bbd627e-4d25-4906-9a6e-3789780af3ec",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_WindowsFirewallProperties",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/909c958d-1b99-4c74-b88f-46a5c5bc34f9",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_WindowsFirewallProperties",
+        "parameters": {
+          "WindowsFirewallDomainUseProfileSettings": {
+            "value": "[parameters('WindowsFirewallDomainUseProfileSettings')]"
+          },
+          "WindowsFirewallDomainBehaviorForOutboundConnections": {
+            "value": "[parameters('WindowsFirewallDomainBehaviorForOutboundConnections')]"
+          },
+          "WindowsFirewallDomainApplyLocalConnectionSecurityRules": {
+            "value": "[parameters('WindowsFirewallDomainApplyLocalConnectionSecurityRules')]"
+          },
+          "WindowsFirewallDomainApplyLocalFirewallRules": {
+            "value": "[parameters('WindowsFirewallDomainApplyLocalFirewallRules')]"
+          },
+          "WindowsFirewallDomainDisplayNotifications": {
+            "value": "[parameters('WindowsFirewallDomainDisplayNotifications')]"
+          },
+          "WindowsFirewallPrivateUseProfileSettings": {
+            "value": "[parameters('WindowsFirewallPrivateUseProfileSettings')]"
+          },
+          "WindowsFirewallPrivateBehaviorForOutboundConnections": {
+            "value": "[parameters('WindowsFirewallPrivateBehaviorForOutboundConnections')]"
+          },
+          "WindowsFirewallPrivateApplyLocalConnectionSecurityRules": {
+            "value": "[parameters('WindowsFirewallPrivateApplyLocalConnectionSecurityRules')]"
+          },
+          "WindowsFirewallPrivateApplyLocalFirewallRules": {
+            "value": "[parameters('WindowsFirewallPrivateApplyLocalFirewallRules')]"
+          },
+          "WindowsFirewallPrivateDisplayNotifications": {
+            "value": "[parameters('WindowsFirewallPrivateDisplayNotifications')]"
+          },
+          "WindowsFirewallPublicUseProfileSettings": {
+            "value": "[parameters('WindowsFirewallPublicUseProfileSettings')]"
+          },
+          "WindowsFirewallPublicBehaviorForOutboundConnections": {
+            "value": "[parameters('WindowsFirewallPublicBehaviorForOutboundConnections')]"
+          },
+          "WindowsFirewallPublicApplyLocalConnectionSecurityRules": {
+            "value": "[parameters('WindowsFirewallPublicApplyLocalConnectionSecurityRules')]"
+          },
+          "WindowsFirewallPublicApplyLocalFirewallRules": {
+            "value": "[parameters('WindowsFirewallPublicApplyLocalFirewallRules')]"
+          },
+          "WindowsFirewallPublicDisplayNotifications": {
+            "value": "[parameters('WindowsFirewallPublicDisplayNotifications')]"
+          },
+          "WindowsFirewallDomainAllowUnicastResponse": {
+            "value": "[parameters('WindowsFirewallDomainAllowUnicastResponse')]"
+          },
+          "WindowsFirewallPrivateAllowUnicastResponse": {
+            "value": "[parameters('WindowsFirewallPrivateAllowUnicastResponse')]"
+          },
+          "WindowsFirewallPublicAllowUnicastResponse": {
+            "value": "[parameters('WindowsFirewallPublicAllowUnicastResponse')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9daedab3-fb2d-461e-b861-71790eead4f6",
+        "policyDefinitionReferenceId": "nextGenerationFirewallMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('nextGenerationFirewallMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0d134df8-db83-46fb-ad72-fe0c9428c8dd",
+        "policyDefinitionReferenceId": "ensureServerTDEIsEncryptedWithYourOwnKeyMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('ensureServerTDEIsEncryptedWithYourOwnKeyMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e9c8d085-d9cc-4b17-9cdc-059f1f01f19e",
+        "policyDefinitionReferenceId": "apiAppDisableRemoteDebuggingMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('apiAppDisableRemoteDebuggingMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1d84d5fb-01f6-4d12-ba4f-4a26081d403d",
+        "policyDefinitionReferenceId": "classicComputeVMsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('classicComputeVMsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/34c877ad-507e-4c82-993e-3452a6e0ad3c",
+        "policyDefinitionReferenceId": "disableUnrestrictedNetworkToStorageAccountMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('disableUnrestrictedNetworkToStorageAccountMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc",
+        "policyDefinitionReferenceId": "adaptiveApplicationControlsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('adaptiveApplicationControlsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c9c29499-c1d1-4195-99bd-2ec9e3a9dc89",
+        "policyDefinitionReferenceId": "DeployDiagnosticSettingsforNetworkSecurityGroups",
+        "parameters": {
+          "storagePrefix": {
+            "value": "[parameters('DeployDiagnosticSettingsforNetworkSecurityGroupsstoragePrefix')]"
+          },
+          "rgName": {
+            "value": "[parameters('DeployDiagnosticSettingsforNetworkSecurityGroupsrgName')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/30040dab-4e75-4456-8273-14b8f75d91d9",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SecurityOptionsNetworkAccess",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f56a3ab2-89d1-44de-ac0d-2ada5962e22a",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SecurityOptionsNetworkAccess",
+        "parameters": {
+          "NetworkAccessRemotelyAccessibleRegistryPaths": {
+            "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPaths')]"
+          },
+          "NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths": {
+            "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPathsAndSubpaths')]"
+          },
+          "NetworkAccessSharesThatCanBeAccessedAnonymously": {
+            "value": "[parameters('NetworkAccessSharesThatCanBeAccessedAnonymously')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cb510bfd-1cba-4d9f-a230-cb0976f4bb71",
+        "policyDefinitionReferenceId": "webAppDisableRemoteDebuggingMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('webAppDisableRemoteDebuggingMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b18175dd-c599-4c64-83ba-bb018a06d35b",
+        "policyDefinitionReferenceId": "PreviewAuditLinuxVMsThatDoNotHaveThePasswdFilePermissionsSetTo0644",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f19aa1c1-6b91-4c27-ae6a-970279f03db9",
+        "policyDefinitionReferenceId": "PreviewDeployVMExtensionToAuditThatLinuxVMsHaveThePasswdFilePermissionsSeTTo0644",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a6fb4358-5bf4-4ad7-ba82-2cd2f41ce5e9",
+        "policyDefinitionReferenceId": "AuditSqlServerLevelAuditingSettings",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f3b9ad83-000d-4dc1-bff0-6d54533dd03f",
+        "policyDefinitionReferenceId": "Audit_WindowsCertificateInTrustedRoot",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/106ccbe4-a791-4f33-a44a-06796944b8d5",
+        "policyDefinitionReferenceId": "Deploy_WindowsCertificateInTrustedRoot",
+        "parameters": {
+          "CertificateThumbprints": {
+            "value": "[parameters('CertificateThumbprints')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b7ddfbdc-1260-477d-91fd-98bd9be789a6",
+        "policyDefinitionReferenceId": "apiAppEnforceHttpsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('apiAppEnforceHttpsMonitoringEffectV2')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f48b2913-1dc5-4834-8c72-ccc1dfd819bb",
+        "policyDefinitionReferenceId": "PreviewAuditWindowsVMsThatDoNotHaveThePasswordComplexitySettingEnabled",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7ed40801-8a0f-4ceb-85c0-9fd25c1d61a8",
+        "policyDefinitionReferenceId": "PreviewDeployVmExtensionToAuditWindowsVmEnforcesPasswordComplexityRequirements",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9297c21d-2ed6-4474-b48f-163f75654ce3",
+        "policyDefinitionReferenceId": "identityEnableMFAForWritePermissionsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('identityEnableMFAForWritePermissionsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c",
+        "policyDefinitionReferenceId": "jitNetworkAccessMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('jitNetworkAccessMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/aa633080-8b72-40c4-a2d7-d00c03e80bed",
+        "policyDefinitionReferenceId": "identityEnableMFAForOwnerPermissionsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('identityEnableMFAForOwnerPermissionsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ac4a19c2-fa67-49b4-8ae5-0b2e78c49457",
+        "policyDefinitionReferenceId": "kubernetesServiceRbacEnabledMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('kubernetesServiceRbacEnabledMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b872a447-cc6f-43b9-bccf-45703cd81607",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SecurityOptionsAccounts",
+        "parameters": {}
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e5b81f87-9185-4224-bf00-9f505e9f89f3",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SecurityOptionsAccounts",
+        "parameters": {
+          "AccountsGuestAccountStatus": {
+            "value": "[parameters('DeployAzureBaselineSecurityOptionsAccountsAccountsGuestAccountStatus')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/22730e10-96f6-4aac-ad84-9383d35b5917",
+        "policyDefinitionReferenceId": "restrictAccessToManagementPortsMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('restrictAccessToManagementPortsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3c735d8a-a4ba-4a3a-b7cf-db7754cf57f4",
+        "policyDefinitionReferenceId": "vmssOsVulnerabilitiesMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('vmssOsVulnerabilitiesMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/83a214f7-d01a-484b-91a9-ed54470c9a6a",
+        "policyDefinitionReferenceId": "diagnosticsLogsInEventHubMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('diagnosticsLogsInEventHubMonitoringEffect')]"
+          },
+          "requiredRetentionDays": {
+            "value": "[parameters('diagnosticsLogsInEventHubRetentionDays')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c3f317a7-a95c-4547-b7e7-11017ebdf2fe",
+        "policyDefinitionReferenceId": "vmssSystemUpdatesMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('vmssSystemUpdatesMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7c1b1214-f927-48bf-8882-84f0af6588b1",
+        "policyDefinitionReferenceId": "diagnosticsLogsInServiceFabricMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('diagnosticsLogsInServiceFabricMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ba12366f-f9a6-42b8-9d98-157d0b1a837b",
+        "policyDefinitionReferenceId": "Audit_AzureBaseline_SecurityOptionsRecoveryconsole"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ddc0a4d5-5e08-43d5-9fd9-b586d8d7116b",
+        "policyDefinitionReferenceId": "Deploy_AzureBaseline_SecurityOptionsRecoveryconsole",
+        "parameters": {
+          "RecoveryConsoleAllowFloppyCopyAndAccessToAllDrivesAndAllFolders": {
+            "value": "[parameters('RecoveryConsoleAllowFloppyCopyAndAccessToAllDrivesAndAllFolders')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/a169a624-5599-4385-a696-c8d643089fab",
+  "name": "a169a624-5599-4385-a696-c8d643089fab"
+}

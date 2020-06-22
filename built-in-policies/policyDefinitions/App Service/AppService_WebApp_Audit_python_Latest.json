@@ -1,0 +1,105 @@
+{
+  "properties": {
+    "displayName": "Ensure that 'Python version' is the latest, if used as a part of the Web app",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for Python software either due to security flaws or to include additional functionality. Using the latest Python version for web apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "WindowsPythonLatestVersion": {
+        "type": "String",
+        "defaultValue": "3.6",
+        "metadata": {
+          "displayName": "Windows Latest Python version",
+          "description": "Latest supported Python version for App Services"
+        }
+      },
+      "LinuxPythonLatestVersion": {
+        "type": "String",
+        "defaultValue": "3.8",
+        "metadata": {
+          "displayName": "Linux Latest Python version",
+          "description": "Latest supported Python version for App Services"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "app*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "notContains": "PYTHON"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "equals": "[concat('PYTHON|', parameters('LinuxPythonLatestVersion'))]"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                    "equals": ""
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
+                    "equals": "[parameters('WindowsPythonLatestVersion')]"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7008174a-fd10-4ef0-817e-fc820a951d73",
+  "name": "7008174a-fd10-4ef0-817e-fc820a951d73"
+}

@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Access to App Services should be restricted",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure security center has discovered that the networking configuration of some of your app services are overly permissive and allow inbound traffic from ranges that are too broad",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Security Center",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": ["AuditIfNotExists", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Web/sites"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "restrictAccessToAppServices",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1a833ff1-d297-4a0f-9944-888428f8e0ff",
+  "name": "1a833ff1-d297-4a0f-9944-888428f8e0ff"
+}

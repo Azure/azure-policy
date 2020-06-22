@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "displayName": "PostgreSQL server should use a virtual network service endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits PostgreSQL servers not configured to use a virtual network service endpoint. For more details, visit https://aka.ms/postgresqlvnet.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules",
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/virtualNetworkSubnetId",
+            "exists": "true"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3c14b034-bcb6-4905-94e7-5b8e98a47b65",
+  "name": "3c14b034-bcb6-4905-94e7-5b8e98a47b65"
+}

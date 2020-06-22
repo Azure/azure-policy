@@ -1,0 +1,97 @@
+{
+    "properties": {
+        "displayName": "Ensure that 'Java version' is the latest, if used as a part of the Api app",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Periodically, newer versions are released for Java either due to security flaws or to include additional functionality. Using the latest Python version for Api apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "App Service"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            },
+            "JavaLatestVersion": {
+                "type": "String",
+                "defaultValue": "11",
+                "metadata": {
+                    "displayName": "Latest Java version",
+                    "description": "Latest supported Java version for App Services"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Web/sites"
+                    },
+                    {
+                        "field": "kind",
+                        "like": "*api"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Web/sites/config",
+                    "name": "web",
+                    "existenceCondition": {
+                        "anyOf": [
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                                        "notContains": "JAVA"
+                                    },
+                                    {
+                                        "field": "Microsoft.Web/sites/config/web.javaVersion",
+                                        "equals": ""
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                                        "like": "[concat('*', parameters('JavaLatestVersion'))]"
+                                    },
+                                    {
+                                        "field": "Microsoft.Web/sites/config/web.javaVersion",
+                                        "equals": ""
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                                        "equals": ""
+                                    },
+                                    {
+                                        "field": "Microsoft.Web/sites/config/web.javaVersion",
+                                        "like": "[concat(parameters('JavaLatestVersion'), '*')]"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/88999f4c-376a-45c8-bcb3-4058f713cf39",
+    "name": "88999f4c-376a-45c8-bcb3-4058f713cf39"
+}

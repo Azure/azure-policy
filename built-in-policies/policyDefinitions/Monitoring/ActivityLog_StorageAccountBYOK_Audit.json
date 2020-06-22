@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Storage account containing the container with activity logs must be encrypted with BYOK",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy audits if the Storage account containing the container with activity logs is encrypted with BYOK. The policy works only if the storage account lies on the same subscription as activity logs by design. More information on Azure Storage encryption at rest can be found here https://aka.ms/azurestoragebyok. ",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Insights/logProfiles"
+          },
+          {
+            "field": "Microsoft.Insights/logProfiles/storageAccountId",
+            "exists": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Storage/storageAccounts",
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "value": "[contains(field('Microsoft.Insights/logProfiles/storageAccountId'), subscription().Id)]",
+                "equals": "true"
+              },
+              {
+                "field": "name",
+                "equals": "[last(split(field('Microsoft.Insights/logProfiles/storageAccountId'),'/'))]"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/encryption.keySource",
+                "equals": "Microsoft.Keyvault"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fbb99e8e-e444-4da0-9ff1-75c92f5a85b2",
+  "name": "fbb99e8e-e444-4da0-9ff1-75c92f5a85b2"
+}

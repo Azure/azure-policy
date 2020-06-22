@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "displayName": "Custom subscription owner roles should not exist",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy ensures that no custom subscription owner roles exist.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "General"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Authorization/roleDefinitions"
+          },
+          {
+            "field": "Microsoft.Authorization/roleDefinitions/type",
+            "equals": "CustomRole"
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/permissions[*].actions[*]",
+                  "notEquals": "*"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/permissions.actions[*]",
+                  "notEquals": "*"
+                }
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]",
+                  "notIn": [
+                    "[concat(subscription().id,'/')]",
+                    "[subscription().id]",
+                    "/"
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Authorization/roleDefinitions/assignableScopes[*]",
+                  "notLike": "/providers/Microsoft.Management/*"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/10ee2ea2-fb4d-45b8-a7e9-a2e770044cd9",
+  "name": "10ee2ea2-fb4d-45b8-a7e9-a2e770044cd9"
+}

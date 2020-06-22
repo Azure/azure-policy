@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "Management ports of virtual machines should be protected with just-in-time network access control",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Possible network Just In Time (JIT) access will be monitored by Azure Security Center as recommendations",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachines"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "jitNetworkAccess",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c",
+  "name": "b0f33259-77d7-4c9e-aac6-3aabcfae693c"
+}

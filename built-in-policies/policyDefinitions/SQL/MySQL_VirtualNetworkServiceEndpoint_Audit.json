@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "displayName": "MySQL server should use a virtual network service endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits MySQL servers not configured to use a virtual network service endpoint. For more details, visit https://aka.ms/mysqlvnet.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforMySQL/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforMySQL/servers/virtualNetworkRules",
+          "existenceCondition": {
+            "field": "Microsoft.DBforMySQL/servers/virtualNetworkRules/virtualNetworkSubnetId",
+            "exists": "true"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3375856c-3824-4e0e-ae6a-79e011dd4c47",
+  "name": "3375856c-3824-4e0e-ae6a-79e011dd4c47"
+}

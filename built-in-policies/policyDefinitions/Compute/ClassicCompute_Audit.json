@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "Virtual machines should be migrated to new Azure Resource Manager resources",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Use new Azure Resource Manager for your virtual machines to provide security enhancements such as: stronger access control (RBAC), better auditing, Azure Resource Manager based deployment and governance, access to managed identities, access to key vault for secrets, Azure AD-based authentication and support for tags and resource groups for easier security management",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.ClassicCompute/virtualMachines",
+              "Microsoft.Compute/virtualMachines"
+            ]
+          },
+          {
+            "value": "[field('type')]",
+            "equals": "Microsoft.ClassicCompute/virtualMachines"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1d84d5fb-01f6-4d12-ba4f-4a26081d403d",
+  "name": "1d84d5fb-01f6-4d12-ba4f-4a26081d403d"
+}

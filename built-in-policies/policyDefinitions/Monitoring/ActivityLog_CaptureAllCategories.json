@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Azure Monitor log profile should collect logs for categories 'write,' 'delete,' and 'action'",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy ensures that a log profile collects logs for categories 'write,' 'delete,' and 'action'",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/logprofiles",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/categories[*]",
+                  "notEquals": "Write"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/categories[*]",
+                  "notEquals": "Delete"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/categories[*]",
+                  "notEquals": "Action"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1a4e592a-6a6e-44a5-9814-e36264ca96e7",
+  "name": "1a4e592a-6a6e-44a5-9814-e36264ca96e7"
+}
