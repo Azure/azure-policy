@@ -1,0 +1,96 @@
+{
+  "properties": {
+    "displayName": "Azure Cosmos DB accounts should have firewall rules",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Audit or deny resources that do not have any IP rules configured and allow all networks by default. Accounts that have at least one IP rule defined with the virtual network filter enabled are deemed compliant. Accounts disabling public access are also deemed compliant.",
+    "metadata": {
+        "version": "1.0.0",
+        "category": "Cosmos DB"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Policy Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess",
+                "equals": "Enabled"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/isVirtualNetworkFilterEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/isVirtualNetworkFilterEnabled",
+                "equals": "false"
+              },
+              {
+                "allOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/ipRules",
+                        "exists": "false"
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.DocumentDB/databaseAccounts/ipRules[*]"
+                        },
+                        "equals": 0
+                      }
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/ipRangeFilter",
+                        "exists": "false"
+                      },
+                      {
+                        "field": "Microsoft.DocumentDB/databaseAccounts/ipRangeFilter",
+                        "equals": ""
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/862e97cf-49fc-4a5c-9de4-40d4e2e7c8eb",
+  "name": "862e97cf-49fc-4a5c-9de4-40d4e2e7c8eb"
+}
