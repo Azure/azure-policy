@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Advanced data security should be enabled on SQL Server on Virtual Machines",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Advanced data security standard tier should be enabled on SQL Server on Virtual Machines. This provides functionality for surfacing and mitigating potential database vulnerabilities, detecting anomalous activities that could indicate a threat to SQL database and discovering and classifying sensitive data.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "SqlServerVirtualMachines",
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "field": "Microsoft.Security/pricings/pricingTier",
+            "equals": "Standard"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6581d072-105e-4418-827f-bd446d56421b",
+  "name": "6581d072-105e-4418-827f-bd446d56421b"
+}
