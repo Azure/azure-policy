@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Audit Web Sockets state for a Web Application",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "The Web Sockets protocol is vulnerable to different types of security threats. Use of Web Sockets within a web application must be carefully reviewed.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Security Center",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "app"
+              },
+              {
+                "field": "kind",
+                "equals": "WebApp"
+              },
+              {
+                "field": "kind",
+                "equals": "app,linux"
+              },
+              {
+                "field": "kind",
+                "equals": "app,linux,container"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "DisableWebSockets",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e797f851-8be7-4c40-bb56-2e3395215b0e",
+  "name": "e797f851-8be7-4c40-bb56-2e3395215b0e"
+}

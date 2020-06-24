@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "MFA should be enabled on accounts with read permissions on your subscription",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Multi-Factor Authentication (MFA) should be enabled for all subscription accounts with read privileges to prevent a breach of accounts or resources.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "EnableMFAForReadPermissions",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e3576e28-8b17-4677-84c3-db2990658d64",
+  "name": "e3576e28-8b17-4677-84c3-db2990658d64"
+}

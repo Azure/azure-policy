@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "Vulnerabilities in container security configurations should be remediated",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Audit vulnerabilities in security configuration on machines with Docker installed and display as recommendations in Azure Security Center.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.ClassicCompute/virtualMachines",
+          "Microsoft.Compute/virtualMachineScaleSets"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "ContainerBenchmark",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e8cbc669-f12d-49eb-93e7-9273119e9933",
+  "name": "e8cbc669-f12d-49eb-93e7-9273119e9933"
+}

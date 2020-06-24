@@ -1,0 +1,54 @@
+{
+    "properties": {
+        "displayName": "Role-Based Access Control (RBAC) should be used on Kubernetes Services",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "To provide granular filtering on the actions that users can perform, use Role-Based Access Control (RBAC) to manage permissions in Kubernetes Service Clusters and configure relevant authorization policies.",
+        "metadata": {
+            "version": "1.0.1-preview",
+            "category": "Security Center",
+            "preview": true
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.ContainerService/managedClusters"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "field": "Microsoft.ContainerService/managedClusters/enableRBAC",
+                                "exists": "false"
+                            },
+                            {
+                                "field": "Microsoft.ContainerService/managedClusters/enableRBAC",
+                                "equals": "false"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/ac4a19c2-fa67-49b4-8ae5-0b2e78c49457",
+    "name": "ac4a19c2-fa67-49b4-8ae5-0b2e78c49457"
+}
