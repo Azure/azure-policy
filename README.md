@@ -196,6 +196,10 @@ Using this type of alias in the existence condition of auditIfNotExists or deplo
 
 Using this type of alias in audit/deny/append effect policies works partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies and no deny or append behaviors for deny/append effect policies because of the missing property in the request payload.
 
+-Microsoft.Databricks/* (Creation time only)
+
+All Databricks reasources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
+
 ### Resource types that exceed current enforcement and compliance scale
 
 There some resource types that are generated at very high scale. These are not suitable for management by Azure Policy because the enforcement and compliance checks create overhead that can negatively impact the performance of the API itself. Most of these are not significant policy scenarios, but there are a few exceptions.
