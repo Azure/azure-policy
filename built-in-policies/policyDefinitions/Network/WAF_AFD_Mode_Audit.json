@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Web Application Firewall (WAF) should use the specified mode for Azure Front Door Service",
+    "description": "Mandates the use of 'Detection' or 'Prevention' mode to be active on all Web Application Firewall policies for Azure Front Door Service.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "modeRequirement": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Mode Requirement",
+          "description": "Mode required for all WAF policies"
+        },
+        "allowedValues": [
+          "Prevention",
+          "Detection"
+        ],
+        "defaultValue": "Detection"
+      }
+    },
+    "policyRule": {
+      "if": {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Network/frontdoorwebapplicationfirewallpolicies"
+              },
+              {
+                "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/policySettings.mode",
+                "notEquals": "[parameters('modeRequirement')]"
+              }
+            ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/425bea59-a659-4cbb-8d31-34499bd030b8",
+  "name": "425bea59-a659-4cbb-8d31-34499bd030b8"
+}

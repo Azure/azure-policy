@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Monitor unencrypted SQL databases in Azure Security Center",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "Unencrypted SQL databases will be monitored by Azure Security Center as recommendations. This policy is deprecated and replaced by the following policy: Transparent Data Encryption on SQL databases should be enabled'",
+        "metadata": {
+            "version": "1.0.0-deprecated",
+            "category": "Security Center",
+            "deprecated": true
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": [
+                    "Microsoft.SQL/servers/databases"
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Security/complianceResults",
+                    "name": "encryption",
+                    "existenceCondition": {
+                        "field": "Microsoft.Security/complianceResults/resourceStatus",
+                        "in": [
+                            "OffByPolicy",
+                            "Healthy"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16",
+    "name": "a8bef009-a5c9-4d0f-90d7-6018734e8a16"
+}
