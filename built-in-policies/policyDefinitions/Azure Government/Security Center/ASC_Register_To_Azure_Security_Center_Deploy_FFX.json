@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "Enable Azure Security Center on your subscription",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Identifies existing subscriptions that are not monitored by Azure Security Center (ASC).\nSubscriptions not monitored by ASC will be registered to the free pricing tier.\nSubscriptions already monitored by ASC (free or standard), will be considered compliant.\nTo register newly created subscriptions, open the compliance tab, select the relevant non-compliant assignment and create a remediation task.\nRepeat this step when you have one or more new subscriptions you want to monitor with Security Center.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "VirtualMachines",
+          "deploymentScope": "subscription",
+          "existenceScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "existenceCondition": {
+            "anyof": [
+              {
+                "field": "microsoft.security/pricings/pricingTier",
+                "equals": "standard"
+              },
+              {
+                "field": "microsoft.security/pricings/pricingTier",
+                "equals": "free"
+              }
+            ]
+          },
+          "deployment": {
+            "location": "usgovvirginia",
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2018-06-01",
+                    "name": "VirtualMachines",
+                    "properties": {
+                      "pricingTier": "free"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ac076320-ddcf-4066-b451-6154267e8ad2",
+  "name": "ac076320-ddcf-4066-b451-6154267e8ad2"
+}

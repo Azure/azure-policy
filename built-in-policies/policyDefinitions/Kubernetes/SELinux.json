@@ -1,0 +1,103 @@
+{
+    "properties": {
+        "displayName": "Kubernetes cluster pods and containers should only use allowed SELinux options",
+        "policyType": "BuiltIn",
+        "mode": "Microsoft.Kubernetes.Data",
+        "description": "This policy ensures pods and containers only use allowed SELinux options in a Kubernetes cluster. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+        "metadata": {
+            "version": "1.0.0-preview",
+            "category": "Kubernetes",
+            "preview": true
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+                },
+                "allowedValues": [
+                    "audit",
+                    "deny",
+                    "disabled"
+                ],
+                "defaultValue": "audit"
+            },
+            "excludedNamespaces": {
+                "type": "Array",
+                "metadata": {
+                    "displayName": "Namespace exclusions",
+                    "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+                },
+                "defaultValue": [
+                    "kube-system",
+                    "gatekeeper-system",
+                    "azure-arc"
+                ]
+            },
+            "allowedSELinuxOptions": {
+                "type": "Object",
+                "metadata": {
+                    "displayName": "Allowed SELinux options",
+                    "description": "The allowed configurations for pod and container level SELinux Options. Provide empty options list as input to block everything.",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "options": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "level": {
+                                            "type": "string"
+                                        },
+                                        "role": {
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "type": "string"
+                                        },
+                                        "user": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "required": [
+                            "options"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "defaultValue": {
+                    "options": []
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": [
+                    "AKS Engine",
+                    "Microsoft.Kubernetes/connectedClusters",
+                    "Microsoft.ContainerService/managedClusters"
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/selinux/template.yaml",
+                    "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/selinux/constraint.yaml",
+                    "values": {
+                        "excludedNamespaces": "[parameters('excludedNamespaces')]",
+                        "allowedSELinuxOptions": "[parameters('allowedSELinuxOptions').options]"
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/e1e6c427-07d9-46ab-9689-bfa85431e636",
+    "name": "e1e6c427-07d9-46ab-9689-bfa85431e636"
+}

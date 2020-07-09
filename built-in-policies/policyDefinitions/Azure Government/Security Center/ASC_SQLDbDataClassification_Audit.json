@@ -1,0 +1,52 @@
+{
+    "properties": {
+        "displayName": "Sensitive data in your SQL databases should be classified",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Azure Security Center monitors the data discovery and classification scan results for your SQL databases and provides recommendations to classify the sensitive data in your databases for better monitoring and security",
+        "metadata": {
+            "version": "1.0.0-preview",
+            "category": "Security Center",
+            "preview": true
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": [
+                    "Microsoft.Sql/servers/databases",
+                    "Microsoft.Sql/managedInstances/databases"
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Security/complianceResults",
+                    "name": "sqlDataClassification",
+                    "existenceCondition": {
+                        "field": "Microsoft.Security/complianceResults/resourceStatus",
+                        "in": [
+                            "OffByPolicy",
+                            "Healthy"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/cc9835f2-9f6b-4cc8-ab4a-f8ef615eb349",
+    "name": "cc9835f2-9f6b-4cc8-ab4a-f8ef615eb349"
+}

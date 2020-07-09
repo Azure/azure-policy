@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Container Registries should use private links",
+        "description": "Audit Container Registries that do not have at least one approved private endpoint connection. Clients in a virtual network can securely access resources that have private endpoint connections through private links. For more information, visit: https://aka.ms/acr/private-link.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Container Registry"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.ContainerRegistry/registries"
+                    },
+                    {
+                        "count": {
+                            "field": "Microsoft.ContainerRegistry/registries/privateEndpointConnections[*]",
+                            "where": {
+                                "field": "Microsoft.ContainerRegistry/registries/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                                "equals": "Approved"
+                            }
+                        },
+                        "less": 1
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/e8eef0a8-67cf-4eb4-9386-14b0e78733d4",
+    "name": "e8eef0a8-67cf-4eb4-9386-14b0e78733d4"
+}
