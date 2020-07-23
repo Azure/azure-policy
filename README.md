@@ -247,6 +247,7 @@ To add one to the list please add it in this UserVoice Item: [here](https://feed
 ### Alias changes  
 
 May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
+July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
 
 ### Tag Contributor Role
 
