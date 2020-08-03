@@ -9,7 +9,7 @@ Ensure disk encryption enabled for Azure Data Explorer (kusto)
 ## Try with PowerShell
 
 ````powershell
-$definition = New-AzPolicyDefinition -Name "audit-kusto-disk-encryption" -DisplayName "Audit Azure Data Explorer Disk Encryption" -description "This policy ensures that Azure Data Explorer Cluster have disc encryption enabled." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Storage/https-traffic-only/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Storage/https-traffic-only/azurepolicy.parameters.json' -Mode All
+$definition = New-AzPolicyDefinition -Name "audit-kusto-disk-encryption" -DisplayName "Audit Azure Data Explorer Disk Encryption" -description "This policy ensures that Azure Data Explorer Cluster have disc encryption enabled." -Policy 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Kusto/encrypted-disk-only/azurepolicy.rules.json' -Parameter 'https://raw.githubusercontent.com/Azure/azure-policy/master/samples/Kusto/encrypted-disk-only/azurepolicy.parameters.json' -Mode All
 $definition
 $assignment = New-AzPolicyAssignment -Name <assignmentname> -Scope <scope>  -PolicyDefinition $definition
 $assignment 

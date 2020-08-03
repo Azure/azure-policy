@@ -1,0 +1,53 @@
+{
+    "properties": {
+        "mode": "All",
+        "parameters": {
+            "effectType": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "displayName": "Audit Azure Data Explorer with virtual network injection not configured",
+        "description": "Audit Azure Data Explorer with virtual network injection not configured. Checks the virtualNetworkConfiguration property on Kusto.",
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Kusto/clusters"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effectType')]",
+                "details": {
+                    "type": "Microsoft.Kusto/clusters/virtualNetworkConfiguration", 
+                    "existenceCondition": {
+                        "allOf":[
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration.subnetId", 
+                                "exists": "true" 
+                            },
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration.enginePublicIpId", 
+                                "exists": "true" 
+                            },
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration.dataManagementPublicIpId", 
+                                "exists": "true" 
+                            }
+                        ]
+                    } 
+                } 
+            }
+        }
+    }
+}
