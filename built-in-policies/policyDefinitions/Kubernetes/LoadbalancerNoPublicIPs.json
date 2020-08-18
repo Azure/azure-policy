@@ -30,6 +30,54 @@
           "description": "List of Kubernetes namespaces to exclude from policy evaluation."
         },
         "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaceSelector": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Namespace selector",
+          "description": "Standard Kubernetes namespace selector to include matching namespaces for policy evaluation.",
+          "schema": {
+            "type": "Object",
+            "properties": {
+              "matchExpressions": {
+                "type": "Array",
+                "items": {
+                  "type": "Object",
+                  "properties": {
+                    "key": {
+                      "type": "String"
+                    },
+                    "operator": {
+                      "type": "String",
+                      "allowedValues": [
+                        "In",
+                        "NotIn",
+                        "Exists",
+                        "DoesNotExist"
+                      ]
+                    },
+                    "values": {
+                      "type": "Array",
+                      "items": {
+                        "type": "String"
+                      }
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "operator"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "matchExpressions"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "defaultValue": {}
       }
     },
     "policyRule": {
@@ -47,7 +95,8 @@
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/load-balancer-no-public-ips/template.yaml",
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/load-balancer-no-public-ips/constraint.yaml",
           "values": {
-            "excludedNamespaces": "[parameters('excludedNamespaces')]"
+            "excludedNamespaces": "[parameters('excludedNamespaces')]",
+            "namespaceSelector": "[parameters('namespaceSelector')]"
           }
         }
       }

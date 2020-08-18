@@ -31,6 +31,54 @@
         },
         "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
       },
+      "namespaceSelector": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Namespace selector",
+          "description": "Standard Kubernetes namespace selector to include matching namespaces for policy evaluation.",
+          "schema": {
+            "type": "Object",
+            "properties": {
+              "matchExpressions": {
+                "type": "Array",
+                "items": {
+                  "type": "Object",
+                  "properties": {
+                    "key": {
+                      "type": "String"
+                    },
+                    "operator": {
+                      "type": "String",
+                      "allowedValues": [
+                        "In",
+                        "NotIn",
+                        "Exists",
+                        "DoesNotExist"
+                      ]
+                    },
+                    "values": {
+                      "type": "Array",
+                      "items": {
+                        "type": "String"
+                      }
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "operator"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "matchExpressions"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "defaultValue": {}
+      },
       "forbiddenSysctls": {
         "type": "Array",
         "metadata": {
@@ -55,7 +103,8 @@
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/forbidden-sysctl-interfaces/constraint.yaml",
           "values": {
             "forbiddenSysctls": "[parameters('forbiddenSysctls')]",
-            "excludedNamespaces": "[parameters('excludedNamespaces')]"
+            "excludedNamespaces": "[parameters('excludedNamespaces')]",
+            "namespaceSelector": "[parameters('namespaceSelector')]"
           }
         }
       }
