@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Azure Spring Cloud should use network injection",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Spring Cloud instances should use virtual network injection for the following purposes: 1. Isolate Azure Spring Cloud from Internet. 2. Enable Azure Spring Cloud to interact with systems in either on premises data centers or Azure service in other virtual networks. 3. Empower customers to control inbound and outbound network communications for Azure Spring Cloud.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Platform"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      },
+      "evaluatedSkuNames": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Azure Spring Cloud SKU Names",
+          "description": "List of Azure Spring Cloud SKUs against which this policy will be evaluated."
+        },
+        "allowedValues": [
+          "Standard"
+        ],
+        "defaultValue": [
+          "Standard"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AppPlatform/Spring"
+          },
+          {
+            "field": "Microsoft.AppPlatform/Spring/sku.tier",
+            "in": "[parameters('evaluatedSkuNames')]"
+          },
+          {
+            "field": "Microsoft.AppPlatform/Spring/networkProfile.serviceRuntimeSubnetId",
+            "exists": false
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/af35e2a4-ef96-44e7-a9ae-853dd97032c4",
+  "name": "af35e2a4-ef96-44e7-a9ae-853dd97032c4"
+}
