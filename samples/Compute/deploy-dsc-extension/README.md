@@ -2,6 +2,12 @@
 
 Deploys the DSC extension to and assigns configuration artifact from url location.
 
+If the desired outcome is to always deploy the extension even if it already exists, add the following line as a property of the extension for each resource type:
+
+```json
+"forceUpdateTag": "[uniqueString(resourceGroup().id, deployment().name)]",
+```
+
 ## Try on Portal
 
 [![Deploy to Azure](http://azuredeploy.net/deploybutton.png)](https://portal.azure.com/#blade/Microsoft_Azure_Policy/CreatePolicyDefinitionBlade/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fazure-policy%2Fmaster%2Fsamples%2FCompute%2Fdeploy-dsc-extension%2Fazurepolicy.json)
