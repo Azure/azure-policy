@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Manage certificate lifetime action triggers",
+    "displayName": "Certificates should have the specified lifetime action triggers",
     "policyType": "BuiltIn",
     "mode": "Microsoft.KeyVault.Data",
-    "description": "This policy manages the configuration for certificate lifetime action triggers before certificate expiration.",
+    "description": "Manage your organizational compliance requirements by specifying whether a certificate lifetime action is triggered at a specific percentage of its lifetime or at a certain number of days prior to its expiration.",
     "metadata": {
-      "version": "1.0.1-preview",
+      "version": "2.0.0-preview",
       "category": "Key Vault",
       "preview": true
     },
@@ -40,28 +40,36 @@
     },
     "policyRule": {
       "if": {
-        "anyOf": [
+        "allOf": [
           {
-            "allOf": [
-              {
-                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.daysBeforeExpiry",
-                "exists": true
-              },
-              {
-                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.daysBeforeExpiry",
-                "less": "[parameters('minimumDaysBeforeExpiry')]"
-              }
-            ]
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
           },
           {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.lifetimePercentage",
-                "exists": true
+                "allOf": [
+                  {
+                    "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.daysBeforeExpiry",
+                    "exists": true
+                  },
+                  {
+                    "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.daysBeforeExpiry",
+                    "less": "[parameters('minimumDaysBeforeExpiry')]"
+                  }
+                ]
               },
               {
-                "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.lifetimePercentage",
-                "greater": "[parameters('maximumPercentageLife')]"
+                "allOf": [
+                  {
+                    "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.lifetimePercentage",
+                    "exists": true
+                  },
+                  {
+                    "field": "Microsoft.KeyVault.Data/vaults/certificates/lifetimeAction.lifetimePercentage",
+                    "greater": "[parameters('maximumPercentageLife')]"
+                  }
+                ]
               }
             ]
           }

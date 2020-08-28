@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Manage allowed certificate key types",
+    "displayName": "Certificates should use allowed key types",
     "policyType": "BuiltIn",
     "mode": "Microsoft.KeyVault.Data",
-    "description": "This policy manages the allowed key types for certificates.",
+    "description": "Manage your organizational compliance requirements by restricting the key types allowed for certificates.",
     "metadata": {
-      "version": "1.0.1-preview",
+      "version": "2.0.0-preview",
       "category": "Key Vault",
       "preview": true
     },
@@ -43,8 +43,16 @@
     },
     "policyRule": {
       "if": {
-        "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType",
-        "notIn": "[parameters('allowedKeyTypes')]"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType",
+            "notIn": "[parameters('allowedKeyTypes')]"
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]"

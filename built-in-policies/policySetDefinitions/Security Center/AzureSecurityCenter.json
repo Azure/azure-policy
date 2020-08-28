@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "Monitor all the available security recommendations in Azure Security Center. This is the default policy for Azure Security Center.",
     "metadata": {
-      "version": "12.0.0",
+      "version": "13.0.1",
       "category": "Security Center"
     },
     "parameters": {
@@ -231,7 +231,7 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Vulnerability assessment should be enabled on virtual machines",
+          "displayName": "A vulnerability assessment solution should be enabled on your virtual machines",
           "description": "Enable or disable the detection of virtual machine vulnerabilities by Azure Security Center vulnerability assessment"
         }
       },
@@ -2311,6 +2311,19 @@
           "displayName": "Vulnerabilities in Azure Container Registry images should be remediated",
           "description": "Enable or disable monitoring of Azure container registries by Azure Security Center vulnerability assessment (powered by Qualys)"
         }
+      },
+      "disallowPublicBlobAccessEffect": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Storage account public access should be disallowed",
+          "description": "Enable or disable reporting of Storage Accounts that allow public access"
+        }
       }
     },
       "policyDefinitions": [
@@ -3522,6 +3535,15 @@
             },
             "allowedHostPaths":{
               "value": "[parameters('AllowedHostPathVolumesInKubernetesClusterList')]"
+            }
+          }
+        },
+        {
+          "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4fa4b6c0-31ca-4c0d-b10d-24b96f62a751",
+          "policyDefinitionReferenceId": "StorageDisallowPublicAccess",
+          "parameters": {
+            "effect": {
+              "value": "[parameters('disallowPublicBlobAccessEffect')]"
             }
           }
         }

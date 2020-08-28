@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Manage certificates issued by a non-integrated CA",
+    "displayName": "Certificates should be issued by the specified non-integrated certificate authority",
     "policyType": "BuiltIn",
     "mode": "Microsoft.KeyVault.Data",
-    "description": "This policy manages certificates are issued by a specified non-integrated Certificate Authority.",
+    "description": "Manage your organizational compliance requirements by specifying the custom or internal certificate authorities that can issue certificates in your key vault.",
     "metadata": {
-      "version": "1.0.1-preview",
+      "version": "2.0.0-preview",
       "category": "Key Vault",
       "preview": true
     },
@@ -33,8 +33,16 @@
     },
     "policyRule": {
       "if": {
-        "field": "Microsoft.KeyVault.Data/vaults/certificates/issuer.commonName",
-        "notContains": "[parameters('caCommonName')]"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/issuer.commonName",
+            "notContains": "[parameters('caCommonName')]"
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]"
