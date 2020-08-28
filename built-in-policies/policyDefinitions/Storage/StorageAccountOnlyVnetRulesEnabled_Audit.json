@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Storage accounts should restrict network access using virtual network rules",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Protect your storage accounts from potential threats using virtual network rules as a preferred method to IP-based filtering. Disallowing IP-based filtering prevents public IPs from accessing your storage accounts.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the audit policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules[*]"
+                },
+                "greaterOrEquals": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2a1a9cdf-e04d-429a-8416-3bfb72a1b26f",
+  "name": "2a1a9cdf-e04d-429a-8416-3bfb72a1b26f"
+}
