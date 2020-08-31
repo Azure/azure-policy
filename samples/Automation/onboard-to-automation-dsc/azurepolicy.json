@@ -195,21 +195,45 @@
           "type": "[if(equals(tolower(field('Type')),'microsoft.compute/virtualmachines'),'Microsoft.Compute/virtualMachines/extensions','Microsoft.HybridCompute/machines/extensions')]",
           "name": "Microsoft.Powershell.DSC",
           "existenceCondition": {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                "equals": "Microsoft.PowerShell"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                    "equals": "Microsoft.PowerShell"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                    "equals": "DSC"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                    "in": [
+                      "Creating",
+                      "Updating",
+                      "Succeeded"
+                    ]
+                  }
+                ]
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                "equals": "DSC"
-              },
-              {
-                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                "in": [
-                  "Creating",
-                  "Updating",
-                  "Succeeded"
+                "allOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+                    "equals": "Microsoft.PowerShell"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/type",
+                    "equals": "DSC"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                    "in": [
+                      "Creating",
+                      "Updating",
+                      "Succeeded"
+                    ]
+                  }
                 ]
               }
             ]
@@ -249,7 +273,11 @@
                   }
                 },
                 "variables": {
-                  "automationAccountName": "[last(split(parameters('automationAccount'),'/'))]"
+                  "automationAccountName": "[last(split(parameters('automationAccount'),'/'))]",
+                  "location": {
+                    "Compute": "[if(equals(toLower(parameters('type')), 'microsoft.compute/virtualmachines'), parameters('location'), 'westus2')]",
+                    "HybridCompute": "[if(equals(toLower(parameters('type')),'microsoft.hybridcompute/machines'), parameters('location'), 'westus2')]"
+                  }
                 },
                 "resources": [
                   {
@@ -257,7 +285,7 @@
                     "type": "Microsoft.Compute/virtualMachines/extensions",
                     "name": "[concat(parameters('machineName'),'/Microsoft.Powershell.DSC')]",
                     "apiVersion": "2020-06-01",
-                    "location": "[parameters('location')]",
+                    "location": "[variables('location').Compute]",
                     "properties": {
                       "publisher": "Microsoft.Powershell",
                       "type": "DSC",
@@ -293,7 +321,7 @@
                     "type": "Microsoft.HybridCompute/machines/extensions",
                     "name": "[concat(parameters('machineName'),'/Microsoft.Powershell.DSC')]",
                     "apiVersion": "2020-07-30-preview",
-                    "location": "[parameters('location')]",
+                    "location": "[variables('location').HybridCompute]",
                     "properties": {
                       "publisher": "Microsoft.Powershell",
                       "type": "DSC",
