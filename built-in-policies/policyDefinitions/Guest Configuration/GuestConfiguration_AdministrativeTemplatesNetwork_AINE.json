@@ -6,7 +6,7 @@
         "description": "Windows machines should have the specified Group Policy settings in the category 'Administrative Templates - Network' for guest logons, simultaneous connections, network bridge, ICS, and multicast name resolution. This policy requires that the Guest Configuration prerequisites have been deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
         "metadata": {
             "category": "Guest Configuration",
-            "version": "1.0.0-preview",
+            "version": "2.0.0-preview",
             "preview": true,
             "requiredProviders": [
                 "Microsoft.GuestConfiguration"
@@ -22,6 +22,18 @@
             }
         },
         "parameters": {
+            "IncludeArcMachines": {
+                "type": "string",
+                "metadata": {
+                    "displayName": "Include Arc connected servers",
+                    "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+                },
+                "allowedValues": [
+                    "true",
+                    "false"
+                ],
+                "defaultValue": "false"
+            },
             "EnableInsecureGuestLogons": {
                 "type": "string",
                 "metadata": {
@@ -223,6 +235,10 @@
                     },
                     {
                         "allOf": [
+                            {
+                                "value": "[parameters('IncludeArcMachines')]",
+                                "equals": "true"
+                            },
                             {
                                 "field": "type",
                                 "equals": "Microsoft.HybridCompute/machines"
