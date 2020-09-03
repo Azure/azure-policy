@@ -5,7 +5,7 @@
         "mode": "All",
         "description": "Azure Security Center has identified that some of your subnets aren't protected with a next generation firewall. Protect your subnets from potential threats by restricting access to them with Azure Firewall or a supported next generation firewall",
         "metadata": {
-            "version": "2.0.0-preview",
+            "version": "3.0.0-preview",
             "category": "Network",
             "preview": true
         },
@@ -25,101 +25,61 @@
                 "allOf": [
                     {
                         "field": "type",
-                        "equals": "Microsoft.Network/virtualNetworks/subnets"
-                    },
-                    {
-                        "field": "Microsoft.Network/virtualNetworks/subnets/routeTable",
-                        "exists": false
+                        "equals": "Microsoft.Network/virtualNetworks"
                     },
                     {
                         "count": {
-                            "field": "Microsoft.Network/virtualNetworks/subnets/ipConfigurations[*]"
+                            "field": "Microsoft.Network/virtualNetworks/subnets[*]",
+                            "where": {
+                                "allOf": [
+                                    {
+                                        "count": {
+                                            "field": "Microsoft.Network/virtualNetworks/subnets[*].ipConfigurations[*]",
+                                            "where": {
+                                                "value": "[empty(field('Microsoft.Network/virtualNetworks/subnets[*].ipConfigurations[*].id'))]",
+                                                "equals": false
+                                            }
+                                        },
+                                        "greaterOrEquals": 2
+                                    },
+                                    {
+                                        "field": "Microsoft.Network/virtualNetworks/subnets[*].routeTable",
+                                        "exists": false
+                                    },
+                                    {
+                                        "not": {
+                                            "anyOf": [
+                                                {
+                                                    "field": "Microsoft.Network/virtualNetworks/subnets[*].name",
+                                                    "equals": "AzureBastionSubnet"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Network/virtualNetworks/subnets[*].name",
+                                                    "equals": "GatewaySubnet"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
                         },
-                        "greaterOrEquals": 2
-                    },
-                    {
-                        "field": "name",
-                        "notIn": ["AzureFirewallSubnet","GatewaySubnet","AzureBastionSubnet"]
+                        "greater": 0
                     }
                 ]
             },
             "then": {
                 "effect": "[parameters('effect')]",
                 "details": {
-                    "type": "Microsoft.Network/networkSecurityGroups",
-                    "name": "[string(last(split(field('Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id'), '/')))]",
-                    "resourceGroupName": "[string(take(skip(split(field('Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id'), '/'), 4), 1))]",
+                    "type": "Microsoft.Network/azureFirewalls",
                     "existenceCondition": {
-                        "allOf": [
-                            {
-                                "count": {
-                                    "field": "Microsoft.Network/networkSecurityGroups/subnets[*]",
-                                    "where": {
-                                        "field": "Microsoft.Network/networkSecurityGroups/subnets[*].id",
-                                        "like": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/*/providers/Microsoft.Network/virtualNetworks/', first(split(field('fullName'), '/')), '/subnets/', field('name'))]"
-                                    }
-                                },
-                                "equals": 1
-                            },
-                            {
-                                "count": {
-                                    "field": "Microsoft.Network/networkSecurityGroups/securityRules[*]",
-                                    "where": {
-                                        "allOf": [
-                                            {
-                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].direction",
-                                                "equals": "Outbound"
-                                            },
-                                            {
-                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].access",
-                                                "equals": "Deny"
-                                            },
-                                            {
-                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].destinationAddressPrefix",
-                                                "in": ["*","Internet"]
-                                            },
-                                            {
-                                                "anyOf": [
-                                                    {
-                                                        "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].destinationPortRange",
-                                                        "in": ["*","0-65535"]
-                                                    },
-                                                    {
-                                                        "not": {
-                                                            "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].destinationPortRanges",
-                                                            "notEquals": "0-65535"
-                                                        }
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                },
-                                "greater": 0
-                            },
-                            {
-                                "count": {
-                                    "field": "Microsoft.Network/networkSecurityGroups/securityRules[*]",
-                                    "where": {
-                                        "allOf": [
-                                            {
-                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].direction",
-                                                "equals": "Outbound"
-                                            },
-                                            {
-                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].access",
-                                                "equals": "Allow"
-                                            },
-                                            {
-                                                "field": "Microsoft.Network/networkSecurityGroups/securityRules[*].destinationAddressPrefix",
-                                                "in": ["*","Internet"]
-                                            }
-                                        ]
-                                    }
-                                },
-                                "equals": 0
+                        "count": {
+                            "field": "Microsoft.Network/azureFirewalls/ipConfigurations[*]",
+                            "where": {
+                                "field": "Microsoft.Network/azureFirewalls/ipConfigurations[*].subnet.id",
+                                "like": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/*/providers/Microsoft.Network/virtualNetworks/', first(split(field('fullName'), '/')), '/subnets/AzureFirewallSubnet')]"
                             }
-                        ]
+                        },
+                        "equals": 1
                     }
                 }
             }
