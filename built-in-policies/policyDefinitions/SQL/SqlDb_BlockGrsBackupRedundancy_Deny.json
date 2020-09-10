@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "SQL Database should avoid using GRS backup redundancy",
+    "description": "Databases should avoid using GRS storage for backups if data residency rules require data to stay within a specific region.",
+    "mode": "Indexed",
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/databases"
+          },
+          {
+            "field": "Microsoft.Sql/servers/databases/edition",
+            "notEquals": "DataWarehouse"
+          },
+          {
+            "not": {
+              "anyOf": [
+                {
+                  "field": "Microsoft.Sql/servers/databases/storageAccountType",
+                  "equals": "LRS"
+                },
+                {
+                  "field": "Microsoft.Sql/servers/databases/storageAccountType",
+                  "equals": "ZRS"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b219b9cf-f672-4f96-9ab0-f5a3ac5e1c13",
+  "name": "b219b9cf-f672-4f96-9ab0-f5a3ac5e1c13"
+}
