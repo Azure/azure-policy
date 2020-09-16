@@ -1,16 +1,49 @@
 {
     "properties": {
-        "displayName": "Deploy the Windows Guest Configuration extension to enable Guest Configuration assignments on Windows VMs",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "This policy deploys the Windows Guest Configuration extension to Windows virtual machines hosted in Azure that are supported by Guest Configuration. The Windows Guest Configuration extension is a prerequisite for all Windows Guest Configuration assignments and must deployed to machines before using any Windows Guest Configuration policy definition. For more information on Guest Configuration, visit https://aka.ms/gcpol.",
+        "displayName": "Enable Automanage - Azure virtual machine best practices",
+        "description": "Automanage enrolls, configures, and monitors virtual machines with Azure VM best practice services. Use this policy to apply Automanage to your selected scope.",
         "metadata": {
-            "category": "Guest Configuration",
-            "version": "1.0.0"
+            "version": "1.0.0",
+            "category": "Automanage"
+        },
+        "parameters": {
+            "automanageAccount": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Automanage account",
+                    "description": "Select Automanage account from dropdown list. If this account is outside of the scope of the assignment you must manually grant 'Contributor' permissions (or similar) on the account to the policy assignment's principal ID.",
+                    "strongType": "Microsoft.Automanage/accounts",
+                    "assignPermissions": true
+                }
+            },
+            "configurationProfileAssignment": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Configuration profile",
+                    "description": "The management services provided are based on whether the machine is intended to be used in a dev/test environment or production."
+                },
+                "allowedValues": [
+                    "Azure virtual machine best practices – Production",
+                    "Azure virtual machine best practices – Dev/test"
+                ],
+                "defaultValue": "Azure virtual machine best practices – Production"
+            }
         },
         "policyRule": {
             "if": {
                 "allOf": [
+                    {
+                        "field": "location",
+                        "in": [
+                            "eastus",
+                            "westus2",
+                            "westcentralus",
+                            "westeurope",
+                            "canadacentral"
+                        ]
+                    },
                     {
                         "field": "type",
                         "equals": "Microsoft.Compute/virtualMachines"
@@ -174,21 +207,17 @@
                     "roleDefinitionIds": [
                         "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
                     ],
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "AzurePolicyforWindows",
+                    "type": "Microsoft.Automanage/configurationProfileAssignments",
+                    "name": "default",
                     "existenceCondition": {
                         "allOf": [
                             {
-                                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                                "equals": "Microsoft.GuestConfiguration"
+                                "field": "Microsoft.Automanage/configurationProfileAssignments/configurationProfile",
+                                "equals": "[parameters('configurationProfileAssignment')]"
                             },
                             {
-                                "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                                "equals": "ConfigurationforWindows"
-                            },
-                            {
-                                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                                "equals": "Succeeded"
+                                "field": "Microsoft.Automanage/configurationProfileAssignments/accountId",
+                                "equals": "[parameters('automanageAccount')]"
                             }
                         ]
                     },
@@ -196,37 +225,38 @@
                         "properties": {
                             "mode": "incremental",
                             "parameters": {
-                                "vmName": {
-                                    "value": "[field('name')]"
+                                "machineName": {
+                                    "value": "[field('Name')]"
                                 },
-                                "location": {
-                                    "value": "[field('location')]"
+                                "automanageAccount": {
+                                    "value": "[parameters('automanageAccount')]"
+                                },
+                                "configurationProfileAssignment": {
+                                    "value": "[parameters('configurationProfileAssignment')]"
                                 }
                             },
                             "template": {
-                                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                                 "contentVersion": "1.0.0.0",
                                 "parameters": {
-                                    "vmName": {
+                                    "machineName": {
+                                        "type": "String"
+                                    },
+                                    "automanageAccount": {
                                         "type": "string"
                                     },
-                                    "location": {
+                                    "configurationProfileAssignment": {
                                         "type": "string"
                                     }
                                 },
                                 "resources": [
                                     {
-                                        "apiVersion": "2019-07-01",
-                                        "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
-                                        "type": "Microsoft.Compute/virtualMachines/extensions",
-                                        "location": "[parameters('location')]",
+                                        "type": "Microsoft.Compute/virtualMachines/providers/configurationProfileAssignments",
+                                        "apiVersion": "2020-06-30-preview",
+                                        "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/', 'default')]",
                                         "properties": {
-                                            "publisher": "Microsoft.GuestConfiguration",
-                                            "type": "ConfigurationforWindows",
-                                            "typeHandlerVersion": "1.1",
-                                            "autoUpgradeMinorVersion": true,
-                                            "settings": {},
-                                            "protectedSettings": {}
+                                            "configurationProfile": "[parameters('configurationProfileAssignment')]",
+                                            "accountId": "[parameters('automanageAccount')]"
                                         }
                                     }
                                 ]
@@ -237,6 +267,6 @@
             }
         }
     },
-    "id": "/providers/Microsoft.Authorization/policyDefinitions/385f5831-96d4-41db-9a3c-cd3af78aaae6",
-    "name": "385f5831-96d4-41db-9a3c-cd3af78aaae6"
+        "id": "/providers/Microsoft.Authorization/policyDefinitions/270610db-8c04-438a-a739-e8e6745b22d3",
+        "name": "270610db-8c04-438a-a739-e8e6745b22d3"
 }
