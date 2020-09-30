@@ -218,7 +218,7 @@ Work to increase the scale that policy can be performantly applied to resource t
  certificate relies on legacy Common Name field, use SANs or temporarily enable Common Name matching 
 
 Mitigation: Avoid using K8s 1.19 (preview) with the Azure Policy add-on. The add-on can be used with any GA supported version such as 1.16, 1.17, or 1.18. 
-Feature team is actively working on fixing this issue.GitHub issue tracking this on AKS side https://github.com/Azure/AKS/issues/1869 
+Feature team is actively working on fixing this issue. GitHub issue tracking this on AKS side https://github.com/Azure/AKS/issues/1869 
 
 
 ### Indexed Resource types always non-complaint to tagging policies 
