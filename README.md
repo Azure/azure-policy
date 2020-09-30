@@ -213,6 +213,13 @@ These are resource types that have significant policy scenarios, but are not sup
 
 Work to increase the scale that policy can be performantly applied to resource types is in progress. Planned availability date is not yet determined.
 
+### Azure Policy Add-on not compatible on AKS Kubernetes 1.19 (preview) version
+1.19 clusters will return this error via gatekeeper controller and policy webhook pods: 
+ certificate relies on legacy Common Name field, use SANs or temporarily enable Common Name matching 
+
+Mitigation: Avoid using K8s 1.19 (preview) with the Azure Policy add-on. The add-on can be used with any GA supported version such as 1.16, 1.17, or 1.18. 
+Feature team is actively working on fixing this issue.GitHub issue tracking this on AKS side https://github.com/Azure/AKS/issues/1869 
+
 
 ### Indexed Resource types always non-complaint to tagging policies 
 
