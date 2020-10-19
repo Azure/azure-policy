@@ -3,9 +3,9 @@
     "displayName": "Ensure that 'Python version' is the latest, if used as a part of the Function app",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Periodically, newer versions are released for Python software either due to security flaws or to include additional functionality. Using the latest Python version for Function apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+    "description": "Periodically, newer versions are released for Python software either due to security flaws or to include additional functionality. Using the latest Python version for Function apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. Currently, this policy only applies to Linux web apps.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -23,11 +23,12 @@
       },
       "WindowsPythonLatestVersion": {
         "type": "String",
-        "defaultValue": "3.6",
         "metadata": {
-          "displayName": "Windows Latest Python version",
-          "description": "Latest supported Python version for App Services"
-        }
+          "displayName": "Latest Windows Python version",
+          "description": "Latest supported Python version for App Services",
+          "deprecated": true
+        },
+        "defaultValue": "3.6"
       },
       "LinuxPythonLatestVersion": {
         "type": "String",
@@ -48,6 +49,10 @@
           {
             "field": "kind",
             "like": "functionapp*"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
           }
         ]
       },
@@ -59,40 +64,12 @@
           "existenceCondition": {
             "anyOf": [
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                    "notContains": "PYTHON"
-                  },
-                  {
-                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
-                    "equals": ""
-                  }
-                ]
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "PYTHON"
               },
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                    "equals": "[concat('PYTHON|', parameters('LinuxPythonLatestVersion'))]"
-                  },
-                  {
-                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
-                    "equals": ""
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                    "equals": ""
-                  },
-                  {
-                    "field": "Microsoft.Web/sites/config/web.pythonVersion",
-                    "equals": "[parameters('WindowsPythonLatestVersion')]"
-                  }
-                ]
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "equals": "[concat('PYTHON|', parameters('LinuxPythonLatestVersion'))]"
               }
             ]
           }
