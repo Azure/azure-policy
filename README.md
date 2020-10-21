@@ -140,9 +140,9 @@ Resource providers are free to implement their own resource management operation
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
-The storage team is working on implementing blob public access control on storage account to address this scenario. This is expected to first be available in August 2020.
+The storage team has implemented blob public access control on storage accounts to address this scenario. Per-account public access control of blobs can be controlled by Azure Policy using the new alias ```Microsoft.Storage/storageAccounts/allowBlobPublicAccess```.
 
-Note that Azure policies for dataplane operations of certain targeted resource providers is also under active development.
+Note that Azure policies for dataplane operations of certain targeted resource providers is also supported or under active development.
 
  - Microsoft.Sql/servers/firewallRules
 
@@ -154,12 +154,13 @@ Service Fabric applications created via direct requests to the Service Fabric cl
 
 ### Nonstandard creation pattern
 
-In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource could be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this class of behavior:
+In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource provider selects the values for properties not provided in the payload. Such a resource might be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this class of behavior:
 
 - Microsoft.Sql/servers/firewallRules
 - Microsoft.Automation/certificates
+- Microsoft.Security/securityContacts
 
-There is currently no plan to change this behavior. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL or Automation team.
+There is currently no plan to change this behavior for these types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL or Automation team.
 
 ### Provider pass-through to non Azure Resource Manager resources
 
@@ -179,8 +180,6 @@ There are examples where a resource provider publishes a resource type to Azure 
 Since custom policies use aliases directly, it is usually not possible to update them without causing unintended side effects to existing custom policies. This means that aliases referring to incorrect information or following legacy naming conventions must be left in place, even though it may cause confusion. In certain cases where an alias is known to refer to the wrong information, another alias may be created as a corrected alternative to the known bad one. In these cases, the new alias will be given the name of the bad alias with .v2 appended. For example a bad alias named Microsoft.ResourceProvider/someType/someAlias would result in the addition of a corrected version named Microsoft.ResourceProvider/someType/someAlias.v2. If an alias is added to correct a .v2 alias it will be named by replacing v2 with v3. All known corrected aliases are listed here:
 
 - Microsoft.Sql/servers/databases/requestedServiceObjectiveName.v2
-
-*This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
 
 ### Optional or auto-generated resource property that bypasses policy evaluation
 
@@ -264,3 +263,4 @@ Current limitation causes errors using the Tag Contributor role with Tag related
 
 Subscription tagging is not yet supported using "Append" or "Modify" policies. Details on subscription tagging without using Azure Policy can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources).
 
+*This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
