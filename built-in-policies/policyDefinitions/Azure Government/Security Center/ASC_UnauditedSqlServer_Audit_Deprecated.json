@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Monitor unaudited SQL servers in Azure Security Center",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "SQL servers which don't have SQL auditing turned on will be monitored by Azure Security Center as recommendations. This policy is deprecated and replaced by the following policy: 'Auditing should be enabled on advanced data security settings on SQL Server'",
+        "metadata": {
+            "version": "1.0.0-deprecated",
+            "category": "Security Center",
+            "deprecated": true
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "in": [
+                    "Microsoft.SQL/servers"
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Security/complianceResults",
+                    "name": "auditing",
+                    "existenceCondition": {
+                        "field": "Microsoft.Security/complianceResults/resourceStatus",
+                        "in": [
+                            "OffByPolicy",
+                            "Healthy"
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/af8051bf-258b-44e2-a2bf-165330459f9d",
+    "name": "af8051bf-258b-44e2-a2bf-165330459f9d"
+}

@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "SQL Managed Instances should avoid using GRS backup redundancy",
+    "description": "Managed Instances should avoid using GRS storage for backups if data residency rules require data to stay within a specific region.",
+    "mode": "Indexed",
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/managedInstances"
+          },
+          {
+            "not": {
+              "anyOf": [
+                {
+                  "field": "Microsoft.Sql/managedInstances/storageAccountType",
+                  "equals": "LRS"
+                },
+                {
+                  "field": "Microsoft.Sql/managedInstances/storageAccountType",
+                  "equals": "ZRS"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a9934fd7-29f2-4e6d-ab3d-607ea38e9079",
+  "name": "a9934fd7-29f2-4e6d-ab3d-607ea38e9079"
+}

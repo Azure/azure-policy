@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Function App should only be accessible over HTTPS",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Use of HTTPS ensures server/service authentication and protects data in transit from network layer eavesdropping attacks.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Security Center",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "functionapp"
+              },
+              {
+                "field": "kind",
+                "equals": "functionapp,linux"
+              },
+              {
+                "field": "kind",
+                "equals": "functionapp,linux,container"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "OnlyHttpsForFunctionApp",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5df82f4f-773a-4a2d-97a2-422a806f1a55",
+  "name": "5df82f4f-773a-4a2d-97a2-422a806f1a55"
+}

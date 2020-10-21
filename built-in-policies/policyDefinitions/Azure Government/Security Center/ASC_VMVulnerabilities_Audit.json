@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "Vulnerabilities should be remediated by a Vulnerability Assessment solution",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Monitors vulnerabilities detected by Vulnerability Assessment solution and VMs without a Vulnerability Assessment solution in Azure Security Center as recommendations.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.ClassicCompute/virtualMachines"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/assessments",
+          "name": "01b1ed4c-b733-4fee-b145-f23236e70cf3",
+          "existenceCondition": {
+            "field": "Microsoft.Security/assessments/status.code",
+            "in": [
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/760a85ff-6162-42b3-8d70-698e268f648c",
+  "name": "760a85ff-6162-42b3-8d70-698e268f648c"
+}

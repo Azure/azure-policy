@@ -1,0 +1,38 @@
+{
+  "properties": {
+    "displayName": "Private endpoint connections on Azure SQL Database should be enabled",
+    "description": "Private endpoint connections enforce secure communication by enabling private connectivity to Azure SQL Database.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Sql/servers/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.Sql/servers/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "audit"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7698e800-9299-47a6-b3b6-5a0fee576eed",
+  "name": "7698e800-9299-47a6-b3b6-5a0fee576eed"
+}

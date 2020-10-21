@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "It is recommended to enable Logs so that activity trail can be recreated when investigations are required in the event of an incident or a compromise.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Compute"
     },
     "parameters": {
@@ -20,12 +20,56 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "includeAKSClusters": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Include AKS Clusters",
+          "description": "Whether to include AKS Clusters to Diagnostic logs extension - True or False"
+        },
+        "defaultValue": false
       }
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.Compute/virtualMachineScaleSets"
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachineScaleSets"
+              },
+              {
+                "value": "[parameters('includeAKSClusters')]",
+                "equals": true
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachineScaleSets"
+              },
+              {
+                "value": "[parameters('includeAKSClusters')]",
+                "equals": false
+              },
+              {
+                "field": "Microsoft.Compute/imagePublisher",
+                "notEquals": "microsoft-aks"
+              },
+              {
+                "field": "Microsoft.Compute/imageOffer",
+                "notEquals": "aks"
+              },
+              {
+                "field": "Microsoft.Compute/imageSKU",
+                "notLike": "aks*"
+              }
+            ]
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",

@@ -1,0 +1,272 @@
+{
+    "properties": {
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "displayName": "Enable Automanage - Azure virtual machine best practices",
+        "description": "Automanage enrolls, configures, and monitors virtual machines with Azure VM best practice services. Use this policy to apply Automanage to your selected scope.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Automanage"
+        },
+        "parameters": {
+            "automanageAccount": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Automanage account",
+                    "description": "Select Automanage account from dropdown list. If this account is outside of the scope of the assignment you must manually grant 'Contributor' permissions (or similar) on the account to the policy assignment's principal ID.",
+                    "strongType": "Microsoft.Automanage/accounts",
+                    "assignPermissions": true
+                }
+            },
+            "configurationProfileAssignment": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Configuration profile",
+                    "description": "The management services provided are based on whether the machine is intended to be used in a dev/test environment or production."
+                },
+                "allowedValues": [
+                    "Azure virtual machine best practices – Production",
+                    "Azure virtual machine best practices – Dev/test"
+                ],
+                "defaultValue": "Azure virtual machine best practices – Production"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "location",
+                        "in": [
+                            "eastus",
+                            "westus2",
+                            "westcentralus",
+                            "westeurope",
+                            "canadacentral"
+                        ]
+                    },
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/virtualMachines"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "field": "Microsoft.Compute/imagePublisher",
+                                "in": [
+                                    "esri",
+                                    "incredibuild",
+                                    "MicrosoftDynamicsAX",
+                                    "MicrosoftSharepoint",
+                                    "MicrosoftVisualStudio",
+                                    "MicrosoftWindowsDesktop",
+                                    "MicrosoftWindowsServerHPCPack"
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "MicrosoftWindowsServer"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "2008*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "MicrosoftSQLServer"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "notLike": "SQL2008*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "microsoft-dsvm"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "dsvm-windows"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "microsoft-ads"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "in": [
+                                            "standard-data-science-vm",
+                                            "windows-data-science-vm"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "batch"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "rendering-windows2016"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "center-for-internet-security-inc"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "like": "cis-windows-server-201*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "pivotal"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "like": "bosh-windows-server*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "cloud-infrastructure-services"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "like": "ad*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "anyOf": [
+                                            {
+                                                "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                                                "exists": "true"
+                                            },
+                                            {
+                                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                                "like": "Windows*"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "anyOf": [
+                                            {
+                                                "field": "Microsoft.Compute/imageSKU",
+                                                "exists": "false"
+                                            },
+                                            {
+                                                "allOf": [
+                                                    {
+                                                        "field": "Microsoft.Compute/imageSKU",
+                                                        "notLike": "2008*"
+                                                    },
+                                                    {
+                                                        "field": "Microsoft.Compute/imageOffer",
+                                                        "notLike": "SQL2008*"
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "deployIfNotExists",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "type": "Microsoft.Automanage/configurationProfileAssignments",
+                    "name": "default",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Automanage/configurationProfileAssignments/configurationProfile",
+                                "equals": "[parameters('configurationProfileAssignment')]"
+                            },
+                            {
+                                "field": "Microsoft.Automanage/configurationProfileAssignments/accountId",
+                                "equals": "[parameters('automanageAccount')]"
+                            }
+                        ]
+                    },
+                    "deployment": {
+                        "properties": {
+                            "mode": "incremental",
+                            "parameters": {
+                                "machineName": {
+                                    "value": "[field('Name')]"
+                                },
+                                "automanageAccount": {
+                                    "value": "[parameters('automanageAccount')]"
+                                },
+                                "configurationProfileAssignment": {
+                                    "value": "[parameters('configurationProfileAssignment')]"
+                                }
+                            },
+                            "template": {
+                                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "parameters": {
+                                    "machineName": {
+                                        "type": "String"
+                                    },
+                                    "automanageAccount": {
+                                        "type": "string"
+                                    },
+                                    "configurationProfileAssignment": {
+                                        "type": "string"
+                                    }
+                                },
+                                "resources": [
+                                    {
+                                        "type": "Microsoft.Compute/virtualMachines/providers/configurationProfileAssignments",
+                                        "apiVersion": "2020-06-30-preview",
+                                        "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/', 'default')]",
+                                        "properties": {
+                                            "configurationProfile": "[parameters('configurationProfileAssignment')]",
+                                            "accountId": "[parameters('automanageAccount')]"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+        "id": "/providers/Microsoft.Authorization/policyDefinitions/270610db-8c04-438a-a739-e8e6745b22d3",
+        "name": "270610db-8c04-438a-a739-e8e6745b22d3"
+}

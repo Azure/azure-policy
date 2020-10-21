@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Audit IP restrictions configuration for an API App",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "IP Restrictions allow you to define a list of IP addresses that are allowed to access your app. Use of IP Restrictions protects an API app from common attacks.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Security Center",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "api"
+              },
+              {
+                "field": "kind",
+                "equals": "apiApp"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "ConfigureIPRestrictions",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/48893b84-a2c8-4d9a-badf-835d5d1b7d53",
+  "name": "48893b84-a2c8-4d9a-badf-835d5d1b7d53"
+}

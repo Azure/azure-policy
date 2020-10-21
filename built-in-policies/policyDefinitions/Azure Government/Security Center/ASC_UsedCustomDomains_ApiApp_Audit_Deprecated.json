@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Audit API Apps that are not using custom domains",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Use of custom domains protects a API app from common attacks such as phishing and other DNS-related attacks.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Security Center",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allof": [
+          {
+            "field": "type",
+            "equals": "microsoft.Web/sites"
+          },
+          {
+            "anyof": [
+              {
+                "field": "kind",
+                "equals": "api"
+              },
+              {
+                "field": "kind",
+                "equals": "apiApp"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/complianceResults",
+          "name": "UsedCustomDomains",
+          "existenceCondition": {
+            "field": "Microsoft.Security/complianceResults/resourceStatus",
+            "in": [
+              "OffByPolicy",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/224da9fe-0d38-4e79-adb3-0a6e2af942ac",
+  "name": "224da9fe-0d38-4e79-adb3-0a6e2af942ac"
+}

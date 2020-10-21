@@ -1,14 +1,26 @@
 {
   "properties": {
-    "displayName": "Audit Motion Picture Association of America (MPAA) controls and deploy specific VM Extensions to support audit requirements",
+    "displayName": "Motion Picture Association of America (MPAA)",
     "policyType": "BuiltIn",
-    "description": "This initiative includes policies that address a subset of Motion Picture Association of America (MPAA) security and guidelines controls. Additional policies will be added in upcoming releases. For more information, please visit https://aka.ms/mpaa-blueprint",
+    "description": "This initiative includes audit and virtual machine extension deployment policies that address a subset of Motion Picture Association of America (MPAA) security and guidelines controls. Additional policies will be added in upcoming releases. For more information, visit https://aka.ms/mpaa-blueprint.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "3.0.0-preview",
       "category": "Regulatory Compliance",
       "preview": true
     },
     "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+            "displayName": "Include Arc connected servers for Guest Configuration policies",
+            "description": "Optionally choose to audit settings inside Arc connected servers using Guest Configuration policies. By selecting this option, you agree to be charged monthly per Arc connected machine."
+        },
+        "allowedValues": [
+            "true",
+            "false"
+        ],
+        "defaultValue": "false"
+      },
       "certificateThumbprints": {
         "type": "string",
         "metadata": {
@@ -553,14 +565,15 @@
       "threatDetectionTypesOnManagedInstanceMonitoringEffect": {
         "type": "string",
         "metadata": {
-          "displayName": "Advanced Threat Protection types should be set to 'All' in SQL managed instance Advanced Data Security settings",
-          "description": "It is recommended to enable all Advanced Threat Protection types on your SQL servers. Enabling all types protects against SQL injection, database vulnerabilities, and any other anomalous activities."
+          "displayName": "Advanced Threat Protection types should be set to 'All' in SQL Managed Instance advanced data security settings",
+          "description": "It's recommended to enable all Advanced Threat Protection types on your SQL Managed Instance. Enabling all types protects against SQL injection, database vulnerabilities, and any other anomalous activities.",
+        "deprecated": true
         },
         "allowedValues": [
           "AuditIfNotExists",
           "Disabled"
         ],
-        "defaultValue": "AuditIfNotExists"
+        "defaultValue": "Disabled"
       },
       "certificateStorePath": {
         "type": "string",
@@ -682,9 +695,12 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "deployWindowsCertificateInTrustedRoot",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/106ccbe4-a791-4f33-a44a-06796944b8d5",
+        "policyDefinitionReferenceId": "auditWindowsCertificateInTrustedRoot",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/934345e1-4dfb-4c70-90d7-41990dc9608b",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "certificateThumbprints": {
             "value": "[parameters('CertificateThumbprints')]"
           }
@@ -700,9 +716,13 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "previewDeployRequirementsToAuditWindowsVMsThatDoNotRestrictTheMinimumPasswordLengthTo14Characters",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/23020aa6-1135-4be2-bae2-149982b06eca",
-        "parameters": {}
+        "policyDefinitionReferenceId": "previewAuditWindowsVMsThatDoNotRestrictTheMinimumPasswordLengthTo14Characters",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a2d0e922-65d0-40c4-8f87-ea6da2d307a2",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        }
       },
       {
         "policyDefinitionReferenceId": "metricAlertsInBatchAccountPoolDeleteStart",
@@ -722,14 +742,20 @@
         "parameters": {}
       },
       {
-        "policyDefinitionReferenceId": "previewAuditLinuxVMsThatAllowRemoteConnectionsFromAccountsWithoutPasswords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2d67222d-05fd-4526-a171-2ee132ad9e83",
-        "parameters": {}
+        "policyDefinitionReferenceId": "Prerequisite_AddSystemIdentityWhenNone",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3cf2ab00-13f1-4d0c-8971-2ac904541a7e"
       },
       {
-        "policyDefinitionReferenceId": "auditAzureBaselineSecurityOptionsNetworkAccess",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/30040dab-4e75-4456-8273-14b8f75d91d9",
-        "parameters": {}
+        "policyDefinitionReferenceId": "Prerequisite_AddSystemIdentityWhenUser",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/497dff13-db2a-4c0f-8603-28fa3b331ab6"
+      },
+      {
+        "policyDefinitionReferenceId": "Prerequisite_DeployExtensionWindows",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/385f5831-96d4-41db-9a3c-cd3af78aaae6"
+      },
+      {
+        "policyDefinitionReferenceId": "Prerequisite_DeployExtensionLinux",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/331e8ea8-378a-410f-a2e5-ae22f38bb0da"
       },
       {
         "policyDefinitionReferenceId": "disableUnrestrictedNetworkToStorageAccountMonitoring",
@@ -767,27 +793,28 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "deployAzureBaselineSecurityOptionsSystemsettings",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/437a1f8f-8552-47a8-8b12-a2fee3269dd5",
+        "policyDefinitionReferenceId": "AzureBaselineSecurityOptionsSystemsettings",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/12017595-5a75-4bb1-9d97-4c2c939ea3c3",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "systemSettingsUseCertificateRulesOnWindowsExecutablesForSoftwareRestrictionPolicies": {
             "value": "[parameters('SystemSettingsUseCertificateRulesOnWindowsExecutablesForSoftwareRestrictionPolicies')]"
           }
         }
       },
       {
-        "policyDefinitionReferenceId": "deployInstalledApplicationLinux",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4d1c04de-2172-403f-901b-90608c35c721",
+        "policyDefinitionReferenceId": "InstalledApplicationLinux",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d3b823c9-e0fc-4453-9fb2-8213b7338523",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "applicationName": {
             "value": "[parameters('ApplicationName')]"
           }
         }
-      },
-      {
-        "policyDefinitionReferenceId": "previewAuditWindowsVmPasswordsMustBeAtLeast14Characters",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5aebc8d1-020d-4037-89a0-02043a7524ec",
-        "parameters": {}
       },
       {
         "policyDefinitionReferenceId": "vulnerabilityAssessmentMonitoring",
@@ -799,9 +826,12 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "deployAzureBaselineUserRightsAssignment",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/815dcc9f-6662-43f2-9a03-1b83e9876f24",
+        "policyDefinitionReferenceId": "AzureBaselineUserRightsAssignment",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e068b215-0026-4354-b347-8fb2766f73a2",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "usersOrGroupsThatMayAccessThisComputerFromTheNetwork": {
             "value": "[parameters('UsersOrGroupsThatMayAccessThisComputerFromTheNetwork')]"
           },
@@ -879,19 +909,12 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "auditAzureBaselineSecurityOptionsSystemsettings",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8a39d1f1-5513-4628-b261-f469a5a3341b",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "auditAzureBaselineWindowsFirewallProperties",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8bbd627e-4d25-4906-9a6e-3789780af3ec",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "deployAzureBaselineWindowsFirewallProperties",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/909c958d-1b99-4c74-b88f-46a5c5bc34f9",
+        "policyDefinitionReferenceId": "AzureBaselineWindowsFirewallProperties",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/35d9882c-993d-44e6-87d2-db66ce21b636",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "windowsFirewallDomainUseProfileSettings": {
             "value": "[parameters('WindowsFirewallDomainUseProfileSettings')]"
           },
@@ -958,11 +981,6 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "auditCertificateExpiration",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9328f27e-611e-44a7-a244-39109d7d35ab",
-        "parameters": {}
-      },
-      {
         "policyDefinitionReferenceId": "namespaceAuthorizationRulesInServiceBusMonitoring",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a1817ec0-a368-432a-8057-8371e17ac6ee",
         "parameters": {
@@ -993,19 +1011,12 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "auditAzureBaselineSecurityOptionsAccounts",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b872a447-cc6f-43b9-bccf-45703cd81607",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "auditAzureBaselineSecurityOptionsRecoveryconsole",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ba12366f-f9a6-42b8-9d98-157d0b1a837b",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "deployAzureBaselineSecurityOptionsMicrosoftNetworkClient",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bbcdd8fa-b600-4ee3-85b8-d184e3339652",
+        "policyDefinitionReferenceId": "AzureBaselineSecurityOptionsMicrosoftNetworkClient",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d6c69680-54f0-4349-af10-94dd05f4225e",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "microsoftNetworkClientDigitallySignCommunicationsAlways": {
             "value": "[parameters('MicrosoftNetworkClientDigitallySignCommunicationsAlways')]"
           },
@@ -1033,18 +1044,12 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "threatDetectionTypesOnManagedInstanceMonitoring",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bda18df3-5e41-4709-add9-2554ce68c966",
+        "policyDefinitionReferenceId": "CertificateExpiration",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1417908b-4bff-46ee-a2a6-4acc899320ab",
         "parameters": {
-          "effect": {
-            "value": "[parameters('threatDetectionTypesOnManagedInstanceMonitoringEffect')]"
-          }
-        }
-      },
-      {
-        "policyDefinitionReferenceId": "deployCertificateExpiration",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c5fbc59e-fb6f-494f-81e2-d99a671bdaa8",
-        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "certificateStorePath": {
             "value": "[parameters('CertificateStorePath')]"
           },
@@ -1063,11 +1068,6 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "auditAzureBaselineUserRightsAssignment",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c961dac9-5916-42e8-8fb1-703148323994",
-        "parameters": {}
-      },
-      {
         "policyDefinitionReferenceId": "deployDiagnosticSettingsforNetworkSecurityGroups",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c9c29499-c1d1-4195-99bd-2ec9e3a9dc89",
         "parameters": {
@@ -1080,37 +1080,45 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "deployAzureBaselineSecurityOptionsRecoveryconsole",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ddc0a4d5-5e08-43d5-9fd9-b586d8d7116b",
+        "policyDefinitionReferenceId": "AzureBaselineSecurityOptionsRecoveryconsole",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f71be03e-e25b-4d0f-b8bc-9b3e309b66c0",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "recoveryConsoleAllowFloppyCopyAndAccessToAllDrivesAndAllFolders": {
             "value": "[parameters('RecoveryConsoleAllowFloppyCopyAndAccessToAllDrivesAndAllFolders')]"
           }
         }
       },
       {
-        "policyDefinitionReferenceId": "deployAzureBaselineSecurityOptionsAccounts",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e5b81f87-9185-4224-bf00-9f505e9f89f3",
+        "policyDefinitionReferenceId": "AzureBaselineSecurityOptionsAccounts",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ee984370-154a-4ee8-9726-19d900e56fc0",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "accountsGuestAccountStatus": {
             "value": "[parameters('AccountsGuestAccountStatus')]"
           }
         }
       },
       {
-        "policyDefinitionReferenceId": "previewDeployVmExtensionToAuditLinuxVmAllowingRemoteConnectionsFromAccountsWithNoPasswords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ec49586f-4939-402d-a29e-6ff502b20592",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "auditWindowsCertificateInTrustedRoot",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f3b9ad83-000d-4dc1-bff0-6d54533dd03f",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "deployAzureBaselineSecurityOptionsNetworkAccess",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f56a3ab2-89d1-44de-ac0d-2ada5962e22a",
+        "policyDefinitionReferenceId": "previewAuditLinuxVmAllowingRemoteConnectionsFromAccountsWithNoPasswords",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ea53dbee-c6c9-4f0e-9f9e-de0039b78023",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "AzureBaselineSecurityOptionsNetworkAccess",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3ff60f98-7fa4-410a-9f7f-0b00f5afdbdd",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "networkAccessRemotelyAccessibleRegistryPaths": {
             "value": "[parameters('NetworkAccessRemotelyAccessibleRegistryPaths')]"
           },
@@ -1130,16 +1138,6 @@
             "value": "[parameters('externalAccountsWithOwnerPermissionsShouldBeRemovedFromYourSubscriptionEffect')]"
           }
         }
-      },
-      {
-        "policyDefinitionReferenceId": "auditAzureBaselineSecurityOptionsMicrosoftNetworkClient",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fcbc55c9-f25a-4e55-a6cb-33acb3be778b",
-        "parameters": {}
-      },
-      {
-        "policyDefinitionReferenceId": "auditInstalledApplicationLinux",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004",
-        "parameters": {}
       },
       {
         "policyDefinitionReferenceId": "sqlDbVulnerabilityAssesmentMonitoring",

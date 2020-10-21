@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Azure Machine Learning workspaces should use private link",
+        "description": "Evaluate Azure Machine Learning workspaces that do not have at least one approved private endpoint connection. Clients in a virtual network can securely access resources that have private endpoint connections through private links. For more information, visit: https://aka.ms/azureml-workspaces-privatelink.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Machine Learning"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.MachineLearningServices/workspaces"
+                    },
+                    {
+                        "count": {
+                            "field": "Microsoft.MachineLearningServices/workspaces/privateEndpointConnections[*]",
+                            "where": {
+                                "field": "Microsoft.MachineLearningServices/workspaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                                "equals": "Approved"
+                            }
+                        },
+                        "less": 1
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/40cec1dd-a100-4920-b15b-3024fe8901ab",
+    "name": "40cec1dd-a100-4920-b15b-3024fe8901ab"
+}

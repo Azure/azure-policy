@@ -1,0 +1,63 @@
+{
+    "properties": {
+      "displayName": "Web Application Firewall should be enabled for Azure Front Door Service or Application Gateway",
+      "description": "Requires Web Application Firewall on any Azure Front Door Service or Application Gateway. A Web Application Firewall provides greater security for your other Azure resources.",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "metadata": {
+        "version": "1.0.0-deprecated",
+        "category": "Network",
+        "deprecated": true
+      },
+      "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "defaultValue": "Deny"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Network/frontdoors"
+                },
+                {
+                  "field": "Microsoft.Network/frontdoors/frontendEndpoints[*].webApplicationFirewallPolicyLink.id",
+                  "exists": "false"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Network/applicationGateways"
+                },
+                {
+                  "field": "Microsoft.Network/applicationGateways/webApplicationFirewallConfiguration",
+                  "exists": "false"
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/be7ed5c8-2660-4136-8216-e6f3412ba909",
+    "name": "be7ed5c8-2660-4136-8216-e6f3412ba909"
+  }

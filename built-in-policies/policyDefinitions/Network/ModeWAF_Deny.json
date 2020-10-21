@@ -1,0 +1,75 @@
+{
+    "properties": {
+      "displayName": "Web Application Firewall should be a set mode for Application Gateway and Azure Front Door Service",
+      "description": "Mandates detect or prevent mode to be active on all Web Application Firewall policies for Azure Front Door and Application Gateway. Web Application Firewall policies can have a consistent mode configuration across a resource group.",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "metadata": {
+        "version": "1.0.0-deprecated",
+        "category": "Network",
+        "deprecated": true
+      },
+      "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "defaultValue": "Deny"
+        },
+        "modeRequirement": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Mode Requirement",
+            "description": "Mode required for all WAF policies"
+          },
+          "allowedValues": [
+            "Prevention",
+            "Detection"
+          ],
+          "defaultValue": "Detection"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Network/frontdoorwebapplicationfirewallpolicies"
+                },
+                {
+                  "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/policySettings.mode",
+                  "notEquals": "[parameters('modeRequirement')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies"
+                },
+                {
+                  "field": "Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/policySettings.mode",
+                  "notEquals": "[parameters('modeRequirement')]"
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/f6b68e5a-7207-4638-a1fb-47d90404209e",
+    "name": "f6b68e5a-7207-4638-a1fb-47d90404209e"
+  }

@@ -66,7 +66,7 @@ Previously, this repository was the official channel to open requests for new al
 If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discussions on Azure Policy:
 
  - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure Governance conversation space**](https://techcommunity.microsoft.com/t5/Azure-Governance/bd-p/AzureGovernance)
- - Join the Monthly Call on Azure Governance (register [here](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbRxn7UD7lweFDnmuLj72r6E1UN1dLNTBZUVMyNVpHUjJLRE5PVDVGNlkyOC4u))
+ - Join the Customer Call on Azure Governance (register [here](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbRxn7UD7lweFDnmuLj72r6E1UN1dLNTBZUVMyNVpHUjJLRE5PVDVGNlkyOC4u)) Latest Customer call (Sep 3rd) recording can be found [here]( https://youtu.be/cUlExatJjfc)
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
  - Search or add to Azure Policy discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
 
@@ -140,7 +140,7 @@ Resource providers are free to implement their own resource management operation
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
-The storage team is working on implementing Azure Policy on its dataplane operations to address this scenario. This is expected to first be available in the middle of 2020.
+The storage team is working on implementing blob public access control on storage account to address this scenario. This is expected to first be available in August 2020.
 
 Note that Azure policies for dataplane operations of certain targeted resource providers is also under active development.
 
@@ -196,6 +196,10 @@ Using this type of alias in the existence condition of auditIfNotExists or deplo
 
 Using this type of alias in audit/deny/append effect policies works partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies and no deny or append behaviors for deny/append effect policies because of the missing property in the request payload.
 
+-Microsoft.Databricks/* (Creation time only)
+
+All Databricks reasources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
+
 ### Resource types that exceed current enforcement and compliance scale
 
 There some resource types that are generated at very high scale. These are not suitable for management by Azure Policy because the enforcement and compliance checks create overhead that can negatively impact the performance of the API itself. Most of these are not significant policy scenarios, but there are a few exceptions.
@@ -208,6 +212,13 @@ These are resource types that have significant policy scenarios, but are not sup
 - Microsoft.ServiceBus/namespaces/topics/subscriptions/rules
 
 Work to increase the scale that policy can be performantly applied to resource types is in progress. Planned availability date is not yet determined.
+
+### Azure Policy Add-on not compatible on AKS Kubernetes 1.19 (preview) version
+1.19 clusters will return this error via gatekeeper controller and policy webhook pods: 
+ certificate relies on legacy Common Name field, use SANs or temporarily enable Common Name matching 
+
+Mitigation: Avoid using K8s 1.19 (preview) with the Azure Policy add-on. The add-on can be used with any GA supported version such as 1.16, 1.17, or 1.18. 
+Feature team is actively working on fixing this issue. GitHub issue tracking this on AKS side https://github.com/Azure/AKS/issues/1869 
 
 
 ### Indexed Resource types always non-complaint to tagging policies 
@@ -239,3 +250,17 @@ There are some resource types that even though are indexed, do not support Taggi
 * Microsoft.Web/certificates (Does not support numbers)
 
 To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
+
+### Alias changes  
+
+May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
+July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
+
+### Tag Contributor Role
+
+Current limitation causes errors using the Tag Contributor role with Tag related policies.  We are aware of this issue and are working to resolve this. (ETA: End of calendar year). If assigning Tag Contributor role to managed identities handling remediation tasks on "Modify" effect policies, please assign Contributor role to the managed identity.
+
+### Subscription tagging support
+
+Subscription tagging is not yet supported using "Append" or "Modify" policies. Details on subscription tagging without using Azure Policy can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources).
+

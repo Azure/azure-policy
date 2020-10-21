@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Azure Defender for Kubernetes should be enabled",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure Defender for Kubernetes provides real-time threat protection for containerized environments and generates alerts for suspicious activities.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "KubernetesService",
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "field": "Microsoft.Security/pricings/pricingTier",
+            "equals": "Standard"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/523b5cd1-3e23-492f-a539-13118b6d1e3a",
+  "name": "523b5cd1-3e23-492f-a539-13118b6d1e3a"
+}

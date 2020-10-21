@@ -3,9 +3,9 @@
     "displayName": "Ensure that 'Java version' is the latest, if used as a part of the Web app",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Periodically, newer versions are released for Java software either due to security flaws or to include additional functionality. Using the latest Java version for web apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+    "description": "Periodically, newer versions are released for Java software either due to security flaws or to include additional functionality. Using the latest Java version for web apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. Currently, this policy only applies to Linux web apps.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -40,6 +40,10 @@
           {
             "field": "kind",
             "like": "app*"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
           }
         ]
       },
@@ -51,40 +55,12 @@
           "existenceCondition": {
             "anyOf": [
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                    "notContains": "JAVA"
-                  },
-                  {
-                    "field": "Microsoft.Web/sites/config/web.javaVersion",
-                    "equals": ""
-                  }
-                ]
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "JAVA"
               },
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                    "like": "[concat('*', parameters('JavaLatestVersion'))]"
-                  },
-                  {
-                    "field": "Microsoft.Web/sites/config/web.javaVersion",
-                    "equals": ""
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                    "equals": ""
-                  },
-                  {
-                    "field": "Microsoft.Web/sites/config/web.javaVersion",
-                    "like": "[concat(parameters('JavaLatestVersion'), '*')]"
-                  }
-                ]
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "like": "[concat('*', parameters('JavaLatestVersion'))]"
               }
             ]
           }

@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "displayName": "Log Analytics agent health issues should be resolved on your machines",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Security Center uses the Log Analytics agent, formerly known as the Microsoft Monitoring Agent (MMA). To make sure your virtual machines are successfully monitored, you need to make sure the agent is installed on the virtual machines and properly collects security events to the configured workspace.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.ClassicCompute/virtualMachines",
+          "Microsoft.Compute/virtualMachines"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/assessments",
+          "name": "8e2b96ff-3de2-289b-b5c1-3b9921a3441e",
+          "existenceCondition": {
+            "field": "Microsoft.Security/assessments/status.code",
+            "in": [
+              "NotApplicable",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d62cfe2b-3ab0-4d41-980d-76803b58ca65",
+  "name": "d62cfe2b-3ab0-4d41-980d-76803b58ca65"
+}

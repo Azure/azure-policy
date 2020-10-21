@@ -83,7 +83,7 @@ test.each(samplesDirectories)('Validate directory structure: %s', (dirPath, file
 });
 
 // Validates that all JSON files are valid JSON (not necessarily valid policy entities though)
-test.each(samplesDirectories.map(dirSet => dirSet[1]))('Validate JSON can be parsed: %s', async (filePath) => {
+test.each(samplesDirectories.map(dirSet => dirSet[1]).reduce((first, second) => first.concat(second), []))('Validate JSON can be parsed: %s', async (filePath) => {
    if (path.extname(filePath).toUpperCase() !== '.JSON') {
       return;
    }

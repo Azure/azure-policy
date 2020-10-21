@@ -5,14 +5,25 @@
         "mode": "Indexed",
         "description": "This policy creates a Guest Configuration assignment to set specified time zone on Windows virtual machines.",
         "metadata": {
-            "version": "1.1.0-preview",
+            "version": "1.1.0",
             "category": "Guest Configuration",
             "requiredProviders": [
                 "Microsoft.GuestConfiguration"
-            ],
-            "preview": true
+            ]
         },
         "parameters": {
+            "IncludeArcMachines": {
+                "type": "string",
+                "metadata": {
+                    "displayName": "Include Arc connected servers",
+                    "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+                },
+                "allowedValues": [
+                    "true",
+                    "false"
+                ],
+                "defaultValue": "false"
+            },
             "TimeZone": {
                 "type": "string",
                 "metadata": {
@@ -326,6 +337,10 @@
                     },
                     {
                         "allOf": [
+                            {
+                                "value": "[parameters('IncludeArcMachines')]",
+                                "equals": "true"
+                            },
                             {
                                 "field": "type",
                                 "equals": "Microsoft.HybridCompute/machines"

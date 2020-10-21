@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Storage account should use a private link connection",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Private links enforce secure communication, by providing private connectivity to the storage account",
+    "metadata": {
+      "version": "1.0.0",
+	  "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Storage/storageAccounts"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Storage/storageAccounts/privateEndpointConnections",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/privateEndpoint",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/privateLinkServiceConnectionState",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6edd7eda-6dd8-40f7-810d-67160c639cd9",
+  "name": "6edd7eda-6dd8-40f7-810d-67160c639cd9"
+}

@@ -1,0 +1,44 @@
+{
+  "properties": {
+    "displayName": "Email notification for high severity alerts should be enabled",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Enable emailing security alerts to the security contact, in order to have them receive security alert emails from Microsoft. This ensures that the right people are aware of any potential security issues and are able to mitigate the risks",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/securityContacts",
+          "existenceCondition": {
+            "field": "Microsoft.Security/securityContacts/alertNotifications",
+            "notEquals": "Off"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6e2593d9-add6-4083-9c9b-4b7d2188c899",
+  "name": "6e2593d9-add6-4083-9c9b-4b7d2188c899"
+}

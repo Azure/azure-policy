@@ -5,11 +5,12 @@
         "mode": "Indexed",
         "description": "This policy creates a system-assigned managed identity and deploys the VM extension for Guest Configuration on Linux VMs. This is a prerequisite for Guest Configuration Policy and must be assigned to the scope before using any Guest Configuration policy. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol.",
         "metadata": {
-            "version": "1.2.0",
+            "version": "3.0.0-deprecated",
             "category": "Guest Configuration",
             "requiredProviders": [
                 "Microsoft.GuestConfiguration"
-            ]
+            ],
+            "deprecated": true
         },
         "policyRule": {
             "if": {
@@ -24,13 +25,13 @@
                                 "field": "Microsoft.Compute/imagePublisher",
                                 "in": [
                                     "microsoft-aks",
-                                    "AzureDatabricks",
                                     "qubole-inc",
                                     "datastax",
                                     "couchbase",
                                     "scalegrid",
                                     "checkpoint",
-                                    "paloaltonetworks"
+                                    "paloaltonetworks",
+                                    "debian"
                                 ]
                             },
                             {
@@ -53,11 +54,11 @@
                                 "allOf": [
                                     {
                                         "field": "Microsoft.Compute/imagePublisher",
-                                        "equals": "RedHat"
+                                        "equals": "Oracle"
                                     },
                                     {
                                         "field": "Microsoft.Compute/imageOffer",
-                                        "equals": "RHEL"
+                                        "equals": "Oracle-Linux"
                                     },
                                     {
                                         "field": "Microsoft.Compute/imageSKU",
@@ -73,7 +74,61 @@
                                     },
                                     {
                                         "field": "Microsoft.Compute/imageOffer",
-                                        "equals": "osa"
+                                        "in": [
+                                            "RHEL",
+                                            "RHEL-HA",
+                                            "RHEL-SAP",
+                                            "RHEL-SAP-APPS",
+                                            "RHEL-SAP-HA",
+                                            "RHEL-SAP-HANA"
+                                        ]
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "notLike": "6*"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "RedHat"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "in": [
+                                            "osa",
+                                            "rhel-byos"
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "center-for-internet-security-inc"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "in": [
+                                            "cis-centos-7-l1",
+                                            "cis-centos-7-v2-1-1-l1",
+                                            "cis-centos-8-l1",
+                                            "cis-debian-linux-8-l1",
+                                            "cis-debian-linux-9-l1",
+                                            "cis-nginx-centos-7-v1-1-0-l1",
+                                            "cis-oracle-linux-7-v2-0-0-l1",
+                                            "cis-oracle-linux-8-l1",
+                                            "cis-postgresql-11-centos-linux-7-level-1",
+                                            "cis-rhel-7-l2",
+                                            "cis-rhel-7-v2-2-0-l1",
+                                            "cis-rhel-8-l1",
+                                            "cis-suse-linux-12-v2-0-0-l1",
+                                            "cis-ubuntu-linux-1604-v1-0-0-l1",
+                                            "cis-ubuntu-linux-1804-l1"
+                                        ]
                                     }
                                 ]
                             },
@@ -210,7 +265,9 @@
                                                     "Canonical",
                                                     "microsoft-dsvm",
                                                     "cloudera",
-                                                    "microsoft-ads"
+                                                    "microsoft-ads",
+                                                    "center-for-internet-security-inc",
+                                                    "Oracle"
                                                 ]
                                             }
                                         ]
@@ -238,6 +295,10 @@
                             {
                                 "field": "Microsoft.Compute/virtualMachines/extensions/type",
                                 "equals": "ConfigurationforLinux"
+                            },
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                                "equals": "Succeeded"
                             }
                         ]
                     },
@@ -274,7 +335,7 @@
                                         "location": "[parameters('location')]"
                                     },
                                     {
-                                        "apiVersion": "2015-05-01-preview",
+                                        "apiVersion": "2019-07-01",
                                         "name": "[concat(parameters('vmName'), '/AzurePolicyforLinux')]",
                                         "type": "Microsoft.Compute/virtualMachines/extensions",
                                         "location": "[parameters('location')]",

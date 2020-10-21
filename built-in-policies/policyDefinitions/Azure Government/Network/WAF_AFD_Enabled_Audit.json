@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Web Application Firewall (WAF) should be enabled for Azure Front Door Service",
+    "description": "Requires Web Application Firewall (WAF) on any Azure Front Door Service. A Web Application Firewall provides greater security for your other Azure resources.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+          "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Network/frontdoors"
+              },
+              {
+                "field": "Microsoft.Network/frontdoors/frontendEndpoints[*].webApplicationFirewallPolicyLink.id",
+                "exists": "false"
+              }
+          ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/055aa869-bc98-4af8-bafc-23f1ab6ffe2c",
+  "name": "055aa869-bc98-4af8-bafc-23f1ab6ffe2c"
+}

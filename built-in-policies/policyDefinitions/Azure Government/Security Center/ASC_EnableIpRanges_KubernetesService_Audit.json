@@ -1,0 +1,57 @@
+{
+    "properties": {
+        "displayName": "Authorized IP ranges should be defined on Kubernetes Services",
+        "policyType": "BuiltIn",
+        "mode": "All",
+        "description": "Restrict access to the Kubernetes Service Management API by granting API access only to IP addresses in specific ranges. It is recommended to limit access to authorized IP ranges to ensure that only applications from allowed networks can access the cluster.",
+        "metadata": {
+            "version": "2.0.0",
+            "category": "Security Center"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.ContainerService/managedClusters"
+                    },
+                    {
+                        "field": "Microsoft.ContainerService/managedClusters/apiServerAccessProfile.authorizedIPRanges",
+                        "exists": "false"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "field": "Microsoft.ContainerService/managedClusters/apiServerAccessProfile.enablePrivateCluster",
+                                "exists": "false"
+                            },
+                            {
+                                "field": "Microsoft.ContainerService/managedClusters/apiServerAccessProfile.enablePrivateCluster",
+                                "equals": "false"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/0e246bcf-5f6f-4f87-bc6f-775d4712c7ea",
+    "name": "0e246bcf-5f6f-4f87-bc6f-775d4712c7ea"
+}

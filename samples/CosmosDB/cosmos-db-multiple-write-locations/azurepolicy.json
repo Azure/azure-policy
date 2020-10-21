@@ -1,0 +1,52 @@
+{
+	"properties": {
+		"displayName": "Audit or Deny Cosmos DB | Multiple Write Locations not set as required",
+		"policyType": "Custom",
+		"description": "This policy audits or denies when a Cosmos DB account does not have the required multiple write locations setting.",
+		"mode": "All",
+		"metadata": {
+			"category": "Cosmos DB"
+		},
+		"parameters": {
+			"multipleWriteLocationsMustBeEnabled": {
+				"type": "boolean",
+				"defaultValue": true,
+				"allowedValues": [
+					true,
+					false
+				],
+				"metadata": {
+					"displayName": "Specify whether multiple write locations must be enabled (true) or not enabled (false)."
+				}
+			},
+			"effect": {
+				"type": "string",
+				"defaultValue": "Audit",
+				"allowedValues": [
+					"Audit",
+					"Deny"
+				],
+				"metadata": {
+					"displayName": "Policy Effect"
+				}
+			}
+		},
+		"policyRule": {
+			"if": {
+				"allOf": [
+					{
+						"field": "type",
+						"equals": "Microsoft.DocumentDB/databaseAccounts"
+					},
+					{
+						"field": "Microsoft.DocumentDB/databaseAccounts/enableMultipleWriteLocations",
+						"notEquals": "[parameters('multipleWriteLocationsMustBeEnabled')]"
+					}
+				]
+			},
+			"then": {
+				"effect": "[parameters('effect')]"
+			}
+		}
+	}
+}

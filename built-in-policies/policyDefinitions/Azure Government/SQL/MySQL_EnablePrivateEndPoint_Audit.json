@@ -1,0 +1,45 @@
+{
+  "properties": {
+    "displayName": "Private endpoint should be enabled for MySQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Private endpoint connections enforce secure communication by enabling private connectivity to Azure Database for MySQL. Configure a private endpoint connection to enable access to traffic coming only from known networks and prevent access from all other IP addresses, including within Azure.",
+    "metadata": {
+      "version": "1.0.1-deprecated",
+      "category": "SQL",
+      "deprecated": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforMySQL/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforMySQL/servers/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.DBforMySQL/servers/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7595c971-233d-4bcf-bd18-596129188c49",
+  "name": "7595c971-233d-4bcf-bd18-596129188c49"
+}

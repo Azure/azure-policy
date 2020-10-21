@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Private endpoint should be configured for Key Vault",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Private link provides a way to connect key vault to your Azure resources without sending traffic over the public internet. Private link provides defense in depth protection against data exfiltration.",
+    "metadata": {
+      "version": "1.0.1-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/privateEndpointConnections",
+                "exists": "false"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.KeyVault/vaults/privateEndpointConnections[*]"
+                },
+                "equals": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5f0bc445-3935-4915-9981-011aa2b46147",
+  "name": "5f0bc445-3935-4915-9981-011aa2b46147"
+}
