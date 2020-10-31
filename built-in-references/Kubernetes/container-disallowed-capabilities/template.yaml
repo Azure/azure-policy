@@ -1,0 +1,54 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazuredisallowedcapabilities
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureDisallowedCapabilities
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedCapabilities:
+              type: array
+              items:
+                type: string
+            requiredDropCapabilities:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazureblockcapabilities
+
+        violation[{"msg": msg}] {
+          container := input_containers[_]
+          has_disallowed_capabilities(container)
+          msg := sprintf("container <%v> has a disallowed capability. Allowed capabilities are %v", [container.name, get_default(input.parameters, "disallowedCapabilities", [])])
+        }
+
+        has_disallowed_capabilities(container) {
+          input.parameters.disallowedCapabilities[_] == container.securityContext.capabilities.add[_]
+        }
+        has_disallowed_capabilities(container) {
+          input.parameters.disallowedCapabilities[_] == "*"
+        }
+
+        get_default(obj, param, _default) = out {
+          out = obj[param]
+        }
+
+        get_default(obj, param, _default) = out {
+          not obj[param]
+          not obj[param] == false
+          out = _default
+        }
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
