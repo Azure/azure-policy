@@ -37,9 +37,13 @@ spec:
         - name: RESOURCE_ID
           value: {{ .Values.azurepolicy.env.resourceid }}
         - name: RESOURCE_TYPE
-          value: aks engine
+          value: {{ .Values.azurepolicy.env.resourceType }}
         - name: DATAPLANE_ENDPOINT
-          value: https://gov-prod-policy-data.trafficmanager.net
+          value: {{ .Values.azurepolicy.env.policyServiceEndpoint }}
+        - name: FULL_SCAN_EXCLUSION_LIST
+          value: {{ .Values.azurepolicy.env.fullScanExclusionList }}
+        - name: WEBHOOK_EXCLUSION_LIST
+          value: {{ .Values.azurepolicy.env.webhookExclusionList }}
         - name: ACS_CREDENTIAL_LOCATION
           value: /etc/acs/azure.json
         - name: POD_NAME
@@ -55,6 +59,20 @@ spec:
         volumeMounts:
         - name: acs-credential
           mountPath: "/etc/acs/azure.json"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 9090
+          initialDelaySeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 9090
+          initialDelaySeconds: 5
+        ports:
+        - containerPort: 9090
+          name: healthz
+          protocol: TCP
       volumes:
       - hostPath:
           path: /etc/kubernetes/azure.json

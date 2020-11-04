@@ -40,19 +40,35 @@ spec:
             cpu: 100m
             memory: 200Mi
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 9090
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 9090
+        ports:
+        - containerPort: 9090
+          name: healthz
+          protocol: TCP
         env:
         - name: K8S_POLICY_PREFIX
           value: azurepolicy
         - name: RESOURCE_ID
           value: {{ .Values.azurepolicy.env.resourceid }}
         - name: RESOURCE_TYPE
-          value: Microsoft.Kubernetes/connectedClusters
+          value: {{ .Values.azurepolicy.env.resourceType }}
+        - name: DATAPLANE_ENDPOINT
+          value: {{ .Values.azurepolicy.env.policyServiceEndpoint }}
+        - name: FULL_SCAN_EXCLUSION_LIST
+          value: {{ .Values.azurepolicy.env.fullScanExclusionList }}
+        - name: WEBHOOK_EXCLUSION_LIST
+          value: {{ .Values.azurepolicy.env.webhookExclusionList }}
         - name: CLIENT_ID
           value: {{ .Values.azurepolicy.env.clientid }}
         - name: TENANT_ID
           value: {{ .Values.azurepolicy.env.tenantid }}
-        - name: DATAPLANE_ENDPOINT
-          value: https://gov-prod-policy-data.trafficmanager.net
         - name: CLIENT_SECRET
           valueFrom:
             secretKeyRef:
