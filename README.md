@@ -2,11 +2,11 @@
 
 This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For easy search of all built-in  with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
-For custom policy samples, check out our Community repo! (https://github.com/Azure/Community-Policy)
+For custom policy samples, [check](https://github.com/Azure/Community-Policy) out our Community repo! 
 
 ## Contributing
 
-To contribute, please submit your policies to our Community repo! (https://github.com/Azure/Community-Policy)
+To contribute, please submit your policies to [our Community repo!](https://github.com/Azure/Community-Policy)
 
 ## Reporting Samples Issues
 
@@ -218,7 +218,7 @@ Work to increase the scale that policy can be performantly applied to resource t
  certificate relies on legacy Common Name field, use SANs or temporarily enable Common Name matching 
 
 Mitigation: Avoid using K8s 1.19 (preview) with the Azure Policy add-on. The add-on can be used with any GA supported version such as 1.16, 1.17, or 1.18. 
-Feature team is actively working on fixing this issue. GitHub issue tracking this on AKS side https://github.com/Azure/AKS/issues/1869 
+Feature team is actively working on fixing this issue. GitHub issue tracking this on [AKS side](https://github.com/Azure/AKS/issues/1869)
 
 
 ### Indexed Resource types always non-complaint to tagging policies 
