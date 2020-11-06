@@ -7,17 +7,10 @@ spec:
     spec:
       names:
         kind: K8sAzureContainerProbesRequired
-        listKind: K8sAzureContainerProbesRequiredList
-        plural: k8sazurecontainerprobesrequired
-        singular: k8sazurecontainerprobesrequired
       validation:
         openAPIV3Schema:
           properties:
-            probes:
-              type: array
-              items:
-                type: string
-            probeTypes:
+            requiredProbes:
               type: array
               items:
                 type: string
@@ -27,12 +20,12 @@ spec:
         package k8srequiredprobes
 
         probe_type_set = probe_types {
-          probe_types := {type | type := input.parameters.probeTypes[_]}
+          probe_types := {type | type := ["tcpSocket", "httpGet", "exec"][_]}
         }
 
         violation[{"msg": msg}] {
           container := input.review.object.spec.containers[_]
-          probe := input.parameters.probes[_]
+          probe := input.parameters.requiredProbes[_]
           probe_is_missing(container, probe)
           msg := get_violation_message(container, input.review, probe)
         }
@@ -51,6 +44,10 @@ spec:
           count(diff_fields) == count(probe_type_set)
         }
 
+        has_field(object, field) = true {
+            object[field]
+        }
+
         get_violation_message(container, review, probe) = msg {
-          msg := sprintf("Container <%v> in your <%v> <%v> has no <%v>", [container.name, review.kind.kind, review.object.metadata.name, probe])
+          msg := sprintf("Container <%v> in your <%v> <%v> has no <%v>. Required probes: %v", [container.name, review.kind.kind, review.object.metadata.name, probe, input.parameters.requiredProbes])
         }
