@@ -1,58 +1,30 @@
 {
   "properties": {
-    "displayName": "Configure backup on VMs without a given tag to an existing recovery services vault in the same location",
+    "description": "Enforce backup for all virtual machines by deploying a recovery services vault in the same location and resource group as the virtual machine. Doing this is useful when different application teams in your organization are allocated separate resource groups and need to manage their own backups and restores. You can optionally include virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMAppCentricBackupIncludeTag",
+    "displayName": "Configure backup on VMs with a given tag to a new recovery services vault with a default policy",
     "policyType": "BuiltIn",
-    "description": "Enforce backup for all virtual machines by backing them up to an existing central recovery services vault in the same location and subscription as the virtual machine. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally exclude virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMCentralBackupExcludeTag",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.0.0-preview",
+      "preview": true,
       "category": "Backup"
     },
     "parameters": {
-      "vaultLocation": {
+      "inclusionTagName": {
         "type": "String",
         "metadata": {
-          "displayName": "Location (Specify the location of the VMs that you want to protect)",
-          "description": "Specify the location of the VMs that you want to protect. VMs should be backed up to a vault in the same location. For example - southeastasia",
-          "strongType": "location"
-        }
-      },
-      "backupPolicyId": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Backup Policy (of type Azure VM from a vault in the location chosen above)",
-          "description": "Specify the id of the Azure backup policy to configure backup of the virtual machines. The selected Azure backup policy should be of type Azure virtual machine. This policy needs to be in a vault that is present in the location chosen above. For example - /subscriptions/<SubscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.RecoveryServices/vaults/<VaultName>/backupPolicies/<BackupPolicyName>",
-          "strongType": "Microsoft.RecoveryServices/vaults/backupPolicies"
-        }
-      },
-      "exclusionTagName": {
-          "type": "String",
-          "metadata": {
-              "displayName": "Exclusion Tag Name",
-              "description": "Name of the tag to use for excluding VMs from the scope of this policy. This should be used along with the Exclusion Tag Value parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
-          },
-          "defaultValue": ""
-      },
-      "exclusionTagValue": {
-          "type": "Array",
-          "metadata": {
-              "displayName": "Exclusion Tag Values",
-              "description": "Value of the tag to use for excluding VMs from the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Exclusion Tag Name parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
-          },
-          "defaultValue": []
-      },      
-      "effect": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Effect",
-          "description": "Enable or disable the execution of the policy"
+          "displayName": "Inclusion Tag Name",
+          "description": "Name of the tag to use for including VMs in the scope of this policy. This should be used along with the Inclusion Tag Value parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
         },
-        "allowedValues": [
-          "deployIfNotExists",
-          "auditIfNotExists",
-          "disabled"
-        ],
-        "defaultValue": "deployIfNotExists"
+        "defaultValue": ""
+      },
+      "inclusionTagValue": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Inclusion Tag Values",
+          "description": "Value of the tag to use for including VMs in the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Inclusion Tag Name parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -63,24 +35,17 @@
             "equals": "Microsoft.Compute/virtualMachines"
           },
           {
-            "field": "location",
-            "equals": "[parameters('vaultLocation')]"
-          },
-          {
             "anyOf": [
               {
-                "not": 
-                {
-                    "field": "[concat('tags[', parameters('exclusionTagName'), ']')]",
-                    "in": "[parameters('exclusionTagValue')]"
-                }
+                "field": "[concat('tags[', parameters('inclusionTagName'), ']')]",
+                "in": "[parameters('inclusionTagValue')]"
               },
               {
-                "value": "[empty(parameters('exclusionTagValue'))]",
+                "value": "[empty(parameters('inclusionTagValue'))]",
                 "equals": "true"
               },
               {
-                "value": "[empty(parameters('exclusionTagName'))]",
+                "value": "[empty(parameters('inclusionTagName'))]",
                 "equals": "true"
               }
             ]
@@ -414,114 +379,89 @@
         ]
       },
       "then": {
-        "effect": "[parameters('effect')]",
+        "effect": "deployIfNotExists",
         "details": {
-          "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
-            "/providers/microsoft.authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b"
-          ],
           "type": "Microsoft.RecoveryServices/backupprotecteditems",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+            "/providers/Microsoft.Authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b"
+          ],
           "deployment": {
             "properties": {
               "mode": "incremental",
               "template": {
-                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "parameters": {
-                  "backupPolicyId": {
-                    "type": "String"
+                  "vmName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Name of Azure Virtual Machines"
+                    }
                   },
-                  "fabricName": {
-                    "type": "String"
+                  "vmRgName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Resource group containing the virtual machines."
+                    }
                   },
-                  "protectionContainers": {
-                    "type": "String"
-                  },
-                  "protectedItems": {
-                    "type": "String"
-                  },
-                  "sourceResourceId": {
-                    "type": "String"
+                  "location": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Location for VM and Backup vault"
+                    }
                   }
+                },
+                "variables": {
+                  "backupFabric": "Azure",
+                  "backupPolicy": "DefaultPolicy",
+                  "v2VmType": "Microsoft.Compute/virtualMachines",
+                  "v2VmContainer": "iaasvmcontainer;iaasvmcontainerv2;",
+                  "v2Vm": "vm;iaasvmcontainerv2;",
+                  "vaultName": "[take(concat('RSVault-', parameters('location'), '-', guid(resourceGroup().id)),50)]"
                 },
                 "resources": [
                   {
-                    "apiVersion": "2017-05-10",
-                    "name": "[concat('DeployProtection-',uniqueString(parameters('protectedItems')))]",
-                    "type": "Microsoft.Resources/deployments",
-                    "resourceGroup": "[first(skip(split(parameters('backupPolicyId'), '/'), 4))]",
-                    "subscriptionId": "[first(skip(split(parameters('backupPolicyId'), '/'), 2))]",
+                    "name": "[variables('vaultName')]",
+                    "type": "Microsoft.RecoveryServices/vaults",
+                    "apiVersion": "2016-06-01",
+                    "location": "[parameters('location')]",
+                    "properties": {},
+                    "sku": {
+                      "name": "Standard"
+                    }
+                  },
+                  {
+                    "name": "[concat(variables('vaultName'), '/', variables('backupFabric'), '/', variables('v2VmContainer'), concat(parameters('vmRgName'),';',parameters('vmName')), '/', variables('v2Vm'), concat(parameters('vmRgName'),';',parameters('vmName')))]",
+                    "apiVersion": "2016-12-01",
+                    "location": "[parameters('location')]",
+                    "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.RecoveryServices/vaults/', variables('vaultName'))]"
+                    ],
                     "properties": {
-                      "mode": "Incremental",
-                      "template": {
-                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {
-                          "backupPolicyId": {
-                            "type": "String"
-                          },
-                          "fabricName": {
-                            "type": "String"
-                          },
-                          "protectionContainers": {
-                            "type": "String"
-                          },
-                          "protectedItems": {
-                            "type": "String"
-                          },
-                          "sourceResourceId": {
-                            "type": "String"
-                          }
-                        },
-                        "resources": [
-                          {
-                            "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
-                            "name": "[concat(first(skip(split(parameters('backupPolicyId'), '/'), 8)), '/', parameters('fabricName'), '/',parameters('protectionContainers'), '/', parameters('protectedItems'))]",
-                            "apiVersion": "2016-06-01",
-                            "properties": {
-                              "protectedItemType": "Microsoft.Compute/virtualMachines",
-                              "policyId": "[parameters('backupPolicyId')]",
-                              "sourceResourceId": "[parameters('sourceResourceId')]"
-                            }
-                          }
-                        ]
-                      },
-                      "parameters": {
-                        "backupPolicyId": {
-                          "value": "[parameters('backupPolicyId')]"
-                        },
-                        "fabricName": {
-                          "value": "[parameters('fabricName')]"
-                        },
-                        "protectionContainers": {
-                          "value": "[parameters('protectionContainers')]"
-                        },
-                        "protectedItems": {
-                          "value": "[parameters('protectedItems')]"
-                        },
-                        "sourceResourceId": {
-                          "value": "[parameters('sourceResourceId')]"
-                        }
-                      }
+                      "protectedItemType": "[variables('v2VmType')]",
+                      "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', variables('vaultName'),variables('backupPolicy'))]",
+                      "sourceResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vmRgName'), '/providers/Microsoft.Compute/virtualMachines/', parameters('vmName'))]"
                     }
                   }
-                ]
+                ],
+                "outputs": {
+                  "status": {
+                    "type": "string",
+                    "value": "[concat('Backup enabled successfully for VM:', ' ', parameters('vmName'), 'Backup Vault: ', variables('vaultName'))]"
+                  }
+                }
               },
               "parameters": {
-                "backupPolicyId": {
-                  "value": "[parameters('backupPolicyId')]"
+                "vmName": {
+                  "value": "[field('name')]"
                 },
-                "fabricName": {
-                  "value": "Azure"
+                "location": {
+                  "value": "[field('location')]"
                 },
-                "protectionContainers": {
-                  "value": "[concat('iaasvmcontainer;iaasvmcontainerv2;', resourceGroup().name, ';' ,field('name'))]"
-                },
-                "protectedItems": {
-                  "value": "[concat('vm;iaasvmcontainerv2;', resourceGroup().name, ';' ,field('name'))]"
-                },
-                "sourceResourceId": {
-                  "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Compute/virtualMachines/',field('name'))]"
+                "vmRgName": {
+                  "value": "[resourceGroup().name]"
                 }
               }
             }
@@ -530,6 +470,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/09ce66bc-1220-4153-8104-e3f51c936913",
-  "name": "09ce66bc-1220-4153-8104-e3f51c936913"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/83644c87-93dd-49fe-bf9f-6aff8fd0834e",
+  "name": "83644c87-93dd-49fe-bf9f-6aff8fd0834e"
 }
