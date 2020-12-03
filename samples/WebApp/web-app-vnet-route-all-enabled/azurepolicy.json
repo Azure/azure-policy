@@ -1,8 +1,8 @@
 {
   "properties": {
-    "displayName": "Enforce Web App VNet route all",
+    "displayName": "Audit Web App VNet route all if not exists",
     "policyType": "Custom",
-    "description": "This policy ensures that all traffic originating from a web app is routed through Regional VNet integration",
+    "description": "This policy audits that all traffic originating from a web app is routed through Regional VNet integration",
     "mode": "Indexed",
     "metadata": {
       "category": "Web App"
@@ -10,21 +10,18 @@
     "parameters": {},
     "policyRule": {
       "if": {
-        "allOf": [
-          {
             "field": "type",
             "equals": "Microsoft.Web/sites"
-          },
-          {
-            "not": {
-              "field": "Microsoft.Web/sites/config/vnetRouteAllEnabled",
-              "equals": "true"
-            }
-          }
-        ]
       },
       "then": {
-        "effect": "deny"
+        "effect": "auditIfNotExists",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/vnetRouteAllEnabled",
+            "equals": true
+          }
+        }
       }
     }
   }
