@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "Kubernetes clusters should not use the default namespace",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "Prevent usage of the default namespace in Kubernetes clusters to protect against unauthorized access for ConfigMap, Pod, Secret, Service, and ServiceAccount resource types. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": [ "kube-system", "gatekeeper-system", "azure-arc" ]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "AKS Engine",
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/block-default-namespace/template.yaml",
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/block-default-namespace/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "excludedNamespaces": "[parameters('excludedNamespaces')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9f061a12-e40d-4183-a00e-171812443373",
+  "name": "9f061a12-e40d-4183-a00e-171812443373"
+}

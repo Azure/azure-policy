@@ -1,10 +1,10 @@
-{
+﻿{
   "properties": {
     "displayName": "Enable Monitoring in Azure Security Center",
     "policyType": "BuiltIn",
     "description": "Monitor all the available security recommendations in Azure Security Center. This is the default policy for Azure Security Center.",
     "metadata": {
-      "version": "19.0.1",
+      "version": "22.0.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -89,6 +89,32 @@
           "description": "The limit to how long a certificate may be valid for. Certificates with lengthy validity periods aren't best practice."
         }
       },
+      "secretsExpirationSetEffect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Key Vault secrets should have expiration dates set",
+          "description": "Enable or disable key vault secrets should have expiration dates set."
+        }
+      },
+      "keysExpirationSetEffect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Key Vault keys should have expiration dates set",
+          "description": "Enable or disable key vault keys should have expiration dates set."
+        }
+      },
       "azurePolicyforWindowsMonitoringEffect": {
         "type": "string",
         "defaultValue": "Disabled",
@@ -97,8 +123,20 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Guest Configuration extension should be installed on Windows virtual machines",
-          "description": "Enable or disable virtual machines reporting that the Guest Configuration extension for Windows should be installed"
+          "displayName": "Guest Configuration extension should be installed on virtual machines",
+          "description": "Enable or disable virtual machines reporting that the Guest Configuration extension should be installed"
+        }
+      },
+      "gcExtOnVMWithNoSAMIMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Virtual Machines with Guest Configuration extension should have system assigned managed identities",
+          "description": "Enable or disable virtual machines with no system assigned managed identity reporting that the Guest Configuration extension is installed"
         }
       },
       "windowsDefenderExploitGuardMonitoringEffect": {
@@ -830,6 +868,18 @@
         "metadata": {
           "displayName": "Vulnerabilities on your SQL databases should be remediated",
           "description": "Enable or disable the monitoring of Vulnerability Assessment scan results and recommendations for how to remediate database vulnerabilities."
+        }
+      },
+      "serverSqlDbVulnerabilityAssesmentMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities on your SQL servers on machine should be remediated",
+          "description": "SQL Vulnerability assessment scans your database for security vulnerabilities, and exposes any deviations from best practices such as misconfigurations, excessive permissions, and unprotected sensitive data. Resolving the vulnerabilities found can greatly improve your database security posture."
         }
       },
       "sqlDbDataClassificationMonitoringEffect": {
@@ -2749,6 +2799,413 @@
           "displayName": "FTPS only should be required in your API App",
           "description": "Enable FTPS enforcement for enhanced security"
         }
+      },
+      "functionAppsShouldHaveClientCertificatesEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Function apps should have 'Client Certificates (Incoming client certificates)' enabled",
+          "description": "Client certificates allow for the app to request a certificate for incoming requests. Only clients with valid certificates will be able to reach the app."
+        }
+      },
+      "cognitiveServicesAccountsShouldEnableDataEncryptionWithACustomerManagedKeyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Cognitive Services accounts should enable data encryption with a customer-managed key (CMK)",
+          "description": "Customer-managed keys (CMK) are commonly required to meet regulatory compliance standards. CMKs enable the data stored in Cognitive Services to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more about CMK encryption at https://aka.ms/cosmosdb-cmk."
+        }
+      },
+      "azureCosmosDbAccountsShouldUseCustomerManagedKeysToEncryptDataAtRestMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "audit",
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Cosmos DB accounts should use customer-managed keys to encrypt data at rest",
+          "description": "Use customer-managed keys to manage the encryption at rest of your Azure Cosmos DB. By default, the data is encrypted at rest with service-managed keys, but customer-managed keys (CMK) are commonly required to meet regulatory compliance standards. CMKs enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more about CMK encryption at https://aka.ms/cosmosdb-cmk."
+        }
+      },
+      "keyVaultsShouldHavePurgeProtectionEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Key vaults should have purge protection enabled",
+          "description": "Malicious deletion of a key vault can lead to permanent data loss. A malicious insider in your organization can potentially delete and purge key vaults. Purge protection protects you from insider attacks by enforcing a mandatory retention period for soft deleted key vaults. No one inside your organization or Microsoft will be able to purge your key vaults during the soft delete retention period."
+        }
+      },
+      "keyVaultsShouldHaveSoftDeleteEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Key vaults should have soft delete enabled",
+          "description": "Deleting a key vault without soft delete enabled permanently deletes all secrets, keys, and certificates stored in the key vault. Accidental deletion of a key vault can lead to permanent data loss. Soft delete allows you to recover an accidently deleted key vault for a configurable retention period."
+        }
+      },
+      "azureCacheForRedisShouldResideWithinAVirtualNetworkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Cache for Redis should reside within a virtual network",
+          "description": "Azure Virtual Network (VNet) deployment provides enhanced security and isolation for your Azure Cache for Redis, as well as subnets, access control policies, and other features to further restrict access.When an Azure Cache for Redis instance is configured with a VNet, it is not publicly addressable and can only be accessed from virtual machines and applications within the VNet."
+        }
+      },
+      "storageAccountsShouldUseCustomerManagedKeyForEncryptionMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Storage accounts should use customer-managed key (CMK) for encryption",
+          "description": "Secure your storage account with greater flexibility using customer-managed keys (CMKs). When you specify a CMK, that key is used to protect and control access to the key that encrypts your data. Using CMKs provides additional capabilities to control rotation of the key encryption key or cryptographically erase data."
+        }
+      },
+      "storageAccountsShouldRestrictNetworkAccessUsingVirtualNetworkRulesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Storage accounts should restrict network access using virtual network rules",
+          "description": "Protect your storage accounts from potential threats using virtual network rules as a preferred method instead of IP-based filtering. Disabling IP-based filtering prevents public IPs from accessing your storage accounts."
+        }
+      },
+      "containerRegistriesShouldBeEncryptedWithACustomerManagedKeyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Container registries should be encrypted with a customer-managed key (CMK)",
+          "description": "Use customer-managed keys to manage the encryption at rest of the contents of your registries. By default, the data is encrypted at rest with service-managed keys, but customer-managed keys (CMK) are commonly required to meet regulatory compliance standards. CMKs enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more about CMK encryption at https://aka.ms/acr/CMK."
+        }
+      },
+      "containerRegistriesShouldNotAllowUnrestrictedNetworkAccessMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Container registries should not allow unrestricted network access",
+          "description": "Azure container registries by default accept connections over the internet from hosts on any network. To protect your registries from potential threats, allow access from only specific public IP addresses or address ranges. If your registry doesn't have an IP/firewall rule or a configured virtual network, it will appear in the unhealthy resources. Learn more about Container Registry network rules here: https://aka.ms/acr/portal/public-network and here https://aka.ms/acr/vnet."
+        }
+      },
+      "containerRegistriesShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Container registries should use private link",
+          "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network.By mapping private endpoints to your container registries instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/acr/private-link."
+        }
+      },
+      "appConfigurationShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "App Configuration should use private link",
+          "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your app configuration instances instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/appconfig/private-endpoint."
+        }
+      },
+      "azureEventGridDomainsShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Event Grid domains should use private link",
+          "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network.By mapping private endpoints to your Event Grid domains instead of the entire service, you'll also be protected against data leakage risks.Learn more at: https://aka.ms/privateendpoints."
+        }
+      },
+      "azureEventGridTopicsShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Event Grid topics should use private link",
+          "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your topics instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/privateendpoints."
+        }
+      },
+      "azureSignalRServiceShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure SignalR Service should use private link",
+          "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your  SignalR resources instead of the entire service, you'll also be protected against data leakage risks .Learn more at: https://aka.ms/asrs/privatelink."
+        }
+      },
+      "azureMachineLearningWorkspacesShouldBeEncryptedWithACustomerManagedKeyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Machine Learning workspaces should be encrypted with a customer-managed key (CMK)",
+          "description": "Manage encryption at rest of your Azure Machine Learning workspace data with customer-managed keys (CMK). By default, customer data is encrypted with service-managed keys, but CMKs are commonly required to meet regulatory compliance standards. CMKs enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more about CMK encryption at https://aka.ms/azureml-workspaces-cmk."
+        }
+      },
+      "azureMachineLearningWorkspacesShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Machine Learning workspaces should use private link",
+          "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your Azure Machine Learning workspaces instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/azureml-workspaces-privatelink."
+        }
+      },
+      "webApplicationFirewallShouldBeEnabledForAzureFrontDoorServiceServiceMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Web Application Firewall (WAF) should be enabled for Azure Front Door Service service",
+          "description": "Deploy Azure Web Application Firewall (WAF) in front of public facing web applications for additional inspection of incoming traffic. Web Application Firewall (WAF) provides centralized protection of your web applications from common exploits and vulnerabilities such as SQL injections, Cross-Site Scripting, local and remote file executions. You can also restrict access to your web applications by countries, IP address ranges, and other http(s) parameters via custom rules."
+        }
+      },
+      "webApplicationFirewallShouldBeEnabledForApplicationGatewayMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Web Application Firewall (WAF) should be enabled for Application Gateway",
+          "description": "Deploy Azure Web Application Firewall (WAF) in front of public facing web applications for additional inspection of incoming traffic. Web Application Firewall (WAF) provides centralized protection of your web applications from common exploits and vulnerabilities such as SQL injections, Cross-Site Scripting, local and remote file executions. You can also restrict access to your web applications by countries, IP address ranges, and other http(s) parameters via custom rules."
+        }
+      },
+      "publicNetworkAccessShouldBeDisabledForMariaDbServersMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Public network access should be disabled for MariaDB servers",
+          "description": "Disable the public network access property to improve security and ensure your Azure Database for MariaDB can only be accessed from a private endpoint. This configuration strictly disables access from any public address space outside of Azure IP range, and denies all logins that match IP or virtual network-based firewall rules."
+        }
+      },
+      "publicNetworkAccessShouldBeDisabledForMySqlServersMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Public network access should be disabled for MySQL servers",
+          "description": "Disable the public network access property to improve security and ensure your Azure Database for MySQL can only be accessed from a private endpoint. This configuration strictly disables access from any public address space outside of Azure IP range, and denies all logins that match IP or virtual network-based firewall rules."
+        }
+      },
+      "bringYourOwnKeyDataProtectionShouldBeEnabledForMySqlServersMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Bring your own key data protection should be enabled for MySQL servers",
+          "description": "Use customer-managed keys to manage the encryption at rest of your MySQL servers. By default, the data is encrypted at rest with service-managed keys, but customer-managed keys (CMK) are commonly required to meet regulatory compliance standards. CMKs enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management."
+        }
+      },
+      "publicNetworkAccessShouldBeDisabledForPostgreSqlServersMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Public network access should be disabled for PostgreSQL servers",
+          "description": "Disable the public network access property to improve security and ensure your Azure Database for PostgreSQL can only be accessed from a private endpoint. This configuration disables access from any public address space outside of Azure IP range, and denies all logins that match IP or virtual network-based firewall rules."
+        }
+      },
+      "bringYourOwnKeyDataProtectionShouldBeEnabledForPostgreSqlServersMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Bring your own key data protection should be enabled for PostgreSQL servers",
+          "description": "Use customer-managed keys to manage the encryption at rest of your PostgreSQL servers. By default, the data is encrypted at rest with service-managed keys, but customer-managed keys (CMK) are commonly required to meet regulatory compliance standards. CMKs enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management."
+        }
+      },
+      "vmImageBuilderTemplatesShouldUsePrivateLinkMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "VM Image Builder templates should use private link",
+          "description": "Audit VM Image Builder templates that do not have a virtual network configured. When a virtual network is not configured, a public IP is created and used instead which may directly expose resources to the internet and increase the potential attack surface."
+        }
+      },
+      "firewallShouldBeEnabledOnKeyVaultMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Firewall should be enabled on Key Vault",
+          "description": "Key vault's firewall prevents unauthorized traffic from reaching your key vault and provides an additional layer of protection for your secrets. Enable the firewall to make sure that only traffic from allowed networks can access your key vault."
+        }
+      },
+      "privateEndpointShouldBeConfiguredForKeyVaultMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Private endpoint should be configured for Key Vault",
+          "description": "Private link provides a way to connect Key Vault to your Azure resources without sending traffic over the public internet. Private link provides defense in depth protection against data exfiltration."
+        }
+      },
+      "azureSpringCloudShouldUseNetworkInjectionMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Spring Cloud should use network injection",
+          "description": "Azure Spring Cloud instances should use virtual network injection for the following purposes: 1. Isolate Azure Spring Cloud from Internet. 2. Enable Azure Spring Cloud to interact with systems in either on premises data centers or Azure service in other virtual networks. 3. Empower customers to control inbound and outbound network communications for Azure Spring Cloud."
+        }
+      },
+      "subscriptionsShouldHaveAContactEmailAddressForSecurityIssuesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Subscriptions should have a contact email address for security issues",
+          "description": "To ensure the relevant people in your organization are notified when there is a potential security breach in one of your subscriptions, set a security contact to receive email notifications from Security Center."
+        }
+      },
+      "autoProvisioningOfTheLogAnalyticsAgentShouldBeEnabledOnYourSubscriptionMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Auto provisioning of the Log Analytics agent should be enabled on your subscription",
+          "description": "To monitor for security vulnerabilities and threats, Azure Security Center collects data from your Azure virtual machines. Data is collected by the Log Analytics agent, formerly known as the Microsoft Monitoring Agent (MMA), which reads various security-related configurations and event logs from the machine and copies the data to your Log Analytics workspace for analysis. We recommend enabling auto provisioning to automatically deploy the agent to all supported Azure VMs and any new ones that are created."
+        }
+      },
+      "emailNotificationForHighSeverityAlertsShouldBeEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Email notification for high severity alerts should be enabled",
+          "description": "To ensure the relevant people in your organization are notified when there is a potential security breach in one of your subscriptions, enable email notifications for high severity alerts in Security Center."
+        }
+      },
+      "emailNotificationToSubscriptionOwnerForHighSeverityAlertsShouldBeEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Email notification to subscription owner for high severity alerts should be enabled",
+          "description": "To ensure your subscription owners are notified when there is a potential security breach in their subscription, set email notifications to subscription owners for high severity alerts in Security Center."
+        }
+      },
+      "storageAccountShouldUseAPrivateLinkConnectionMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Storage account should use a private link connection",
+          "description": "Private links enforce secure communication, by providing private connectivity to the storage account"
+        }
       }
     },
     "policyDefinitions": [
@@ -2810,6 +3267,24 @@
         }
       },
       {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/98728c90-32c7-4049-8429-847dc0f4fe37",
+        "policyDefinitionReferenceId": "secretsExpirationSet",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('secretsExpirationSetEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/152b15f7-8e1f-4c1f-ab71-8c010ba5dbc0",
+        "policyDefinitionReferenceId": "keysExpirationSet",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('keysExpirationSetEffect')]"
+          }
+        }
+      },
+      {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3c735d8a-a4ba-4a3a-b7cf-db7754cf57f4",
         "policyDefinitionReferenceId": "vmssOsVulnerabilitiesMonitoring",
         "parameters": {
@@ -2837,11 +3312,20 @@
         }
       },
       {
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5fc23db3-dd4d-4c56-bcc7-43626243e601",
-        "policyDefinitionReferenceId": "azurePolicyforWindowsMonitoring",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ae89ebca-1c92-4898-ac2c-9f63decb045c",
+        "policyDefinitionReferenceId": "gcExtOnVMMonitoring",
         "parameters": {
           "effect": {
             "value": "[parameters('azurePolicyforWindowsMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d26f7642-7545-4e18-9b75-8c9bbdee3a9a",
+        "policyDefinitionReferenceId": "gcExtOnVMWithNoSAMIMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('gcExtOnVMWithNoSAMIMonitoringEffect')]"
           }
         }
       },
@@ -3217,6 +3701,15 @@
         "parameters": {
           "effect": {
             "value": "[parameters('sqlDbVulnerabilityAssesmentMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6ba6d016-e7c3-4842-b8f2-4992ebc0d72d",
+        "policyDefinitionReferenceId": "serverSqlDbVulnerabilityAssesmentMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('serverSqlDbVulnerabilityAssesmentMonitoringEffect')]"
           }
         }
       },
@@ -4167,6 +4660,303 @@
         "parameters": {
           "effect": {
             "value": "[parameters('fTPSOnlyShouldBeRequiredInYourAPIAppMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/eaebaea7-8013-4ceb-9d14-7eb32271373c",
+        "policyDefinitionReferenceId": "functionAppsShouldHaveClientCertificatesEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('functionAppsShouldHaveClientCertificatesEnabledMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/67121cc7-ff39-4ab8-b7e3-95b84dab487d",
+        "policyDefinitionReferenceId": "cognitiveServicesAccountsShouldEnableDataEncryptionWithACustomerManagedKeyMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('cognitiveServicesAccountsShouldEnableDataEncryptionWithACustomerManagedKeyMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1f905d99-2ab7-462c-a6b0-f709acca6c8f",
+        "policyDefinitionReferenceId": "azureCosmosDbAccountsShouldUseCustomerManagedKeysToEncryptDataAtRestMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureCosmosDbAccountsShouldUseCustomerManagedKeysToEncryptDataAtRestMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0b60c0b2-2dc2-4e1c-b5c9-abbed971de53",
+        "policyDefinitionReferenceId": "keyVaultsShouldHavePurgeProtectionEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('keyVaultsShouldHavePurgeProtectionEnabledMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1e66c121-a66a-4b1f-9b83-0fd99bf0fc2d",
+        "policyDefinitionReferenceId": "keyVaultsShouldHaveSoftDeleteEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('keyVaultsShouldHaveSoftDeleteEnabledMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7d092e0a-7acd-40d2-a975-dca21cae48c4",
+        "policyDefinitionReferenceId": "azureCacheForRedisShouldResideWithinAVirtualNetworkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureCacheForRedisShouldResideWithinAVirtualNetworkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6fac406b-40ca-413b-bf8e-0bf964659c25",
+        "policyDefinitionReferenceId": "storageAccountsShouldUseCustomerManagedKeyForEncryptionMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('storageAccountsShouldUseCustomerManagedKeyForEncryptionMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2a1a9cdf-e04d-429a-8416-3bfb72a1b26f",
+        "policyDefinitionReferenceId": "storageAccountsShouldRestrictNetworkAccessUsingVirtualNetworkRulesMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('storageAccountsShouldRestrictNetworkAccessUsingVirtualNetworkRulesMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5b9159ae-1701-4a6f-9a7a-aa9c8ddd0580",
+        "policyDefinitionReferenceId": "containerRegistriesShouldBeEncryptedWithACustomerManagedKeyMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('containerRegistriesShouldBeEncryptedWithACustomerManagedKeyMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d0793b48-0edc-4296-a390-4c75d1bdfd71",
+        "policyDefinitionReferenceId": "containerRegistriesShouldNotAllowUnrestrictedNetworkAccessMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('containerRegistriesShouldNotAllowUnrestrictedNetworkAccessMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e8eef0a8-67cf-4eb4-9386-14b0e78733d4",
+        "policyDefinitionReferenceId": "containerRegistriesShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('containerRegistriesShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ca610c1d-041c-4332-9d88-7ed3094967c7",
+        "policyDefinitionReferenceId": "appConfigurationShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('appConfigurationShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9830b652-8523-49cc-b1b3-e17dce1127ca",
+        "policyDefinitionReferenceId": "azureEventGridDomainsShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureEventGridDomainsShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4b90e17e-8448-49db-875e-bd83fb6f804f",
+        "policyDefinitionReferenceId": "azureEventGridTopicsShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureEventGridTopicsShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/53503636-bcc9-4748-9663-5348217f160f",
+        "policyDefinitionReferenceId": "azureSignalRServiceShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureSignalRServiceShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ba769a63-b8cc-4b2d-abf6-ac33c7204be8",
+        "policyDefinitionReferenceId": "azureMachineLearningWorkspacesShouldBeEncryptedWithACustomerManagedKeyMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureMachineLearningWorkspacesShouldBeEncryptedWithACustomerManagedKeyMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/40cec1dd-a100-4920-b15b-3024fe8901ab",
+        "policyDefinitionReferenceId": "azureMachineLearningWorkspacesShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureMachineLearningWorkspacesShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/055aa869-bc98-4af8-bafc-23f1ab6ffe2c",
+        "policyDefinitionReferenceId": "webApplicationFirewallShouldBeEnabledForAzureFrontDoorServiceServiceMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('webApplicationFirewallShouldBeEnabledForAzureFrontDoorServiceServiceMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/564feb30-bf6a-4854-b4bb-0d2d2d1e6c66",
+        "policyDefinitionReferenceId": "webApplicationFirewallShouldBeEnabledForApplicationGatewayMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('webApplicationFirewallShouldBeEnabledForApplicationGatewayMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fdccbe47-f3e3-4213-ad5d-ea459b2fa077",
+        "policyDefinitionReferenceId": "publicNetworkAccessShouldBeDisabledForMariaDbServersMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('publicNetworkAccessShouldBeDisabledForMariaDbServersMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d9844e8a-1437-4aeb-a32c-0c992f056095",
+        "policyDefinitionReferenceId": "publicNetworkAccessShouldBeDisabledForMySqlServersMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('publicNetworkAccessShouldBeDisabledForMySqlServersMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/83cef61d-dbd1-4b20-a4fc-5fbc7da10833",
+        "policyDefinitionReferenceId": "bringYourOwnKeyDataProtectionShouldBeEnabledForMySqlServersMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('bringYourOwnKeyDataProtectionShouldBeEnabledForMySqlServersMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b52376f7-9612-48a1-81cd-1ffe4b61032c",
+        "policyDefinitionReferenceId": "publicNetworkAccessShouldBeDisabledForPostgreSqlServersMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('publicNetworkAccessShouldBeDisabledForPostgreSqlServersMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/18adea5e-f416-4d0f-8aa8-d24321e3e274",
+        "policyDefinitionReferenceId": "bringYourOwnKeyDataProtectionShouldBeEnabledForPostgreSqlServersMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('bringYourOwnKeyDataProtectionShouldBeEnabledForPostgreSqlServersMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2154edb9-244f-4741-9970-660785bccdaa",
+        "policyDefinitionReferenceId": "vmImageBuilderTemplatesShouldUsePrivateLinkMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('vmImageBuilderTemplatesShouldUsePrivateLinkMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/55615ac9-af46-4a59-874e-391cc3dfb490",
+        "policyDefinitionReferenceId": "firewallShouldBeEnabledOnKeyVaultMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('firewallShouldBeEnabledOnKeyVaultMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5f0bc445-3935-4915-9981-011aa2b46147",
+        "policyDefinitionReferenceId": "privateEndpointShouldBeConfiguredForKeyVaultMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('privateEndpointShouldBeConfiguredForKeyVaultMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/af35e2a4-ef96-44e7-a9ae-853dd97032c4",
+        "policyDefinitionReferenceId": "azureSpringCloudShouldUseNetworkInjectionMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureSpringCloudShouldUseNetworkInjectionMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4f4f78b8-e367-4b10-a341-d9a4ad5cf1c7",
+        "policyDefinitionReferenceId": "subscriptionsShouldHaveAContactEmailAddressForSecurityIssuesMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('subscriptionsShouldHaveAContactEmailAddressForSecurityIssuesMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/475aae12-b88a-4572-8b36-9b712b2b3a17",
+        "policyDefinitionReferenceId": "autoProvisioningOfTheLogAnalyticsAgentShouldBeEnabledOnYourSubscriptionMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('autoProvisioningOfTheLogAnalyticsAgentShouldBeEnabledOnYourSubscriptionMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6e2593d9-add6-4083-9c9b-4b7d2188c899",
+        "policyDefinitionReferenceId": "emailNotificationForHighSeverityAlertsShouldBeEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('emailNotificationForHighSeverityAlertsShouldBeEnabledMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0b15565f-aa9e-48ba-8619-45960f2c314d",
+        "policyDefinitionReferenceId": "emailNotificationToSubscriptionOwnerForHighSeverityAlertsShouldBeEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('emailNotificationToSubscriptionOwnerForHighSeverityAlertsShouldBeEnabledMonitoringEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6edd7eda-6dd8-40f7-810d-67160c639cd9",
+        "policyDefinitionReferenceId": "storageAccountShouldUseAPrivateLinkConnectionMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('storageAccountShouldUseAPrivateLinkConnectionMonitoringEffect')]"
           }
         }
       }

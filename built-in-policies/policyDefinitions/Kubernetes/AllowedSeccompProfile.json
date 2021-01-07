@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy ensures containers only use allowed seccomp profiles in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.1",
+      "version": "2.0.1",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -30,6 +30,14 @@
         },
         "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
       },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
       "allowedProfiles": {
         "type": "Array",
         "metadata": {
@@ -53,6 +61,8 @@
         "details": {
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/allowed-seccomp-profiles/template.yaml",
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/allowed-seccomp-profiles/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
           "values": {
             "allowedProfiles": "[parameters('allowedProfiles')]",
             "excludedNamespaces": "[parameters('excludedNamespaces')]"
