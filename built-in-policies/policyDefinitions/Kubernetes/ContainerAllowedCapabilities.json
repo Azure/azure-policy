@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy ensures containers only use allowed capabilities in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.1",
+      "version": "2.0.1",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -29,6 +29,14 @@
           "description": "List of Kubernetes namespaces to exclude from policy evaluation."
         },
         "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
       },
       "allowedCapabilities": {
         "type": "Array",
@@ -61,6 +69,8 @@
         "details": {
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-allowed-capabilities/template.yaml",
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-allowed-capabilities/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
           "values": {
             "allowedCapabilities": "[parameters('allowedCapabilities')]",
             "requiredDropCapabilities": "[parameters('requiredDropCapabilities')]",

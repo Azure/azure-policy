@@ -5,7 +5,7 @@
         "mode": "Microsoft.Kubernetes.Data",
         "description": "This policy ensures pods and containers only use allowed SELinux options in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
         "metadata": {
-            "version": "2.0.1",
+            "version": "3.0.1",
             "category": "Kubernetes"
         },
         "parameters": {
@@ -33,6 +33,14 @@
                     "gatekeeper-system",
                     "azure-arc"
                 ]
+            },
+            "namespaces": {
+                "type": "Array",
+                "metadata": {
+                  "displayName": "Namespace inclusions",
+                  "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+                },
+                "defaultValue": []
             },
             "allowedSELinuxOptions": {
                 "type": "Object",
@@ -88,6 +96,8 @@
                 "details": {
                     "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/selinux/template.yaml",
                     "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/selinux/constraint.yaml",
+                    "excludedNamespaces": "[parameters('excludedNamespaces')]",
+                    "namespaces": "[parameters('namespaces')]",
                     "values": {
                         "excludedNamespaces": "[parameters('excludedNamespaces')]",
                         "allowedSELinuxOptions": "[parameters('allowedSELinuxOptions').options]"
