@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy enforces unique ingress hostnames across namespaces in a Kubernetes cluster. For instructions on using this policy, please go to https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.0.1-deprecated",
+      "version": "4.0.1-deprecated",
       "category": "Kubernetes",
       "deprecated": true
     },
@@ -30,6 +30,14 @@
           "description": "List of Kubernetes namespaces to exclude from policy evaluation."
         },
         "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -45,6 +53,8 @@
         "details": {
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/ingress-hostnames-conflict/template.yaml",
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/ingress-hostnames-conflict/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
           "values": {
             "excludedNamespaces": "[parameters('excludedNamespaces')]"
           }

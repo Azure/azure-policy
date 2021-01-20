@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "This policy controls the user, primary group, supplemental group and file system group IDs that pods and containers can use to run in a Kubernetes Cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.1",
+      "version": "2.0.1",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -29,6 +29,14 @@
           "description": "List of Kubernetes namespaces to exclude from policy evaluation."
         },
         "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
       },
       "runAsUserRule": {
         "type": "String",
@@ -229,6 +237,8 @@
         "details": {
           "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/allowed-users-groups/template.yaml",
           "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/allowed-users-groups/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
           "values": {
             "runAsUser": {
               "rule": "[parameters('runAsUserRule')]",

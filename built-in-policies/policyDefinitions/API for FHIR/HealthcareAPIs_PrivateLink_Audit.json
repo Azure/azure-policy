@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "Azure API for FHIR should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure API for FHIR should have at least one approved private endpoint connection. Clients in a virtual network can securely access resources that have private endpoint connections through private links. For more information, visit: https://aka.ms/fhir-privatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "API for FHIR"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HealthcareApis/services"
+          },
+          {
+            "count": {
+              "field": "Microsoft.HealthcareApis/services/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.HealthcareApis/services/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1ee56206-5dd1-42ab-b02d-8aae8b1634ce",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "1ee56206-5dd1-42ab-b02d-8aae8b1634ce"
+}

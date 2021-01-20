@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "Kubernetes clusters should not use specific security capabilities",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "Prevent specific security capabilities in Kubernetes clusters to prevent ungranted privileges on the Pod resource. For instructions on using this policy, please visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": [ "kube-system", "gatekeeper-system", "azure-arc" ]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "disallowedCapabilities": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Blocked capabilities",
+          "description": "List of capabilities that containers are not able to use"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "AKS Engine",
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-disallowed-capabilities/template.yaml",
+          "constraint": "https://raw.githubusercontent.com/Azure/azure-policy/master/built-in-references/Kubernetes/container-disallowed-capabilities/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "excludedNamespaces": "[parameters('excludedNamespaces')]",
+            "disallowedCapabilities": "[parameters('disallowedCapabilities')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a27c700f-8a22-44ec-961c-41625264370b",
+  "name": "a27c700f-8a22-44ec-961c-41625264370b"
+}

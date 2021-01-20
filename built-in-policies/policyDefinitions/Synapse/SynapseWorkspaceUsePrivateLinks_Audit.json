@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Private endpoint connections on Azure Synapse workspaces should be enabled",
+        "description": "Private endpoints can be configured to connect privately to an Azure Synapse workspace. This is used to enforce a secure communication channel to Azure Synapse workspace.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Synapse"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "defaultValue": "Audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Synapse/workspaces"
+                    },
+                    {
+                        "count": {
+                            "field": "Microsoft.Synapse/workspaces/privateEndpointConnections[*]",
+                            "where": {
+                                "field": "Microsoft.Synapse/workspaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                                "equals": "Approved"
+                            }
+                        },
+                        "less": 1
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/72d11df1-dd8a-41f7-8925-b05b960ebafc",
+    "name": "72d11df1-dd8a-41f7-8925-b05b960ebafc"
+}

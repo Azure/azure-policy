@@ -1,7 +1,7 @@
 # Audit Resource Locks on Resource Groups based on Tags
 
 Audits all Resource Groups that have a specific Tag, for the CanNotDelete Resource Lock.
-Within this Policy, you sepcify the Tag Name and Tag Value that will be used for identifying the Resource Groups to audit.
+Within this Policy, you specify the Tag Name and Tag Value that will be used for identifying the Resource Groups to audit.
 
 ## Try in the Azure Portal
 

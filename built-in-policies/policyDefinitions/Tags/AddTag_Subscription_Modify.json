@@ -1,0 +1,59 @@
+{
+   "properties": {
+      "displayName": "Add a tag to subscriptions",
+      "policyType": "BuiltIn",
+      "mode": "All",
+      "description": "Adds the specified tag and value to subscriptions via a remediation task. If the tag exists with a different value it will not be changed. See https://aka.ms/azurepolicyremediation for more information on policy remediation.",
+      "metadata": {
+         "version": "1.0.0",
+         "category": "Tags"
+      },
+      "parameters": {
+         "tagName": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Name",
+               "description": "Name of the tag, such as 'environment'"
+            }
+         },
+         "tagValue": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Tag Value",
+               "description": "Value of the tag, such as 'production'"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Resources/subscriptions"
+               },
+               {
+                  "field": "[concat('tags[', parameters('tagName'), ']')]",
+                  "exists": "false"
+               }
+            ]
+         },
+         "then": {
+            "effect": "modify",
+            "details": {
+               "roleDefinitionIds": [
+                  "/providers/microsoft.authorization/roleDefinitions/4a9ae827-6dc8-4573-8ac7-8239d42aa03f"
+               ],
+               "operations": [
+                  {
+                     "operation": "add",
+                     "field": "[concat('tags[', parameters('tagName'), ']')]",
+                     "value": "[parameters('tagValue')]"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/96d9a89c-0d67-41fc-899d-2b9599f76a24",
+   "name": "96d9a89c-0d67-41fc-899d-2b9599f76a24"
+}
