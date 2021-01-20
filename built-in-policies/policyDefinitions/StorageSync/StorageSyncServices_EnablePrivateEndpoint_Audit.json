@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "displayName": "Azure Event Grid topics should use private link",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your topics instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/privateendpoints.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Event Grid"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventGrid/topics"
+          },
+          {
+            "count": {
+              "field": "Microsoft.EventGrid/topics/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.EventGrid/topics/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/63fc866a-d001-4487-88d9-5035eaed6dd5",
+  "name": "63fc866a-d001-4487-88d9-5035eaed6dd5"
+}
