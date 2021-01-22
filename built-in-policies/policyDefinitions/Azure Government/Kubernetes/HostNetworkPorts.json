@@ -1,0 +1,91 @@
+{
+  "properties": {
+    "displayName": "Kubernetes cluster pods should only use approved host network and port range",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy controls pod access to the host network and the allowable host port range in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "allowHostNetwork": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow host network usage",
+          "description": "Set this value to true if pod is allowed to use host network otherwise false."
+        },
+        "defaultValue": false
+      },
+      "minPort": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Min host port",
+          "description": "The minimum value in the allowable host port range that pods can use in the host network namespace."
+        },
+        "defaultValue": 0
+      },
+      "maxPort": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Max host port",
+          "description": "The maximum value in the allowable host port range that pods can use in the host network namespace."
+        },
+        "defaultValue": 0
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/host-network-ports/v1/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/host-network-ports/v1/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "allowHostNetwork": "[parameters('allowHostNetwork')]",
+            "minPort": "[parameters('minPort')]",
+            "maxPort": "[parameters('maxPort')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/82985f06-dc18-4a48-bc1c-b9f4f0098cfe",
+  "name": "82985f06-dc18-4a48-bc1c-b9f4f0098cfe"
+}

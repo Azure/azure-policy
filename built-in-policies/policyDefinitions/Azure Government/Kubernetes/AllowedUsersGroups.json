@@ -1,0 +1,264 @@
+{
+  "properties": {
+    "displayName": "Kubernetes cluster pods and containers should only run with approved user and group IDs",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy controls the user, primary group, supplemental group and file system group IDs that pods and containers can use to run in a Kubernetes Cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "runAsUserRule": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Run as user rule",
+          "description": "The 'RunAsUser' rule that containers are allowed to run with."
+        },
+        "allowedValues": [
+          "MustRunAs",
+          "MustRunAsNonRoot",
+          "RunAsAny"
+        ],
+        "defaultValue": "MustRunAsNonRoot"
+      },
+      "runAsUserRanges": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed user ID ranges",
+          "description": "The user ID ranges that are allowed for containers to use.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ranges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "integer"
+                    },
+                    "max": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["min", "max"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["ranges"],
+            "additionalProperties": false
+          }
+        },
+        "defaultValue": {
+          "ranges": []
+        }
+      },
+      "runAsGroupRule": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Run as group rule",
+          "description": "The 'RunAsGroup' rule that containers are allowed to run with."
+        },
+        "allowedValues": [
+          "MustRunAs",
+          "MayRunAs",
+          "RunAsAny"
+        ],
+        "defaultValue": "RunAsAny"
+      },
+      "runAsGroupRanges": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed group ID ranges",
+          "description": "The group ID ranges that are allowed for containers to use.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ranges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "integer"
+                    },
+                    "max": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["min", "max"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["ranges"],
+            "additionalProperties": false
+          }
+        },
+        "defaultValue": {
+          "ranges": []
+        }
+      },
+      "supplementalGroupsRule": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Supplemental group rule",
+          "description": "The 'SupplementalGroups' rule that containers are allowed to run with."
+        },
+        "allowedValues": [
+          "MustRunAs",
+          "MayRunAs",
+          "RunAsAny"
+        ],
+        "defaultValue": "RunAsAny"
+      },
+      "supplementalGroupsRanges": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed supplemental group ID ranges",
+          "description": "The supplemental group ID ranges that are allowed for containers to use.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ranges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "integer"
+                    },
+                    "max": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["min", "max"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["ranges"],
+            "additionalProperties": false
+          }
+        },
+        "defaultValue": {
+          "ranges": []
+        }
+      },
+      "fsGroupRule": {
+        "type": "String",
+        "metadata": {
+          "displayName": "File system group rule",
+          "description": "The 'FSGroup' rule that containers are allowed to run with."
+        },
+        "allowedValues": [
+          "MustRunAs",
+          "MayRunAs",
+          "RunAsAny"
+        ],
+        "defaultValue": "RunAsAny"
+      },
+      "fsGroupRanges": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed file system group ID ranges",
+          "description": "The file system group ranges that are allowed for pods to use.",
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ranges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "integer"
+                    },
+                    "max": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["min", "max"],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["ranges"],
+            "additionalProperties": false
+          }
+        },
+        "defaultValue": {
+          "ranges": []
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/allowed-users-groups/v1/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/allowed-users-groups/v1/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "runAsUser": {
+              "rule": "[parameters('runAsUserRule')]",
+              "ranges": "[parameters('runAsUserRanges').ranges]"
+            },
+            "runAsGroup": {
+              "rule": "[parameters('runAsGroupRule')]",
+              "ranges": "[parameters('runAsGroupRanges').ranges]"
+            },
+            "supplementalGroups": {
+              "rule": "[parameters('supplementalGroupsRule')]",
+              "ranges": "[parameters('supplementalGroupsRanges').ranges]"
+            },
+            "fsGroup": {
+              "rule": "[parameters('fsGroupRule')]",
+              "ranges": "[parameters('fsGroupRanges').ranges]"
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f06ddb64-5fa3-4b77-b166-acb36f7f6042",
+  "name": "f06ddb64-5fa3-4b77-b166-acb36f7f6042"
+}
