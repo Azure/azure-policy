@@ -1,0 +1,82 @@
+{
+  "properties": {
+    "displayName": "Kubernetes cluster containers should only use allowed capabilities",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy ensures containers only use allowed capabilities in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "allowedCapabilities": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed capabilities",
+          "description": "The list of capabilities that are allowed to be added to a container. Provide empty list as input to block everything."
+        },
+        "defaultValue": []
+      },
+      "requiredDropCapabilities": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Required drop capabilities",
+          "description": "The list of capabilities that must be dropped by a container."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-allowed-capabilities/v1/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/container-allowed-capabilities/v1/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "allowedCapabilities": "[parameters('allowedCapabilities')]",
+            "requiredDropCapabilities": "[parameters('requiredDropCapabilities')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c26596ff-4d70-4e6a-9a30-c2506bd2f80c",
+  "name": "c26596ff-4d70-4e6a-9a30-c2506bd2f80c"
+}

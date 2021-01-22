@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "Kubernetes cluster containers should only use allowed seccomp profiles",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy ensures containers only use allowed seccomp profiles in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "allowedProfiles": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed seccomp profiles",
+          "description": "The list of seccomp profiles that containers are allowed to use. E.g. 'runtime/default;docker/default'. Provide empty list as input to block everything."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/allowed-seccomp-profiles/v1/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/allowed-seccomp-profiles/v1/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "allowedProfiles": "[parameters('allowedProfiles')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/975ce327-682c-4f2e-aa46-b9598289b86c",
+  "name": "975ce327-682c-4f2e-aa46-b9598289b86c"
+}

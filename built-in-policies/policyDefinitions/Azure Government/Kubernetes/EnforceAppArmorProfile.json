@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "Kubernetes cluster containers should only use allowed AppArmor profiles",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "This policy ensures containers only use allowed AppArmor profiles in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Kubernetes"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "deny",
+          "disabled"
+        ],
+        "defaultValue": "audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": ["kube-system", "gatekeeper-system", "azure-arc"]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "allowedProfiles": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed AppArmor profiles",
+          "description": "The list of AppArmor profiles that containers are allowed to use. E.g. 'runtime/default;docker/default'. Provide empty list as input to block everything."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/enforce-apparmor-profile/v1/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/enforce-apparmor-profile/v1/constraint.yaml",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "namespaces": "[parameters('namespaces')]",
+          "values": {
+            "allowedProfiles": "[parameters('allowedProfiles')]"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/511f5417-5d12-434d-ab2e-816901e72a5e",
+  "name": "511f5417-5d12-434d-ab2e-816901e72a5e"
+}
