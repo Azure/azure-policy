@@ -111,6 +111,7 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 - Microsoft.DataLakeStore/accounts
   - This type behaves similarly to Microsoft.Sql/servers/autidintSettings. Compliance of some fields cannot be determined except in AuditIfNotExits and DeployIfNotExists.
 - Microsoft.Compute/virtualMachines/instanceView
+- Microsoft.Web/hostingEnvironments does not behave case insensitively for resource GETs, this behavior is causing issues for Microsoft.Insights/diagnosticSettings extension resource and the corresponding policy evaluation. 
 
 The potential for fixing these resource types is still under investigation.
 
