@@ -1,12 +1,13 @@
 {
   "properties": {
-    "displayName": "Deploy Workflow Automation for Azure Security Center recommendations",
+    "displayName": "Deploy Workflow Automation for Azure Security Center regulatory compliance",
     "policyType": "BuiltIn",
     "mode": "All",
-    "description": "Enable automation of Azure Security Center recommendations. This policy deploys a workflow automation with your conditions and triggers on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
+    "description": "Enable automation of Azure Security Center regulatory compliance. This policy deploys a workflow automation with your conditions and triggers on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
       "version": "2.0.0",
-      "category": "Security Center"
+      "category": "Security Center",
+      "preview ":  true
     },
     "parameters": {
       "automationName": {
@@ -31,46 +32,31 @@
           "strongType": "location"
         }
       },
-      "recommendationNames": {
+      "regulatoryComplianceStandards": {
         "type": "Array",
         "metadata": {
-          "displayName": "Recommendation IDs",
-          "description": "For all recommendations, leave empty. For specific recommendations, enter a list of recommendation IDs separated by semicolons (';'). Recommendation IDs are available through the Assessments API (https://docs.microsoft.com/en-us/rest/api/securitycenter/assessments), or Azure Resource Graph Explorer, choose securityresources and microsoft.security/assessments."
+          "displayName": "Compliance standards names",
+          "description": "For all compliance standards, leave it empty. For specific compliance standards, enter a list of standards names separated by semicolons (';'). Compliance standards names are available through the regulatory compliance standards API (https://docs.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards), or Azure Resource Graph Explorer, choose securityresources and microsoft.security/regulatorycompliancestandards."
         },
         "defaultValue": [ ]
       },
-      "recommendationSeverities": {
+      "regulatoryComplianceControlStates": {
         "type": "Array",
         "metadata": {
-          "displayName": "Recommendation severities",
-          "description": "Determines recommendation severities. Example: High;Medium;Low;"
+          "displayName": "Compliance control states",
+          "description": "Determines compliance control states."
         },
         "allowedValues": [
-          "High",
-          "Medium",
-          "Low"
+          "Failed",
+          "Passed",
+          "Skipped",
+          "Unsupported"
         ],
         "defaultValue": [
-          "High",
-          "Medium",
-          "Low"
-        ]
-      },
-      "recommendationStates": {
-        "type": "Array",
-        "metadata": {
-          "displayName": "Recommendation states",
-          "description": "Determines recommendation states. Recommendations with unhealthy state require your attention to resolve. When a recommendation state is healthy, it no longer applies to the resource as Security Center detects it as healthy. A recommendation is not-applicable if, for example, it was disabled in the Security Policy. Example: Healthy;Unhealthy;Not Applicable;"
-        },
-        "allowedValues": [
-          "Healthy",
-          "Unhealthy",
-          "Not Applicable"
-        ],
-        "defaultValue": [
-          "Healthy",
-          "Unhealthy",
-          "Not Applicable"
+          "Failed",
+          "Passed",
+          "Skipped",
+          "Unsupported"
         ]
       },
       "logicAppResourceId": {
@@ -86,11 +72,11 @@
         "type": "String",
         "metadata": {
           "displayName": "Logic app trigger",
-          "description": "The trigger connector of the logic app that is triggered. Possible values: 'Manual (Incoming HTTP request)', 'When an Azure Security Center Recommendation is created or triggered'."
+          "description": "The trigger connector of the logic app that is triggered. Possible values: 'Manual (Incoming HTTP request)', 'When an Azure Security Center regulatory compliance assessment is created or triggered'."
         },
         "allowedValues": [
           "Manual (Incoming HTTP request)",
-          "When an Azure Security Center Recommendation is created or triggered"
+          "When an Azure Security Center regulatory compliance assessment is created or triggered"
         ]
       }
     },
@@ -131,13 +117,10 @@
                   "resourceGroupLocation": {
                     "type": "string"
                   },
-                  "recommendationNames": {
+                  "regulatoryComplianceStandards": {
                     "type": "array"
                   },
-                  "recommendationSeverities": {
-                    "type": "array"
-                  },
-                  "recommendationStates": {
+                  "regulatoryComplianceControlStates": {
                     "type": "array"
                   },
                   "logicAppResourceId": {
@@ -153,24 +136,66 @@
                 },
                 "variables": {
                   "scopeDescription": "scope for subscription {0}",
-                  "recommendationNamesLength": "[length(parameters('recommendationNames'))]",
-                  "recommendationSeveritiesLength": "[length(parameters('recommendationSeverities'))]",
-                  "recommendationStatesLength": "[length(parameters('recommendationStates'))]",
-                  "recommendationNamesLengthIfEmpty": "[if(equals(variables('recommendationNamesLength'), 0), 1, variables('recommendationNamesLength'))]",
-                  "recommendationSeveritiesLengthIfEmpty": "[if(equals(variables('recommendationSeveritiesLength'), 0), 1, variables('recommendationSeveritiesLength'))]",
-                  "recommendationStatesLengthIfEmpty": "[if(equals(variables('recommendationStatesLength'), 0), 1, variables('recommendationStatesLength'))]",
-                  "totalRuleCombinationsForOneRecommendationName": "[mul(variables('recommendationSeveritiesLengthIfEmpty'),variables('recommendationStatesLengthIfEmpty'))]",
-                  "totalRuleCombinationsForOneRecommendationSeverity": "[variables('recommendationStatesLengthIfEmpty')]",
-                  "totalRuleCombinationsForOneRecommendationState": 1,
+                  "regulatoryComplianceStandardsLength": "[length(parameters('regulatoryComplianceStandards'))]",
+                  "regulatoryComplianceControlStatesLength": "[length(parameters('regulatoryComplianceControlStates'))]",
+                  "regulatoryComplianceStandardsLengthIfEmpty": "[if(equals(variables('regulatoryComplianceStandardsLength'), 0), 1, variables('regulatoryComplianceStandardsLength'))]",
+                  "regulatoryComplianceControlStatesLengthIfEmpty": "[if(equals(variables('regulatoryComplianceControlStatesLength'), 0), 1, variables('regulatoryComplianceControlStatesLength'))]",
                   "stateMap": {
-                    "Healthy": "healthy",
-                    "Unhealthy": "unhealthy",
-                    "Not Applicable": "notapplicable"
+                    "Failed": "failed",
+                    "Passed": "passed",
+                    "Skipped": "skipped",
+                    "Unsupported": "unsupported"
                   },
                   "triggerMap": {
                     "Manual (Incoming HTTP request)": "manual",
-                    "When an Azure Security Center Recommendation is created or triggered": "When_an_Azure_Security_Center_Recommendation_is_created_or_triggered"
-                  }
+                    "When an Azure Security Center regulatory compliance assessment is created or triggered": "When_a_Security_Center_Regulatory_Compliance_Assessment_is_created_or_triggered"
+                  },
+                  "doesAllStatesSelected": "[if(equals(length(parameters('regulatoryComplianceControlStates')),length(variables('stateMap'))),bool('true'),bool('false'))]",
+                  "doesAllStandardsSelected": "[if(equals(variables('regulatoryComplianceStandardsLength'),0),bool('true'),bool('false'))]",
+                  "allRegulatoryComplianceRuleSets": [ ],
+                  "customStandardsOrCustomStateRuleSets": {
+                    "copy": [
+                      {
+                        "name": "customStandardsOrCustomStateRuleSetsArr",
+                        "count": "[if(not(variables('doesAllStandardsSelected')),variables('regulatoryComplianceStandardsLength'),if(not(variables('doesAllStatesSelected')),variables('regulatoryComplianceControlStatesLength'),1))]",
+                        "input": {
+                          "rules": [
+                            {
+                              "propertyJPath": "[if(not(variables('doesAllStandardsSelected')),'id',if(not(variables('doesAllStatesSelected')),'properties.state',json('null')))]",
+                              "propertyType": "string",
+                              "expectedValue": "[if(not(variables('doesAllStandardsSelected')),parameters('regulatoryComplianceStandards')[copyIndex('customStandardsOrCustomStateRuleSetsArr')],if(not(variables('doesAllStatesSelected')),parameters('regulatoryComplianceControlStates')[copyIndex('customStandardsOrCustomStateRuleSetsArr')],json('null')))]",
+                              "operator": "[if(not(variables('doesAllStandardsSelected')),'Contains',if(not(variables('doesAllStatesSelected')),'Equals',json('null')))]"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "customStandardsAndCustomStateRuleSets": {
+                    "copy": [
+                      {
+                        "name": "customStandardsAndCustomStateRuleSetsArr",
+                        "count": "[if(and(not(variables('doesAllStandardsSelected')),not(variables('doesAllStatesSelected'))),mul(variables('regulatoryComplianceStandardsLength'),variables('regulatoryComplianceControlStatesLength')),1)]",
+                        "input": {
+                          "rules": [
+                            {
+                              "propertyJPath": "id",
+                              "propertyType": "string",
+                              "expectedValue": "[if(not(variables('doesAllStandardsSelected')),parameters('regulatoryComplianceStandards')[mod(div(copyIndex('customStandardsAndCustomStateRuleSetsArr'), variables('regulatoryComplianceControlStatesLength')), variables('regulatoryComplianceStandardsLength'))],json('null'))]",
+                              "operator": "Contains"
+                            },
+                            {
+                              "propertyJPath": "properties.state",
+                              "propertyType": "string",
+                              "expectedValue": "[if(not(variables('doesAllStatesSelected')),parameters('regulatoryComplianceControlStates')[mod(copyIndex('customStandardsAndCustomStateRuleSetsArr'), variables('regulatoryComplianceControlStatesLength'))],json('null'))]",
+                              "operator": "Equals"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "sourceRuleSets": "[if(and(variables('doesAllStandardsSelected'),variables('doesAllStatesSelected')),variables('allRegulatoryComplianceRuleSets'),if(and(not(variables('doesAllStandardsSelected')),not(variables('doesAllStatesSelected'))),variables('customStandardsAndCustomStateRuleSets').customStandardsAndCustomStateRuleSetsArr,variables('customStandardsOrCustomStateRuleSets').customStandardsOrCustomStateRuleSetsArr))]"
                 },
                 "resources": [
                   {
@@ -215,35 +240,8 @@
                               ],
                               "sources": [
                                 {
-                                  "eventSource": "Assessments",
-                                  "copy": [
-                                    {
-                                      "name": "ruleSets",
-                                      "count": "[mul(variables('recommendationNamesLengthIfEmpty'), mul(variables('recommendationSeveritiesLengthIfEmpty'),variables('recommendationStatesLengthIfEmpty')))]",
-                                      "input": {
-                                        "rules": [
-                                          {
-                                            "propertyJPath": "[if(equals(variables('recommendationNamesLength'), 0), 'type', 'name')]",
-                                            "propertyType": "string",
-                                            "expectedValue": "[if(equals(variables('recommendationNamesLength'), 0), 'Microsoft.Security/assessments', parameters('recommendationNames')[mod(div(copyIndex('ruleSets'), variables('totalRuleCombinationsForOneRecommendationName')), variables('recommendationNamesLength'))])]",
-                                            "operator": "Contains"
-                                          },
-                                          {
-                                            "propertyJPath": "properties.metadata.severity",
-                                            "propertyType": "string",
-                                            "expectedValue": "[parameters('recommendationSeverities')[mod(div(copyIndex('ruleSets'), variables('totalRuleCombinationsForOneRecommendationSeverity')), variables('recommendationSeveritiesLength'))]]",
-                                            "operator": "Equals"
-                                          },
-                                          {
-                                            "propertyJPath": "properties.status.code",
-                                            "propertyType": "string",
-                                            "expectedValue": "[variables('stateMap')[parameters('recommendationStates')[mod(div(copyIndex('ruleSets'), variables('totalRuleCombinationsForOneRecommendationState')), variables('recommendationStatesLength'))]]]",
-                                            "operator": "Contains"
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
+                                  "eventSource": "RegulatoryComplianceAssessment",
+                                  "ruleSets": "[variables('sourceRuleSets')]"
                                 }
                               ],
                               "actions": [
@@ -271,14 +269,11 @@
                 "resourceGroupLocation": {
                   "value": "[parameters('resourceGroupLocation')]"
                 },
-                "recommendationNames": {
-                  "value": "[parameters('recommendationNames')]"
+                "regulatoryComplianceStandards": {
+                  "value": "[parameters('regulatoryComplianceStandards')]"
                 },
-                "recommendationSeverities": {
-                  "value": "[parameters('recommendationSeverities')]"
-                },
-                "recommendationStates": {
-                  "value": "[parameters('recommendationStates')]"
+                "regulatoryComplianceControlStates": {
+                  "value": "[parameters('regulatoryComplianceControlStates')]"
                 },
                 "logicAppResourceId": {
                   "value": "[parameters('logicAppResourceId')]"
@@ -293,6 +288,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/73d6ab6c-2475-4850-afd6-43795f3492ef",
-  "name": "73d6ab6c-2475-4850-afd6-43795f3492ef"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/509122b9-ddd9-47ba-a5f1-d0dac20be63c",
+  "name": "509122b9-ddd9-47ba-a5f1-d0dac20be63c"
 }
