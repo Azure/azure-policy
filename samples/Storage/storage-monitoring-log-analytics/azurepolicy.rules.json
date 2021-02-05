@@ -1,0 +1,327 @@
+{
+    "if": {
+        "field": "type",
+        "equals": "Microsoft.Storage/storageAccounts"
+    },
+    "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+            "type": "Microsoft.Insights/diagnosticSettings",
+            "name": "[parameters('profileName')]",
+            "existenceCondition": {
+                "allOf": [
+                    {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                        "equals": "[parameters('logsEnabled')]"
+                    },
+                    {
+                        "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                        "equals": "[parameters('metricsEnabled')]"
+                    }
+                ]
+            },
+            "roleDefinitionIds": [
+                "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+                "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+            ],
+            "deployment": {
+                "properties": {
+                    "mode": "incremental",
+                    "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                            "resourceName": {
+                                "type": "string"
+                            },
+                            "location": {
+                                "type": "string"
+                            },
+                            "logAnalytics": {
+                                "type": "string"
+                            },
+                            "metricsEnabled": {
+                                "type": "string"
+                            },
+                            "logsEnabled": {
+                                "type": "string"
+                            },
+                            "profileName": {
+                                "type": "string"
+                            }
+                        },
+                        "variables": {},
+                        "resources": [
+                            {
+                                "type": "Microsoft.Storage/storageAccounts/providers/diagnosticSettings",
+                                "apiVersion": "2017-05-01-preview",
+                                "name": "[concat(parameters('resourceName'), '/microsoft.insights/', parameters('profileName'))]",
+                                "location": "[parameters('location')]",
+                                "dependsOn": [],
+                                "properties": {
+                                    "workspaceId": "[parameters('logAnalytics')]",
+                                    "metrics": [
+                                        {
+                                            "category": "Capacity",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        },
+                                        {
+                                            "category": "Transaction",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        }
+                                    ],
+                                    "logs": []
+                                }
+                            },
+                            {
+                                "type": "Microsoft.Storage/storageAccounts/blobServices/providers/diagnosticSettings",
+                                "apiVersion": "2017-05-01-preview",
+                                "name": "[concat(parameters('resourceName'), '/default/microsoft.insights/', parameters('profileName'))]",
+                                "location": "[parameters('location')]",
+                                "dependsOn": [],
+                                "properties": {
+                                    "workspaceId": "[parameters('logAnalytics')]",
+                                    "metrics": [
+                                        {
+                                            "category": "Capacity",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        },
+                                        {
+                                            "category": "Transaction",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        }
+                                    ],
+                                    "logs": [
+                                        {
+                                            "category": "StorageRead",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageWrite",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageDelete",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "type": "Microsoft.Storage/storageAccounts/fileServices/providers/diagnosticSettings",
+                                "apiVersion": "2017-05-01-preview",
+                                "name": "[concat(parameters('resourceName'), '/default/microsoft.insights/', parameters('profileName'))]",
+                                "location": "[parameters('location')]",
+                                "dependsOn": [],
+                                "properties": {
+                                    "workspaceId": "[parameters('logAnalytics')]",
+                                    "metrics": [
+                                        {
+                                            "category": "Capacity",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        },
+                                        {
+                                            "category": "Transaction",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        }
+                                    ],
+                                    "logs": [
+                                        {
+                                            "category": "StorageRead",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageWrite",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageDelete",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "type": "Microsoft.Storage/storageAccounts/queueServices/providers/diagnosticSettings",
+                                "apiVersion": "2017-05-01-preview",
+                                "name": "[concat(parameters('resourceName'), '/default/microsoft.insights/', parameters('profileName'))]",
+                                "location": "[parameters('location')]",
+                                "dependsOn": [],
+                                "properties": {
+                                    "workspaceId": "[parameters('logAnalytics')]",
+                                    "metrics": [
+                                        {
+                                            "category": "Capacity",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        },
+                                        {
+                                            "category": "Transaction",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        }
+                                    ],
+                                    "logs": [
+                                        {
+                                            "category": "StorageRead",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageWrite",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageDelete",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "type": "Microsoft.Storage/storageAccounts/tableServices/providers/diagnosticSettings",
+                                "apiVersion": "2017-05-01-preview",
+                                "name": "[concat(parameters('resourceName'), '/default/microsoft.insights/', parameters('profileName'))]",
+                                "location": "[parameters('location')]",
+                                "dependsOn": [],
+                                "properties": {
+                                    "workspaceId": "[parameters('logAnalytics')]",
+                                    "metrics": [
+                                        {
+                                            "category": "Capacity",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        },
+                                        {
+                                            "category": "Transaction",
+                                            "enabled": "[parameters('metricsEnabled')]",
+                                            "retentionPolicy": {
+                                                "enabled": false,
+                                                "days": 0
+                                            }
+                                        }
+                                    ],
+                                    "logs": [
+                                        {
+                                            "category": "StorageRead",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageWrite",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        },
+                                        {
+                                            "category": "StorageDelete",
+                                            "enabled": "[parameters('logsEnabled')]",
+                                            "retentionPolicy": {
+                                                "days": 0,
+                                                "enabled": false
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "outputs": {}
+                    },
+                    "parameters": {
+                        "location": {
+                            "value": "[field('location')]"
+                        },
+                        "resourceName": {
+                            "value": "[field('name')]"
+                        },
+                        "logAnalytics": {
+                            "value": "[parameters('logAnalytics')]"
+                        },
+                        "metricsEnabled": {
+                            "value": "[parameters('metricsEnabled')]"
+                        },
+                        "logsEnabled": {
+                            "value": "[parameters('logsEnabled')]"
+                        },
+                        "profileName": {
+                            "value": "[parameters('profileName')]"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
