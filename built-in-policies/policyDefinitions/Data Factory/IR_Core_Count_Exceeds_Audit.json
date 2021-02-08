@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Azure Data Factory integration runtime should have a limit for number of cores",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "To manage your resources and costs, limit the number of cores for an integration runtime.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Data Factory",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "maxCores": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Allowed max number of cores",
+          "description": "The max number of cores allowed for dataflow."
+        },
+        "defaultValue": 32
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataFactory/factories/integrationRuntimes"
+          },
+          {
+            "field": "Microsoft.DataFactory/factories/integrationruntimes/type",
+            "equals": "Managed"
+          },
+          {
+            "field": "Microsoft.DataFactory/factories/integrationRuntimes/Managed.typeProperties.computeProperties.dataFlowProperties.coreCount",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.DataFactory/factories/integrationRuntimes/Managed.typeProperties.computeProperties.dataFlowProperties.coreCount",
+            "greater": "[parameters('maxCores')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/85bb39b5-2f66-49f8-9306-77da3ac5130f",
+  "name": "85bb39b5-2f66-49f8-9306-77da3ac5130f"
+}

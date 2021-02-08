@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "Azure Data Factory should use a Git repository for source control",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable source control on data factories, to gain capabilities such as change tracking, collaboration, continuous integration, and deployment.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Data Factory",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataFactory/factories"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DataFactory/factories/repoConfiguration.repositoryName",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DataFactory/factories/repoConfiguration.repositoryName",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/77d40665-3120-4348-b539-3192ec808307",
+  "name": "77d40665-3120-4348-b539-3192ec808307"
+}
