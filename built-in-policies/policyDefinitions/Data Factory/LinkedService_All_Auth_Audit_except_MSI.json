@@ -1,0 +1,85 @@
+{
+  "properties": {
+    "displayName": "Azure Data Factory linked services should use system-assigned managed identity authentication when it is supported",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Using system-assigned managed identity when communicating with data stores via linked services avoids the use of less secured credentials such as passwords or connection strings.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Data Factory",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataFactory/factories/linkedservices"
+          },
+          {
+            "field": "Microsoft.DataFactory/factories/linkedservices/type",
+            "in": [
+              "AzureSqlDatabase",
+              "AzureSqlMI",
+              "AzureSqlDW",
+              "AzureBlobFS",
+              "AdlsGen2CosmosStructuredStream",
+              "AzureDataLakeStore",
+              "AzureDataLakeStoreCosmosStructuredStream",
+              "AzureBlobStorage",
+              "AzureDatabricks"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DataFactory/factories/linkedservices/typeProperties.connectionString",
+                "contains": "User ID="
+              },
+              {
+                "field": "Microsoft.DataFactory/factories/linkedservices/typeProperties.connectionString",
+                "contains": "AccountKey="
+              },
+              {
+                "field": "Microsoft.DataFactory/factories/linkedservices/AzureSqlDW.typeProperties.servicePrincipalKey",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.DataFactory/factories/linkedservices/AzureStorage.typeProperties.accountKey",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.DataFactory/factories/linkedservices/AzureStorage.typeProperties.sasUri",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.DataFactory/factories/linkedservices/Hubspot.typeProperties.accessToken",
+                "exists": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f78ccdb4-7bf4-4106-8647-270491d2978a",
+  "name": "f78ccdb4-7bf4-4106-8647-270491d2978a"
+}
