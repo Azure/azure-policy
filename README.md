@@ -197,7 +197,7 @@ Using this type of alias in audit/deny/append effect policies works partially. T
 
 -Microsoft.Databricks/* (Creation time only)
 
-All Databricks reasources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
+All Databricks resources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
 
 ### Resource types that exceed current enforcement and compliance scale
 
