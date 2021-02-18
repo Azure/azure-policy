@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "Azure Event Grid domains should use private link",
+        "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your Event Grid domain instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/privateendpoints.",
+        "metadata": {
+            "version": "1.0.2",
+            "category": "Event Grid"
+        },
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "defaultValue": "Audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.EventGrid/domains"
+                    },
+                    {
+                        "count": {
+                            "field": "Microsoft.EventGrid/domains/privateEndpointConnections[*]",
+                            "where": {
+                                "field": "Microsoft.EventGrid/domains/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                                "equals": "Approved"
+                            }
+                        },
+                        "less": 1
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/9830b652-8523-49cc-b1b3-e17dce1127ca",
+    "name": "9830b652-8523-49cc-b1b3-e17dce1127ca"
+}

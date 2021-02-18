@@ -5,7 +5,7 @@
     "mode": "All",
     "description": "Enable automation of Azure Security Center alerts. This policy deploys a workflow automation with your conditions and triggers on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -94,8 +94,45 @@
             "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
           ],
           "existenceCondition": {
-            "field": "Microsoft.Security/automations/isEnabled",
-            "equals": true
+            "allOf": [
+              {
+                "field": "Microsoft.Security/automations/isEnabled",
+                "equals": true
+              },
+              {
+                "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                "in": "[union(parameters('alertSeverities'),if(equals(parameters('alertName'), ''), array('3.'), array(parameters('alertName'))))]"
+              },
+              {
+                "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].propertyJPath",
+                "in": "[union(array('Severity'),if(equals(parameters('alertName'), ''), array('Version'), array('AlertDisplayName')))]"
+              },
+              {
+                "count": {
+                  "value": "[parameters('alertSeverities')]",
+                  "name": "alertSeverity",
+                  "where": {
+                    "count": {
+                      "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*]",
+                      "where": {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].propertyJPath",
+                            "equals": "Severity"
+                          },
+                          {
+                            "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                            "equals": "[current('alertSeverity')]"
+                          }
+                        ]
+                      }
+                    },
+                    "equals": 1
+                  }
+                },
+                "equals": "[length(parameters('alertSeverities'))]"
+              }
+            ]
           },
           "deployment": {
             "location": "usgovvirginia",

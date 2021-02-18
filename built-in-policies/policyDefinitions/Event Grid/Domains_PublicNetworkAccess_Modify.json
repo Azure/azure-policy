@@ -1,0 +1,59 @@
+{
+    "properties": {
+        "displayName": "Modify - Configure Azure Event Grid domains to disable public network access",
+        "description": "Disable public network access for Azure Event Grid resource so that it isn't accessible over the public internet. This will help protect them against data leakage risks. You can limit exposure of the your resources by creating private endpoints instead. Learn more at: https://aka.ms/privateendpoints.",
+        "metadata": {
+            "category": "Event Grid",
+            "version": "1.0.0"
+        },
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Modify",
+                    "Disabled"
+                ],
+                "defaultValue": "Modify"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.EventGrid/domains"
+                    },
+                    {
+                        "field": "Microsoft.EventGrid/domains/publicNetworkAccess",
+                        "notEquals": "Disabled"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/microsoft.authorization/roleDefinitions/1e241071-0855-49ea-94dc-649edcd759de"
+                    ],
+                    "conflictEffect": "audit",
+                    "operations": [
+                        {
+                            "condition": "[greaterOrEquals(requestContext().apiVersion, '2020-04-01-preview')]",
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.EventGrid/domains/publicNetworkAccess",
+                            "value": "Disabled"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/898e9824-104c-4965-8e0e-5197588fa5d4",
+    "name": "898e9824-104c-4965-8e0e-5197588fa5d4"
+}

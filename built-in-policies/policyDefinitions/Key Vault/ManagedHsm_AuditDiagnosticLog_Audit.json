@@ -1,0 +1,99 @@
+{
+  "properties": {
+    "displayName": "Resource logs in Azure Key Vault Managed HSM should be enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To recreate activity trails for investigation purposes when a security incident occurs or when your network is compromised, you may want to audit by enabling resource logs on Managed HSMs. Please follow the instructions here: https://docs.microsoft.com/azure/key-vault/managed-hsm/logging.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Key Vault"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": ["AuditIfNotExists", "Disabled"],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "requiredRetentionDays": {
+        "type": "String",
+        "defaultValue": "365",
+        "metadata": {
+          "displayName": "Required retention (days)",
+          "description": "The required resource logs retention in days"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.KeyVault/managedHsms"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "existenceCondition": {
+            "count": {
+              "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+              "where": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                        "equals": "true"
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days",
+                            "equals": "0"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days",
+                            "equals": "[parameters('requiredRetentionDays')]"
+                          }
+                        ]
+                      },
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                        "equals": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                        "equals": "true"
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                            "notEquals": "true"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/storageAccountId",
+                            "exists": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a2a5b911-5617-447e-a49e-59dbe0e0434b",
+  "name": "a2a5b911-5617-447e-a49e-59dbe0e0434b"
+}
