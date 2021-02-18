@@ -5,9 +5,9 @@
     "mode": "All",
     "description": "Enable automation of Azure Security Center regulatory compliance. This policy deploys a workflow automation with your conditions and triggers on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Security Center",
-      "preview ":  true
+      "preview ": true
     },
     "parameters": {
       "automationName": {
@@ -97,8 +97,139 @@
             "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
           ],
           "existenceCondition": {
-            "field": "Microsoft.Security/automations/isEnabled",
-            "equals": true
+            "allOf": [
+              {
+                "field": "Microsoft.Security/automations/isEnabled",
+                "equals": true
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/automations/sources[*].ruleSets",
+                        "exists": false
+                      },
+                      {
+                        "value": "[length(parameters('regulatoryComplianceStandards'))]",
+                        "equals": 0
+                      },
+                      {
+                        "value": "[length(parameters('regulatoryComplianceControlStates'))]",
+                        "equals": 4
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[length(parameters('regulatoryComplianceStandards'))]",
+                        "equals": 0
+                      },
+                      {
+                        "value": "[length(parameters('regulatoryComplianceControlStates'))]",
+                        "less": 4
+                      },
+                      {
+                        "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                        "in": "[parameters('regulatoryComplianceControlStates')]"
+                      },
+                      {
+                        "count": {
+                          "value": "[parameters('regulatoryComplianceControlStates')]",
+                          "name": "regulatoryComplianceControlState",
+                          "where": {
+                            "count": {
+                              "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*]",
+                              "where": {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].propertyJPath",
+                                    "equals": "properties.state"
+                                  },
+                                  {
+                                    "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                                    "equals": "[current('regulatoryComplianceControlState')]"
+                                  }
+                                ]
+                              }
+                            },
+                            "equals": 1
+                          }
+                        },
+                        "equals": "[length(parameters('regulatoryComplianceControlStates'))]"
+                      }
+
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[length(parameters('regulatoryComplianceStandards'))]",
+                        "notEquals": 0
+                      },
+                      {
+                        "value": "[length(parameters('regulatoryComplianceControlStates'))]",
+                        "equals": 4
+                      },
+                      {
+                        "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                        "in": "[parameters('regulatoryComplianceStandards')]"
+                      },
+                      {
+                        "count": {
+                          "value": "[parameters('regulatoryComplianceStandards')]",
+                          "name": "regulatoryComplianceStandard",
+                          "where": {
+                            "count": {
+                              "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*]",
+                              "where": {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].propertyJPath",
+                                    "equals": "id"
+                                  },
+                                  {
+                                    "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                                    "equals": "[current('regulatoryComplianceStandard')]"
+                                  }
+                                ]
+                              }
+                            },
+                            "equals": 1
+                          }
+                        },
+                        "equals": "[length(parameters('regulatoryComplianceStandards'))]"
+                      }
+
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[length(parameters('regulatoryComplianceStandards'))]",
+                        "notEquals": 0
+                      },
+                      {
+                        "value": "[length(parameters('regulatoryComplianceControlStates'))]",
+                        "notEquals": 4
+                      },
+                      {
+                        "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*].expectedValue",
+                        "in": "[union(parameters('regulatoryComplianceStandards'),parameters('regulatoryComplianceControlStates'))]"
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.Security/automations/sources[*].ruleSets[*].rules[*]"
+                        },
+                        "equals": "[mul(2,mul(length(parameters('regulatoryComplianceStandards')),length(parameters('regulatoryComplianceControlStates'))))]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+
           },
           "deployment": {
             "location": "usgovvirginia",

@@ -1,0 +1,48 @@
+{
+    "properties": {
+        "displayName": "Azure Monitor Logs clusters should be created with infrastructure-encryption enabled (double encryption)",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "To ensure secure data encryption is enabled at the service level and the infrastructure level with two different encryption algorithms and two different keys, use an Azure Monitor dedicated cluster. This option is enabled by default when supported at the region, see https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys#customer-managed-key-overview.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Monitoring"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "The effect determines what happens when the policy rule is evaluated to match"
+                },
+                "allowedValues": [
+                    "audit",
+                    "deny",
+                    "disabled"
+                ],
+                "defaultValue": "audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.OperationalInsights/clusters"
+                },
+                {
+                  "not": {
+                    "field": "Microsoft.OperationalInsights/clusters/isDoubleEncryptionEnabled",
+                    "equals": "true"
+                  }
+                }
+              ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/ea0dfaed-95fb-448c-934e-d6e713ce393d",
+    "name": "ea0dfaed-95fb-448c-934e-d6e713ce393d"
+}

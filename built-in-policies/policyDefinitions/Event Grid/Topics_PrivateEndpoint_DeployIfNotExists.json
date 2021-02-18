@@ -1,0 +1,128 @@
+{
+    "properties": {
+        "displayName": "Deploy - Configure Azure Event Grid topics with private endpoints",
+        "description": "Private endpoints lets you connect your virtual network to Azure services without a public IP address at the source or destination. By mapping private endpoints to your resources, they'll be protected against data leakage risks. Learn more at: https://aka.ms/privateendpoints.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Event Grid"
+        },
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "parameters": {
+            "privateEndpointSubnetId": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "PrivateEndpointSubnetId",
+                    "description": "Specifies the subnet to use to configure private endpoint",
+                    "strongType": "Microsoft.Network/virtualNetworks/subnets"
+                }
+            },
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "deployIfNotExists",
+                    "Disabled"
+                ],
+                "defaultValue": "deployIfNotExists"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.EventGrid/topics"
+                    },
+                    {
+                        "field": "kind",
+                        "notEquals": "AzureArc"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.EventGrid/topics/privateEndpointConnections",
+                    "existenceCondition": {
+                        "field": "Microsoft.EventGrid/topics/privateEndpointConnections/privateLinkServiceConnectionState.status",
+                        "equals": "Approved"
+                    },
+                    "roleDefinitionIds": [
+                        "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+                        "/providers/Microsoft.Authorization/roleDefinitions/1e241071-0855-49ea-94dc-649edcd759de"
+                    ],
+                    "deployment": {
+                        "properties": {
+                            "mode": "incremental",
+                            "parameters": {
+                                "name": {
+                                    "value": "[concat('pe','-',field('name'))]"
+                                },
+                                "serviceId": {
+                                    "value": "[concat(subscription().id,'/resourcegroups/',resourceGroup().name,'/providers/', 'Microsoft.EventGrid/topics/',field('name'))]"
+                                },
+                                "privateEndpointSubnetId": {
+                                    "value": "[parameters('privateEndpointSubnetId')]"
+                                },
+                                "location": {
+                                    "value": "[field('location')]"
+                                }
+                            },
+                            "template": {
+                                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "parameters": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "serviceId": {
+                                        "type": "string"
+                                    },
+                                    "privateEndpointSubnetId": {
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "type": "string"
+                                    }
+                                },
+                                "resources": [
+                                    {
+                                        "name": "[parameters('name')]",
+                                        "type": "Microsoft.Network/privateEndpoints",
+                                        "apiVersion": "2019-11-01",
+                                        "location": "[parameters('location')]",
+                                        "tags": {},
+                                        "properties": {
+                                            "subnet": {
+                                                "id": "[parameters('privateEndpointSubnetId')]"
+                                            },
+                                            "privateLinkServiceConnections": [
+                                                {
+                                                    "name": "[parameters('name')]",
+                                                    "properties": {
+                                                        "privateLinkServiceId": "[parameters('serviceId')]",
+                                                        "groupIds": [
+                                                            "topic"
+                                                        ],
+                                                        "requestMessage": "autoapprove"
+                                                    }
+                                                }
+                                            ],
+                                            "manualPrivateLinkServiceConnections": []
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/6fcec95c-fbdf-45e8-91e1-e3175d9c9eca",
+    "name": "6fcec95c-fbdf-45e8-91e1-e3175d9c9eca"
+}
