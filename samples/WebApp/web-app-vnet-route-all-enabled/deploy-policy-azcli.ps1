@@ -5,8 +5,10 @@ az policy definition create --name 'audit-web-app-vnet-route-all-enabled-azcli' 
     --params 'https://raw.githubusercontent.com/DanielLarsenNZ/azure-policy/master/samples/WebApp/web-app-vnet-route-all-enabled/azurepolicy.parameters.json' `
     --mode Indexed
 
-$scope = ( az group show -n 'helloprivate-rg' | ConvertFrom-Json ).id
+$scope = ( az group show -n 'hellovnetrouteall-rg' | ConvertFrom-Json ).id
 $scope
 
-az policy assignment create --name 'audit-helloprivate-rg-web-app-vnet-route-all-enabled-azcli' --scope $scope `
+az policy assignment create --name 'audit-hellovnetrouteall-rg-web-app-vnet-route-all-enabled-azcli' --scope $scope `
     --policy 'audit-web-app-vnet-route-all-enabled-azcli'
+
+#az policy state trigger-scan -g 'hellovnetrouteall-rg'
