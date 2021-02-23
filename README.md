@@ -221,35 +221,7 @@ Feature team is actively working on fixing this issue. GitHub issue tracking thi
 
 
 ### Indexed Resource types always non-complaint to tagging policies 
-
-There are some resource types that even though are indexed, do not support Tagging Policies. Here are the list of those with issue: 
-* Master SQL DB
-* Microsoft.alertsmanagement/smartdetectoralertrules
-* Microsoft.AnalysisServices/servers (Cannot use periods '.')
-* Microsoft.Automation/automationAccounts/configurations
-* Microsoft.compute/virtualmachines/extensions
-* Microsoft.DataMigration 
-* Microsoft.DBforPostgreSQL/servers 
-* Microsoft.Insights/actiongroups
-* Microsoft.Insights/activitylogalerts
-* Microsoft.Insights/alertrules
-* Microsoft.Insights/autoscalesettings
-* Microsoft.Insights/components 
-* Microsoft.Insights/guestDiagnosticSettings
-* Microsoft.Insights/metricalerts (All tags will be automatically lowercased)
-* Microsoft.Logic/workflows
-* Microsoft.Netowork/trafficManagerProfiles/heatmapps
-* Microsoft.Network/frontdoors
-* Microsoft.Network/networkWatchers
-* Microsoft.Network/networkWatchers/flowLogs
-* Microsoft.Network/trafficManagerProfiles/ (Does not support spaces ' ')
-* Microsoft.offazure/vmwaresites
-* Microsoft.OperationsManagement/solutions
-* Microsoft.Portal/dashboards (All tags will be automatically lowercased)
-* Microsoft.Sql/virtualClusters
-* Microsoft.Web/certificates (Does not support numbers)
-
-To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
+As of February 2021, index resources that don't support tags aren't applicable to polices that inspect tags.
 
 ### Alias changes  
 
