@@ -221,8 +221,7 @@ Feature team is actively working on fixing this issue. GitHub issue tracking thi
 
 
 ### Indexed Resource types always non-complaint to tagging policies 
-
-As of Feburary 2021, index resources that do not support tags will not be applicable to policies that inspect tags.
+As of February 2021, index resources that don't support tags aren't applicable to polices that inspect tags.
 
 ### Alias changes  
 
