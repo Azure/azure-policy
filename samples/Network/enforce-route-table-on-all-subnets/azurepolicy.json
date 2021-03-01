@@ -1,0 +1,44 @@
+{
+    "properties": {
+        "displayName": "Enforces an UDR on all subnets",
+        "description": "Denies the creation of subnets without an UDR",
+        "mode": "All",
+		"policyRule": {
+			"if": {
+				"anyOf": [
+					{
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Network/virtualNetworks"
+							},
+							{
+								"not": {
+									"field": "Microsoft.Network/virtualNetworks/subnets[*].routeTable",
+									"exists": true
+								}
+							}
+						]
+					},
+					{
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Network/virtualNetworks/subnets"
+							},
+							{
+								"not": {
+									"field": "Microsoft.Network/virtualNetworks/subnets/routeTable",
+									"exists": true
+								}
+							}
+						]
+					}
+				]
+			},
+			"then": {
+				"effect": "deny"
+			}
+		}
+	}
+}
