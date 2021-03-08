@@ -228,12 +228,4 @@ As of February 2021, index resources that don't support tags aren't applicable t
 May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
 July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
 
-### Tag Contributor Role
-
-Current limitation causes errors using the Tag Contributor role with Tag related policies.  We are aware of this issue and are working to resolve this. (ETA: End of calendar year). If assigning Tag Contributor role to managed identities handling remediation tasks on "Modify" effect policies, please assign Contributor role to the managed identity.
-
-### Subscription tagging support
-
-Subscription tagging is not yet supported using "Append" or "Modify" policies. Details on subscription tagging without using Azure Policy can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources).
-
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
