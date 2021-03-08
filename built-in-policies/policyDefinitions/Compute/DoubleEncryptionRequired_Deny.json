@@ -1,0 +1,46 @@
+{
+    "properties": {
+      "displayName": "Managed disks should be double encrypted with both platform-managed and customer-managed keys",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "High security sensitive customers who are concerned of the risk associated with any particular encryption algorithm, implementation, or key being compromised can opt for additional layer of encryption using a different encryption algorithm/mode at the infrastructure layer using platform managed encryption keys. The disk encryption sets are required to use double encryption. Learn more at https://aka.ms/disks-doubleEncryption.",
+      "metadata": {
+        "category": "Compute",
+        "version": "1.0.0"
+      },
+      "parameters": {
+        "effect": {
+          "type": "string",
+          "defaultValue": "Audit",
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.Compute/diskEncryptionSets"
+            },
+            {
+              "field": "Microsoft.Compute/diskEncryptionSets/encryptionType",
+              "notEquals": "EncryptionAtRestWithPlatformAndCustomerKeys"
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/ca91455f-eace-4f96-be59-e6e2c35b4816",
+    "name": "ca91455f-eace-4f96-be59-e6e2c35b4816"
+  }

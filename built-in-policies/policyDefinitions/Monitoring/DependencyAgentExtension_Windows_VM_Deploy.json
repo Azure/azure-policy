@@ -1,11 +1,11 @@
 {
     "properties": {
-        "displayName": "Deploy Dependency agent for Windows virtual machines",
+        "displayName": "Deploy - Configure Dependency agent to be enabled on Windows virtual machines",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "Deploy Dependency agent for Windows virtual machines if the VM Image (OS) is in the list defined and the agent is not installed. The list of OS images will be updated over time as support is updated.",
+        "description": "Deploy Dependency agent for Windows virtual machines if the virtual machine image is in the list defined and the agent is not installed.",
         "metadata": {
-            "version": "1.3.0",
+            "version": "2.0.0",
             "category": "Monitoring"
         },
         "parameters": {
@@ -13,8 +13,20 @@
                 "type": "Array",
                 "defaultValue": [],
                 "metadata": {
-                    "displayName": "Optional: List of VM images that have supported Windows OS to add to scope",
+                    "displayName": "Optional: List of virtual machine images that have supported Windows OS to add to scope",
                     "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+                }
+            },
+            "effect": {
+                "type": "string",
+                "defaultValue": "DeployIfNotExists",
+                "allowedValues": [
+                    "DeployIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
                 }
             }
         },
@@ -176,6 +188,22 @@
                                 "allOf": [
                                     {
                                         "field": "Microsoft.Compute/imagePublisher",
+                                        "equals": "MicrosoftDynamicsAX"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "Dynamics"
+                                    },
+                                    {
+                                        "field": "Microsoft.Compute/imageSKU",
+                                        "equals": "Pre-Req-AX7-Onebox-V4"
+                                    }
+                                ]
+                            },
+                            {
+                                "allOf": [
+                                    {
+                                        "field": "Microsoft.Compute/imagePublisher",
                                         "equals": "microsoft-ads"
                                     },
                                     {
@@ -201,7 +229,7 @@
                 ]
             },
             "then": {
-                "effect": "deployIfNotExists",
+                "effect": "[parameters('effect')]",
                 "details": {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
                     "roleDefinitionIds": [

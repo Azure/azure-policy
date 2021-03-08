@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Azure Machine Learning workspaces should use user-assigned managed identity",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Manange access to Azure ML workspace and associated resources, Azure Container Registry, KeyVault, Storage, and App Insights using user-assigned managed identity. By default, system-assigned managed identity is used by Azure ML workspace to access the associated resources. User-assigned managed identity allows you to create the identity as an Azure resource and maintain the life cycle of that identity. Learn more at https://docs.microsoft.com/azure/machine-learning/how-to-use-managed-identities?tabs=python.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Machine Learning"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices/workspaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.MachineLearningServices/workspaces/primaryUserAssignedIdentity",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.MachineLearningServices/workspaces/primaryUserAssignedIdentity",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5f0c7d88-c7de-45b8-ac49-db49e72eaa78",
+  "name": "5f0c7d88-c7de-45b8-ac49-db49e72eaa78"
+}

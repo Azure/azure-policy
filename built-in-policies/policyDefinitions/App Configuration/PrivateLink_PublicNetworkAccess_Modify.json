@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Configure App Configuration to disable public network access",
+    "description": "Disable public network access for App Configuration so that it isn't accessible over the public internet. This configuration helps protect them against data leakage risks. You can limit exposure of the your resources by creating private endpoints instead. Learn more at: https://aka.ms/appconfig/private-endpoint.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Configuration"
+    },
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AppConfiguration/configurationStores"
+          },
+          {
+            "field": "Microsoft.AppConfiguration/configurationStores/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+              {
+                  "condition": "[greater(requestContext().apiVersion, '2019-10-01')]",
+                  "operation": "addOrReplace",
+                  "field": "Microsoft.AppConfiguration/configurationStores/publicNetworkAccess",
+                  "value": "Disabled"
+              }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/73290fa2-dfa7-4bbb-945d-a5e23b75df2c",
+  "name": "73290fa2-dfa7-4bbb-945d-a5e23b75df2c"
+}
