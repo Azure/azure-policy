@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "Synapse workspaces should be configured with 90 days auditing retention or higher.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "For incident investigation purposes, we recommend setting the data retention for your Synapse workspace' audit to at least 90 days. Confirm that you're meeting the necessary retention rules for the regions in which you're operating. This is sometimes required for compliance with regulatory standards.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Synapse"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Synapse/workspaces"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Synapse/workspaces/auditingSettings",
+          "name": "default",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Synapse/workspaces/auditingSettings/retentionDays",
+                "equals": 0
+              },
+              {
+                "field": "Microsoft.Synapse/workspaces/auditingSettings/retentionDays",
+                "greaterOrEquals": 90
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/529ea018-6afc-4ed4-95bd-7c9ee47b00bc",
+  "name": "529ea018-6afc-4ed4-95bd-7c9ee47b00bc"
+}

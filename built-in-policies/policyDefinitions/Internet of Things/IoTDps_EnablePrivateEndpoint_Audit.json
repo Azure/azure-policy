@@ -1,0 +1,51 @@
+{
+    "properties": {
+        "displayName": "IoT Hub device provisioning service instances should use private link",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to the IoT Hub device provisioning service, data leakage risks are reduced. Learn more about private links at: https://aka.ms/iotdpsvnet.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Internet of Things"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Audit",
+                    "Disabled"
+                ],
+                "defaultValue": "Audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Devices/provisioningServices"
+                    },
+                    {
+                        "count": {
+                            "field": "Microsoft.Devices/provisioningServices/privateEndpointConnections[*]",
+                            "where": {
+                                "field": "Microsoft.Devices/provisioningServices/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                                "equals": "Approved"
+                            }
+                        },
+                        "less": 1
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/df39c015-56a4-45de-b4a3-efe77bed320d",
+    "name": "df39c015-56a4-45de-b4a3-efe77bed320d"
+}
