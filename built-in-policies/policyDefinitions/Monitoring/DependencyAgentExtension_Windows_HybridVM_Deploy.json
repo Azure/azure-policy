@@ -1,13 +1,26 @@
 {
     "properties": {
-        "displayName": "Deploy Dependency agent to Windows Azure Arc machines",
+        "displayName": "Configure Dependency agent to be enabled on Windows Azure Arc machines",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "This policy deploys the Dependency agent to Windows Azure Arc machines if the agent isn't installed.",
+        "description": "Deploy Dependency agent for Windows Azure Arc machines if the Azure Arc machines image is in the list defined and the agent is not installed.",
         "metadata": {
-            "version": "1.1.0-preview",
-            "category": "Monitoring",
-            "preview": true
+            "version": "1.2.0",
+            "category": "Monitoring"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "DeployIfNotExists",
+                "allowedValues": [
+                    "DeployIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
         },
         "policyRule": {
             "if": {
@@ -23,7 +36,7 @@
                 ]
             },
             "then": {
-                "effect": "deployIfNotExists",
+                "effect": "[parameters('effect')]",
                 "details": {
                     "type": "Microsoft.HybridCompute/machines/extensions",
                     "roleDefinitionIds": [
@@ -65,27 +78,16 @@
                                 },
                                 "resources": [
                                     {
-                                        "type": "Microsoft.HybridCompute/machines",
+                                        "type": "Microsoft.HybridCompute/machines/extensions",
                                         "apiVersion": "2020-03-11-preview",
-                                        "name": "[parameters('vmName')]",
+                                        "name": "[concat(parameters('vmName'), '/', variables('DaExtensionName'))]",
                                         "location": "[parameters('location')]",
-                                        "resources": [
-                                            {
-                                                "type": "extensions",
-                                                "apiVersion": "2020-03-11-preview",
-                                                "name": "[variables('DaExtensionName')]",
-                                                "location": "[parameters('location')]",
-                                                "dependsOn": [
-                                                    "[concat('Microsoft.HybridCompute/machines/', parameters('vmName'))]"
-                                                ],
-                                                "properties": {
-                                                    "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
-                                                    "type": "[variables('DaExtensionType')]",
-                                                    "autoUpgradeMinorVersion": true,
-                                                    "settings": {}
-                                                }
-                                            }
-                                        ]
+                                        "properties": {
+                                            "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                                            "type": "[variables('DaExtensionType')]",
+                                            "autoUpgradeMinorVersion": true,
+                                            "settings": {}
+                                        }
                                     }
                                 ],
                                 "outputs": {

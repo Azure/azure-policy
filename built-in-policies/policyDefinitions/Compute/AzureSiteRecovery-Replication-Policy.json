@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Deploy - Configure disaster recovery on virtual machines by enabling replication",
+    "displayName": "Configure disaster recovery on virtual machines by enabling replication",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Virtual machines without disaster recovery configurations are vulnerable to outages and other disruptions. If the virtual machine does not already have disaster recovery configured, this would initiate the same by enabling replication using preset configurations to facilitate business continuity. To learn more about disaster recovery, visit https://aka.ms/asr-doc.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Compute"
     },
     "parameters": {
@@ -14,7 +14,8 @@
         "metadata": {
           "displayName": "Source Region",
           "description": "Region in which the virtual machine is originally deployed",
-          "strongType": "location"
+          "strongType": "location",
+          "serviceName": "ASR"
         }
       },
       "targetRegion": {
@@ -22,7 +23,8 @@
         "metadata": {
           "displayName": "Target Region",
           "description": "Region to be used to deploy the virtual machine in case of a natural disaster",
-          "strongType": "location"
+          "strongType": "location",
+          "serviceName": "ASR"
         }
       },
       "targetResourceGroupId": {
@@ -30,7 +32,8 @@
         "metadata": {
           "displayName": "Target Resource Group",
           "description": "Resource group to be used to create the virtual machine in the target region",
-          "assignPermissions": true
+          "assignPermissions": true,
+          "serviceName": "ASR"
         }
       },
       "vaultResourceGroupId": {
@@ -38,7 +41,8 @@
         "metadata": {
           "displayName": "Vault Resource Group",
           "description": "The resource group containing the recovery services vault used for disaster recovery configurations",
-          "assignPermissions": true
+          "assignPermissions": true,
+          "serviceName": "ASR"
         }
       },
       "vaultId": {
@@ -46,7 +50,8 @@
         "metadata": {
           "displayName": "Recovery Services Vault",
           "description": "ID of the recovery services vault to be used for disaster recovery configurations",
-          "strongType": "Microsoft.RecoveryServices/vaults"
+          "strongType": "Microsoft.RecoveryServices/vaults",
+          "serviceName": "ASR"
         }
       },
       "recoveryNetworkId": {
@@ -54,7 +59,8 @@
         "metadata": {
           "displayName": "Recovery Virtual Network",
           "description": "Existing Recovery Virtual Network ID or name of the Virtual Network to be created in Target Region",
-          "strongType": "Microsoft.Network/virtualNetworks"
+          "strongType": "Microsoft.Network/virtualNetworks",
+          "serviceName": "ASR"
         },
         "defaultValue": ""
       },
@@ -62,9 +68,22 @@
         "type": "String",
         "metadata": {
           "displayName": "Target Availability Zone",
-          "description": "Availability zone in the designated target region to be used by virtual machines during disaster"
+          "description": "Availability zone in the designated target region to be used by virtual machines during disaster",
+          "serviceName": "ASR"
         },
         "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
       }
     },
     "policyRule": {
@@ -137,7 +156,7 @@
         ]
       },
       "then": {
-        "effect": "deployIfNotExists",
+        "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Resources/links",
           "roleDefinitionIds": [

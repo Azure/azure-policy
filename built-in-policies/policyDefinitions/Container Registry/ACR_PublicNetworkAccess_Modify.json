@@ -1,0 +1,58 @@
+{
+    "properties": {
+        "displayName": "Configure Container registries to disable public network access",
+        "description": "Disable public network access for your Container Registry resource so that it's not accessible over the public internet. This can reduce data leakage risks. Learn more at https://aka.ms/acr/portal/public-network and https://aka.ms/acr/private-link.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Container Registry"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Modify",
+                    "Disabled"
+                ],
+                "defaultValue": "Modify"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.ContainerRegistry/registries"
+                    },
+                    {
+                        "field": "Microsoft.ContainerRegistry/registries/publicNetworkAccess",
+                        "notEquals": "Disabled"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "conflictEffect": "audit",
+                    "roleDefinitionIds": [
+                        "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "operations": [
+                        {
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.ContainerRegistry/registries/publicNetworkAccess",
+                            "value": "Disabled"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/a3701552-92ea-433e-9d17-33b7f1208fc9",
+    "name": "a3701552-92ea-433e-9d17-33b7f1208fc9"
+}
