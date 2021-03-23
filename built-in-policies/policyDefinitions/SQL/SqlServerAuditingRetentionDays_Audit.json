@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "SQL servers should retain audit data for at least 90 days",
+    "displayName": "SQL servers with auditing to storage account destination should be configured with 90 days retention or higher",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "For incident investigation purposes, we recommend setting the data retention for your SQL servers' audit data to at least 90 days. Confirm that you're meeting the necessary retention rules for the regions in which you're operating. This is sometimes required for compliance with regulatory standards.",
+    "description": "For incident investigation purposes, we recommend setting the data retention for your SQL Server' auditing to storage account destination to at least 90 days. Confirm that you are meeting the necessary retention rules for the regions in which you are operating. This is sometimes required for compliance with regulatory standards.",
     "metadata": {
-      "version": "2.1.0",
+      "version": "3.0.0",
       "category": "SQL"
     },
     "parameters": {
@@ -42,6 +42,18 @@
           "name": "default",
           "existenceCondition": {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Sql/servers/auditingSettings/isAzureMonitorTargetEnabled",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.Sql/servers/auditingSettings/storageEndpoint",
+                    "equals": ""
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Sql/servers/auditingSettings/retentionDays",
                 "equals": 0
