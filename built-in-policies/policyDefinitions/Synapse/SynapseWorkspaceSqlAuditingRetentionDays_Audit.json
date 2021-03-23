@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Synapse workspaces should be configured with 90 days auditing retention or higher.",
+    "displayName": "Synapse workspaces with SQL auditing to storage account destination should be configured with 90 days retention or higher",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "For incident investigation purposes, we recommend setting the data retention for your Synapse workspace' audit to at least 90 days. Confirm that you're meeting the necessary retention rules for the regions in which you're operating. This is sometimes required for compliance with regulatory standards.",
+    "description": "For incident investigation purposes, we recommend setting the data retention for your Synapse workspace' SQL auditing to storage account destination to at least 90 days. Confirm that you are meeting the necessary retention rules for the regions in which you are operating. This is sometimes required for compliance with regulatory standards.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Synapse"
     },
     "parameters": {
@@ -34,6 +34,18 @@
           "name": "default",
           "existenceCondition": {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Synapse/workspaces/auditingSettings/isAzureMonitorTargetEnabled",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.Synapse/workspaces/auditingSettings/storageEndpoint",
+                    "equals": ""
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Synapse/workspaces/auditingSettings/retentionDays",
                 "equals": 0

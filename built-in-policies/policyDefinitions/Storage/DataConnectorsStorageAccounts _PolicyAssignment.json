@@ -6,9 +6,47 @@
     "mode": "Indexed",
     "metadata": {
       "category": "Storage",
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     "parameters": {
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Specify the Log Analytics workspace the storage account should be connected to.",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      },
+      "servicesToDeploy": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Storage services to deploy",
+          "description": "List of Storage services to deploy"
+        },
+        "allowedValues": [
+          "storageAccounts",
+          "blobServices",
+          "fileServices",
+          "tableServices",
+          "queueServices"
+        ],
+        "defaultValue": [
+          "storageAccounts",
+          "blobServices",
+          "fileServices",
+          "tableServices",
+          "queueServices"
+        ]
+      },
+      "diagnosticsSettingNameToUse": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Setting name",
+          "description": "Name of the diagnostic settings."
+        },
+        "defaultValue": "storageAccountsDiagnosticsLogsToWorkspace"
+      },
       "effect": {
         "type": "string",
         "defaultValue": "DeployIfNotExists",
@@ -19,23 +57,6 @@
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
-        }
-      },
-      "diagnosticsSettingNameToUse": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Setting name",
-          "description": "Name of the diagnostic settings."
-        },
-        "defaultValue": "storageAccountsDiagnosticsLogsToWorkspace"
-      },
-      "logAnalytics": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Log Analytics workspace",
-          "description": "Specify the Log Analytics workspace the storage account should be connected to.",
-          "strongType": "omsWorkspace",
-          "assignPermissions": true
         }
       },
       "StorageDelete": {
@@ -127,6 +148,9 @@
                 "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "parameters": {
+                  "servicesToDeploy": {
+                    "type": "array"
+                  },
                   "diagnosticsSettingNameToUse": {
                     "type": "string"
                   },
@@ -155,6 +179,7 @@
                 "variables": {},
                 "resources": [
                   {
+                    "condition": "[contains(parameters('servicesToDeploy'), 'blobServices')]",
                     "type": "Microsoft.storage/storageAccounts/blobServices/providers/diagnosticSettings",
                     "apiVersion": "2017-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/default/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
@@ -190,6 +215,7 @@
                     }
                   },
                   {
+                    "condition": "[contains(parameters('servicesToDeploy'), 'fileServices')]",
                     "type": "Microsoft.storage/storageAccounts/fileServices/providers/diagnosticSettings",
                     "apiVersion": "2017-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/default/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
@@ -225,6 +251,7 @@
                     }
                   },
                   {
+                    "condition": "[contains(parameters('servicesToDeploy'), 'tableServices')]",
                     "type": "Microsoft.storage/storageAccounts/tableServices/providers/diagnosticSettings",
                     "apiVersion": "2017-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/default/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
@@ -260,6 +287,7 @@
                     }
                   },
                   {
+                    "condition": "[contains(parameters('servicesToDeploy'), 'queueServices')]",
                     "type": "Microsoft.storage/storageAccounts/queueServices/providers/diagnosticSettings",
                     "apiVersion": "2017-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/default/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
@@ -295,6 +323,7 @@
                     }
                   },
                   {
+                    "condition": "[contains(parameters('servicesToDeploy'), 'storageAccounts')]",
                     "type": "Microsoft.storage/storageAccounts/providers/diagnosticSettings",
                     "apiVersion": "2017-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
@@ -342,6 +371,9 @@
                 },
                 "StorageRead": {
                   "value": "[parameters('StorageRead')]"
+                },
+                "servicesToDeploy": {
+                  "value": "[parameters('servicesToDeploy')]"
                 }
               }
             }
