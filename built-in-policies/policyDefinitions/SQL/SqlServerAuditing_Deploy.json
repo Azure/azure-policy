@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "To ensure the operations performed against your SQL assets are captured, SQL servers should have auditing enabled. This is sometimes required for compliance with regulatory standards.",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "SQL"
     },
     "parameters": {
@@ -92,6 +92,9 @@
                     "resourceGroup": "[parameters('storageAccountsResourceGroup')]",
                     "properties": {
                       "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
                       "parameters": {
                         "location": {
                           "value": "[parameters('location')]"
@@ -103,6 +106,14 @@
                       "template": {
                         "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "location": {
+                            "type": "string"
+                          },
+                          "storageName": {
+                            "type": "string"
+                          }
+                        },
                         "resources": [
                           {
                             "type": "Microsoft.Storage/storageAccounts",
@@ -135,6 +146,7 @@
                     "name": "[concat(parameters('serverName'), '/Default')]",
                     "type": "Microsoft.Sql/servers/auditingSettings",
                     "apiVersion": "2017-03-01-preview",
+                    "dependsOn": ["[resourceId('Microsoft.Resources/deployments/', variables('createStorageAccountDeploymentName'))]"],
                     "properties": {
                       "state": "Enabled",
                       "storageEndpoint": "[reference(variables('createStorageAccountDeploymentName')).outputs.storageAccountEndPoint.value]",

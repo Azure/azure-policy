@@ -1,0 +1,80 @@
+{
+  "properties": {
+    "displayName": "Virtual networks should be protected by Azure DDoS Protection Standard",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Protect your virtual networks against volumetric and protocol attacks with Azure DDoS Protection Standard. For more information, visit https://aka.ms/ddosprotectiondocs.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      },
+      "ddosPlan": {
+        "type": "String",
+        "metadata": {
+          "displayName": "DDoS Protection Plan",
+          "description": "DDoS Protection Plan resource to be associated to the virtual networks",
+          "strongType": "Microsoft.Network/ddosProtectionPlans"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/virtualNetworks"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Network/virtualNetworks/enableDdosProtection",
+                "notEquals": true
+              },
+              {
+                "field": "Microsoft.Network/virtualNetworks/ddosProtectionPlan",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Network/virtualNetworks/enableDdosProtection",
+              "value": true
+            },
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Network/virtualNetworks/ddosProtectionPlan.id",
+              "value": "[parameters('ddosPlan')]"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/94de2ad3-e0c1-4caf-ad78-5d47bbc83d3d",
+  "name": "94de2ad3-e0c1-4caf-ad78-5d47bbc83d3d"
+}
