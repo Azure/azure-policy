@@ -20,6 +20,6 @@ $scope
 
 az policy assignment create --name $assignment --scope $scope --policy $policy
 
-az policy assignment create --name "$assignment-alias" --scope $scope --policy "$policy-alias"
+az policy assignment create --name "$assignment-a" --scope $scope --policy "$policy-alias"
 
 #az policy state trigger-scan -g 'hellovnetrouteall-rg'
