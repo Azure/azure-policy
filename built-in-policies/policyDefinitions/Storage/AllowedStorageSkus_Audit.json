@@ -1,0 +1,56 @@
+{
+   "properties": {
+      "displayName": "Storage accounts should be limited by allowed SKUs",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Restrict the set of storage account SKUs that your organization can deploy.",
+      "metadata": {
+         "version": "1.1.0",
+         "category": "Storage"
+      },
+      "parameters": {
+         "effect": {
+            "type": "String",
+            "metadata": {
+              "displayName": "Effect",
+              "description": "Enable or disable the execution of the audit policy"
+            },
+            "allowedValues": [
+               "Audit",
+               "Deny",
+               "Disabled"
+            ],
+            "defaultValue": "Deny"
+         },
+         "listOfAllowedSKUs": {
+            "type": "Array",
+            "metadata": {
+               "description": "The list of SKUs that can be specified for storage accounts.",
+               "displayName": "Allowed SKUs",
+               "strongType": "StorageSKUs"
+            }
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Storage/storageAccounts"
+               },
+               {
+                  "not": {
+                     "field": "Microsoft.Storage/storageAccounts/sku.name",
+                     "in": "[parameters('listOfAllowedSKUs')]"
+                  }
+               }
+            ]
+         },
+         "then": {
+            "effect": "[parameters('effect')]"
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/7433c107-6db4-4ad1-b57a-a76dce0154a1",
+   "name": "7433c107-6db4-4ad1-b57a-a76dce0154a1"
+}

@@ -1,0 +1,62 @@
+{
+    "properties": {
+        "policyType": "BuiltIn",
+        "displayName": "Virtual network injection should be enabled for Azure Data Explorer",
+        "description": "Secure your network perimeter with virtual network injection which allows you to enforce network security group rules, connect on-premises and secure your data connection sources with service endpoints.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Azure Data Explorer"
+        },
+        "mode": "indexed",
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": [
+                    "Audit",
+                    "Deny",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Kusto/Clusters"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration",
+                                "exists": false
+                            },
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration.subnetId",
+                                "exists": false
+                            },
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration.enginePublicIpId",
+                                "exists": false
+                            },
+                            {
+                                "field": "Microsoft.Kusto/clusters/virtualNetworkConfiguration.dataManagementPublicIpId",
+                                "exists": false
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/9ad2fd1f-b25f-47a2-aa01-1a5a779e6413",
+    "name": "9ad2fd1f-b25f-47a2-aa01-1a5a779e6413"
+}

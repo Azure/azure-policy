@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Azure Cosmos DB should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access improves security by ensuring that your CosmosDB account isn't exposed on the public internet. Creating private endpoints can limit exposure of your CosmosDB account. Learn more at: https://docs.microsoft.com/azure/cosmos-db/how-to-configure-private-endpoints#blocking-public-network-access-during-account-creation.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cosmos DB"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "field": "Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/797b37f7-06b8-444c-b1ad-fc62867f335a",
+  "name": "797b37f7-06b8-444c-b1ad-fc62867f335a"
+}

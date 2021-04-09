@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "IoT Hub device provisioning service data should be encrypted using customer-managed keys (CMK)",
+    "description": "Use customer-managed keys to manage the encryption at rest of your IoT Hub device provisioning service. The data is automatically encrypted at rest with service-managed keys, but customer-managed keys (CMK) are commonly required to meet regulatory compliance standards. CMKs enable the data to be encrypted with an Azure Key Vault key created and owned by you. Learn more about CMK encryption at https://aka.ms/dps/CMK.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Internet of Things",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Devices/provisioningServices"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Devices/provisioningServices/encryption.keyVaultProperties[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Devices/provisioningServices/encryption.keyVaultProperties[*].keyIdentifier",
+                    "exists": "true"
+                  },
+                  {
+                    "field": "Microsoft.Devices/provisioningServices/encryption.keyVaultProperties[*].keyIdentifier",
+                    "notequals": ""
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/47031206-ce96-41f8-861b-6a915f3de284",
+  "name": "47031206-ce96-41f8-861b-6a915f3de284"
+}

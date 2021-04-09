@@ -3,9 +3,9 @@
     "displayName": "Configure allowed module authors for specified Azure Machine Learning computes",
     "policyType": "BuiltIn",
     "mode": "Microsoft.MachineLearningServices.Data",
-    "description": "This policy helps provide allowed module authors in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
+    "description": "Provide allowed module authors in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "1.0.1-preview",
+      "version": "2.0.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -17,6 +17,32 @@
           "description": "List of compute names where this policy should be applied. Ex. cpu-cluster;gpu-cluster. If no value is provided to this parameter then policy is applicable to all computes."
         },
         "defaultValue": []
+      },
+      "computeType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Compute type for the compute where Azure ML jobs run",
+          "description": "Compute type name. If Any is selected, the policy is applicable to any compute types."
+        },
+        "allowedValues": [
+          "MachineLearningCompute",
+          "HDInsight",
+          "Any"
+        ],
+        "defaultValue": "Any"
+      },
+      "isIsolatedNetwork": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Is the compute in isolated network",
+          "description": "Only applicable for MachineLearningCompute type. \"Yes: apply the policy to computes in isolated network\". \"No: apply the policy to computes that are out of isolated network\". \"Any: apply the policy regardless of if the compute is in isolated network or not\". If compute type is not MachineLearningCompute, the value set for this parameter will be ignored."
+        },
+        "allowedValues": [
+          "Yes",
+          "No",
+          "Any"
+        ],
+        "defaultValue": "Any"
       },
       "allowedModuleAuthors": {
         "type": "Array",
@@ -41,14 +67,58 @@
     },
     "policyRule": {
       "if": {
-        "anyOf": [
+        "allOf": [
           {
-            "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/name",
-            "in": "[parameters('computeNames')]"
+            "anyOf": [
+              {
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/name",
+                "in": "[parameters('computeNames')]"
+              },
+              {
+                "value": "[length(parameters('computeNames'))]",
+                "equals": 0
+              }
+            ]
           },
           {
-            "value": "[length(parameters('computeNames'))]",
-            "equals": 0
+            "anyOf": [
+              {
+                "value": "[parameters('computeType')]",
+                "equals": "Any"
+              },
+              {
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                "equals": "[parameters('computeType')]"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                    "equals": "MachineLearningCompute"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "value": "[parameters('isIsolatedNetwork')]",
+                        "equals": "Any"
+                      },
+                      {
+                        "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/isIsolatedNetwork",
+                        "equals": "[parameters('isIsolatedNetwork')]"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                "notEquals": "MachineLearningCompute"
+              }
+            ]
           }
         ]
       },

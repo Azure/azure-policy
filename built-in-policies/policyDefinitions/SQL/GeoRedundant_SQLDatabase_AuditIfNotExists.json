@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "This policy audits any Azure SQL Database with long-term geo-redundant backup not enabled.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "SQL"
     },
     "parameters": {
@@ -24,8 +24,16 @@
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.Sql/servers/databases"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/databases"
+          },
+          {
+            "field": "name",
+            "notEquals": "master"
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",

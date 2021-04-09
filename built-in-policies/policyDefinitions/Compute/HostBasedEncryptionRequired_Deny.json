@@ -1,0 +1,62 @@
+{
+    "properties": {
+      "displayName": "Virtual machines and virtual machine scale sets should have encryption at host enabled",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Use encryption at host to get end-to-end encryption for your virtual machine and virtual machine scale set data. Encryption at host enables encryption at rest for your temporary disk and OS/data disk caches. Temporary and ephemeral OS disks are encrypted with platform-managed keys when encryption at host is enabled. OS/data disk caches are encrypted at rest with either customer-managed or platform-managed key, depending on the encryption type selected on the disk. Learn more at https://aka.ms/vm-hbe.",
+      "metadata": {
+        "category": "Compute",
+        "version": "1.0.0"
+      },
+      "parameters": {
+        "effect": {
+          "type": "string",
+          "defaultValue": "Audit",
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachines"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachines/securityProfile.encryptionAtHost",
+                  "notEquals": "true"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachineScaleSets"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.encryptionAtHost",
+                  "notEquals": "true"
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/fc4d8e41-e223-45ea-9bf5-eada37891d87",
+    "name": "fc4d8e41-e223-45ea-9bf5-eada37891d87"
+  }

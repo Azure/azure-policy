@@ -1,0 +1,54 @@
+{
+    "properties": {
+       "policyType": "BuiltIn",
+        "displayName": "Double encryption should be enabled on Azure Data Explorer",
+        "description": "Enabling double encryption helps protect and safeguard your data to meet your organizational security and compliance commitments. When double encryption has been enabled, data in the storage account is encrypted twice, once at the service level and once at the infrastructure level, using two different encryption algorithms and two different keys.",
+        "metadata": {
+          "version": "2.0.0",
+          "category": "Azure Data Explorer"
+        },
+        "mode": "Indexed",
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "Audit",
+                "allowedValues": [
+                    "Audit",
+                    "Deny",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Kusto/Clusters"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "field": "Microsoft.Kusto/clusters/enableDoubleEncryption",
+                                "exists": false
+                            },
+                            {
+                                "field": "Microsoft.Kusto/clusters/enableDoubleEncryption",
+                                "equals": false
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/ec068d99-e9c7-401f-8cef-5bdde4e6ccf1",
+    "name": "ec068d99-e9c7-401f-8cef-5bdde4e6ccf1"
+  }

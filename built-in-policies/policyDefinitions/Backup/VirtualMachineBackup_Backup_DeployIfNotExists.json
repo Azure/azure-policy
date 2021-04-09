@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure backup on VMs of a location to an existing central Vault in the same location",
+    "displayName": "Configure backup on VMs without a given tag to an existing recovery services vault in the same location",
     "policyType": "BuiltIn",
-    "description": "This policy configures Azure Backup protection on VMs in a given location to an existing central vault in the same location. It applies to only those VMs that are not already configured for backup. It is recommended that this policy is assigned to not more than 200 VMs. If the policy is assigned for more than 200 VMs, it can result in the backup getting triggered a few hours beyond the defined schedule. This policy will be enhanced to support more VM images.",
+    "description": "Enforce backup for all virtual machines by backing them up to an existing central recovery services vault in the same location and subscription as the virtual machine. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally exclude virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMCentralBackupExcludeTag",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Backup"
     },
     "parameters": {
@@ -13,7 +13,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Location (Specify the location of the VMs that you want to protect)",
-          "description": "Specify the location of the VMs that you want to protect. VMs should be backed up to a vault in the same location.\nFor example - southeastasia",
+          "description": "Specify the location of the VMs that you want to protect. VMs should be backed up to a vault in the same location. For example - southeastasia",
           "strongType": "location"
         }
       },
@@ -21,10 +21,26 @@
         "type": "String",
         "metadata": {
           "displayName": "Backup Policy (of type Azure VM from a vault in the location chosen above)",
-          "description": "Specify the id of the Azure backup policy to configure backup of the virtual machines. The selected Azure backup policy should be of type Azure virtual machine. This policy needs to be in a vault that is present in the location chosen above.\nFor example - /subscriptions/<SubscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.RecoveryServices/vaults/<VaultName>/backupPolicies/<BackupPolicyName>",
+          "description": "Specify the id of the Azure backup policy to configure backup of the virtual machines. The selected Azure backup policy should be of type Azure virtual machine. This policy needs to be in a vault that is present in the location chosen above. For example - /subscriptions/<SubscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.RecoveryServices/vaults/<VaultName>/backupPolicies/<BackupPolicyName>",
           "strongType": "Microsoft.RecoveryServices/vaults/backupPolicies"
         }
       },
+      "exclusionTagName": {
+          "type": "String",
+          "metadata": {
+              "displayName": "Exclusion Tag Name",
+              "description": "Name of the tag to use for excluding VMs from the scope of this policy. This should be used along with the Exclusion Tag Value parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
+          },
+          "defaultValue": ""
+      },
+      "exclusionTagValue": {
+          "type": "Array",
+          "metadata": {
+              "displayName": "Exclusion Tag Values",
+              "description": "Value of the tag to use for excluding VMs from the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Exclusion Tag Name parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
+          },
+          "defaultValue": []
+      },      
       "effect": {
         "type": "String",
         "metadata": {
@@ -53,323 +69,346 @@
           {
             "anyOf": [
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftWindowsServer"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "WindowsServer"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "in": [
-                      "2008-R2-SP1",
-                      "2008-R2-SP1-smalldisk",
-                      "2012-Datacenter",
-                      "2012-Datacenter-smalldisk",
-                      "2012-R2-Datacenter",
-                      "2012-R2-Datacenter-smalldisk",
-                      "2016-Datacenter",
-                      "2016-Datacenter-Server-Core",
-                      "2016-Datacenter-Server-Core-smalldisk",
-                      "2016-Datacenter-smalldisk",
-                      "2016-Datacenter-with-Containers",
-                      "2016-Datacenter-with-RDSH",
-                      "2019-Datacenter",
-                      "2019-Datacenter-Core",
-                      "2019-Datacenter-Core-smalldisk",
-                      "2019-Datacenter-Core-with-Containers",
-                      "2019-Datacenter-Core-with-Containers-smalldisk",
-                      "2019-Datacenter-smalldisk",
-                      "2019-Datacenter-with-Containers",
-                      "2019-Datacenter-with-Containers-smalldisk",
-                      "2019-Datacenter-zhcn"
-                    ]
-                  }
-                ]
+                "not": 
+                {
+                    "field": "[concat('tags[', parameters('exclusionTagName'), ']')]",
+                    "in": "[parameters('exclusionTagValue')]"
+                }
               },
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftWindowsServer"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "WindowsServerSemiAnnual"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "in": [
-                      "Datacenter-Core-1709-smalldisk",
-                      "Datacenter-Core-1709-with-Containers-smalldisk",
-                      "Datacenter-Core-1803-with-Containers-smalldisk"
-                    ]
-                  }
-                ]
+                "value": "[empty(parameters('exclusionTagValue'))]",
+                "equals": "true"
               },
               {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftWindowsServerHPCPack"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "WindowsServerHPCPack"
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftSQLServer"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "*-WS2016"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "*-WS2016-BYOL"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "*-WS2012R2"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "*-WS2012R2-BYOL"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftRServer"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "MLServer-WS2016"
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftVisualStudio"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "VisualStudio",
-                      "Windows"
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftDynamicsAX"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "Dynamics"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "equals": "Pre-Req-AX7-Onebox-U8"
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "microsoft-ads"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "windows-data-science-vm"
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftWindowsDesktop"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "Windows-10"
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "RedHat"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "RHEL",
-                      "RHEL-SAP-HANA"
-                    ]
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "6.*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "7*"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "SUSE"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "SLES",
-                      "SLES-HPC",
-                      "SLES-HPC-Priority",
-                      "SLES-SAP",
-                      "SLES-SAP-BYOS",
-                      "SLES-Priority",
-                      "SLES-BYOS",
-                      "SLES-SAPCAL",
-                      "SLES-Standard"
-                    ]
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "12*"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Canonical"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "UbuntuServer"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "14.04*LTS"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "16.04*LTS"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "18.04*LTS"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Oracle"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "Oracle-Linux"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "6.*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "7.*"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "OpenLogic"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "CentOS",
-                      "Centos-LVM",
-                      "CentOS-SRIOV"
-                    ]
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "6.*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "7*"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "cloudera"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "cloudera-centos-os"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "like": "7*"
-                  }
-                ]
+                "value": "[empty(parameters('exclusionTagName'))]",
+                "equals": "true"
               }
+            ]
+          },
+          {
+            "anyOf": [
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "WindowsServer"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                                "2008-R2-SP1",
+                                "2008-R2-SP1-smalldisk",
+                                "2012-Datacenter",
+                                "2012-Datacenter-smalldisk",
+                                "2012-R2-Datacenter",
+                                "2012-R2-Datacenter-smalldisk",
+                                "2016-Datacenter",
+                                "2016-Datacenter-Server-Core",
+                                "2016-Datacenter-Server-Core-smalldisk",
+                                "2016-Datacenter-smalldisk",
+                                "2016-Datacenter-with-Containers",
+                                "2016-Datacenter-with-RDSH",
+                                "2019-Datacenter",
+                                "2019-Datacenter-Core",
+                                "2019-Datacenter-Core-smalldisk",
+                                "2019-Datacenter-Core-with-Containers",
+                                "2019-Datacenter-Core-with-Containers-smalldisk",
+                                "2019-Datacenter-smalldisk",
+                                "2019-Datacenter-with-Containers",
+                                "2019-Datacenter-with-Containers-smalldisk",
+                                "2019-Datacenter-zhcn"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "WindowsServerSemiAnnual"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                                "Datacenter-Core-1709-smalldisk",
+                                "Datacenter-Core-1709-with-Containers-smalldisk",
+                                "Datacenter-Core-1803-with-Containers-smalldisk"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServerHPCPack"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "WindowsServerHPCPack"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftSQLServer"
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "like": "*-WS2019"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "like": "*-WS2016"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "like": "*-WS2016-BYOL"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "like": "*-WS2012R2"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "like": "*-WS2012R2-BYOL"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftRServer"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "MLServer-WS2016"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftVisualStudio"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                                "VisualStudio",
+                                "Windows"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftDynamicsAX"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "Dynamics"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "equals": "Pre-Req-AX7-Onebox-U8"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-ads"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "windows-data-science-vm"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsDesktop"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "Windows-10"
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "RedHat"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                                "RHEL",
+                                "RHEL-SAP-HANA"
+                            ]
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "6.*"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "7*"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "SUSE"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                                "SLES",
+                                "SLES-HPC",
+                                "SLES-HPC-Priority",
+                                "SLES-SAP",
+                                "SLES-SAP-BYOS",
+                                "SLES-Priority",
+                                "SLES-BYOS",
+                                "SLES-SAPCAL",
+                                "SLES-Standard"
+                            ]
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "12*"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Canonical"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "UbuntuServer"
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "14.04*LTS"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "16.04*LTS"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "18.04*LTS"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Oracle"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "Oracle-Linux"
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "6.*"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "7.*"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "OpenLogic"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                                "CentOS",
+                                "Centos-LVM",
+                                "CentOS-SRIOV"
+                            ]
+                        },
+                        {
+                            "anyOf": [
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "6.*"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "7*"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "allOf": [
+                        {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "cloudera"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "cloudera-centos-os"
+                        },
+                        {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "like": "7*"
+                        }
+                    ]
+                }
             ]
           }
         ]

@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Synapse managed private endpoints should only connect to resources in approved Azure Active Directory tenants",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Protect your Synapse workspace by only allowing connections to resources in approved Azure Active Directory (Azure AD) tenants. The approved Azure AD tenants can be defined during policy assignment.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Synapse"
+    },
+    "parameters": {
+      "allowedTenantIds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of Allowed Tenant Ids for private endpoint creation",
+          "description": "This parameter defines the list of Allowed Tenant Ids that are allowed to create managed private endpoints in the workspaces"
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Synapse/workspaces"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Synapse/workspaces/managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[*]",
+              "where": {
+                "field": "Microsoft.Synapse/workspaces/managedVirtualNetworkSettings.allowedAadTenantIdsForLinking[*]",
+                "notIn": "[parameters('allowedTenantIds')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3a003702-13d2-4679-941b-937e58c443f0",
+  "name": "3a003702-13d2-4679-941b-937e58c443f0"
+}

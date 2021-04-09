@@ -1,0 +1,59 @@
+{
+    "properties": {
+      "displayName": "HPC Cache accounts should use customer-managed key for encryption",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Manage encryption at rest of Azure HPC Cache with customer-managed keys. By default, customer data is encrypted with service-managed keys, but customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management.",
+      "metadata": {
+        "version": "2.0.0",
+        "category": "Storage"
+      },
+      "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "Audit",
+            "Disabled",
+            "Deny"
+          ],
+          "defaultValue": "Audit"
+        }
+      },
+      "policyRule": {
+        "if": {
+            "allOf": [
+                {
+                    "field": "type",
+                    "equals": "Microsoft.StorageCache/caches"
+                },                
+                {
+                    "anyOf":[
+                        {
+                            "field": "identity.type",
+                            "exists": false
+                        },
+                        {
+                            "field": "Microsoft.StorageCache/caches/encryptionSettings.keyEncryptionKey.keyUrl",
+                            "exists": false
+                        },
+                        {
+                            "field": "Microsoft.StorageCache/caches/encryptionSettings.keyEncryptionKey.sourceVault.Id",
+                            "exists": false
+                        }
+
+                    ]
+                }
+            ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/970f84d8-71b6-4091-9979-ace7e3fb6dbb",
+    "name": "970f84d8-71b6-4091-9979-ace7e3fb6dbb"
+}

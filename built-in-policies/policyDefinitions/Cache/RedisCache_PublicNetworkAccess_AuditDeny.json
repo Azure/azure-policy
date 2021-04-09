@@ -1,0 +1,46 @@
+{
+    "properties": {
+        "displayName": "Azure Cache for Redis should disable public network access",
+        "description": "Disabling public network access improves security by ensuring that the Azure Cache for Redis isn't exposed on the public internet. You can limit exposure of your Azure Cache for Redis by creating private endpoints instead. Learn more at: https://docs.microsoft.com/azure/azure-cache-for-redis/cache-private-link.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Cache"
+        },
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Audit",
+                    "Deny",
+                    "Disabled"
+                ],
+                "defaultValue": "Audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Cache/Redis"
+                    },
+                    {
+                        "field": "Microsoft.Cache/Redis/publicNetworkAccess",
+                        "notEquals": "Disabled"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/470baccb-7e51-4549-8b1a-3e5be069f663",
+    "name": "470baccb-7e51-4549-8b1a-3e5be069f663"
+}

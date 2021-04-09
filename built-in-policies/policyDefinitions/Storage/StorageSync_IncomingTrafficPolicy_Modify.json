@@ -1,0 +1,59 @@
+{
+    "properties": {
+        "displayName": "Modify - Configure Azure File Sync to disable public network access",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "The Azure File Sync's internet-accessible public endpoint are disabled by your organizational policy. You may still access the Storage Sync Service via its private endpoint(s).",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Storage"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Modify",
+                    "Disabled"
+                ],
+                "defaultValue": "Modify"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.StorageSync/storageSyncServices"
+                    },
+                    {
+                        "field": "Microsoft.StorageSync/storageSyncServices/incomingTrafficPolicy",
+                        "notEquals": "AllowVirtualNetworksOnly"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "conflictEffect": "Audit",
+                    "operations": [
+                        {
+                            "condition": "[greater(requestContext().apiVersion, '2019-10-01')]",
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.StorageSync/storageSyncServices/incomingTrafficPolicy",
+                            "value": "AllowVirtualNetworksOnly"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/0e07b2e9-6cd9-4c40-9ccb-52817b95133b",
+    "name": "0e07b2e9-6cd9-4c40-9ccb-52817b95133b"
+}

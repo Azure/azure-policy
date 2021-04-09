@@ -1,0 +1,59 @@
+{
+    "properties": {
+        "displayName": "Configure IoT Hub device provisioning service instances to disable public network access",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Disable public network access for your IoT Hub device provisioning instance so that it's not accessible over the public internet. This can reduce data leakage risks. Learn more at: https://aka.ms/iotdpsvnet.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Internet of Things"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Modify",
+                    "Disabled"
+                ],
+                "defaultValue": "Modify"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Devices/provisioningServices"
+                    },
+                    {
+                        "field": "Microsoft.Devices/provisioningServices/publicNetworkAccess",
+                        "notEquals": "Disabled"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "conflictEffect": "audit",
+                    "operations": [
+                        {
+                            "condition": "[greaterOrEquals(requestContext().apiVersion, '2020-03-01')]",
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.Devices/provisioningServices/publicNetworkAccess",
+                            "value": "Disabled"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/859dfc91-ea35-43a6-8256-31271c363794",
+    "name": "859dfc91-ea35-43a6-8256-31271c363794"
+}

@@ -5,14 +5,22 @@
     "mode": "Indexed",
     "description": "This policy ensures that Threat Detection is enabled on SQL Servers.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "SQL"
     },
     "parameters": {},
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.Sql/servers"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+          },
+          {
+            "field": "kind",
+            "notContains": "analytics"
+          }
+        ]
       },
       "then": {
         "effect": "DeployIfNotExists",
@@ -45,7 +53,7 @@
                     "apiVersion": "2017-03-01-preview",
                     "properties": {
                       "state": "Enabled",
-                      "emailAccountAdmins": true
+                      "emailAccountAdmins": false
                     }
                   }
                 ]
