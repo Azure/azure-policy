@@ -1,0 +1,86 @@
+{
+    "properties": {
+        "displayName": "Configure managed disks to disable public network access",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Disable public network access for your managed disk resource so that it's not accessible over the public internet. This can reduce data leakage risks. Learn more at: https://aka.ms/disksprivatelinksdoc.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Compute"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Modify",
+                    "Disabled"
+                ],
+                "defaultValue": "Modify"
+            },
+            "location": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Location",
+                    "strongType": "location",
+                    "description": "All disks in this region are validated and disk access resource would be associated with them."
+                }
+            },
+            "diskAccessId": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Resource Id for the DiskAccess in the given location to which the disk resource needs to be linked",
+                    "strongType": "Microsoft.Compute/diskAccesses",
+                    "description": "Disk access resources enable exporting managed disks securely via private endpoints. Learn more at: https://aka.ms/disksprivatelinksdoc"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/disks"
+                    },
+                    {
+                        "field": "location",
+                        "equals": "[parameters('location')]"
+                    },
+                    {
+                        "field": "Microsoft.Compute/disks/networkAccessPolicy",
+                        "notIn": [
+                            "AllowPrivate",
+                            "DenyAll"
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "conflictEffect": "audit",
+                    "operations": [
+                        {
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.Compute/disks/diskAccessId",
+                            "value": "[parameters('diskAccessId')]"
+                        },
+                        {
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.Compute/disks/networkAccessPolicy",
+                            "value": "AllowPrivate"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/8426280e-b5be-43d9-979e-653d12a08638",
+    "name": "8426280e-b5be-43d9-979e-653d12a08638"
+}
