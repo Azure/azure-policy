@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure backup on VMs without a given tag to an existing recovery services vault in the same location",
+    "displayName": "Configure backup on virtual machines without a given tag to an existing recovery services vault in the same location",
     "policyType": "BuiltIn",
-    "description": "Enforce backup for all virtual machines by backing them up to an existing central recovery services vault in the same location and subscription as the virtual machine. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally exclude virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMCentralBackupExcludeTag",
+    "description": "Enforce backup for all virtual machines by backing them up to an existing central recovery services vault in the same location and subscription as the virtual machine. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally exclude virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMCentralBackupExcludeTag.",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.1.0",
+      "version": "2.0.0",
       "category": "Backup"
     },
     "parameters": {
@@ -13,7 +13,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Location (Specify the location of the VMs that you want to protect)",
-          "description": "Specify the location of the VMs that you want to protect. VMs should be backed up to a vault in the same location. For example - southeastasia",
+          "description": "Specify the location of the VMs that you want to protect. VMs should be backed up to a vault in the same location. For example - southeastasia.",
           "strongType": "location"
         }
       },
@@ -21,7 +21,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Backup Policy (of type Azure VM from a vault in the location chosen above)",
-          "description": "Specify the id of the Azure backup policy to configure backup of the virtual machines. The selected Azure backup policy should be of type Azure virtual machine. This policy needs to be in a vault that is present in the location chosen above. For example - /subscriptions/<SubscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.RecoveryServices/vaults/<VaultName>/backupPolicies/<BackupPolicyName>",
+          "description": "Specify the id of the Azure backup policy to configure backup of the virtual machines. The selected Azure backup policy should be of type Azure virtual machine. This policy needs to be in a vault that is present in the location chosen above. For example - /subscriptions/<SubscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.RecoveryServices/vaults/<VaultName>/backupPolicies/<BackupPolicyName>.",
           "strongType": "Microsoft.RecoveryServices/vaults/backupPolicies"
         }
       },
@@ -29,7 +29,7 @@
           "type": "String",
           "metadata": {
               "displayName": "Exclusion Tag Name",
-              "description": "Name of the tag to use for excluding VMs from the scope of this policy. This should be used along with the Exclusion Tag Value parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
+              "description": "Name of the tag to use for excluding VMs from the scope of this policy. This should be used along with the Exclusion Tag Value parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy."
           },
           "defaultValue": ""
       },
@@ -37,7 +37,7 @@
           "type": "Array",
           "metadata": {
               "displayName": "Exclusion Tag Values",
-              "description": "Value of the tag to use for excluding VMs from the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Exclusion Tag Name parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy"
+              "description": "Value of the tag to use for excluding VMs from the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Exclusion Tag Name parameter. Learn more at https://aka.ms/AppCentricVMBackupPolicy."
           },
           "defaultValue": []
       },      
@@ -45,7 +45,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "Enable or disable the execution of the policy"
+          "description": "Enable or disable the execution of the policy."
         },
         "allowedValues": [
           "deployIfNotExists",
@@ -66,6 +66,10 @@
             "field": "location",
             "equals": "[parameters('vaultLocation')]"
           },
+          {
+            "field": "id",
+            "notContains": "/resourceGroups/databricks-rg-"
+          },          
           {
             "anyOf": [
               {
@@ -336,6 +340,10 @@
                                 {
                                     "field": "Microsoft.Compute/imageSKU",
                                     "like": "18.04*LTS"
+                                },
+                                {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "20.04*LTS"
                                 }
                             ]
                         }

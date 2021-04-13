@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "The Azure Security Benchmark initiative represents the policies and controls implementing security recommendations defined in Azure Security Benchmark v2, see https://aka.ms/azsecbm. This also serves as the Azure Security Center default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Azure Security Center.",
     "metadata": {
-      "version": "26.2.0",
+      "version": "27.0.0",
       "category": "Security Center"
     },
     "policyDefinitionGroups": [
@@ -431,6 +431,30 @@
         "metadata": {
           "displayName": "Windows Defender Exploit Guard should be enabled on your Windows virtual machines",
           "description": "Enable or disable virtual machines reporting that Windows Defender Exploit Guard is enabled"
+        }
+      },
+      "windowsGuestConfigBaselinesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities in security configuration on your Windows machines should be remediated (powered by Guest Config)",
+          "description": "Enable or disable virtual machines reporting Windows Baselines in Guest Config"
+        }
+      },
+      "linuxGuestConfigBaselinesMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities in security configuration on your Linux machines should be remediated (powered by Guest Config)",
+          "description": "Enable or disable virtual machines reporting Linux Baselines in Guest Config"
         }
       },
       "vmssSystemUpdatesMonitoringEffect": {
@@ -3566,7 +3590,11 @@
       },
       "kubernetesClustersShouldBeAccessibleOnlyOverHTTPSExcludedNamespaces": {
         "type": "Array",
-        "defaultValue": [ "kube-system", "gatekeeper-system", "azure-arc" ],
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ],
         "metadata": {
           "displayName": "Namespace exclusions",
           "description": "List of Kubernetes namespaces to exclude from policy evaluation."
@@ -3682,7 +3710,10 @@
       },
       "aPIManagementServicesShouldUseAVirtualNetworkEvaluatedSkuNames": {
         "type": "Array",
-        "defaultValue": [ "Developer", "Premium" ],
+        "defaultValue": [
+          "Developer",
+          "Premium"
+        ],
         "allowedValues": [
           "Developer",
           "Basic",
@@ -3722,9 +3753,7 @@
       },
       "networkWatcherShouldBeEnabledListOfLocations": {
         "type": "Array",
-        "defaultValue": [
-          "[]"
-        ],
+        "defaultValue": [],
         "metadata": {
           "displayName": "List of regions where Network Watcher should be enabled",
           "description": "To see a complete list of regions, run the PowerShell command Get-AzLocation",
@@ -3737,6 +3766,30 @@
         "metadata": {
           "displayName": "Name of the resource group for Network Watcher",
           "description": "Name of the resource group where Network Watchers are located"
+        }
+      },
+      "AzureDefenderForResourceManagerShouldBeEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Defender for Resource Manager should be enabled",
+          "description": "Azure Defender for Resource Manager automatically monitors the resource management operations in your organization. Azure Defender detects threats and alerts you about suspicious activity. Learn more about the capabilities of Azure Defender for Resource Manager at https://aka.ms/defender-for-resource-manager . Enabling this Azure Defender plan results in charges. Learn about the pricing details per region on Security Center's pricing page: https://aka.ms/pricing-security-center ."
+        }
+      },
+      "AzureDefenderForDNSShouldBeEnabledMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Azure Defender for DNS should be enabled",
+          "description": "Azure Defender for DNS provides an additional layer of protection for your cloud resources by continuously monitoring all DNS queries from your Azure resources. Azure Defender alerts you about suspicious activity at the DNS layer. Learn more about the capabilities of Azure Defender for DNS at https://aka.ms/defender-for-dns . Enabling this Azure Defender plan results in charges. Learn about the pricing details per region on Security Center's pricing page: https://aka.ms/pricing-security-center ."
         }
       }
     },
@@ -3917,6 +3970,30 @@
         },
         "groupNames": [
           "Azure_Security_Benchmark_v2.0_ES-2"
+        ]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/72650e9f-97bc-4b2a-ab5f-9781a9fcecbc",
+        "policyDefinitionReferenceId": "windowsGuestConfigBaselinesMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('windowsGuestConfigBaselinesMonitoringEffect')]"
+          }
+        },
+        "groupNames": [
+          "Azure_Security_Benchmark_v2.0_PV-4"
+        ]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fc9b3da7-8347-4380-8e70-0a0361d8dedd",
+        "policyDefinitionReferenceId": "linuxGuestConfigBaselinesMonitoring",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('linuxGuestConfigBaselinesMonitoringEffect')]"
+          }
+        },
+        "groupNames": [
+          "Azure_Security_Benchmark_v2.0_PV-4"
         ]
       },
       {
@@ -6274,6 +6351,36 @@
         },
         "groupNames": [
           "Azure_Security_Benchmark_v2.0_LT-3"
+        ]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c3d20c29-b36d-48fe-808b-99a87530ad99",
+        "policyDefinitionReferenceId": "AzureDefenderForResourceManagerShouldBeEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('AzureDefenderForResourceManagerShouldBeEnabledMonitoringEffect')]"
+          }
+        },
+        "groupNames": [
+          "Azure_Security_Benchmark_v2.0_LT-1",
+          "Azure_Security_Benchmark_v2.0_LT-2",
+          "Azure_Security_Benchmark_v2.0_IR-3",
+          "Azure_Security_Benchmark_v2.0_IR-5"
+        ]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bdc59948-5574-49b3-bb91-76b7c986428d",
+        "policyDefinitionReferenceId": "AzureDefenderForDNSShouldBeEnabledMonitoringEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('AzureDefenderForDNSShouldBeEnabledMonitoringEffect')]"
+          }
+        },
+        "groupNames": [
+          "Azure_Security_Benchmark_v2.0_LT-1",
+          "Azure_Security_Benchmark_v2.0_LT-2",
+          "Azure_Security_Benchmark_v2.0_IR-3",
+          "Azure_Security_Benchmark_v2.0_IR-5"
         ]
       }
     ]
