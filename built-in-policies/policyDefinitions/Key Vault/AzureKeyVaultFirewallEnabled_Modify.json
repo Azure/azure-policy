@@ -1,0 +1,59 @@
+{
+    "properties": {
+      "displayName": "Configure key vaults to disable public network access",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Disable public network access for your key vault so that it's not accessible over the public internet. This can reduce data leakage risks. Learn more at: https://aka.ms/akvprivatelink.",
+      "metadata": {
+        "version": "1.0.0-preview",
+        "category": "Key Vault",
+        "preview": true
+      },
+      "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "Modify",
+            "Disabled"
+          ],
+          "defaultValue": "Modify"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.KeyVault/vaults"
+            },
+            {
+              "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+              "notEquals": "Deny"
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]",
+          "details": {
+            "conflictEffect": "audit",
+            "roleDefinitionIds": [
+              "/providers/Microsoft.Authorization/roleDefinitions/f25e0fa2-a7c8-4377-a976-54943a77a395"
+            ],
+            "operations": [
+              {
+                "operation": "addOrReplace",
+                "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+                "value": "Deny"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/ac673a9a-f77d-4846-b2d8-a57f8e1c01dc",
+    "name": "ac673a9a-f77d-4846-b2d8-a57f8e1c01dc"
+  }
