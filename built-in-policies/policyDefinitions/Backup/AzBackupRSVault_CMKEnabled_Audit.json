@@ -1,0 +1,75 @@
+{
+  "properties": {
+    "displayName": "Azure Recovery Services vaults should use customer-managed keys for encrypting backup data",
+    "description": "Use customer-managed keys to manage the encryption at rest of your backup data. By default, customer data is encrypted with service-managed keys, but CMKs are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more at https://aka.ms/AB-CmkEncryption.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+     "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "enableDoubleEncryption": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Double encryption should be enabled on Recovery Services vaults for Backup",
+          "description": "Check if double encryption is enabled on Recovery Services vaults for Backup.  For more details refer to https://aka.ms/AB-InfraEncryption."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.RecoveryServices/vaults/encryption.keyVaultProperties.keyUri",
+                "exists": "false"
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('enableDoubleEncryption')]",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.RecoveryServices/vaults/encryption.infrastructureEncryption",
+                    "notEquals": "Enabled"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2e94d99a-8a36-4563-bc77-810d8893b671",
+  "name": "2e94d99a-8a36-4563-bc77-810d8893b671"
+}

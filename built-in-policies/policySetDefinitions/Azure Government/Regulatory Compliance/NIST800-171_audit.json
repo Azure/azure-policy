@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "This initiative includes audit and virtual machine extension policies that address a subset of NIST SP 800-171 R2 requirements. Additional policies will be added in upcoming releases. For more information, visit https://aka.ms/nist800171r2-blueprint.",
     "metadata": {
-      "version": "5.0.1-preview",
+      "version": "6.0.0-preview",
       "category": "Regulatory Compliance",
       "preview": true
     },
@@ -451,6 +451,18 @@
       }
     ],
     "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+            "displayName": "Include Arc connected servers for Guest Configuration policies",
+            "description": "Optionally choose to audit settings inside Arc connected servers using Guest Configuration policies. By selecting this option, you agree to be charged monthly per Arc connected machine."
+        },
+        "allowedValues": [
+            "true",
+            "false"
+        ],
+        "defaultValue": "false"
+      },
       "membersToExcludeInLocalAdministratorsGroup": {
         "type": "string",
         "metadata": {
@@ -681,9 +693,12 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "deployVMExtensionToAuditThatTheAdministratorsGroupInsideWindowsVMsExcludesTheSpecifiedMembers",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/144f1397-32f9-4598-8c88-118decc3ccba",
+        "policyDefinitionReferenceId": "auditWindowsVMsInWhichTheAdministratorsGroupContainsAnyOfTheSpecifiedMembers",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/69bf4abd-ca1e-4cf6-8b5a-762d42e61d4f",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "membersToExclude": {
             "value": "[parameters('membersToExcludeInLocalAdministratorsGroup')]"
           }
@@ -716,9 +731,74 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "deployPrerequisitesToAuditWindowsVMsThatDoNotRestrictTheMinimumPasswordLengthTo14Characters",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/23020aa6-1135-4be2-bae2-149982b06eca",
-        "parameters": {},
+        "policyDefinitionReferenceId": "Prerequisite_AddSystemIdentityWhenNone",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3cf2ab00-13f1-4d0c-8971-2ac904541a7e",
+        "parameters": {
+        },
+        "groupNames": [
+          "NIST_SP_800-171_R2_3.5.2",
+          "NIST_SP_800-171_R2_3.5.7",
+          "NIST_SP_800-171_R2_3.5.8",
+          "NIST_SP_800-171_R2_3.1.1",
+          "NIST_SP_800-171_R2_3.1.12",
+          "NIST_SP_800-171_R2_3.5.10",
+          "NIST_SP_800-171_R2_3.13.1",
+          "NIST_SP_800-171_R2_3.13.8",
+          "NIST_SP_800-171_R2_3.1.4"
+        ]
+      },
+      {
+        "policyDefinitionReferenceId": "Prerequisite_AddSystemIdentityWhenUser",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/497dff13-db2a-4c0f-8603-28fa3b331ab6",
+        "parameters": {
+        },
+        "groupNames": [
+          "NIST_SP_800-171_R2_3.5.2",
+          "NIST_SP_800-171_R2_3.5.7",
+          "NIST_SP_800-171_R2_3.5.8",
+          "NIST_SP_800-171_R2_3.1.1",
+          "NIST_SP_800-171_R2_3.1.12",
+          "NIST_SP_800-171_R2_3.5.10",
+          "NIST_SP_800-171_R2_3.13.1",
+          "NIST_SP_800-171_R2_3.13.8",
+          "NIST_SP_800-171_R2_3.1.4"
+        ]
+      },
+      {
+        "policyDefinitionReferenceId": "Prerequisite_DeployExtensionWindows",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/385f5831-96d4-41db-9a3c-cd3af78aaae6",
+        "parameters": {
+        },
+        "groupNames": [
+          "NIST_SP_800-171_R2_3.5.7",
+          "NIST_SP_800-171_R2_3.5.8",
+          "NIST_SP_800-171_R2_3.5.10",
+          "NIST_SP_800-171_R2_3.13.1",
+          "NIST_SP_800-171_R2_3.13.8",
+          "NIST_SP_800-171_R2_3.1.4"
+        ]
+      },
+      {
+        "policyDefinitionReferenceId": "Prerequisite_DeployExtensionLinux",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1221c620-d201-468c-81e7-2817e6107e84",
+        "parameters": {
+        },
+        "groupNames": [
+          "NIST_SP_800-171_R2_3.5.2",
+          "NIST_SP_800-171_R2_3.5.7",
+          "NIST_SP_800-171_R2_3.1.1",
+          "NIST_SP_800-171_R2_3.1.12",
+          "NIST_SP_800-171_R2_3.5.10"
+        ]
+      },
+      {
+        "policyDefinitionReferenceId": "previewAuditWindowsVmPasswordsMustBeAtLeast14Characters",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a2d0e922-65d0-40c4-8f87-ea6da2d307a2",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [ "NIST_SP_800-171_R2_3.5.7" ]
       },
       {
@@ -726,21 +806,6 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/26a828e1-e88f-464e-bbb3-c134a282b9de",
         "parameters": {},
         "groupNames": [ "NIST_SP_800-171_R2_3.14.2" ]
-      },
-      {
-        "policyDefinitionReferenceId": "previewAuditWindowsVmShouldNotStorePasswordsUsingReversibleEncryption",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2d60d3b7-aa10-454c-88a8-de39d99d17c6",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.5.10" ]
-      },
-      {
-        "policyDefinitionReferenceId": "previewAuditLinuxVMsThatAllowRemoteConnectionsFromAccountsWithoutPasswords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2d67222d-05fd-4526-a171-2ee132ad9e83",
-        "parameters": {},
-        "groupNames": [
-          "NIST_SP_800-171_R2_3.1.1",
-          "NIST_SP_800-171_R2_3.1.12"
-        ]
       },
       {
         "policyDefinitionReferenceId": "logAnalyticsOSImageAudit",
@@ -759,9 +824,13 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "previewDeployVmExtensionToAuditLinuxVmAccountsWithNoPasswords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3470477a-b35a-49db-aca5-1073d04524fe",
-        "parameters": {},
+        "policyDefinitionReferenceId": "previewAuditLinuxVmAccountsWithNoPasswords",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f6ec09a3-78bf-4f8f-99dc-6c77182d0f99",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [
           "NIST_SP_800-171_R2_3.5.2",
           "NIST_SP_800-171_R2_3.5.7"
@@ -835,12 +904,6 @@
         "groupNames": [ "NIST_SP_800-171_R2_3.1.3" ]
       },
       {
-        "policyDefinitionReferenceId": "previewAuditWindowsVmPasswordsMustBeAtLeast14Characters",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5aebc8d1-020d-4037-89a0-02043a7524ec",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.5.7" ]
-      },
-      {
         "policyDefinitionReferenceId": "logAnalyticsOSImageVMSSAudit",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5c3bc7b8-a64c-4e08-a9cd-7ff0f31e1138",
         "parameters": {
@@ -867,15 +930,6 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5f76cf89-fbf2-47fd-a3f4-b891fa780b60",
         "parameters": {},
         "groupNames": [ "NIST_SP_800-171_R2_3.1.1" ]
-      },
-      {
-        "policyDefinitionReferenceId": "auditWindowsWebServersThatAreNotUsingSecureCommunicationProtocols",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/60ffe3e2-4604-4460-8f22-0f1da058266c",
-        "parameters": {},
-        "groupNames": [
-          "NIST_SP_800-171_R2_3.13.1",
-          "NIST_SP_800-171_R2_3.13.8"
-        ]
       },
       {
         "policyDefinitionReferenceId": "identityRemoveDeprecatedAccountMonitoring",
@@ -923,9 +977,13 @@
         "groupNames": [ "NIST_SP_800-171_R2_3.14.1" ]
       },
       {
-        "policyDefinitionReferenceId": "previewDeployVmExtensionToAuditWindowsVmShouldNotAllowPrevious24Passwords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/726671ac-c4de-4908-8c7d-6043ae62e3b6",
-        "parameters": {},
+        "policyDefinitionReferenceId": "previewAuditWindowsVmShouldNotAllowPrevious24Passwords",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5b054a0d-39e2-4d53-bea3-9734cad2c69b",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [ "NIST_SP_800-171_R2_3.5.8" ]
       },
       {
@@ -939,9 +997,13 @@
         "groupNames": [ "NIST_SP_800-171_R2_3.14.1" ]
       },
       {
-        "policyDefinitionReferenceId": "previewDeployVmExtensionToAuditWindowsVmEnforcesPasswordComplexityRequirements",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7ed40801-8a0f-4ceb-85c0-9fd25c1d61a8",
-        "parameters": {},
+        "policyDefinitionReferenceId": "previewAuditWindowsVmEnforcesPasswordComplexityRequirements",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bf16e0bb-31e1-4646-8202-60a235cc7e74",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [ "NIST_SP_800-171_R2_3.5.7" ]
       },
       {
@@ -990,9 +1052,13 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "deployPrerequisitesToAuditWindowsVMsThatDoNotStorePasswordsUsingReversibleEncryption",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8ff0b18b-262e-4512-857a-48ad0aeb9a78",
-        "parameters": {},
+        "policyDefinitionReferenceId": "previewAuditWindowsVmShouldNotStorePasswordsUsingReversibleEncryption",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/da0f98fe-a24b-4ad5-af69-bd0400233661",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [ "NIST_SP_800-171_R2_3.5.10" ]
       },
       {
@@ -1005,9 +1071,12 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "deployVMExtensionToAuditThatTheAdministratorsGroupInsideWindowsVMsIncludesTheSpecifiedMembers",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/93507a81-10a4-4af0-9ee2-34cf25a96e98",
+        "policyDefinitionReferenceId": "auditWindowsVMsInWhichTheAdministratorsGroupDoesNotContainAllOfTheSpecifiedMembers",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/30f71ea1-ac77-4f26-9fc5-2d926bbd4ba7",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "membersToInclude": {
             "value": "[parameters('membersToIncludeInLocalAdministratorsGroup')]"
           }
@@ -1111,15 +1180,12 @@
         "groupNames": [ "NIST_SP_800-171_R2_3.14.2" ]
       },
       {
-        "policyDefinitionReferenceId": "previewAuditLinuxVmEtcPasswdFilePermissionsAreSetTo0644",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b18175dd-c599-4c64-83ba-bb018a06d35b",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.5.10" ]
-      },
-      {
-        "policyDefinitionReferenceId": "deployWindowsTLS",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b2fc8f91-866d-4434-9089-5ebfe38d6fd8",
+        "policyDefinitionReferenceId": "auditWindowsWebServersThatAreNotUsingSecureCommunicationProtocols",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5752e6d6-1206-46d8-8ab1-ecc2f71a8112",
         "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
           "minimumTLSVersion": {
             "value": "[parameters('minimumTLSVersionForWindowsServers')]"
           }
@@ -1152,25 +1218,10 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "auditWindowsVMsInWhichTheAdministratorsGroupContainsAnyOfTheSpecifiedMembers",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bde62c94-ccca-4821-a815-92c1d31a76de",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.1.4" ]
-      },
-      {
         "policyDefinitionReferenceId": "vmssSystemUpdatesMonitoring",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c3f317a7-a95c-4547-b7e7-11017ebdf2fe",
         "parameters": {},
         "groupNames": [ "NIST_SP_800-171_R2_3.14.1" ]
-      },
-      {
-        "policyDefinitionReferenceId": "previewAuditLinuxVmAccountsWithNoPasswords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c40c9087-1981-4e73-9f53-39743eda9d05",
-        "parameters": {},
-        "groupNames": [
-          "NIST_SP_800-171_R2_3.5.2",
-          "NIST_SP_800-171_R2_3.5.7"
-        ]
       },
       {
         "policyDefinitionReferenceId": "webAppDisableRemoteDebuggingMonitoring",
@@ -1180,12 +1231,6 @@
           "NIST_SP_800-171_R2_3.1.1",
           "NIST_SP_800-171_R2_3.1.12"
         ]
-      },
-      {
-        "policyDefinitionReferenceId": "previewAuditWindowsVmShouldNotAllowPrevious24Passwords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cdbf72d9-ac9c-4026-8a3a-491a5ac59293",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.5.8" ]
       },
       {
         "policyDefinitionReferenceId": "systemConfigurationsMonitoring",
@@ -1230,9 +1275,13 @@
         "groupNames": [ "NIST_SP_800-171_R2_3.1.1" ]
       },
       {
-        "policyDefinitionReferenceId": "previewDeployVmExtensionToAuditLinuxVmAllowingRemoteConnectionsFromAccountsWithNoPasswords",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ec49586f-4939-402d-a29e-6ff502b20592",
-        "parameters": {},
+        "policyDefinitionReferenceId": "previewAuditLinuxVMsThatAllowRemoteConnectionsFromAccountsWithoutPasswords",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ea53dbee-c6c9-4f0e-9f9e-de0039b78023",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [
           "NIST_SP_800-171_R2_3.1.1",
           "NIST_SP_800-171_R2_3.1.12"
@@ -1257,16 +1306,14 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "previewDeployVmExtensionToAuditLinuxVmPasswdFilePermissions",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f19aa1c1-6b91-4c27-ae6a-970279f03db9",
-        "parameters": {},
+        "policyDefinitionReferenceId": "previewAuditLinuxVmEtcPasswdFilePermissionsAreSetTo0644",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e6955644-301c-44b5-a4c4-528577de6861",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          }
+        },
         "groupNames": [ "NIST_SP_800-171_R2_3.5.10" ]
-      },
-      {
-        "policyDefinitionReferenceId": "auditWindowsVMsInWhichTheAdministratorsGroupDoesNotContainAllOfTheSpecifiedMembers",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f3b44e5d-1456-475f-9c67-c66c4618e85a",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.1.4" ]
       },
       {
         "policyDefinitionReferenceId": "previewAuditLogAnalyticsWorkspaceForVmReportMismatch",
@@ -1280,12 +1327,6 @@
           "NIST_SP_800-171_R2_3.3.1",
           "NIST_SP_800-171_R2_3.3.2"
         ]
-      },
-      {
-        "policyDefinitionReferenceId": "previewAuditWindowsVmEnforcesPasswordComplexityRequirements",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f48b2913-1dc5-4834-8c72-ccc1dfd819bb",
-        "parameters": {},
-        "groupNames": [ "NIST_SP_800-171_R2_3.5.7" ]
       },
       {
         "policyDefinitionReferenceId": "networkSecurityGroupsOnVirtualMachinesMonitoring",
