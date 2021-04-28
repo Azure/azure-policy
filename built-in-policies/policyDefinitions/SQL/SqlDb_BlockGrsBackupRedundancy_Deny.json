@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "policyType": "BuiltIn",
     "metadata": {
-      "version": "1.0.1",
+      "version": "2.0.0",
       "category": "SQL"
     },
     "parameters": {
@@ -34,18 +34,52 @@
             "notEquals": "DataWarehouse"
           },
           {
-            "not": {
-              "anyOf": [
-                {
-                  "field": "Microsoft.Sql/servers/databases/storageAccountType",
-                  "equals": "LRS"
-                },
-                {
-                  "field": "Microsoft.Sql/servers/databases/storageAccountType",
-                  "equals": "ZRS"
-                }
-              ]
-            }
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "lessOrEquals": "2020-08-01-preview"
+                  },
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "field": "Microsoft.Sql/servers/databases/storageAccountType",
+                          "equals": "LRS"
+                        },
+                        {
+                          "field": "Microsoft.Sql/servers/databases/storageAccountType",
+                          "equals": "ZRS"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "greater": "2020-08-01-preview"
+                  },
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "field": "Microsoft.Sql/servers/databases/requestedBackupStorageRedundancy",
+                          "equals": "Local"
+                        },
+                        {
+                          "field": "Microsoft.Sql/servers/databases/requestedBackupStorageRedundancy",
+                          "equals": "Zone"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },

@@ -1,13 +1,26 @@
 {
     "properties": {
-        "displayName": "Deploy Dependency agent to hybrid Linux Azure Arc machines",
+        "displayName": "Configure Dependency agent on Azure Arc enabled Linux servers",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "This policy deploys the Dependency agent to Linux Azure Arc machines if the agent isn't installed.",
+        "description": "Enable VM insights on servers and machines connected to Azure through Arc enabled servers by installing the Dependency agent virtual machine extension. VM insights uses the Dependency agent to collect network metrics and discovered data about processes running on the machine and external process dependencies. See more - https://aka.ms/vminsightsdocs.",
         "metadata": {
-            "version": "1.1.0-preview",
-            "category": "Monitoring",
-            "preview": true
+            "version": "1.2.0",
+            "category": "Monitoring"
+        },
+        "parameters": {
+            "effect": {
+                "type": "string",
+                "defaultValue": "DeployIfNotExists",
+                "allowedValues": [
+                    "DeployIfNotExists",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
         },
         "policyRule": {
             "if": {
@@ -23,7 +36,7 @@
                 ]
             },
             "then": {
-                "effect": "deployIfNotExists",
+                "effect": "[parameters('effect')]",
                 "details": {
                     "type": "Microsoft.HybridCompute/machines/extensions",
                     "roleDefinitionIds": [
