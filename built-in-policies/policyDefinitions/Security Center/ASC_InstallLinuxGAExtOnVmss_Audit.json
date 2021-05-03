@@ -1,0 +1,144 @@
+{
+  "properties": {
+    "displayName": "Guest Attestation extension should be installed on supported Linux virtual machines scale sets",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Install Guest Attestation extension on supported Linux virtual machines scale sets to allow Azure Security Center to proactively attest and monitor the boot integrity. Once installed, boot integrity will be attested via Remote Attestation. This assessment only applies to trusted launch enabled Linux virtual machine scale sets.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "UbuntuServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "18_04-lts-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "0001-com-ubuntu-server-focal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "20_04-lts-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "RHEL"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "83-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "SUSE"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "SLES-15-SP2"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "gen2"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled",
+            "equals": "true"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled",
+            "equals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.Azure.Security.LinuxAttestation"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "equals": "GuestAttestation"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+                "in": [
+                  "Succeeded",
+                  "Provisioning succeeded"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a21f8c92-9e22-4f09-b759-50500d1d2dda",
+  "name": "a21f8c92-9e22-4f09-b759-50500d1d2dda"
+}

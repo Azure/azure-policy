@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "vTPM should be enabled on supported virtual machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable virtual TPM device on supported virtual machines to facilitate Measured Boot and other OS security features that require a TPM. Once enabled, vTPM can be used to attest boot integrity. This assessment only applies to trusted launch enabled virtual machines.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings.vTpmEnabled",
+            "notequals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1c30f9cd-b84c-49cc-aa2c-9288447cc3b3",
+  "name": "1c30f9cd-b84c-49cc-aa2c-9288447cc3b3"
+}
