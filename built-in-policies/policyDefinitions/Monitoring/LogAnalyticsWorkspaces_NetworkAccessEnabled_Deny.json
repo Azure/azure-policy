@@ -1,0 +1,54 @@
+{
+  "properties": {
+      "displayName": "Log Analytics workspaces should block log ingestion and querying from public networks",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Improve workspace security by blocking log ingestion and querying from public networks. Only private-link connected networks will be able to ingest and query logs on this workspace. Learn more at https://aka.ms/AzMonPrivateLink#configure-log-analytics.",
+      "metadata": {
+          "version": "1.0.0",
+          "category": "Monitoring"
+      },
+      "parameters": {
+          "effect": {
+              "type": "String",
+              "metadata": {
+                  "displayName": "Effect",
+                  "description": "The effect determines what happens when the policy rule is evaluated to match"
+              },
+              "allowedValues": [
+                  "audit",
+                  "deny",
+                  "disabled"
+              ],
+              "defaultValue": "audit"
+          }
+      },
+      "policyRule": {
+          "if": {
+              "allOf":  [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.OperationalInsights/workspaces"
+                },
+                {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForIngestion",
+                      "notEquals": "disabled"
+                    },
+                    {
+                      "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForQuery",
+                      "notEquals": "disabled"
+                    }
+                  ]
+                }
+              ]
+          },
+          "then": {
+              "effect": "[parameters('effect')]"
+          }
+      }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6c53d030-cc64-46f0-906d-2bc061cd1334",
+  "name": "6c53d030-cc64-46f0-906d-2bc061cd1334"
+}
