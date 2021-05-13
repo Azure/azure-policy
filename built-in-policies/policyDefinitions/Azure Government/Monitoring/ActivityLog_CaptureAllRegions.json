@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "displayName": "Azure Monitor should collect activity logs from all regions",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy audits the Azure Monitor log profile which does not export activities from all Azure supported regions including global.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/logProfiles",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/locations[*]",
+                  "notEquals": "usgovarizona"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/locations[*]",
+                  "notEquals": "usgoviowa"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/locations[*]",
+                  "notEquals": "usgovtexas"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/locations[*]",
+                  "notEquals": "usgovvirginia"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Insights/logProfiles/locations[*]",
+                  "notEquals": "global"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/41388f1c-2db0-4c25-95b2-35d7f5ccbfa9",
+  "name": "41388f1c-2db0-4c25-95b2-35d7f5ccbfa9"
+}

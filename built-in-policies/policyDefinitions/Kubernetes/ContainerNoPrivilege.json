@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Do not allow privileged containers creation in a Kubernetes cluster. This recommendation is part of CIS 5.2.1 which is intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "6.0.0",
+      "version": "7.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -96,6 +96,14 @@
           },
           "additionalProperties": false
         }
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -114,7 +122,10 @@
           "constraint": "https://store.policy.core.windows.net/kubernetes/container-no-privilege/v1/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
-          "labelSelector": "[parameters('labelSelector')]"
+          "labelSelector": "[parameters('labelSelector')]",
+          "values": {
+            "excludedContainers": "[parameters('excludedContainers')]"
+          }
         }
       }
     }
