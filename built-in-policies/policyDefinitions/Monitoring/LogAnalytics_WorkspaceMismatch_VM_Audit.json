@@ -1,41 +1,56 @@
 {
     "properties": {
-        "displayName": "Audit Log Analytics workspace for VM - Report Mismatch",
+        "displayName": "Virtual machines should be connected to a specified workspace",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "Reports VMs as non-compliant if they aren't logging to the Log Analytics workspace specified in the policy/initiative assignment.",
+        "description": "Reports virtual machines as non-compliant if they aren't logging to the Log Analytics workspace specified in the policy/initiative assignment.",
         "metadata": {
-            "version": "1.0.1",
+            "version": "1.1.0",
             "category": "Monitoring"
         },
         "parameters": {
             "logAnalyticsWorkspaceId": {
                 "type": "String",
                 "metadata": {
-                    "displayName": "Log Analytics Workspace Id that VMs should be configured for",
-                    "description": "This is the Id (GUID) of the Log Analytics Workspace that the VMs should be configured for."
+                    "displayName": "Log Analytics Workspace Id that virtual machines should be configured for",
+                    "description": "This is the Id (GUID) of the Log Analytics Workspace that the virtual machines should be configured for."
                 }
-            }
+            },
+            "effect": {
+                "type": "String",
+                "metadata": {
+                  "displayName": "Effect",
+                  "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                  "AuditIfNotExists",
+                  "Disabled"
+                ],
+                "defaultValue": "AuditIfNotExists"
+              }
         },
         "policyRule": {
             "if": {
-                "allOf": [
-                    {
-                        "field": "type",
-                        "equals": "Microsoft.Compute/virtualMachines/extensions"
-                    },
-                    {
-                        "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                        "equals": "Microsoft.EnterpriseCloud.Monitoring"
-                    },
-                    {
-                        "field": "Microsoft.Compute/virtualMachines/extensions/settings.workspaceId",
-                        "notEquals": "[parameters('logAnalyticsWorkspaceId')]"
-                    }
-                ]
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
             },
             "then": {
-                "effect": "audit"
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+                            },
+                            {
+                                "field": "Microsoft.Compute/virtualMachines/extensions/settings.workspaceId",
+                                "equals": "[parameters('logAnalyticsWorkspaceId')]"
+                            }
+                        ]
+                    }
+                }
             }
         }
     },
