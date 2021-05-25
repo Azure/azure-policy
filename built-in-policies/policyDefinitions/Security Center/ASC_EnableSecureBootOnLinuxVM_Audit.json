@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Linux virtual machines should use Secure Boot",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "To protect against the installation of malware-based rootkits and boot kits, enable Secure Boot on supported Linux virtual machines. Secure Boot ensures that only signed operating systems and drivers will be allowed to run. This assessment only applies to Linux virtual machines that have the Azure Monitor Agent installed.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines/extensions"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/extensions/type",
+            "equals": "AzureSecurityLinuxAgent"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+            "equals": "Microsoft.Azure.Security.Monitoring"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/assessments",
+          "name": "0396b18c-41aa-489c-affd-4ee5d1714a59",
+          "existenceCondition": {
+            "field": "Microsoft.Security/assessments/status.code",
+            "in": [
+              "NotApplicable",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b1bb3592-47b8-4150-8db0-bfdcc2c8965b",
+  "name": "b1bb3592-47b8-4150-8db0-bfdcc2c8965b"
+}

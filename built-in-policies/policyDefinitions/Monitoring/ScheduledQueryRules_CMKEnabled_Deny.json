@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Azure Log Search Alerts over Log Analytics workspaces should use customer-managed keys",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Ensure that Azure Log Search Alerts are implementing customer-managed keys, by storing the query text using the storage account that the customer had provided for the queried Log Analytics workspace. For more information, visit https://docs.microsoft.com/azure/azure-monitor/platform/customer-managed-keys#customer-managed-key-overview.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Insights/scheduledqueryrules"
+          },
+          {
+            "field": "Microsoft.Insights/scheduledqueryrules/checkWorkspaceAlertsStorageConfigured",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/94c1f94d-33b0-4062-bd04-1cdc3e7eece2",
+  "name": "94c1f94d-33b0-4062-bd04-1cdc3e7eece2"
+}
