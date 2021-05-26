@@ -118,9 +118,7 @@ The potential for fixing these resource types is still under investigation.
 
 ### Resource Type not correctly published by resource provider
 
-In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. These resource types exhibit this behavior:
-
-- Microsoft.Storage/storageAccounts/blobServices
+In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. Currently, all resource types known to have this behavior have been corrected.
 
 These resource types previously exhibited this behavior, but are now removed:
 
@@ -135,6 +133,7 @@ These resource types previously exhibited this behavior but have been fixed:
 - Microsoft.ServiceBus/namespaces/networkrulesets
 - Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies
 - Microsoft.ApiManagement/service/portalsettings/delegation
+- Microsoft.Storage/storageAccounts/blobServices
 
 ### Resource management that bypasses Azure Resource Manager
 
