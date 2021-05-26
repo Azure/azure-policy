@@ -1,0 +1,44 @@
+{
+    "properties": {
+        "displayName": "Disk access resources should use private link",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to diskAccesses, data leakage risks are reduced. Learn more about private links at: https://aka.ms/disksprivatelinksdoc. ",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Compute"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "AuditIfNotExists",
+                    "Disabled"
+                ],
+                "defaultValue": "AuditIfNotExists"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "field": "type",
+                "equals": "Microsoft.Compute/diskAccesses"
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "type": "Microsoft.Compute/diskAccesses/privateEndpointConnections",
+                    "existenceCondition": {
+                        "field": "Microsoft.Compute/diskAccesses/privateEndpointConnections/privateLinkServiceConnectionState.status",
+                        "equals": "Approved"
+                    }
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/f39f5f49-4abf-44de-8c70-0756997bfb51",
+    "name": "f39f5f49-4abf-44de-8c70-0756997bfb51"
+}

@@ -67,7 +67,7 @@ Previously, this repository was the official channel to open requests for new al
 If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discussions on Azure Policy:
 
  - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure Governance conversation space**](https://techcommunity.microsoft.com/t5/Azure-Governance/bd-p/AzureGovernance)
- - Join the Customer Call on Azure Governance (register [here](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbRxn7UD7lweFDnmuLj72r6E1UN1dLNTBZUVMyNVpHUjJLRE5PVDVGNlkyOC4u)) Latest Customer call (Sep 3rd) recording can be found [here]( https://youtu.be/cUlExatJjfc)
+ - Join the Customer Call on Azure Governance (register [here](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbRxn7UD7lweFDnmuLj72r6E1UN1dLNTBZUVMyNVpHUjJLRE5PVDVGNlkyOC4u)) Latest Customer call (Sep 3rd) recording can be found [here](https://youtu.be/ONKn9XMPZCs)
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
  - Search or add to Azure Policy discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
 
@@ -110,6 +110,8 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
    ```
 - Microsoft.DataLakeStore/accounts
   - This type behaves similarly to Microsoft.Sql/servers/autidintSettings. Compliance of some fields cannot be determined except in AuditIfNotExits and DeployIfNotExists.
+- Microsoft.Sql 'master' database 
+   - This type behaves similarly to Microsoft.Sql/servers/auditingSettings. Compliance of some fields cannot be determined except in `AuditIfNotExists` and `DeployIfNotExists` policies.
 - Microsoft.Compute/virtualMachines/instanceView
 
 The potential for fixing these resource types is still under investigation.
@@ -197,7 +199,7 @@ Using this type of alias in audit/deny/append effect policies works partially. T
 
 -Microsoft.Databricks/* (Creation time only)
 
-All Databricks reasources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
+All Databricks resources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
 
 ### Resource types that exceed current enforcement and compliance scale
 
@@ -221,47 +223,11 @@ Feature team is actively working on fixing this issue. GitHub issue tracking thi
 
 
 ### Indexed Resource types always non-complaint to tagging policies 
-
-There are some resource types that even though are indexed, do not support Tagging Policies. Here are the list of those with issue: 
-* Master SQL DB
-* Microsoft.alertsmanagement/smartdetectoralertrules
-* Microsoft.AnalysisServices/servers (Cannot use periods '.')
-* Microsoft.Automation/automationAccounts/configurations
-* Microsoft.compute/virtualmachines/extensions
-* Microsoft.DataMigration 
-* Microsoft.DBforPostgreSQL/servers 
-* Microsoft.Insights/actiongroups
-* Microsoft.Insights/activitylogalerts
-* Microsoft.Insights/alertrules
-* Microsoft.Insights/autoscalesettings
-* Microsoft.Insights/components 
-* Microsoft.Insights/guestDiagnosticSettings
-* Microsoft.Insights/metricalerts (All tags will be automatically lowercased)
-* Microsoft.Logic/workflows
-* Microsoft.Netowork/trafficManagerProfiles/heatmapps
-* Microsoft.Network/frontdoors
-* Microsoft.Network/networkWatchers
-* Microsoft.Network/networkWatchers/flowLogs
-* Microsoft.Network/trafficManagerProfiles/ (Does not support spaces ' ')
-* Microsoft.offazure/vmwaresites
-* Microsoft.OperationsManagement/solutions
-* Microsoft.Portal/dashboards (All tags will be automatically lowercased)
-* Microsoft.Sql/virtualClusters
-* Microsoft.Web/certificates (Does not support numbers)
-
-To add one to the list please add it in this UserVoice Item: [here](https://feedback.azure.com/forums/915958-azure-governance/suggestions/34052803-azure-policy-indexed-mode-policies-pick-up-resou)
+As of February 2021, index resources that don't support tags aren't applicable to polices that inspect tags.
 
 ### Alias changes  
 
 May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
 July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
-
-### Tag Contributor Role
-
-Current limitation causes errors using the Tag Contributor role with Tag related policies.  We are aware of this issue and are working to resolve this. (ETA: End of calendar year). If assigning Tag Contributor role to managed identities handling remediation tasks on "Modify" effect policies, please assign Contributor role to the managed identity.
-
-### Subscription tagging support
-
-Subscription tagging is not yet supported using "Append" or "Modify" policies. Details on subscription tagging without using Azure Policy can be found [here](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/tag-resources).
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*

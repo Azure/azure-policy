@@ -1,13 +1,12 @@
 {
    "properties": {
-      "displayName": "Deploy Log Analytics agent to Windows Azure Arc machines",
+      "displayName": "Configure Log Analytics agent on Azure Arc enabled Windows servers",
       "policyType": "BuiltIn",
       "mode": "Indexed",
-      "description": "This policy deploys the Log Analytics agent to Windows Azure Arc machines if the agent isn't installed.",
+      "description": "Enable VM insights on servers and machines connected to Azure through Arc enabled servers by installing the Log Analytics agent virtual machine extension. VM insights uses the Log Analytics agent to collect the guest OS performance data, and provides insights into their performance. See more - https://aka.ms/vminsightsdocs.",
       "metadata": {
-         "version": "1.1.0-preview",
-         "category": "Monitoring",
-         "preview": true
+         "version": "1.2.0",
+         "category": "Monitoring"
       },
       "parameters": {
          "logAnalytics": {
@@ -18,7 +17,19 @@
                "strongType": "omsWorkspace",
                "assignPermissions": true
             }
-         }
+         },
+         "effect": {
+            "type": "string",
+            "defaultValue": "DeployIfNotExists",
+            "allowedValues": [
+                "DeployIfNotExists",
+                "Disabled"
+            ],
+            "metadata": {
+                "displayName": "Effect",
+                "description": "Enable or disable the execution of the policy"
+            }
+        }
       },
       "policyRule": {
          "if": {
@@ -34,7 +45,7 @@
             ]
          },
          "then": {
-            "effect": "deployIfNotExists",
+            "effect": "[parameters('effect')]",
             "details": {
                "type": "Microsoft.HybridCompute/machines/extensions",
                "roleDefinitionIds": [

@@ -1,0 +1,166 @@
+{
+    "properties": {
+      "displayName": "Managed disks should use a specific set of disk encryption sets for the customer-managed key encryption",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Requiring a specific set of disk encryption sets to be used with managed disks give you control over the keys used for encryption at rest. You are able to select the allowed encrypted sets and all others are rejected when attached to a disk. Learn more at https://aka.ms/disks-cmk.",
+      "metadata": {
+        "category": "Compute",
+        "version": "2.0.0"
+      },
+      "parameters": {
+        "allowedEncryptionSets": {
+          "type": "Array",
+          "metadata": {
+            "displayName": "Allowed disk encryption set",
+            "description": "The list of allowed disk encryption sets for managed disks.",
+            "strongType": "Microsoft.Compute/diskEncryptionSets"
+          }
+        },
+        "effect": {
+          "type": "string",
+          "defaultValue": "Audit",
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+          "anyOf": [
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/disks"
+                },
+                {
+                  "field": "Microsoft.Compute/disks/managedBy",
+                  "exists": "False"
+                },
+                {
+                  "field": "Microsoft.Compute/disks/encryption.diskEncryptionSetId",
+                  "notIn": "[parameters('allowedEncryptionSets')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachines"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.managedDisk.diskEncryptionSet.id",
+                  "notIn": "[parameters('allowedEncryptionSets')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachineScaleSets"
+                },
+                {
+                  "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id",
+                  "notIn": "[parameters('allowedEncryptionSets')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/virtualMachineScaleSets"
+                },
+                {
+                  "count": {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.dataDisks[*]"
+                  },
+                  "greater": 0
+                },
+                {
+                  "not": {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.dataDisks[*].managedDisk.diskEncryptionSet.id",
+                    "in": "[parameters('allowedEncryptionSets')]"
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/galleries/images/versions"
+                },
+                {
+                  "not": {
+                    "field": "Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*].encryption.osDiskImage.diskEncryptionSetId",
+                    "in": "[parameters('allowedEncryptionSets')]"
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/galleries/images/versions"
+                },
+                {
+                  "value": "[length(field('Microsoft.Compute/galleries/images/versions/storageProfile.dataDiskImages[*]'))]",
+                  "greater": 0
+                },
+                {
+                  "not": {
+                    "field": "Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*].encryption.dataDiskImages[*].diskEncryptionSetId",
+                    "in": "[parameters('allowedEncryptionSets')]"
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/images"
+                },
+                {
+                  "field": "Microsoft.Compute/images/storageProfile.osDisk.diskEncryptionSet.id",
+                  "notIn": "[parameters('allowedEncryptionSets')]"
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "field": "type",
+                  "equals": "Microsoft.Compute/images"
+                },
+                {
+                  "value": "[length(field('Microsoft.Compute/images/storageProfile.dataDisks[*]'))]",
+                  "greater": 0
+                },
+                {
+                  "field": "Microsoft.Compute/images/storageProfile.dataDisks[*].diskEncryptionSet.id",
+                  "notIn": "[parameters('allowedEncryptionSets')]"
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/d461a302-a187-421a-89ac-84acdb4edc04",
+    "name": "d461a302-a187-421a-89ac-84acdb4edc04"
+  }

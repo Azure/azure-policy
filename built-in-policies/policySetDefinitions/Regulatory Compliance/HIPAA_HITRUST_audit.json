@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "This initiative includes audit and virtual machine extension deployment policies that address a subset of HITRUST/HIPAA controls. Additional policies will be added in upcoming releases. For more information, visit https://aka.ms/hipaa-blueprint.",
     "metadata": {
-      "version": "4.1.0",
+      "version": "5.1.0",
       "category": "Regulatory Compliance"
     },
     "policyDefinitionGroups": [
@@ -2458,21 +2458,9 @@
           "Microsoft.Network/virtualNetworkGateways"
         ],
         "metadata": {
-          "displayName": "List of resource types that should have diagnostic logs enabled",
+          "displayName": "List of resource types that should have resource logs enabled",
           "description": "Audit diagnostic setting for selected resource types"
         }
-      },
-      "IncludeArcMachines": {
-        "type": "string",
-        "metadata": {
-            "displayName": "Include Arc connected servers for Guest Configuration policies",
-            "description": "Optionally choose to audit settings inside Arc connected servers using Guest Configuration policies. By selecting this option, you agree to be charged monthly per Arc connected machine."
-        },
-        "allowedValues": [
-            "true",
-            "false"
-        ],
-        "defaultValue": "false"
       },
       "membersToInclude": {
         "type": "string",
@@ -2543,8 +2531,8 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Diagnostic logs in Batch accounts should be enabled",
-          "description": "Enable or disable the monitoring of diagnostic logs in Batch accounts"
+          "displayName": "Resource logs in Batch accounts should be enabled",
+          "description": "Enable or disable the monitoring of resource logs in Batch accounts"
         }
       },
       "diagnosticsLogsInBatchAccountRetentionDays": {
@@ -2552,7 +2540,7 @@
         "defaultValue": "365",
         "metadata": {
           "displayName": "Required retention (in days) for logs in Batch accounts",
-          "description": "The required diagnostic logs retention period in days"
+          "description": "The required resource logs retention period in days"
         }
       },
       "ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoringEffect": {
@@ -2587,8 +2575,8 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Diagnostic logs in Search services should be enabled",
-          "description": "Enable or disable the monitoring of diagnostic logs in Azure Search service"
+          "displayName": "Resource logs in Search services should be enabled",
+          "description": "Enable or disable the monitoring of resource logs in Azure Search service"
         }
       },
       "diagnosticsLogsInSearchServiceRetentionDays": {
@@ -2596,7 +2584,7 @@
         "defaultValue": "365",
         "metadata": {
           "displayName": "Required retention (in days) of logs in Azure Search service",
-          "description": "The required diagnostic logs retention period in days"
+          "description": "The required resource logs retention period in days"
         }
       },
       "vulnerabilityAssessmentOnManagedInstanceMonitoringEffect": {
@@ -2613,14 +2601,15 @@
       },
       "vulnerabilityAssesmentMonitoringEffect": {
         "type": "string",
-        "defaultValue": "AuditIfNotExists",
+        "defaultValue": "Disabled",
         "allowedValues": [
           "AuditIfNotExists",
           "Disabled"
         ],
         "metadata": {
           "displayName": "Vulnerabilities should be remediated by a Vulnerability Assessment solution",
-          "description": "Enable or disable the detection of VM vulnerabilities by a vulnerability assessment solution"
+          "description": "Enable or disable the detection of VM vulnerabilities by a vulnerability assessment solution",
+		      "deprecated": true
         }
       },
       "EnableInsecureGuestLogons": {
@@ -2848,8 +2837,8 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Diagnostic logs in Event Hub should be enabled",
-          "description": "Enable or disable the monitoring of diagnostic logs in Event Hub accounts"
+          "displayName": "Resource logs in Event Hub should be enabled",
+          "description": "Enable or disable the monitoring of resource logs in Event Hub accounts"
         }
       },
       "diagnosticsLogsInEventHubRetentionDays": {
@@ -2857,7 +2846,7 @@
         "defaultValue": "365",
         "metadata": {
           "displayName": "Required retention (in days) of logs in Event Hub accounts",
-          "description": "The required diagnostic logs retention period in days"
+          "description": "The required resource logs retention period in days"
         }
       },
       "vmssSystemUpdatesMonitoringEffect": {
@@ -2880,8 +2869,8 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Diagnostic logs in Virtual Machine Scale Sets should be enabled",
-          "description": "Enable or disable the monitoring of diagnostic logs in Service Fabric"
+          "displayName": "Resource logs in Virtual Machine Scale Sets should be enabled",
+          "description": "Enable or disable the monitoring of resource logs in Service Fabric"
         }
       },
       "systemUpdatesMonitoringEffect": {
@@ -3082,8 +3071,7 @@
         "type": "string",
         "defaultValue": "365",
         "metadata": {
-          "displayName": "Required retention (in days) of logs in Data Lake Store accounts",
-          "description": "The required diagnostic logs retention period in days"
+          "displayName": "Required retention period (days) for resource logs"
         }
       },
       "diagnosticsLogsInRedisCacheMonitoringEffect": {
@@ -3487,19 +3475,6 @@
           "hipaa-0709.10m1Organizational.1-10.m",
           "hipaa-0710.10m2Organizational.1-10.m",
           "hipaa-0719.10m3Organizational.5-10.m"
-        ]
-      },
-      {
-        "policyDefinitionReferenceId": "vulnerabilityAssessmentMonitoring",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/760a85ff-6162-42b3-8d70-698e268f648c",
-        "parameters": {
-          "effect": {
-            "value": "[parameters('vulnerabilityAssesmentMonitoringEffect')]"
-          }
-        },
-        "groupNames": [
-          "hipaa-0709.10m1Organizational.1-10.m",
-          "hipaa-0712.10m2Organizational.4-10.m"
         ]
       },
       {
@@ -4842,6 +4817,26 @@
         "groupNames": [
           "hipaa-0709.10m1Organizational.1-10.m",
           "hipaa-0716.10m3Organizational.1-10.m"
+        ]
+      },
+      {
+        "policyDefinitionReferenceId": "diagnosticsLogsInManagedHsmMonitoring",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a2a5b911-5617-447e-a49e-59dbe0e0434b",
+        "parameters": {
+          "requiredRetentionDays": {
+            "value": "[parameters('requiredRetentionDays')]"
+          }
+        },
+        "groupNames": [
+          "hipaa-1211.09aa3System.4-09.aa"
+        ]
+      },
+      {
+        "policyDefinitionReferenceId": "managedHsmObjectsShouldBeRecoverable",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c39ba22d-4428-4149-b981-70acb31fc383",
+        "parameters": {},
+        "groupNames": [
+          "hipaa-1635.12b1Organizational.2-12.b"
         ]
       }
     ]

@@ -3,9 +3,9 @@
       "displayName": "Not allowed resource types",
       "policyType": "BuiltIn",
       "mode": "All",
-      "description": "This policy enables you to specify the resource types that your organization cannot deploy.",
+      "description": "Restrict which resource types can be deployed in your environment. Limiting resource types can reduce the complexity and attack surface of your environment while also helping to manage costs. Compliance results are only shown for non-compliant resources.",
       "metadata": {
-         "version": "1.0.0",
+         "version": "2.0.0",
          "category": "General"
       },
       "parameters": {
@@ -16,15 +16,36 @@
                "displayName": "Not allowed resource types",
                "strongType": "resourceTypes"
             }
+         },
+         "effect": {
+            "type": "string",
+            "defaultValue": "Deny",
+            "allowedValues": [
+               "Audit",
+               "Deny",
+               "Disabled"
+            ],
+            "metadata": {
+               "displayName": "Effect",
+               "description": "Enable or disable the execution of the policy"
+            }
          }
       },
       "policyRule": {
          "if": {
-            "field": "type",
-            "in": "[parameters('listOfResourceTypesNotAllowed')]"
+            "allOf": [
+               {
+                  "field": "type",
+                  "in": "[parameters('listOfResourceTypesNotAllowed')]"
+               },
+               {
+                  "value": "[field('type')]",
+                  "exists": true
+               }
+            ]
          },
          "then": {
-            "effect": "Deny"
+            "effect": "[parameters('effect')]"
          }
       }
    },

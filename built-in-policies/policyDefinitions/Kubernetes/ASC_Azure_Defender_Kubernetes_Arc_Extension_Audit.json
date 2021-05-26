@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "displayName": "Azure Arc enabled Kubernetes clusters should have Azure Defender's extension installed",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Defender's extension for Azure Arc provides threat protection for your Arc enabled Kubernetes clusters. The extension collects data from nodes in the cluster and sends it to the Azure Defender for Kubernetes backend in the cloud for further analysis. Learn more in https://docs.microsoft.com/azure/security-center/defender-for-kubernetes-azure-arc.",
+    "metadata": {
+      "version": "2.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kubernetes/connectedClusters"
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/distribution",
+            "in": [
+              "generic",
+              "openshift",
+              "rancher_rke",
+              "tkg"
+            ]
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/connectivityStatus",
+            "equals": "connected"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.KubernetesConfiguration/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
+                "equals": "microsoft.azuredefender.kubernetes"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/installState",
+                "equals": "Installed"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8dfab9c4-fe7b-49ad-85e4-1e9be085358f",
+  "name": "8dfab9c4-fe7b-49ad-85e4-1e9be085358f"
+}

@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Container registries should not allow unrestricted network access",
+    "description": "Azure container registries by default accept connections over the internet from hosts on any network. To protect your registries from potential threats, allow access from only specific public IP addresses or address ranges. If your registry doesn't have an IP/firewall rule or a configured virtual network, it will appear in the unhealthy resources. Learn more about Container Registry network rules here: https://aka.ms/acr/portal/public-network and here https://aka.ms/acr/vnet.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Container Registry"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries"
+          },
+          {
+            "anyof": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/networkRuleSet.defaultAction",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/networkRuleSet.defaultAction",
+                "equals": "Allow"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d0793b48-0edc-4296-a390-4c75d1bdfd71",
+  "name": "d0793b48-0edc-4296-a390-4c75d1bdfd71"
+}

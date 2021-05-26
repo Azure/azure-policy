@@ -1,0 +1,315 @@
+{
+  "properties": {
+    "displayName": "Configure Association to link Windows virtual machines to Data Collection Rule",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploy Association to link Windows virtual machines to specified Data Collection Rule. The list of OS images is updated over time as support is increased.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "listOfWindowsImageIdToInclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Optional: List of virtual machine images that have supported Windows OS to add to scope",
+          "description": "Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        },
+        "defaultValue": []
+      },
+      "DcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule to be applied on the virtual machines in scope."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "location",
+            "in": [
+              "australiacentral",
+              "australiaeast",
+              "australiasoutheast",
+              "canadacentral",
+              "centralindia",
+              "centralus",
+              "eastasia",
+              "eastus2euap",
+              "eastus",
+              "eastus2",
+              "francecentral",
+              "germanywestcentral",
+              "japaneast",
+              "koreacentral",
+              "northcentralus",
+              "northeurope",
+              "southafricanorth",
+              "southcentralus",
+              "southeastasia",
+              "switzerlandnorth",
+              "uksouth",
+              "ukwest",
+              "westcentralus",
+              "westeurope",
+              "westus",
+              "westus2"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imageId",
+                "in": "[parameters('listOfWindowsImageIdToInclude')]"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "in": [
+                      "2008-R2-SP1",
+                      "2008-R2-SP1-smalldisk",
+                      "2012-Datacenter",
+                      "2012-Datacenter-smalldisk",
+                      "2012-R2-Datacenter",
+                      "2012-R2-Datacenter-smalldisk",
+                      "2016-Datacenter",
+                      "2016-Datacenter-Server-Core",
+                      "2016-Datacenter-Server-Core-smalldisk",
+                      "2016-Datacenter-smalldisk",
+                      "2016-Datacenter-with-Containers",
+                      "2016-Datacenter-with-RDSH",
+                      "2019-Datacenter",
+                      "2019-Datacenter-Core",
+                      "2019-Datacenter-Core-smalldisk",
+                      "2019-Datacenter-Core-with-Containers",
+                      "2019-Datacenter-Core-with-Containers-smalldisk",
+                      "2019-Datacenter-smalldisk",
+                      "2019-Datacenter-with-Containers",
+                      "2019-Datacenter-with-Containers-smalldisk",
+                      "2019-Datacenter-zhcn"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServerSemiAnnual"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "in": [
+                      "Datacenter-Core-1709-smalldisk",
+                      "Datacenter-Core-1709-with-Containers-smalldisk",
+                      "Datacenter-Core-1803-with-Containers-smalldisk"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServerHPCPack"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServerHPCPack"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftSQLServer"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2016"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2016-BYOL"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2012R2"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2012R2-BYOL"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftRServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "MLServer-WS2016"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftVisualStudio"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "VisualStudio",
+                      "Windows"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftDynamicsAX"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Dynamics"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "equals": "Pre-Req-AX7-Onebox-U8"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "windows-data-science-vm"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsDesktop"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Windows-10"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa"
+          ],
+          "existenceCondition": {
+              "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+              "equals": "[parameters('DcrResourceId')]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "DcrResourceId": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "associationName": "[concat('assoc-', uniqueString(parameters('DcrResourceId')))]"
+                },
+                "resources": [
+                  {
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', variables('associationName'))]",
+                    "type": "Microsoft.Compute/virtualMachines/providers/dataCollectionRuleAssociations",
+                    "location": "[parameters('location')]",
+                    "apiVersion": "2019-11-01-preview",
+                    "properties": {
+                      "dataCollectionRuleId": "[parameters('DcrResourceId')]"
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "DcrResourceId": {
+                  "value": "[parameters('DcrResourceId')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/eab1f514-22e3-42e3-9a1f-e1dc9199355c",
+  "name": "eab1f514-22e3-42e3-9a1f-e1dc9199355c"
+}

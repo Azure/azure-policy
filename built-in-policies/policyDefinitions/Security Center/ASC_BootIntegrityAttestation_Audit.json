@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Virtual machines guest attestation status should be healthy",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Guest attestation is performed by sending a trusted log (TCGLog) to an attestation server. The server uses these logs to determine whether boot components are trustworthy. This assessment is intended to detect compromises of the boot chain which might be the result of a bootkit or rootkit infection. This assessment only applies to Trusted Launch enabled virtual machines that have Guest Attestation extension installed.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines/extensions"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+            "in": [
+              "Microsoft.Azure.Security.WindowsAttestation",
+              "Microsoft.Azure.Security.LinuxAttestation"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/assessments",
+          "name": "b7604066-ed76-45f9-a5c1-c97e4812dc55",
+          "existenceCondition": {
+            "field": "Microsoft.Security/assessments/status.code",
+            "in": [
+              "NotApplicable",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f6358610-e532-4236-b178-4c65865eb262",
+  "name": "f6358610-e532-4236-b178-4c65865eb262"
+}

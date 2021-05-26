@@ -1,11 +1,11 @@
 {
     "properties": {
-        "displayName": "[Preview]: Audit Log Analytics Agent Deployment - VM Image (OS) unlisted",
+        "displayName": "Log Analytics Agent should be enabled for listed virtual machine images",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "Reports VMs as non-compliant if the VM Image (OS) is not in the list defined and the agent is not installed. The list of OS images will be updated over time as support is updated.",
+        "description": "Reports virtual machines as non-compliant if the virtual machine image is not in the list defined and the agent is not installed.",
         "metadata": {
-            "version": "1.0.0-preview",
+            "version": "2.0.0-preview",
             "category": "Monitoring",
             "preview": true
         },
@@ -14,7 +14,7 @@
                 "type": "Array",
                 "defaultValue": [],
                 "metadata": {
-                    "displayName": "Optional: List of VM images that have supported Windows OS to add to scope",
+                    "displayName": "Optional: List of virtual machine images that have supported Windows OS to add to scope",
                     "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
                 }
             },
@@ -22,8 +22,20 @@
                 "type": "Array",
                 "defaultValue": [],
                 "metadata": {
-                    "displayName": "Optional: List of VM images that have supported Linux OS to add to scope",
+                    "displayName": "Optional: List of virtual machine images that have supported Linux OS to add to scope",
                     "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+                }
+            },
+            "effect": {
+                "type": "string",
+                "defaultValue": "AuditIfNotExists",
+                "allowedValues": [
+                  "AuditIfNotExists",
+                  "Disabled"
+                ],
+                "metadata": {
+                  "displayName": "Effect",
+                  "description": "Enable or disable the execution of the policy"
                 }
             }
         },
@@ -185,6 +197,22 @@
                                                 {
                                                     "field": "Microsoft.Compute/imageSKU",
                                                     "equals": "Pre-Req-AX7-Onebox-U8"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "allOf": [
+                                                {
+                                                    "field": "Microsoft.Compute/imagePublisher",
+                                                    "equals": "MicrosoftDynamicsAX"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageOffer",
+                                                    "equals": "Dynamics"
+                                                },
+                                                {
+                                                    "field": "Microsoft.Compute/imageSKU",
+                                                    "equals": "Pre-Req-AX7-Onebox-V4"
                                                 }
                                             ]
                                         },
@@ -373,7 +401,7 @@
                 ]
             },
             "then": {
-                "effect": "auditIfNotExists",
+                "effect": "[parameters('effect')]",
                 "details": {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
                     "existenceCondition": {

@@ -1,0 +1,46 @@
+{
+    "properties": {
+        "displayName": "Azure Event Grid domains should disable public network access",
+        "description": "Disabling public network access improves security by ensuring that the resource isn't exposed on the public internet. You can limit exposure of your resources by creating private endpoints instead. Learn more at: https://aka.ms/privateendpoints.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Event Grid"
+        },
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Audit",
+                    "Deny",
+                    "Disabled"
+                ],
+                "defaultValue": "Audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.EventGrid/domains"
+                    },
+                    {
+                        "field": "Microsoft.EventGrid/domains/publicNetworkAccess",
+                        "notEquals": "Disabled"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/f8f774be-6aee-492a-9e29-486ef81f3a68",
+    "name": "f8f774be-6aee-492a-9e29-486ef81f3a68"
+}

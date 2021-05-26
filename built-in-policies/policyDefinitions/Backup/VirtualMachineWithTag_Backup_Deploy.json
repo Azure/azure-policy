@@ -1,11 +1,11 @@
 {
     "properties": {
-        "displayName": "Configure backup on VMs with a given tag to an existing recovery services vault in the same location",
+        "displayName": "Configure backup on virtual machines with a given tag to an existing recovery services vault in the same location",
         "policyType": "BuiltIn",
         "mode": "Indexed",
-        "description": "Enforce backup for all virtual machines by backing them up to an existing central recovery services vault in the same location and subscription as the virtual machine. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally include virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMCentralBackupIncludeTag",
+        "description": "Enforce backup for all virtual machines by backing them up to an existing central recovery services vault in the same location and subscription as the virtual machine. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally include virtual machines containing a specified tag to control the scope of assignment. See https://aka.ms/AzureVMCentralBackupIncludeTag.",
         "metadata": {
-            "version": "1.0.0-preview",
+            "version": "3.0.0-preview",
             "preview": true,
             "category": "Backup"
         },
@@ -62,6 +62,10 @@
                         "field": "type",
                         "equals": "Microsoft.Compute/virtualMachines"
                     },
+                    {
+                        "field": "id",
+                        "notContains": "/resourceGroups/databricks-rg-"
+                    },                    
                     {
                         "field": "location",
                         "equals": "[parameters('vaultLocation')]"
@@ -306,7 +310,7 @@
                                     },
                                     {
                                         "field": "Microsoft.Compute/imageOffer",
-                                        "equals": "UbuntuServer"
+                                        "contains": "ubuntu"
                                     },
                                     {
                                         "anyOf": [
@@ -321,6 +325,14 @@
                                             {
                                                 "field": "Microsoft.Compute/imageSKU",
                                                 "like": "18.04*LTS"
+                                            },
+                                            {
+                                                "field": "Microsoft.Compute/imageSKU",
+                                                "like": "*20_04-lts"
+                                            },
+                                            {
+                                                "field": "Microsoft.Compute/imageSKU",
+                                                "like": "20_04-lts*"
                                             }
                                         ]
                                     }

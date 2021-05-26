@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Azure IoT Hub should use customer-managed key to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Encryption of data at rest in IoT Hub with customer-managed key adds a second layer of encryption on top of the default service-managed keys, enables customer control of keys, custom rotation policies, and ability to manage access to data through key access control. Customer-managed keys must be configured during creation of IoT Hub. For more information on how to configure customer-managed keys, see https://aka.ms/iotcmk.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Internet of Things",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Devices/IotHubs"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Devices/IotHubs/encryption.keyVaultProperties[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Devices/IotHubs/encryption.keyVaultProperties[*].keyIdentifier",
+                    "exists": "true"
+                  },
+                  {
+                    "field": "Microsoft.Devices/IotHubs/encryption.keyVaultProperties[*].keyIdentifier",
+                    "notequals": ""
+                  }
+                ]
+              }
+            },
+            "lessOrEquals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2d7e144b-159c-44fc-95c1-ac3dbf5e6e54",
+  "name": "2d7e144b-159c-44fc-95c1-ac3dbf5e6e54"
+}

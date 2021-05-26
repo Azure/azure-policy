@@ -1,0 +1,60 @@
+{
+   "properties": {
+      "displayName": "Private endpoints for Guest Configuration assignments should be enabled",
+      "policyType": "BuiltIn",
+      "mode": "All",
+      "description": "Private endpoint connections enforce secure communication by enabling private connectivity to Guest Configuration for virtual machines. Virtual machines will be non-compliant unless they have the tag, 'EnablePrivateNetworkGC'. This tag enforces secure communication through private connectivity to Guest Configuration for Virtual Machines. Private connectivity limits access to traffic coming only from known networks and prevents access from all other IP addresses, including within Azure.",
+      "metadata": {
+         "version": "1.0.0",
+         "category": "Guest Configuration"
+      },
+      "parameters": {
+         "effect": {
+            "type": "String",
+            "metadata": {
+              "displayName": "Effect",
+              "description": "Enable or disable the execution of the policy"
+            },
+            "allowedValues": [
+              "Audit",
+              "Deny",
+              "Disabled"
+            ],
+            "defaultValue": "Audit"
+          }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.GuestConfiguration/guestConfigurationAssignments"
+               },
+               {
+                  "field": "id",
+                  "contains": "Microsoft.Compute/virtualMachines"
+               },
+               {
+                  "not": {
+                     "anyof": [
+                        {
+                           "field": "[concat('tags[', 'EnablePrivateNeworkGC', ']')]",
+                           "equals": "TRUE"
+                        },
+                        {
+                           "field": "[concat('tags[', 'EnablePrivateNetworkGC', ']')]",
+                           "equals": "TRUE"
+                        }
+                     ]
+                  }
+               }
+            ]
+         },
+         "then": {
+            "effect": "[parameters('effect')]"
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/480d0f91-30af-4a76-9afb-f5710ac52b09",
+   "name": "480d0f91-30af-4a76-9afb-f5710ac52b09"
+}

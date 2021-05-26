@@ -1,0 +1,95 @@
+{
+  "properties": {
+    "displayName": "Azure Media Services content key policies should use token authentication",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Content key policies define the conditions that must be met to access content keys. A token restriction ensures content keys can only be accessed by users that have valid tokens from an authentication service, for example Azure Active Directory.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Media Services"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "openIdConnectDiscoveryDocument": {
+        "type": "string",
+        "metadata": {
+          "displayName": "OpenID Connect discovery document",
+          "description": "The permitted OpenID Connect discovery document. When using Azure Active Directory, this would be similar to 'https://login.microsoftonline.com/{tenantId}/v2.0/.well-known/openid-configuration', where {tenantId} is replaced with the tenant (directory) ID."
+        }
+      },
+      "issuer": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Issuer",
+          "description": "The permitted token issuer. When using Azure Active Directory, this would be similar to 'https://sts.windows.net/{tenantId}/', where {tenantId} is replaced with the tenant (directory) ID."
+        }
+      },
+      "audience": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Audience",
+          "description": "The permitted token audience. When using Azure Active Directory, this is the Application ID URI of the resource application."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Media/mediaservices/contentKeyPolicies"
+          },
+          {
+            "count": {
+              "field" : "Microsoft.Media/mediaServices/contentKeyPolicies/options[*]",
+              "where" : {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Media/mediaServices/contentKeyPolicies/options[*].restriction.#Microsoft-Media-ContentKeyPolicyTokenRestriction",
+                      "exists": "true"
+                    },
+                    {
+                      "field": "Microsoft.Media/mediaServices/contentKeyPolicies/options[*].restriction.#Microsoft-Media-ContentKeyPolicyTokenRestriction.restrictionTokenType",
+                      "matchInsensitively": "Jwt"
+                    },
+                    {
+                      "field": "Microsoft.Media/mediaServices/contentKeyPolicies/options[*].restriction.#Microsoft-Media-ContentKeyPolicyTokenRestriction.openIdConnectDiscoveryDocument",
+                      "like": "[parameters('openIdConnectDiscoveryDocument')]"
+                    },
+                    {
+                      "field": "Microsoft.Media/mediaServices/contentKeyPolicies/options[*].restriction.#Microsoft-Media-ContentKeyPolicyTokenRestriction.issuer",
+                      "like": "[parameters('issuer')]"
+                    },
+                    {
+                      "field": "Microsoft.Media/mediaServices/contentKeyPolicies/options[*].restriction.#Microsoft-Media-ContentKeyPolicyTokenRestriction.audience",
+                      "like": "[parameters('audience')]"
+                    }
+                  ]
+                }
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/daccf7e4-9808-470c-a848-1c5b582a1afb",
+  "name": "daccf7e4-9808-470c-a848-1c5b582a1afb"
+}
