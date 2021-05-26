@@ -1,9 +1,9 @@
 {
   "properties": {
-    "displayName": "Configure Linux virtual machines with Azure Monitor Agent",
+    "displayName": "Configure Association to link Linux virtual machines to Data Collection Rule",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Azure Monitor Agent for Linux virtual machines if the virtual machine image (OS) and location are in the list defined and the agent is not installed. The list of OS images is updated over time as support is increased.",
+    "description": "Deploy Association to link Linux virtual machine to specified Data Collection Rule. The list of OS images is updated over time as support is increased.",
     "metadata": {
       "version": "1.0.0",
       "category": "Monitoring"
@@ -28,6 +28,13 @@
           "description": "Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
         },
         "defaultValue": []
+      },
+      "DcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule to be applied on the virtual machines in scope."
+        }
       }
     },
     "policyRule": {
@@ -43,9 +50,7 @@
               "australiacentral",
               "australiaeast",
               "australiasoutheast",
-              "brazilsouth",
               "canadacentral",
-              "canadaeast",
               "centralindia",
               "centralus",
               "eastasia",
@@ -55,24 +60,17 @@
               "francecentral",
               "germanywestcentral",
               "japaneast",
-              "japanwest",
-              "jioindiawest",
               "koreacentral",
-              "koreasouth",
               "northcentralus",
               "northeurope",
-              "norwayeast",
               "southafricanorth",
               "southcentralus",
               "southeastasia",
-              "southindia",
               "switzerlandnorth",
-              "uaenorth",
               "uksouth",
               "ukwest",
               "westcentralus",
               "westeurope",
-              "westindia",
               "westus",
               "westus2"
             ]
@@ -323,25 +321,13 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "type": "Microsoft.Insights/dataCollectionRuleAssociations",
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa"
           ],
           "existenceCondition": {
-            "allOf": [
-              {
-                "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                "equals": "AzureMonitorLinuxAgent"
-              },
-              {
-                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                "equals": "Microsoft.Azure.Monitor"
-              },
-              {
-                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                "equals": "Succeeded"
-              }
-            ]
+              "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+              "equals": "[parameters('DcrResourceId')]"
           },
           "deployment": {
             "properties": {
@@ -350,42 +336,40 @@
                 "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "parameters": {
-                  "vmName": {
+                  "resourceName": {
                     "type": "string"
                   },
                   "location": {
                     "type": "string"
+                  },
+                  "DcrResourceId": {
+                    "type": "string"
                   }
                 },
                 "variables": {
-                  "vmExtensionName": "AzureMonitorLinuxAgent",
-                  "vmExtensionPublisher": "Microsoft.Azure.Monitor",
-                  "vmExtensionType": "AzureMonitorLinuxAgent",
-                  "vmExtensionTypeHandlerVersion": "1.5"
+                  "associationName": "[concat('assoc-', uniqueString(parameters('DcrResourceId')))]"
                 },
                 "resources": [
                   {
-                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', variables('associationName'))]",
+                    "type": "Microsoft.Compute/virtualMachines/providers/dataCollectionRuleAssociations",
                     "location": "[parameters('location')]",
-                    "apiVersion": "2019-07-01",
+                    "apiVersion": "2019-11-01-preview",
                     "properties": {
-                      "publisher": "[variables('vmExtensionPublisher')]",
-                      "type": "[variables('vmExtensionType')]",
-                      "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
-                      "autoUpgradeMinorVersion": true,
-                      "settings": {},
-                      "protectedSettings": {}
+                      "dataCollectionRuleId": "[parameters('DcrResourceId')]"
                     }
                   }
                 ]
               },
               "parameters": {
-                "vmName": {
+                "resourceName": {
                   "value": "[field('name')]"
                 },
                 "location": {
                   "value": "[field('location')]"
+                },
+                "DcrResourceId": {
+                    "value": "[parameters('DcrResourceId')]"
                 }
               }
             }
@@ -394,6 +378,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/a4034bc6-ae50-406d-bf76-50f4ee5a7811",
-  "name": "a4034bc6-ae50-406d-bf76-50f4ee5a7811"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2ea82cdd-f2e8-4500-af75-67a2e084ca74",
+  "name": "2ea82cdd-f2e8-4500-af75-67a2e084ca74"
 }
