@@ -200,6 +200,8 @@ Using this type of alias in audit/deny/append effect policies works partially. T
 
 All Databricks resources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
 
+-Microsoft.Resource/deployments
+
 ### Resource types that exceed current enforcement and compliance scale
 
 There some resource types that are generated at very high scale. These are not suitable for management by Azure Policy because the enforcement and compliance checks create overhead that can negatively impact the performance of the API itself. Most of these are not significant policy scenarios, but there are a few exceptions.
