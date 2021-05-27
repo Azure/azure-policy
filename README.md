@@ -200,7 +200,9 @@ Using this type of alias in audit/deny/append effect policies works partially. T
 
 All Databricks resources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice] (https://feedback.azure.com/forums/909463-azure-databricks). 
 
--Microsoft.Resource/deployments
+### Resources that are exempt from policy evaluation
+
+- Microsoft.Resource/deployments
 
 ### Resource types that exceed current enforcement and compliance scale
 
