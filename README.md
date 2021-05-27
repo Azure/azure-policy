@@ -202,7 +202,7 @@ All Databricks resources bypass policy enforcement at creation time. Databricks 
 
 ### Resources that are exempt from policy evaluation
 
-- Microsoft.Resource/deployments
+- Microsoft.Resources/deployments
 
 ### Resource types that exceed current enforcement and compliance scale
 
