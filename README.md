@@ -196,7 +196,7 @@ Using this type of alias in the existence condition of auditIfNotExists or deplo
 
 Using this type of alias in audit/deny/append effect policies works partially. The compliance scan result will be correct for existing resources. However, when creating/updating the resource, there will be no audit events for audit effect policies and no deny or append behaviors for deny/append effect policies because of the missing property in the request payload.
 
--Microsoft.Databricks/* (Creation time only)
+- Microsoft.Databricks/* (Creation time only)
 
 All Databricks resources bypass policy enforcement at creation time. Databricks resources will have policy enforcement post-creation. To provide feedback on this, please leverage the [Databricks UserVoice](https://feedback.azure.com/forums/909463-azure-databricks). 
 
