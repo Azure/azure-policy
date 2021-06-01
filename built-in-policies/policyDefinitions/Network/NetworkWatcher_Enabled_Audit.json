@@ -3,9 +3,9 @@
     "displayName": "Network Watcher should be enabled",
     "policyType": "BuiltIn",
     "mode": "All",
-    "description": "Network Watcher is a regional service that enables you to monitor and diagnose conditions at a network scenario level in, to, and from Azure. Scenario level monitoring enables you to diagnose problems at an end to end network level view. Network diagnostic and visualization tools available with Network Watcher help you understand, diagnose, and gain insights to your network in Azure.",
+    "description": "Network Watcher is a regional service that enables you to monitor and diagnose conditions at a network scenario level in, to, and from Azure. Scenario level monitoring enables you to diagnose problems at an end to end network level view. It is required to have a network watcher resource group to be created in every region where a virtual network is present. An alert is enabled if a network watcher resource group is not available in a particular region.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Network"
     },
     "parameters": {
@@ -26,8 +26,10 @@
         "metadata": {
           "displayName": "Locations",
           "description": "Audit if Network Watcher is not enabled for region(s).",
-          "strongType": "location"
-        }
+          "strongType": "location",
+          "deprecated": true
+        },
+        "defaultValue": []
       },
       "resourceGroupName": {
         "type": "String",
@@ -41,7 +43,7 @@
     "policyRule": {
       "if": {
         "field": "type",
-        "equals": "Microsoft.Resources/subscriptions"
+        "equals": "Microsoft.Network/virtualNetworks"
       },
       "then": {
         "effect": "[parameters('effect')]",
@@ -50,7 +52,7 @@
           "resourceGroupName": "[parameters('resourceGroupName')]",
           "existenceCondition": {
             "field": "location",
-            "in": "[parameters('listOfLocations')]"
+            "equals": "[field('location')]"
           }
         }
       }
