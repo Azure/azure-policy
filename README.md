@@ -163,6 +163,11 @@ In a few instances, the creation pattern of a resource type doesn't follow norma
 
 There is currently no plan to change this behavior for these types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL or Automation team.
 
+### Nonstandard update pattern through Azure Portal
+In some cases, an RP can choose not to follow normal REST patterns when  a resource is updated via the portal. In these cases, a partial PUT request is done instead of a PATCH request causing the policy engine to incorrectly percieve as some properities are null. 
+
+- Microsoft.Web/sites 
+
 ### Provider pass-through to non Azure Resource Manager resources
 
 There are examples where a resource provider publishes a resource type to Azure Resource Manager, but the resources it represents cannot be managed by Azure Resource Manager. For example, Microsoft.Web has published several resource types to Azure Resource Manager that actually represent resources of the customer's site rather than Azure Resource Manager resources. Such resources cannot or should not be managed by Azure policy, and are explicitly excluded. All known examples are listed here:
