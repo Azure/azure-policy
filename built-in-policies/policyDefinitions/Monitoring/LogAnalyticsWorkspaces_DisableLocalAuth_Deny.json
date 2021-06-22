@@ -1,0 +1,46 @@
+{
+    "properties": {
+        "displayName": "Log Analytics Workspaces should block non-Azure Active Directory based ingestion.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Enforcing log ingestion to require Azure Active Directory authentication prevents unauthenticated logs from an attacker which could lead to incorrect status, false alerts, and incorrect logs stored in the system.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Monitoring"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                },
+                "allowedValues": [
+                    "Deny",
+                    "Audit",
+                    "Disabled"
+                ],
+                "defaultValue": "Deny"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.OperationalInsights/workspaces"
+                    },
+                    {
+                        "field": "Microsoft.OperationalInsights/workspaces/features.disableLocalAuth",
+                        "notEquals": "true"
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]"
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/e15effd4-2278-4c65-a0da-4d6f6d1890e2",
+    "name": "e15effd4-2278-4c65-a0da-4d6f6d1890e2"
+}

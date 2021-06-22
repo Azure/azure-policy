@@ -1,11 +1,11 @@
 {
    "properties":{
-      "displayName":"App Service Environment should disable TLS 1.0 and 1.1",
+      "displayName":"App Service Environment should be configured with strongest TLS Cipher suites",
       "policyType":"BuiltIn",
       "mode":"Indexed",
-      "description":"TLS 1.0 and 1.1 are out-of-date protocols that do not support modern cryptographic algorithms. Disabling inbound TLS 1.0 and 1.1 traffic helps secure apps in an App Service Environment.",
+      "description":"The two most minimal and strongest cipher suites required for App Service Environment to function correctly are : TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256.",
       "metadata":{
-         "version":"2.0.0",
+         "version":"1.0.0",
          "category":"App Service"
       },
       "parameters":{
@@ -14,7 +14,6 @@
             "defaultValue":"Audit",
             "allowedValues":[
                "Audit",
-               "Deny",
                "Disabled"
             ],
             "metadata":{
@@ -27,12 +26,12 @@
          "if":{
             "allOf":[
                {
-                  "field":"type",
-                  "equals":"Microsoft.Web/hostingEnvironments"
-               },
-               {
                   "field":"kind",
                   "like":"ASE*"
+               },
+               {
+                  "field":"type",
+                  "equals":"Microsoft.Web/hostingEnvironments"
                },
                {
                   "count":{
@@ -41,11 +40,19 @@
                         "allOf":[
                            {
                               "field":"Microsoft.Web/HostingEnvironments/clusterSettings[*].name",
-                              "equals":"DisableTls1.0"
+                              "contains":"FrontEndSSLCipherSuiteOrder"
                            },
                            {
                               "field":"Microsoft.Web/HostingEnvironments/clusterSettings[*].value",
-                              "equals":"1"
+                              "contains":"TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+                           },
+                           {
+                              "field":"Microsoft.Web/HostingEnvironments/clusterSettings[*].value",
+                              "contains":"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+                           },
+                           {
+                              "value":"[less(length(field('Microsoft.Web/HostingEnvironments/clusterSettings[*].value')), 80)]",
+                              "equals":"true"
                            }
                         ]
                      }
@@ -59,6 +66,6 @@
          }
       }
    },
-   "id":"/providers/Microsoft.Authorization/policyDefinitions/d6545c6b-dd9d-4265-91e6-0b451e2f1c50",
-   "name":"d6545c6b-dd9d-4265-91e6-0b451e2f1c50"
+   "id":"/providers/Microsoft.Authorization/policyDefinitions/817dcf37-e83d-4999-a472-644eada2ea1e",
+   "name":"817dcf37-e83d-4999-a472-644eada2ea1e"
 }
