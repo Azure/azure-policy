@@ -113,8 +113,10 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 - Microsoft.Sql 'master' database 
    - This type behaves similarly to Microsoft.Sql/servers/auditingSettings. Compliance of some fields cannot be determined except in `AuditIfNotExists` and `DeployIfNotExists` policies.
 - Microsoft.Compute/virtualMachines/instanceView
+  - Collection query of this type is missing many properties, which means compliance checks may not work.
+- Microsoft.Network/virtualNetworks/subnets
+  - The routeTable property of this type is populated differently when queried than when created or updated unless non-standard parameters are provided. This means deny policies will work, but compliance audits will generally not be correct.
 
-The potential for fixing these resource types is still under investigation.
 
 ### Resource Type not correctly published by resource provider
 
