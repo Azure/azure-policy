@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Configure Cosmos DB database accounts to disable local authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable local authentication methods so that your Cosmos DB database accounts exclusively require Azure Active Directory identities for authentication. Learn more at: https://docs.microsoft.com/azure/cosmos-db/how-to-setup-rbac#disable-local-auth.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cosmos DB"
+    },
+    "parameters": {
+    "effect": {
+      "type": "String",
+      "metadata": {
+        "displayName": "Effect",
+        "description": "Enable or disable the execution of the policy"
+      },
+      "allowedValues": [
+        "Modify",
+        "Disabled"
+      ],
+      "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "field": "Microsoft.DocumentDB/databaseAccounts/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/5bd9cd88-fe45-4216-938b-f97437e15450"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-15')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.DocumentDB/databaseAccounts/disableLocalAuth",
+              "value": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dc2d41d1-4ab1-4666-a3e1-3d51c43e0049",
+  "name": "dc2d41d1-4ab1-4666-a3e1-3d51c43e0049"
+}
