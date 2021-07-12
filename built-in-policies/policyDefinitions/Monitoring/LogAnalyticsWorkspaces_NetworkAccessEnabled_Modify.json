@@ -1,0 +1,71 @@
+{
+  "properties": {
+      "displayName": "Configure Azure Log Analytics workspaces to disable public network access for log ingestion and querying",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Improve workspace security by blocking log ingestion and querying from public networks. Only private-link connected networks will be able to ingest and query logs on this workspace. Learn more at https://aka.ms/AzMonPrivateLink#configure-log-analytics.",
+      "metadata": {
+          "version": "1.0.0",
+          "category": "Monitoring"
+      },
+      "parameters": {
+          "effect": {
+              "type": "String",
+              "metadata": {
+                  "displayName": "Effect",
+                  "description": "The effect determines what happens when the policy rule is evaluated to match"
+              },
+              "allowedValues": [
+                "Modify",
+                "Disabled"
+              ],
+              "defaultValue": "Modify"
+          }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.OperationalInsights/workspaces"
+            },
+            {
+              "anyOf": [
+                {
+                  "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForIngestion",
+                  "notEquals": "Disabled"
+                },
+                {
+                  "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForQuery",
+                  "notEquals": "Disabled"
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]",
+          "details": {
+            "roleDefinitionIds": [
+              "/providers/microsoft.authorization/roleDefinitions/86695298-2eb9-48a7-9ec3-2fdb38b6878b"
+            ],
+            "conflictEffect": "Audit",
+            "operations": [
+              {
+                "operation": "addOrReplace",
+                "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForIngestion",
+                "value": "Disabled"
+              },
+              {
+                "operation": "addOrReplace",
+                "field": "Microsoft.OperationalInsights/workspaces/publicNetworkAccessForQuery",
+                "value": "Disabled"
+              }
+            ]
+          }
+        }
+      }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d3ba9c42-9dd5-441a-957c-274031c750c0",
+  "name": "d3ba9c42-9dd5-441a-957c-274031c750c0"
+}

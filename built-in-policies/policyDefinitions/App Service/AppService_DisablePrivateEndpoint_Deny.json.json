@@ -1,0 +1,53 @@
+{
+   "properties":{
+      "displayName":"App Service apps should use a SKU that supports private link",
+      "policyType":"BuiltIn",
+      "mode":"Indexed",
+      "description":"With supported SKUs, Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to apps, you can reduce data leakage risks. Learn more about private links at: https://aka.ms/private-link.",
+      "metadata":{
+         "version":"1.0.0",
+         "category":"App Service"
+      },
+      "parameters":{
+         "effect":{
+            "type":"String",
+            "metadata":{
+               "displayName":"Effect",
+               "description":"Enable or disable the execution of the policy"
+            },
+            "allowedValues":[
+               "Audit",
+               "Deny",
+               "Disabled"
+            ],
+            "defaultValue":"Audit"
+         }
+      },
+      "policyRule":{
+         "if":{
+            "allOf":[
+               {
+                  "field":"type",
+                  "equals":"Microsoft.Web/serverFarms"
+               },
+               {
+                  "field":"Microsoft.Web/serverFarms/sku.family",
+                  "notIn":[
+                     "Pv2",
+                     "Pv3",
+                     "EP",
+                     "P",
+                     "I",
+                     "Iv2"
+                  ]
+               }
+            ]
+         },
+         "then":{
+            "effect":"[parameters('effect')]"
+         }
+      }
+   },
+   "id":"/providers/Microsoft.Authorization/policyDefinitions/546fe8d2-368d-4029-a418-6af48a7f61e5",
+   "name":"546fe8d2-368d-4029-a418-6af48a7f61e5"
+}
