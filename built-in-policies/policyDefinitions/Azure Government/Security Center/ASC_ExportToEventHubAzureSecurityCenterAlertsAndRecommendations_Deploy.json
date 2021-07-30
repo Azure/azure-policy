@@ -5,7 +5,7 @@
     "mode": "All",
     "description": "Enable export to Event Hub of Azure Security Center data. This policy deploys an export to Event Hub configuration with your conditions and target Event Hub on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "4.0.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -23,6 +23,18 @@
           "description": "The location where the resource group and the export to Event Hub configuration are created.",
           "strongType": "location"
         }
+      },
+      "createResourceGroup": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Create resource group",
+          "description": "If a resource group does not exists in the scope, a new resource group will be created. If the resource group exists and this flag is set to 'true' the policy will re-deploy the resource group. Please note this will reset any Azure Tag on the resource group."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       },
       "exportedDataTypes": {
         "type": "Array",
@@ -58,7 +70,7 @@
           "displayName": "Recommendation IDs",
           "description": "Applicable only for export of security recommendations. To export all recommendations, leave this empty. To export specific recommendations, enter a list of recommendation IDs separated by semicolons (';'). Recommendation IDs are available through the Assessments API (https://docs.microsoft.com/rest/api/securitycenter/assessments), or Azure Resource Graph Explorer, choose securityresources and microsoft.security/assessments."
         },
-        "defaultValue": [ ]
+        "defaultValue": []
       },
       "recommendationSeverities": {
         "type": "Array",
@@ -95,7 +107,7 @@
           "displayName": "Secure Score Controls IDs",
           "description": "Applicable only for export of secure score controls. To export all secure score controls, leave this empty. To export specific secure score controls, enter a list of secure score controls IDs separated by semicolons (';'). Secure score controls IDs are available through the Secure score controls API (https://docs.microsoft.com/rest/api/securitycenter/securescorecontrols), or Azure Resource Graph Explorer, choose securityresources and microsoft.security/securescores/securescorecontrols."
         },
-        "defaultValue": [ ]
+        "defaultValue": []
       },
       "alertSeverities": {
         "type": "Array",
@@ -120,7 +132,7 @@
           "displayName": "Regulatory compliance standards names",
           "description": "Applicable only for export of regulatory compliance. To export all regulatory compliance, leave this empty. To export specific regulatory compliance standards, enter a list of these standards names separated by semicolons (';'). Regulatory compliance standards names are available through the regulatory compliance standards API (https://docs.microsoft.com/rest/api/securitycenter/regulatorycompliancestandards), or Azure Resource Graph Explorer, choose securityresources and microsoft.security/regulatorycompliancestandards."
         },
-        "defaultValue": [ ]
+        "defaultValue": []
       },
       "eventHubDetails": {
         "type": "String",
@@ -288,6 +300,9 @@
                   },
                   "resourceGroupLocation": {
                     "type": "string"
+                  },
+                  "createResourceGroup": {
+                    "type": "bool"
                   },
                   "exportedDataTypes": {
                     "type": "array"
@@ -483,12 +498,11 @@
                 },
                 "resources": [
                   {
+                    "condition": "[parameters('createResourceGroup')]",
                     "name": "[parameters('resourceGroupName')]",
                     "type": "Microsoft.Resources/resourceGroups",
                     "apiVersion": "2019-10-01",
-                    "location": "[parameters('resourceGroupLocation')]",
-                    "tags": { },
-                    "properties": { }
+                    "location": "[parameters('resourceGroupLocation')]"
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -503,16 +517,16 @@
                       "template": {
                         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
-                        "parameters": { },
-                        "variables": { },
+                        "parameters": {},
+                        "variables": {},
                         "resources": [
                           {
-                            "tags": { },
+                            "tags": {},
                             "apiVersion": "2019-01-01-preview",
                             "location": "[parameters('resourceGroupLocation')]",
                             "name": "exportToEventHub",
                             "type": "Microsoft.Security/automations",
-                            "dependsOn": [ ],
+                            "dependsOn": [],
                             "properties": {
                               "description": "Export Azure Security Center data to Event Hub via policy",
                               "isEnabled": true,
@@ -544,6 +558,9 @@
                 },
                 "resourceGroupLocation": {
                   "value": "[parameters('resourceGroupLocation')]"
+                },
+                "createResourceGroup": {
+                  "value": "[parameters('createResourceGroup')]"
                 },
                 "exportedDataTypes": {
                   "value": "[parameters('exportedDataTypes')]"
