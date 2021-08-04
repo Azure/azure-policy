@@ -10,5 +10,3 @@ The community is welcome to contribute changes to these samples,
 or create new samples.
 However, this is not intended to be an Open Source project
 to manage the content used in Azure Policy as built-in content.
-
-## Configurations
