@@ -240,4 +240,10 @@ As of February 2021, index resources that don't support tags aren't applicable t
 May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
 July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
 
+### Resources that exceed current Azure policy assignment delete latencies
+
+Microsoft.KeyVault.Data: a deleted policy assignment can take up to 24 hours to stop being enforced. 
+Mitigation: update the policy assignment's effect to 'Disabled'.
+
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
