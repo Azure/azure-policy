@@ -240,4 +240,8 @@ As of February 2021, index resources that don't support tags aren't applicable t
 May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
 July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
 
+### Microsoft.Kubernetes.Data policies that evaluate containers do not currently support container exclusions.  
+
+Some containers are currently marked as non-compliant without ability to modify, such as Istio init containers. This is because some containers like Istio are loaded as side cars, which thus prevents annotation from being set ahead of time. As a solution for this scenario, we are working on updating policy definitions that target RP mode Microsoft.Kubernetes.Data with an 'excludedContainers' parameter to exclude containers in the constraint template and Azure Policy definition by Fall 2021.
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
