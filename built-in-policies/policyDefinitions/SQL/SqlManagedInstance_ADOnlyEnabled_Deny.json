@@ -1,0 +1,54 @@
+{
+   "properties": {
+      "displayName": "Azure SQL Managed Instance should have Azure Active Directory Only Authentication enabled",
+      "description": "Disabling local authentication methods and allowing only Azure Active Directory Authentication improves security by ensuring that Azure SQL Managed Instances can exclusively be accessed by Azure Active Directory identities. Learn more at: aka.ms/adonlycreate.",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "metadata": {
+         "version": "1.0.0",
+         "category": "SQL"
+      },
+      "parameters": {
+         "effect": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Effect",
+               "description": "Enable or disable the execution of the policy"
+            },
+            "allowedValues": [
+               "Audit",
+               "Deny",
+               "Disabled"
+            ],
+            "defaultValue": "Audit"
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Sql/managedInstances"
+               },
+               {
+                  "anyOf": [
+                     {
+                        "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
+                        "exists": false
+                     },
+                     {
+                        "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
+                        "equals": "false"
+                     }
+                  ]
+               }
+            ]
+         },
+         "then": {
+            "effect": "[parameters('effect')]"
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/78215662-041e-49ed-a9dd-5385911b3a1f",
+   "name": "78215662-041e-49ed-a9dd-5385911b3a1f"
+}
