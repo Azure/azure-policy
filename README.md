@@ -198,6 +198,7 @@ In a few instances, when creating a resource from Azure Portal, the property is 
 - Microsoft.Compute/virtualMachines/storageProfile.osDisk.diskSizeGB
 - Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.diskSizeGB
 - Microsoft.Compute/virtualMachineScaleSets/virtualMachines/storageProfile.osDisk.diskSizeGB
+- Microsoft.Authorization/roleAssignmentScheduleInstances/* (all aliases)
 
 Using this type of alias in the existence condition of auditIfNotExists or deployIfNotExists policies works correctly. These two kinds of effects will get the full resource content to evaluate the existence condition. The property is always present in GET request payloads.
 
