@@ -1,0 +1,58 @@
+{
+   "properties": {
+      "displayName": "Azure SQL Database should have Azure Active Directory Only Authentication enabled",
+      "description": "Disabling local authentication methods and allowing only Azure Active Directory Authentication improves security by ensuring that Azure SQL Databases can exclusively be accessed by Azure Active Directory identities. Learn more at: aka.ms/adonlycreate.",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "metadata": {
+         "version": "1.0.0",
+         "category": "SQL"
+      },
+      "parameters": {
+         "effect": {
+            "type": "String",
+            "metadata": {
+               "displayName": "Effect",
+               "description": "Enable or disable the execution of the policy"
+            },
+            "allowedValues": [
+               "Audit",
+               "Deny",
+               "Disabled"
+            ],
+            "defaultValue": "Audit"
+         }
+      },
+      "policyRule": {
+         "if": {
+            "allOf": [
+               {
+                  "field": "type",
+                  "equals": "Microsoft.Sql/servers"
+               },
+               {
+                  "value": "[resourcegroup().managedBy]",
+                  "notContains": "/providers/Microsoft.Synapse/"
+               },
+               {
+                  "anyOf": [
+                     {
+                        "field": "Microsoft.Sql/servers/administrators.azureADOnlyAuthentication",
+                        "exists": false
+                     },
+                     {
+                        "field": "Microsoft.Sql/servers/administrators.azureADOnlyAuthentication",
+                        "equals": "false"
+                     }
+                  ]
+               }
+            ]
+         },
+         "then": {
+            "effect": "[parameters('effect')]"
+         }
+      }
+   },
+   "id": "/providers/Microsoft.Authorization/policyDefinitions/abda6d70-9778-44e7-84a8-06713e6db027",
+   "name": "abda6d70-9778-44e7-84a8-06713e6db027"
+}

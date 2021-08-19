@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Use images from trusted registries to reduce the Kubernetes cluster's exposure risk to unknown vulnerabilities, security issues and malicious images. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "6.1.0",
+      "version": "7.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -107,6 +107,14 @@
           "displayName": "Allowed container images regex",
           "description": "The RegEx rule used to match allowed container images in a Kubernetes cluster. For example, to allow any Azure Container Registry image by matching partial path: ^.+azurecr.io/.+$"
         }
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -119,14 +127,14 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-allowed-images/v1/template.yaml",
-          "constraint": "https://store.policy.azure.us/kubernetes/container-allowed-images/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-allowed-images/v2/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/container-allowed-images/v2/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "allowedContainerImagesRegex": "[parameters('allowedContainerImagesRegex')]",
-            "imageRegex": "[parameters('allowedContainerImagesRegex')]"
+            "imageRegex": "[parameters('allowedContainerImagesRegex')]",
+            "excludedContainers": "[parameters('excludedContainers')]"
           }
         }
       }

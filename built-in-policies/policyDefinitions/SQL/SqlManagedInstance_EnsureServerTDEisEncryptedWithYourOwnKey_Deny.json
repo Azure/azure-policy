@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "SQL Managed instances should use customer-managed keys to encrypt data at rest",
+    "description": "Your SQL Managed instances are created using a customer-managed key for Transparent Data Encryption. Implementing Transparent Data Encryption (TDE) with your own key provides you with increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties. This recommendation applies to organizations with a related compliance requirement.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "SQL",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/managedInstances"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Sql/managedInstances/keyid",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.Sql/managedInstances/keyid",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ac01ad65-10e5-46df-bdd9-6b0cad13e1d2",
+  "name": "ac01ad65-10e5-46df-bdd9-6b0cad13e1d2"
+}
