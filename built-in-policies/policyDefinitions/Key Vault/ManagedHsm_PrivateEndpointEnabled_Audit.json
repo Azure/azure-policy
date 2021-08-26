@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Azure Key Vault Managed HSM should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Private link provides a way to connect Azure Key Vault Managed HSM to your Azure resources without sending traffic over the public internet. Private link provides defense in depth protection against data exfiltration. Learn more at: https://docs.microsoft.com/azure/key-vault/managed-hsm/private-link",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/managedHSMs"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/managedHSMs/privateEndpointConnections",
+                "exists": "false"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.KeyVault/managedHSMs/privateEndpointConnections[*]",
+                  "where": {
+                    "field": "Microsoft.KeyVault/managedHSMs/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                    "equals": "Approved"
+                  }
+                },
+                "equals": 0
+              }
+            ]
+          }
+        ]
+      },
+     "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/59fee2f4-d439-4f1b-9b9a-982e1474bfd8",
+  "name": "59fee2f4-d439-4f1b-9b9a-982e1474bfd8"
+}
