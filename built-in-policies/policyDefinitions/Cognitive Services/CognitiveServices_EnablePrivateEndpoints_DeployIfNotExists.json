@@ -5,7 +5,7 @@
         "mode": "Indexed",
         "description": "Private endpoints connect your virtual networks to Azure services without a public IP address at the source or destination. By mapping private endpoints to Cognitive Services, you'll reduce the potential for data leakage. Learn more about private links at: https://go.microsoft.com/fwlink/?linkid=2129800.",
         "metadata": {
-            "version": "1.0.0",
+            "version": "2.0.0",
             "category": "Cognitive Services"
         },
         "parameters": {
@@ -32,8 +32,22 @@
         },
         "policyRule": {
             "if": {
-                "field": "type",
-                "equals": "Microsoft.CognitiveServices/accounts"
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.CognitiveServices/accounts"
+                    },
+                    {
+                        "count": {
+                            "field": "Microsoft.CognitiveServices/accounts/capabilities[*]",
+                            "where": {
+                                "field": "Microsoft.CognitiveServices/accounts/capabilities[*].name",
+                                "equals": "VirtualNetworks"
+                            }
+                        },
+                        "greater": 0
+                    }
+                ]
             },
             "then": {
                 "effect": "[parameters('effect')]",
