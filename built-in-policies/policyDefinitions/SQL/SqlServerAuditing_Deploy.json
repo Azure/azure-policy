@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "To ensure the operations performed against your SQL assets are captured, SQL servers should have auditing enabled. This is sometimes required for compliance with regulatory standards.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "SQL"
     },
     "parameters": {
@@ -82,7 +82,9 @@
                   "uniqueStorage": "[uniqueString(variables('subscriptionId'), parameters('location'), parameters('storageAccountsResourceGroup'))]",
                   "locationCode": "[substring(parameters('location'), 0, 3)]",
                   "storageName": "[tolower(concat('sqlaudit', variables('locationCode'), variables('uniqueStorage')))]",
-                  "createStorageAccountDeploymentName": "[concat('sqlServerAuditingStorageAccount-', uniqueString(variables('locationCode'), parameters('serverName')))]"
+                  "createStorageAccountDeploymentName": "[concat('sqlServerAuditingStorageAccount-', uniqueString(variables('locationCode'), parameters('serverName')))]",
+                  "serverResourceGroup": "[resourceGroup().name]",
+                  "auditDeployName": "[uniqueString(variables('subscriptionId'), parameters('location'), resourceGroup().name, parameters('serverName'), deployment().name)]"
                 },
                 "resources": [
                   {
@@ -101,6 +103,24 @@
                         },
                         "storageName": {
                           "value": "[variables('storageName')]"
+                        },
+                        "auditDeployName": {
+                          "value": "[variables('auditDeployName')]"
+                        },
+                        "serverResourceGroup": {
+                          "value": "[variables('serverResourceGroup')]"
+                        },
+                        "createStorageAccountDeploymentName": {
+                          "value": "[variables('createStorageAccountDeploymentName')]"
+                        },
+                        "retentionDays": {
+                          "value": "[variables('retentionDays')]"
+                        },
+                        "storageAccountsResourceGroup": {
+                          "value": "[parameters('storageAccountsResourceGroup')]"
+                        },
+                        "serverName": {
+                          "value": "[parameters('serverName')]"
                         }
                       },
                       "template": {
@@ -111,6 +131,24 @@
                             "type": "string"
                           },
                           "storageName": {
+                            "type": "string"
+                          },
+                          "auditDeployName": {
+                            "type": "string"
+                          },
+                          "serverResourceGroup": {
+                            "type": "string"
+                          },
+                          "createStorageAccountDeploymentName": {
+                            "type": "string"
+                          },
+                          "retentionDays": {
+                            "type": "int"
+                          },
+                          "storageAccountsResourceGroup": {
+                            "type": "string"
+                          },
+                          "serverName": {
                             "type": "string"
                           }
                         },
@@ -132,29 +170,40 @@
                               "supportsHttpsTrafficOnly": true,
                               "allowBlobPublicAccess": false
                             }
+                          },
+                          {
+                            "apiVersion": "2017-05-10",
+                            "dependsOn": [
+                              "[resourceId(parameters('storageAccountsResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageName'))]"
+                            ],
+                            "name": "[parameters('auditDeployName')]",
+                            "type": "Microsoft.Resources/deployments",
+                            "resourceGroup": "[parameters('serverResourceGroup')]",
+                            "properties": {
+                              "mode": "Incremental",
+                              "template": {
+                                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "resources": [
+                                  {
+                                    "name": "[concat(parameters('serverName'), '/Default')]",
+                                    "type": "Microsoft.Sql/servers/auditingSettings",
+                                    "apiVersion": "2017-03-01-preview",
+                                    "properties": {
+                                      "state": "Enabled",
+                                      "storageEndpoint": "[reference(resourceId(parameters('storageAccountsResourceGroup'),'Microsoft.Storage/storageAccounts', parameters('storageName'))).primaryEndpoints.blob]",
+                                      "storageAccountAccessKey": "[listKeys(resourceId(parameters('storageAccountsResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageName')), '2017-06-01').keys[0].value]",
+                                      "retentionDays": "[parameters('retentionDays')]",
+                                      "storageAccountSubscriptionId": "[subscription().subscriptionId]",
+                                      "isStorageSecondaryKeyInUse": false
+                                    }
+                                  }
+                                ]
+                              }
+                            }
                           }
-                        ],
-                        "outputs": {
-                          "storageAccountEndPoint": {
-                            "type": "string",
-                            "value": "[reference(parameters('storageName')).primaryEndpoints.blob]"
-                          }
-                        }
+                        ]
                       }
-                    }
-                  },
-                  {
-                    "name": "[concat(parameters('serverName'), '/Default')]",
-                    "type": "Microsoft.Sql/servers/auditingSettings",
-                    "apiVersion": "2017-03-01-preview",
-                    "dependsOn": ["[resourceId('Microsoft.Resources/deployments/', variables('createStorageAccountDeploymentName'))]"],
-                    "properties": {
-                      "state": "Enabled",
-                      "storageEndpoint": "[reference(variables('createStorageAccountDeploymentName')).outputs.storageAccountEndPoint.value]",
-                      "storageAccountAccessKey": "[listKeys(resourceId(parameters('storageAccountsResourceGroup'), 'Microsoft.Storage/storageAccounts', variables('storageName')), '2017-06-01').keys[0].value]",
-                      "retentionDays": "[variables('retentionDays')]",
-                      "storageAccountSubscriptionId": "[subscription().subscriptionId]",
-                      "isStorageSecondaryKeyInUse": false
                     }
                   }
                 ]

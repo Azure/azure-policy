@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "To reduce the attack surface of your containers, restrict CAP_SYS_ADMIN Linux capabilities. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "2.1.0-preview",
+      "version": "3.0.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -101,6 +101,14 @@
           },
           "additionalProperties": false
         }
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -113,15 +121,16 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-disallowed-capabilities/v1/template.yaml",
-          "constraint": "https://store.policy.azure.us/kubernetes/container-disallowed-capabilities/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-disallowed-capabilities/v2/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/container-disallowed-capabilities/v2/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
             "disallowedCapabilities": [
               "CAP_SYS_ADMIN"
-            ]
+            ],
+            "excludedContainers": "[parameters('excludedContainers')]"
           }
         }
       }

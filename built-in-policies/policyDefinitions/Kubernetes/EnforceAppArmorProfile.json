@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Containers should only use allowed AppArmor profiles in a Kubernetes cluster. This recommendation is part of Pod Security Policies which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "4.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -104,6 +104,14 @@
           "description": "The list of AppArmor profiles that containers are allowed to use. E.g. 'runtime/default;docker/default'. Provide empty list as input to block everything."
         },
         "defaultValue": []
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -118,13 +126,14 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/enforce-apparmor-profile/v1/template.yaml",
-          "constraint": "https://store.policy.core.windows.net/kubernetes/enforce-apparmor-profile/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/enforce-apparmor-profile/v2/template.yaml",
+          "constraint": "https://store.policy.core.windows.net/kubernetes/enforce-apparmor-profile/v2/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "allowedProfiles": "[parameters('allowedProfiles')]"
+            "allowedProfiles": "[parameters('allowedProfiles')]",
+            "excludedContainers": "[parameters('excludedContainers')]"
           }
         }
       }

@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Enforce container CPU and memory resource limits to prevent resource exhaustion attacks in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "6.0.0",
+      "version": "7.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -110,6 +110,14 @@
           "displayName": "Max allowed memory bytes",
           "description": "The maximum memory bytes allowed for a container. E.g. 1Gi. For more information, please refer https://aka.ms/k8s-policy-pod-limits"
         }
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -124,14 +132,15 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-resource-limits/v1/template.yaml",
-          "constraint": "https://store.policy.core.windows.net/kubernetes/container-resource-limits/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-resource-limits/v2/template.yaml",
+          "constraint": "https://store.policy.core.windows.net/kubernetes/container-resource-limits/v2/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
             "cpuLimit": "[parameters('cpuLimit')]",
-            "memoryLimit": "[parameters('memoryLimit')]"
+            "memoryLimit": "[parameters('memoryLimit')]",
+            "excludedContainers": "[parameters('excludedContainers')]"
           }
         }
       }
