@@ -1,0 +1,67 @@
+{
+    "properties": {
+       "displayName": "API Management services should disable public network access",
+       "policyType": "BuiltIn",
+       "mode": "Indexed",
+       "description": "To improve the security of API Management services, ensure that endpoints aren't exposed to the public internet. Some public endpoints are exposed by API Management services to support user scenarios, e.g. direct access to Management API, managing configuration using Git, self-hosted gateways configuration. If any of those features are not used, corresponding endpoints should be disabled.",
+       "metadata": {
+          "version": "1.0.0",
+          "category": "API Management"
+       },
+       "parameters": {
+        "effect": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          },
+          "allowedValues": [
+            "AuditIfNotExists",
+            "Disabled"
+          ],
+          "defaultValue": "AuditIfNotExists"
+        },
+        "endpointType": {
+          "type": "String",
+          "metadata": {
+            "displayName": "Public Endpoint Type",
+            "description": "Public Endpoint Type for which to enforce the access check"
+          },
+          "allowedValues": [
+            "Management",
+            "Git",
+            "Gateway Configuration"
+          ],
+          "defaultValue": "Management"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.ApiManagement/service"
+            },
+            {
+              "field": "Microsoft.ApiManagement/service/sku.name",
+              "notEquals": "Consumption"
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]",
+          "details": {
+            "type": "Microsoft.ApiManagement/service/tenant",
+            "name": "[if(equals(parameters('endpointType'), 'Management'), 'access', if(equals(parameters('endpointType'), 'Git'), 'gitaccess', 'gatewayaccess'))]",
+            "evaluationDelay": "AfterProvisioningSuccess",
+            "existenceCondition": {
+              "field": "Microsoft.ApiManagement/service/tenant/enabled",
+              "equals": false
+            }
+          }
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/df73bd95-24da-4a4f-96b9-4e8b94b402bd",
+    "name": "df73bd95-24da-4a4f-96b9-4e8b94b402bd"
+ }

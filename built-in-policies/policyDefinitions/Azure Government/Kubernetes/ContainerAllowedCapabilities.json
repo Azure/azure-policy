@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Restrict the capabilities to reduce the attack surface of containers in a Kubernetes cluster. This recommendation is part of CIS 5.2.8 and CIS 5.2.9 which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "4.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -116,6 +116,14 @@
           "description": "The list of capabilities that must be dropped by a container."
         },
         "defaultValue": []
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -128,14 +136,15 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-allowed-capabilities/v1/template.yaml",
-          "constraint": "https://store.policy.azure.us/kubernetes/container-allowed-capabilities/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/container-allowed-capabilities/v2/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/container-allowed-capabilities/v2/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
             "allowedCapabilities": "[parameters('allowedCapabilities')]",
-            "requiredDropCapabilities": "[parameters('requiredDropCapabilities')]"
+            "requiredDropCapabilities": "[parameters('requiredDropCapabilities')]",
+            "excludedContainers": "[parameters('excludedContainers')]"
           }
         }
       }
