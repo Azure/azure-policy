@@ -1,0 +1,86 @@
+{
+  "properties": {
+    "displayName": "Configure App Service to disable local authentication on FTP deployments.",
+    "description": "Disable local authentication methods for FTP deployments so that your App Services exclusively require Azure Active Directory identities for authentication. Learn more at: https://aka.ms/app-service-disable-basic-auth.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Web/sites"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "name": "ftp",
+          "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/basicPublishingCredentialsPolicies/allow",
+            "equals": "false"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/de139f84-1756-47ae-9be6-808fbbe84772"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "siteName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "siteName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+                    "name": "[concat(parameters('siteName'), '/ftp')]",
+                    "apiVersion": "2021-02-01",
+                    "location": "[parameters('location')]",
+                    "tags": {},
+                    "properties": {
+                      "allow": "false"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/572e342c-c920-4ef5-be2e-1ed3c6a51dc5",
+  "name": "572e342c-c920-4ef5-be2e-1ed3c6a51dc5"
+}
