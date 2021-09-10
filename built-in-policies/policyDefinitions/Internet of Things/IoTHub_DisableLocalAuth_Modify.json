@@ -1,0 +1,59 @@
+{
+    "properties": {
+        "displayName": "Configure Azure IoT Hub to disable local authentication",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "description": "Disable local authentication methods so that your Azure IoT Hub exclusively require Azure Active Directory identities for authentication. Learn more at: https://aka.ms/iothubdisablelocalauth.",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Internet of Things"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "defaultValue": "Modify",
+                 "allowedValues": [
+                    "Modify",
+                    "Disabled"
+                ],
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy"
+                }
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Devices/IotHubs"
+                    },
+                    {
+                        "field": "Microsoft.Devices/IotHubs/disableLocalAuth",
+                        "notEquals": true
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "conflictEffect": "audit",
+                    "roleDefinitionIds": [
+                        "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+                    ],
+                    "operations": [
+                        {
+                            "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-07-01')]",
+                            "operation": "addOrReplace",
+                            "field": "Microsoft.Devices/IotHubs/disableLocalAuth",
+                            "value": true
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/9f8ba900-a70f-486e-9ffc-faf907305376",
+    "name": "9f8ba900-a70f-486e-9ffc-faf907305376" 
+}

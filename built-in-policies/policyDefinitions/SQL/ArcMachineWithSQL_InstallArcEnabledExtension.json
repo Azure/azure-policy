@@ -1,11 +1,11 @@
 {
    "properties": {
-      "displayName": "Configure SQL installed Azure Arc machines to have Arc enabled SQL Server extension enabled.",
+      "displayName": "Configure Arc-enabled machines running SQL Server to have SQL Server extension installed.",
       "policyType": "BuiltIn",
       "mode": "Indexed",
-      "description": " To ensure SQL Server - Azure Arc resources gets created by default when SQL instance found on Azure Arc enabled windows server, Arc machine should have SQL Server extension enabled. For more information- please visit- https://docs.microsoft.com/en-us/sql/sql-server/azure-arc/overview?view=sql-server-ver15",
+      "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled windows server, the latter should have SQL Server extension installed and the server's managed identity should be configured with Azure Connected SQL Server Onboarding role",
       "metadata": {
-         "version": "1.0.0",
+         "version": "1.0.1",
          "category": "SQL"
       },
       "parameters": {
@@ -82,6 +82,15 @@
                               "vmExtensionType": "WindowsAgent.SqlServer"
                            },
                            "resources": [
+                              {
+                                 "type": "Microsoft.Authorization/roleAssignments",
+                                 "apiVersion": "2018-09-01-preview",
+                                 "name": "[guid(resourceGroup().id, parameters('vmName'), deployment().name)]",
+                                 "properties": {
+                                   "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/e8113dcec5294d3391fae9b972617508",
+                                   "principalId": "[reference(resourceId('Microsoft.HybridCompute/machines', parameters('vmName')), '2021-06-10-preview', 'Full').identity.principalId]"
+                                 }
+                               },
                               {
                                  "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
                                  "type": "Microsoft.HybridCompute/machines/extensions",
