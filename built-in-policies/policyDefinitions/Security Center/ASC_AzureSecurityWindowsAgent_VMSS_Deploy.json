@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "Configure supported Windows machines to automatically install the Azure Security agent",
+    "displayName": "Configure supported Windows virtual machine scale sets to automatically install the Azure Security agent",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure supported Windows machines to automatically install the Azure Security agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Target virtual machines must be in a supported location.",
+    "description": "Configure supported Windows virtual machine scale sets to automatically install the Azure Security agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Target Windows virtual machine scale sets must be in a supported location.",
     "metadata": {
       "category": "Security Center",
-      "version": "4.0.0-preview",
+      "version": "1.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -28,7 +28,7 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
           },
           {
             "anyOf": [
@@ -212,23 +212,20 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
                 "equals": "AzureSecurityWindowsAgent"
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/Publisher",
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/Publisher",
                 "equals": "Microsoft.Azure.Security.Monitoring"
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                "in": [
-                  "Succeeded",
-                  "Provisioning succeeded"
-                ]
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+                "equals": "Succeeded"
               }
             ]
           },
@@ -242,7 +239,7 @@
                 "location": {
                   "value": "[field('location')]"
                 },
-                "vmName": {
+                "vmssName": {
                   "value": "[field('name')]"
                 }
               },
@@ -253,15 +250,15 @@
                   "location": {
                     "type": "string"
                   },
-                  "vmName": {
+                  "vmssName": {
                     "type": "string"
                   }
                 },
                 "variables": {},
                 "resources": [
                   {
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "[concat(parameters('vmName'), '/', 'AzureSecurityWindowsAgent')]",
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                    "name": "[concat(parameters('vmssName'), '/', 'AzureSecurityWindowsAgent')]",
                     "apiVersion": "2019-03-01",
                     "location": "[parameters('location')]",
                     "properties": {
@@ -270,7 +267,7 @@
                       "typeHandlerVersion": "1.0",
                       "autoUpgradeMinorVersion": "true",
                       "settings": {},
-                      "protectedsettings": {}
+                      "protectedSettings": {}
                     }
                   }
                 ]
@@ -281,6 +278,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/1537496a-b1e8-482b-a06a-1cc2415cdc7b",
-  "name": "1537496a-b1e8-482b-a06a-1cc2415cdc7b"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/808a7dc4-49f2-4e7b-af75-d14e561c244a",
+  "name": "808a7dc4-49f2-4e7b-af75-d14e561c244a"
 }
