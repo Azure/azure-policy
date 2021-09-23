@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Azure Event Grid topics should have local authentication methods disabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling local authentication methods improves security by ensuring that Azure Event Grid topics exclusively require Azure Active Directory identities for authentication. Learn more at: https://aka.ms/aeg-disablelocalauth.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Event Grid"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventGrid/topics"
+          },
+          {
+            "field": "Microsoft.EventGrid/topics/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/ae9fb87f-8a17-4428-94a4-8135d431055c",
+    "name": "ae9fb87f-8a17-4428-94a4-8135d431055c"
+}
