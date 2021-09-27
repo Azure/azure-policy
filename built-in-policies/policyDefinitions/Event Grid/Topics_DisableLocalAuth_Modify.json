@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Event Grid topics to disable local authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable local authentication methods so that your Azure Event Grid topics exclusively require Azure Active Directory identities for authentication. Learn more at: https://aka.ms/aeg-disablelocalauth.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Event Grid"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventGrid/topics"
+          },
+          {
+            "field": "Microsoft.EventGrid/topics/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/1e241071-0855-49ea-94dc-649edcd759de"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.EventGrid/topics/disableLocalAuth",
+              "value": true
+            }
+          ]
+        }
+      }
+    }
+  },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/1c8144d9-746a-4501-b08c-093c8d29ad04",
+    "name": "1c8144d9-746a-4501-b08c-093c8d29ad04"
+}

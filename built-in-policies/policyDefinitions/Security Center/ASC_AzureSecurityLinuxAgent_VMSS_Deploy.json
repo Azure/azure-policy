@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "Configure supported Linux virtual machines to automatically install the Azure Security agent",
+    "displayName": "Configure supported Linux virtual machine scale sets to automatically install the Azure Security agent",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure supported Linux virtual machines to automatically install the Azure Security agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Target virtual machines must be in a supported location.",
+    "description": "Configure supported Linux virtual machine scale sets to automatically install the Azure Security agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Target virtual machines must be in a supported location.",
     "metadata": {
       "category": "Security Center",
-      "version": "5.0.0-preview",
+      "version": "1.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -28,7 +28,7 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
           },
           {
             "anyOf": [
@@ -286,23 +286,20 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
                 "equals": "AzureSecurityLinuxAgent"
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/Publisher",
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
                 "equals": "Microsoft.Azure.Security.Monitoring"
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                "in": [
-                  "Succeeded",
-                  "Provisioning succeeded"
-                ]
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+                "equals": "Succeeded"
               }
             ]
           },
@@ -316,7 +313,7 @@
                 "location": {
                   "value": "[field('location')]"
                 },
-                "vmName": {
+                "vmssName": {
                   "value": "[field('name')]"
                 }
               },
@@ -327,15 +324,15 @@
                   "location": {
                     "type": "string"
                   },
-                  "vmName": {
+                  "vmssName": {
                     "type": "string"
                   }
                 },
                 "variables": {},
                 "resources": [
                   {
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "name": "[concat(parameters('vmName'), '/', 'AzureSecurityLinuxAgent')]",
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                    "name": "[concat(parameters('vmssName'), '/', 'AzureSecurityLinuxAgent')]",
                     "apiVersion": "2019-03-01",
                     "location": "[parameters('location')]",
                     "properties": {
@@ -344,7 +341,7 @@
                       "typeHandlerVersion": "2.0",
                       "autoUpgradeMinorVersion": "true",
                       "settings": {},
-                      "protectedsettings": {}
+                      "protectedSettings": {}
                     }
                   }
                 ]
@@ -355,6 +352,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/5f8eb305-9c9f-4abe-9bb0-df220d9faba2",
-  "name": "5f8eb305-9c9f-4abe-9bb0-df220d9faba2"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6654c8c4-e6f8-43f8-8869-54327af7ce32",
+  "name": "6654c8c4-e6f8-43f8-8869-54327af7ce32"
 }
