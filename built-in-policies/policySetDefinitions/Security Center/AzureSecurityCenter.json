@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "The Azure Security Benchmark initiative represents the policies and controls implementing security recommendations defined in Azure Security Benchmark v2, see https://aka.ms/azsecbm. This also serves as the Azure Security Center default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Azure Security Center.",
     "metadata": {
-      "version": "31.0.0",
+      "version": "32.0.0",
       "category": "Security Center"
     },
     "policyDefinitionGroups": [
@@ -2731,6 +2731,101 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation of memory and CPU limits in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them."
         }
       },
+      "BlockVulnerableImagesInKubernetesClusterEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Kubernetes clusters should gate deployment of vulnerable images",
+          "description": "Enable or disable gating containers' with vulnerable images in Kubernetes clusters"
+        }
+      },
+      "BlockVulnerableImagesInKubernetesClusterNamespaceExclusion": {
+        "type": "Array",
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ],
+        "metadata": {
+          "displayName": "Kubernetes namespaces to exclude from monitoring of containers with vulnerable images",
+          "description": "List of Kubernetes namespaces to exclude from evaluation of block vulnerable images in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them."
+        }
+      },
+      "BlockVulnerableImagesNamespaces": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        }
+      },
+      "BlockVulnerableImagesExcludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded images regex",
+          "description": "A list of RegEx rules used to exclude container images from policy evaluation. For example: exclude all images from the repo azure-defender-in-cluster-defense-repo in the blockreg ACR -  [\"(blockreg.azurecr.io/azure-defender-in-cluster-defense-repo).*\"]. Use an empty list to apply this policy to all container images."
+        },
+        "defaultValue": []
+      },
+      "BlockVulnerableImagesSeverityThresholdForExcludingNotPatchableFindings": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Severity threshold for excluding vulnerabilities without a patch",
+          "description": "Specify the maximum severity for exempting vulnerabilities without a patch. For example, specify Medium to ignore Low and Medium vulnerabilities without a patch."
+        },
+        "allowedValues": [
+          "None",
+          "Low",
+          "Medium",
+          "High"
+        ],
+        "defaultValue": "None"
+      },
+      "BlockVulnerableImagesExcludeFindingIDs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Exclude findings Ids",
+          "description": "A list of finding IDs that the policy should exempt."
+        },
+        "defaultValue": []
+      },
+      "severity": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Severity threshold",
+          "description": "The number of allowed findings per severity for an image. e.g. \"{\"High\":0,\"Medium\":3,\"Low\":10}\""
+        },
+        "defaultValue": {
+          "High": 0,
+          "Medium": 0,
+          "Low": 0
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "High": {
+              "type": "integer"
+            },
+            "Medium": {
+              "type": "integer"
+            },
+            "Low": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "High",
+            "Medium",
+            "Low"
+          ],
+          "additionalProperties": false
+        }
+      },
       "MustRunAsNonRootNamespaceExclusion": {
         "type": "Array",
         "defaultValue": [
@@ -5314,6 +5409,36 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('allowedServicePortsInKubernetesClusterNamespaceExclusion')]"
+          }
+        },
+        "groupNames": [
+          "Azure_Security_Benchmark_v2.0_PV-2"
+        ]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/13cd7ae3-5bc0-4ac4-a62d-4f7c120b9759",
+        "policyDefinitionReferenceId": "BlockVulnerableImagesInKubernetesCluster",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('BlockVulnerableImagesInKubernetesClusterEffect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('BlockVulnerableImagesInKubernetesClusterNamespaceExclusion')]"
+          },
+          "namespaces": {
+            "value": "[parameters('BlockVulnerableImagesNamespaces')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('BlockVulnerableImagesExcludedImages')]"
+          },
+          "severityThresholdForExcludingNotPatchableFindings": {
+            "value": "[parameters('BlockVulnerableImagesSeverityThresholdForExcludingNotPatchableFindings')]"
+          },
+          "excludeFindingIDs": {
+            "value": "[parameters('BlockVulnerableImagesExcludeFindingIDs')]"
+          },
+          "severity": {
+            "value": "[parameters('severity')]"
           }
         },
         "groupNames": [
