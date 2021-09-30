@@ -6,7 +6,7 @@
       "description": "Configure machines to automatically create the Azure Security Center pipeline for Azure Monitor Agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and Log Analytics workspace in the same region as the machine to store audit records. Target virtual machines must be in a supported location.",
       "metadata": {
         "category": "Security Center",
-        "version": "1.1.0-preview",
+        "version": "3.0.0-preview",
         "preview": true
       },
       "parameters": {
@@ -65,12 +65,24 @@
         "then": {
           "effect": "[parameters('effect')]",
           "details": {
-            "type": "Microsoft.Insights/dataCollectionRuleAssociations",
-            "name": "Security-RulesAssociation",
+            "type": "Microsoft.Insights/dataCollectionRules",
             "deploymentScope": "subscription",
             "roleDefinitionIds": [
+              "/providers/microsoft.authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
               "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
             ],
+            "existenceScope": "subscription",
+            "existenceCondition": {
+                "allOf": [{
+                        "field": "location",
+                        "equals": "[field('location')]"
+                    },
+                    {
+                        "field": "name",
+                        "equals": "[concat('Microsoft-Security-', field('location'), '-dcr')]"
+                    }
+                ]
+            },
             "deployment": {
               "location": "eastus",
               "properties": {
@@ -139,8 +151,11 @@
                     "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                     "defaultRGLocation": "[parameters('location')]",
                     "workspaceName": "[concat('defaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode'))]",
-                    "dcrName": "[concat('Microsoft-Security-', variables('locationCode'), '-dcr')]",
+                    "dcrName": "[concat('Microsoft-Security-', parameters('location'), '-dcr')]",
                     "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
+                    "MonitoringContributorRoleId": "749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+                    "dcrRoleDefinitionId": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', variables('MonitoringContributorRoleId'))]",
+                    "AzureSecurityCenterPrincipalId": "6878917f-bc1d-4e4e-bb24-12924205b215",
                     "dcraName" : "[concat(parameters('vmName'),'/Microsoft.Insights/Security-RulesAssociation')]",
                     "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]",
                     "deployDataCollectionRulesAssociation": "[concat('deployDataCollectionRulesAssociation-', uniqueString(deployment().name))]"
@@ -171,6 +186,15 @@
                                 },
                                 "dcrName": {
                                     "value": "[variables('dcrName')]"
+                                },
+                                "dcrId": {
+                                  "value": "[variables('dcrId')]"
+                                },
+                                "dcrRoleDefinitionId": {
+                                  "value": "[variables('dcrRoleDefinitionId')]"
+                                },
+                                "AzureSecurityCenterPrincipalId": {
+                                  "value": "[variables('AzureSecurityCenterPrincipalId')]"
                                 }
                             },
                             "template": {
@@ -184,6 +208,15 @@
                                       "type": "string"
                                     },
                                     "dcrName": {
+                                      "type": "string"
+                                    },
+                                    "dcrId": {
+                                      "type": "string"
+                                    },
+                                    "dcrRoleDefinitionId": {
+                                      "type": "string"
+                                    },
+                                    "AzureSecurityCenterPrincipalId": {
                                       "type": "string"
                                     }
                                 },
@@ -260,54 +293,15 @@
                                         "properties": {
                                             "description": "Data collection rule for Azure Security Center. Deleting this rule will break the detection of security vulnerabilities.",
                                             "dataSources": {
-                                                "windowsEventLogs": [
-                                                    {
-                                                        "name": "RomeDetectionEventDataSource",
-                                                        "streams": [
-                                                            "Microsoft-RomeDetectionEvent"
-                                                        ],
-                                                        "scheduledTransferPeriod": "PT5M",
-                                                        "xPathQueries": [
-                                                            "Security!*",
-                                                            "Microsoft-Windows-AppLocker/EXE and DLL!*"
-                                                        ]
-                                                    }
-                                                ],
-                                                "syslog": [
-                                                  {
-                                                    "name": "SyslogDataSource",
-                                                    "streams": [
-                                                      "Microsoft-Syslog"
-                                                    ],
-                                                    "facilityNames": [
-                                                      "kern",
-                                                      "auth",
-                                                      "authpriv",
-                                                      "cron",
-                                                      "user",
-                                                      "daemon",
-                                                      "syslog",
-                                                      "local0"
-                                                    ],
-                                                    "logLevels": [
-                                                      "Debug",
-                                                      "Critical",
-                                                      "Emergency"
-                                                    ]
-                                                  }
-                                                ],
                                                 "extensions": [
                                                   {
                                                     "extensionName": "AzureSecurityLinuxAgent",
                                                     "name": "AscLinuxDataSource",
                                                     "streams": [
                                                       "Microsoft-OperationLog",
-                                                      "Microsoft-SecurityBaseline",
-                                                      "Microsoft-SecurityBaselineSummary",
-                                                      "Microsoft-ProcessInvestigator",
-                                                      "Microsoft-Auditd",
                                                       "Microsoft-ProtectionStatus",
-                                                      "Microsoft-Heartbeat"
+                                                      "Microsoft-SecurityBaseline",
+                                                      "Microsoft-SecurityBaselineSummary"
                                                     ],
                                                     "extensionSettings": {
                                                       "scanners": [
@@ -347,9 +341,8 @@
                                                     "name": "AsaWindowsDataSource",
                                                     "streams": [
                                                         "Microsoft-OperationLog",
-                                                        "Microsoft-SecurityBaseline",
-                                                        "Microsoft-ProcessInvestigator",
                                                         "Microsoft-ProtectionStatus",
+                                                        "Microsoft-SecurityBaseline",
                                                         "Microsoft-SecurityBaselineSummary"
                                                     ],
                                                     "extensionSettings": {
@@ -386,15 +379,10 @@
                                             "dataFlows": [
                                                 {
                                                   "streams": [
-                                                    "Microsoft-Syslog",
                                                     "Microsoft-OperationLog",
-                                                    "Microsoft-SecurityBaseline",
-                                                    "Microsoft-SecurityBaselineSummary",
-                                                    "Microsoft-RomeDetectionEvent",
-                                                    "Microsoft-ProcessInvestigator",
-                                                    "Microsoft-Auditd",
                                                     "Microsoft-ProtectionStatus",
-                                                    "Microsoft-Heartbeat"
+                                                    "Microsoft-SecurityBaseline",
+                                                    "Microsoft-SecurityBaselineSummary"
                                                   ],
                                                   "destinations": [
                                                     "LogAnalyticsDest"
@@ -402,6 +390,19 @@
                                                 }
                                             ]
                                         }
+                                    },
+                                    {
+                                      "type": "Microsoft.Authorization/roleAssignments",
+                                      "apiVersion": "2020-04-01-preview",
+                                      "name": "[guid(parameters('dcrId'))]",
+                                      "scope": "[parameters('dcrId')]",
+                                      "dependsOn": [
+                                        "[parameters('dcrId')]"
+                                      ],
+                                      "properties": {
+                                        "roleDefinitionId": "[parameters('dcrRoleDefinitionId')]",
+                                        "principalId": "[parameters('AzureSecurityCenterPrincipalId')]"
+                                      }
                                     }
                                 ]
                             }

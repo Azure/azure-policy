@@ -1,0 +1,162 @@
+{
+    "properties": {
+      "displayName": "Configure Association to link virtual machines to default Azure Security Center Data Collection Rule",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Configure machines to automatically create an association with the default data collection rule for Azure Security Center. Deleting this association will break the detection of security vulnerabilities for this virtual machine. Target virtual machines must be in a supported location.",
+      "metadata": {
+        "category": "Security Center",
+        "version": "1.0.0-preview",
+        "preview": true
+      },
+      "parameters": {
+        "effect": {
+          "type": "string",
+          "defaultValue": "DeployIfNotExists",
+          "allowedValues": [
+            "DeployIfNotExists",
+            "Disabled"
+          ],
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+            "allOf": [{
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                  "field": "location",
+                  "in": [
+                    "australiacentral",
+                    "australiaeast",
+                    "australiasoutheast",
+                    "canadacentral",
+                    "centralindia",
+                    "centralus",
+                    "eastasia",
+                    "eastus2euap",
+                    "eastus",
+                    "eastus2",
+                    "francecentral",
+                    "germanywestcentral",
+                    "japaneast",
+                    "koreacentral",
+                    "northcentralus",
+                    "northeurope",
+                    "southafricanorth",
+                    "southcentralus",
+                    "southeastasia",
+                    "switzerlandnorth",
+                    "uksouth",
+                    "ukwest",
+                    "westcentralus",
+                    "westeurope",
+                    "westus",
+                    "westus2"
+                  ]
+              }
+            ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]",
+          "details": {
+            "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+            "name": "Security-RulesAssociation",
+            "roleDefinitionIds": [
+              "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa"
+            ],
+            "deployment": {
+              "properties": {
+                "mode": "incremental",
+                "parameters": {
+                  "resourceGroup": {
+                    "value": "[resourceGroup().name]"
+                  },
+                  "location": {
+                    "value": "[field('location')]"
+                  },
+                  "vmName": {
+                    "value": "[field('name')]"
+                  }
+                },
+                "template": {
+                  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                  "contentVersion": "1.0.0.0",
+                  "parameters": {
+                    "resourceGroup": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "vmName": {
+                      "type": "string"
+                    }
+                  },
+                  "variables": {
+                    "locationLongNameToShortMap": {
+                        "australiacentral": "CAU",
+                        "australiaeast": "EAU",
+                        "australiasoutheast": "SEAU",
+                        "brazilsouth": "CQ",
+                        "canadacentral": "CCA",
+                        "centralindia": "CIN",
+                        "centralus": "CUS",
+                        "eastasia": "EA",
+                        "eastus2euap": "eus2p",
+                        "eastus": "EUS",
+                        "eastus2": "EUS2",
+                        "francecentral": "PAR",
+                        "germanywestcentral": "DEWC",
+                        "japaneast": "EJP",
+                        "koreacentral": "SE",
+                        "northcentralus": "NCUS",
+                        "northeurope": "NEU",
+                        "norwayeast": "NOE",
+                        "southcentralus": "SCUS",
+                        "southeastasia": "SEA",
+                        "switzerlandnorth": "CHN",
+                        "switzerlandwest": "CHW",
+                        "southafricanorth": "JNB",
+                        "swedencentral": "SEC",
+                        "uaenorth": "DXB",
+                        "uksouth": "SUK",
+                        "ukwest": "WUK",
+                        "westcentralus": "WCUS",
+                        "westeurope": "WEU",
+                        "westus": "WUS",
+                        "westus2": "WUS2"
+                    },
+                    "locationCode": "[variables('locationLongNameToShortMap')[parameters('location')]]",
+                    "subscriptionId": "[subscription().subscriptionId]",
+                    "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
+                    "dcrName": "[concat('Microsoft-Security-', parameters('location'), '-dcr')]",
+                    "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
+                    "dcraName" : "[concat(parameters('vmName'),'/Microsoft.Insights/Security-RulesAssociation')]"
+                  },
+                  "resources": [
+                    {
+                        "type": "Microsoft.Compute/virtualMachines/providers/dataCollectionRuleAssociations",
+                        "name": "[variables('dcraName')]",
+                        "apiVersion": "2019-11-01-preview",
+                        "properties": {
+                            "description": "Association of data collection rule for Azure Security Center. Deleting this association will break the detection of security vulnerabilities for this virtual machine.",
+                            "dataCollectionRuleId": "[variables('dcrId')]"
+                        }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/a2ea54a3-9707-45e3-8230-bbda8309d17e",
+    "name": "a2ea54a3-9707-45e3-8230-bbda8309d17e"
+  }
