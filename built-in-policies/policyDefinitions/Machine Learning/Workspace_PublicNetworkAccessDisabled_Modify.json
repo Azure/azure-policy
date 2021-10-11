@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Machine Learning workspaces to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for Azure Machine Learning workspaces so that your workspaces aren't accessible over the public internet. This will help protect the workspaces against data leakage risks. You can limit exposure of the your machine learning workspaces by creating private endpoints instead. Learn more at: https://aka.ms/privateendpoints.",
+    "metadata": {
+      "category": "Machine Learning",
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices/workspaces"
+          },
+          {
+            "field": "Microsoft.MachineLearningServices/workspaces/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/f6c7c914-8db3-469d-8ca1-694a8f32e121"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-07-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.MachineLearningServices/workspaces/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a10ee784-7409-4941-b091-663697637c0f",
+  "name": "a10ee784-7409-4941-b091-663697637c0f"
+}
