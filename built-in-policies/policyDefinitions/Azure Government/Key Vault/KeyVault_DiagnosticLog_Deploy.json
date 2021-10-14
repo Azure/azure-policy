@@ -1,105 +1,105 @@
 {
   "properties": {
-    "displayName": "Deploy Diagnostic Settings for Key Vault to Log Analytics workspace",
+    "displayName": "Deploy Diagnostic Settings for Key Vault to Event Hub",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Log Analytics workspace when any Key Vault which is missing this diagnostic settings is created or updated.",
+    "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Event Hub when any Key Vault which is missing this diagnostic settings is created or updated.",
     "metadata": {
       "version": "2.0.0",
-      "category": "Monitoring"
+      "category": "Key Vault"
     },
     "parameters": {
-      "effect": {
-        "type": "string",
-        "defaultValue": "DeployIfNotExists",
-        "allowedValues": [
-          "DeployIfNotExists",
-          "Disabled"
-        ],
-        "metadata": {
-          "displayName": "Effect",
-          "description": "Enable or disable the execution of the policy"
-        }
-      },
       "profileName": {
-        "type": "string",
-        "defaultValue": "setbypolicy_logAnalytics",
+        "type": "String",
+        "defaultValue": "setbypolicy",
         "metadata": {
           "displayName": "Profile name",
           "description": "The diagnostic settings profile name"
         }
       },
-      "logAnalytics": {
-        "type": "string",
+      "eventHubRuleId": {
+        "type": "String",
         "metadata": {
-          "displayName": "Log Analytics workspace",
-          "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
-          "strongType": "omsWorkspace",
+          "displayName": "Event Hub Authorization Rule Id",
+          "description": "The Event Hub authorization rule Id for Azure Diagnostics. The authorization rule needs to be at Event Hub namespace level. e.g. /subscriptions/{subscription Id}/resourceGroups/{resource group}/providers/Microsoft.EventHub/namespaces/{Event Hub namespace}/authorizationrules/{authorization rule}",
+          "strongType": "Microsoft.EventHub/Namespaces/AuthorizationRules",
           "assignPermissions": true
         }
       },
+      "eventHubLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Event Hub Location",
+          "description": "The location the Event Hub resides in. Only Key Vaults in this location will be linked to this Event Hub.",
+          "strongType": "location"
+        },
+        "defaultValue": ""
+      },
       "metricsEnabled": {
-        "type": "string",
-        "defaultValue": "False",
-        "allowedValues": [
-          "True",
-          "False"
-        ],
+        "type": "String",
         "metadata": {
           "displayName": "Enable metrics",
-          "description": "Whether to enable metrics stream to the Log Analytics workspace - True or False"
-        }
-      },
-      "logsEnabled": {
-        "type": "string",
-        "defaultValue": "True",
+          "description": "Whether to enable metrics stream to the Event Hub - True or False"
+        },
         "allowedValues": [
           "True",
           "False"
         ],
+        "defaultValue": "False"
+      },
+      "logsEnabled": {
+        "type": "String",
         "metadata": {
           "displayName": "Enable logs",
-          "description": "Whether to enable logs stream to the Log Analytics workspace - True or False"
-        }
+          "description": "Whether to enable logs stream to the Event Hub  - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
       }
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.KeyVault/vaults"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('eventHubLocation')]",
+                "equals": ""
+              },
+              {
+                "field": "location",
+                "equals": "[parameters('eventHubLocation')]"
+              }
+            ]
+          }
+        ]
       },
       "then": {
-        "effect": "[parameters('effect')]",
+        "effect": "deployIfNotExists",
         "details": {
           "type": "Microsoft.Insights/diagnosticSettings",
           "name": "[parameters('profileName')]",
           "existenceCondition": {
             "allOf": [
               {
-                "count": {
-                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
-                  "where": {
-                    "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
-                    "equals": "[parameters('logsEnabled')]"
-                  }
-                },
-                "greaterOrEquals": 1
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "[parameters('logsEnabled')]"
               },
               {
-                "count": {
-                  "field": "Microsoft.Insights/diagnosticSettings/metrics[*]",
-                  "where": {
-                    "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
-                    "equals": "[parameters('metricsEnabled')]"
-                  }
-                },
-                "greaterOrEquals": 1
+                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                "equals": "[parameters('metricsEnabled')]"
               }
             ]
           },
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
-            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
           ],
           "deployment": {
             "properties": {
@@ -108,13 +108,13 @@
                 "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "parameters": {
-                  "resourceName": {
+                  "vaultName": {
                     "type": "string"
                   },
                   "location": {
                     "type": "string"
                   },
-                  "logAnalytics": {
+                  "eventHubRuleId": {
                     "type": "string"
                   },
                   "metricsEnabled": {
@@ -127,16 +127,15 @@
                     "type": "string"
                   }
                 },
-                "variables": {},
                 "resources": [
                   {
                     "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
                     "apiVersion": "2017-05-01-preview",
-                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
+                    "name": "[concat(parameters('vaultName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
                     "location": "[parameters('location')]",
                     "dependsOn": [],
                     "properties": {
-                      "workspaceId": "[parameters('logAnalytics')]",
+                      "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
                       "metrics": [
                         {
                           "category": "AllMetrics",
@@ -151,26 +150,27 @@
                         {
                           "category": "AuditEvent",
                           "enabled": "[parameters('logsEnabled')]"
-                        },
-                        {
-                          "category": "AzurePolicyEvaluationDetails",
-                          "enabled": "[parameters('logsEnabled')]"
                         }
                       ]
                     }
                   }
                 ],
-                "outputs": {}
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Enabled diagnostic settings for ', parameters('vaultName'))]"
+                  }
+                }
               },
               "parameters": {
                 "location": {
                   "value": "[field('location')]"
                 },
-                "resourceName": {
+                "vaultName": {
                   "value": "[field('name')]"
                 },
-                "logAnalytics": {
-                  "value": "[parameters('logAnalytics')]"
+                "eventHubRuleId": {
+                  "value": "[parameters('eventHubRuleId')]"
                 },
                 "metricsEnabled": {
                   "value": "[parameters('metricsEnabled')]"
@@ -188,6 +188,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/bef3f64c-5290-43b7-85b0-9b254eef4c47",
-  "name": "bef3f64c-5290-43b7-85b0-9b254eef4c47"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ed7c8c13-51e7-49d1-8a43-8490431a0da2",
+  "name": "ed7c8c13-51e7-49d1-8a43-8490431a0da2"
 }

@@ -1,0 +1,155 @@
+{
+  "properties": {
+    "displayName": "Configure periodic checking for missing system updates on azure Arc-enabled servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configure auto-assessment (every 24 hours) for OS updates on Azure Arc-enabled servers. You can control the scope of assignment according to machine subscription, resource group, location or tag. Learn more about this for Windows: https://aka.ms/computevm-windowspatchassessmentmode, for Linux: https://aka.ms/computevm-linuxpatchassessmentmode.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Update Management Center",
+      "preview": true
+    },
+    "parameters": {
+      "assessmentMode": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Assessment mode",
+          "description": "Assessment mode for the machines."
+        },
+        "allowedValues": [
+          "ImageDefault",
+          "AutomaticByPlatform"
+        ],
+        "defaultValue": "ImageDefault"
+      },
+      "osType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "OS type",
+          "description": "OS type for the machines."
+        },
+        "allowedValues": [
+          "Windows",
+          "Linux"
+        ],
+        "defaultValue": "Windows"
+      },
+      "locations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Machines locations",
+          "description": "The list of locations from which machines need to be targeted.",
+          "strongType": "location"
+        },
+        "defaultValue": []
+      },
+      "tagValues": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Tags on machines",
+          "description": "The list of tags that need to matched for getting target machines."
+        },
+        "defaultValue": {}
+      },
+      "tagOperator": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag operator",
+          "description": "Matching condition for resource tags"
+        },
+        "allowedValues": [
+          "All",
+          "Any"
+        ],
+        "defaultValue": "Any"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "equals": "[parameters('osType')]"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[empty(parameters('locations'))]",
+                "equals": true
+              },
+              {
+                "field": "location",
+                "in": "[parameters('locations')]"
+              }
+            ]
+          },
+          {
+            "field": "[if(equals(parameters('osType'), 'Windows'), 'Microsoft.HybridCompute/machines/osProfile.windowsConfiguration.patchSettings.assessmentMode', 'Microsoft.HybridCompute/machines/osProfile.linuxConfiguration.patchSettings.assessmentMode')]",
+            "notEquals": "[parameters('assessmentMode')]"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[empty(parameters('tagValues'))]",
+                "equals": true
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('tagOperator')]",
+                    "equals": "Any"
+                  },
+                  {
+                    "value": "[greaterOrEquals(if(empty(field('tags')), 0, length(intersection(parameters('tagValues'), field('tags')))), 1)]",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('tagOperator')]",
+                    "equals": "All"
+                  },
+                  {
+                    "value": "[equals(if(empty(field('tags')), 0, length(intersection(parameters('tagValues'), field('tags')))), length(parameters('tagValues')))]",
+                    "equals": true
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "modify",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/cd570a14-e51a-42ad-bac8-bafd67325302"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[equals(parameters('osType'), 'Windows')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.HybridCompute/machines/osProfile.windowsConfiguration.patchSettings.assessmentMode",
+              "value": "[parameters('assessmentMode')]"
+            },
+            {
+              "condition": "[equals(parameters('osType'), 'Linux')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.HybridCompute/machines/osProfile.linuxConfiguration.patchSettings.assessmentMode",
+              "value": "[parameters('assessmentMode')]"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bfea026e-043f-4ff4-9d1b-bf301ca7ff46",
+  "name": "bfea026e-043f-4ff4-9d1b-bf301ca7ff46"
+}
