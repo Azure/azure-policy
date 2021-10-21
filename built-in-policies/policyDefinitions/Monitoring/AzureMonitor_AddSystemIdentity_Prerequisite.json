@@ -1,17 +1,17 @@
 {
   "properties": {
-    "displayName": "[ASC Private Preview] Configure system-assigned managed identity to enable Azure Monitor assignments on VMs",
+    "displayName": "Configure system-assigned managed identity to enable Azure Monitor assignments on VMs",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "[ASC Private Preview] Configure system-assigned managed identity to virtual machines hosted in Azure that are supported by Azure Monitor that do not have a system-assigned managed identity. A system-assigned managed identity is a prerequisite for all Azure Monitor assignments and must be added to machines before using any Azure Monitor extension. Target virtual machines must be in a supported location.",
+    "description": "Configure system-assigned managed identity to virtual machines hosted in Azure that are supported by Azure Monitor and do not have a system-assigned managed identity. A system-assigned managed identity is a prerequisite for all Azure Monitor assignments and must be added to machines before using any Azure Monitor extension. Target virtual machines must be in a supported location.",
     "metadata": {
       "category": "Monitoring",
-      "version": "3.0.0-preview",
+      "version": "4.0.0-preview",
       "preview": true
     },
     "parameters": {
       "effect": {
-        "type": "string",
+        "type": "String",
         "defaultValue": "Modify",
         "allowedValues": [
           "Modify",
@@ -27,8 +27,16 @@
       "if": {
         "allOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "anyOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachineScaleSets"
+              }
+            ]
           },
           {
             "field": "location",
@@ -36,20 +44,36 @@
               "australiacentral",
               "australiaeast",
               "australiasoutheast",
+              "brazilsouth",
+              "canadacentral",
+              "canadaeast",
               "centralindia",
               "centralus",
               "eastasia",
+              "eastus2euap",
               "eastus",
               "eastus2",
+              "francecentral",
               "germanywestcentral",
               "japaneast",
+              "japanwest",
+              "jioindiawest",
+              "koreacentral",
+              "koreasouth",
               "northcentralus",
               "northeurope",
+              "norwayeast",
+              "southafricanorth",
               "southcentralus",
               "southeastasia",
+              "southindia",
+              "switzerlandnorth",
+              "uaenorth",
               "uksouth",
+              "ukwest",
               "westcentralus",
               "westeurope",
+              "westindia",
               "westus",
               "westus2"
             ]
@@ -73,11 +97,15 @@
                     "anyOf": [
                       {
                         "field": "Microsoft.Compute/imageSku",
-                        "like": "6.*"
+                        "like": "6*"
                       },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
                       }
                     ]
                   }
@@ -108,6 +136,10 @@
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "12*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "15*"
                       }
                     ]
                   }
@@ -145,6 +177,26 @@
                 "allOf": [
                   {
                     "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "0001-com-ubuntu-server-focal"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "20_04-lts*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
                     "equals": "Oracle"
                   },
                   {
@@ -155,15 +207,15 @@
                     "anyOf": [
                       {
                         "field": "Microsoft.Compute/imageSku",
-                        "like": "6.*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "7.*"
+                        "like": "6*"
                       },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
                       }
                     ]
                   }
@@ -187,11 +239,15 @@
                     "anyOf": [
                       {
                         "field": "Microsoft.Compute/imageSku",
-                        "like": "6.*"
+                        "like": "6*"
                       },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
                       }
                     ]
                   }
@@ -450,7 +506,9 @@
         "effect": "[parameters('effect')]",
         "details": {
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c",
+            "/providers/microsoft.authorization/roleDefinitions/e40ec5ca-96e0-45a2-b4ff-59039f2c2b59",
+            "/providers/microsoft.authorization/roleDefinitions/f1a07417-d97a-45cb-824c-7a7467783830"
           ],
           "operations": [
             {

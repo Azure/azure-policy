@@ -1,9 +1,9 @@
 {
   "properties": {
-    "displayName": "Configure Linux virtual machines with Azure Monitor Agent",
+    "displayName": "Linux virtual machines should have Azure Monitor Agent installed",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Azure Monitor Agent for Linux virtual machines if the virtual machine image (OS) and location are in the list defined and the agent is not installed. The list of OS images is updated over time as support is increased.",
+    "description": "Linux virtual machines should be monitored and secured through the deployed Azure Monitor Agent. The Azure Monitor Agent collects telemetry data from the guest OS. This policy will audit virtual machines with supported OS images in supported regions. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
       "version": "1.0.0",
       "category": "Monitoring"
@@ -16,16 +16,16 @@
           "description": "Enable or disable the execution of the policy."
         },
         "allowedValues": [
-          "DeployIfNotExists",
+          "AuditIfNotExists",
           "Disabled"
         ],
-        "defaultValue": "DeployIfNotExists"
+        "defaultValue": "AuditIfNotExists"
       },
       "listOfLinuxImageIdToInclude": {
         "type": "Array",
         "metadata": {
-          "displayName": "Optional: List of virtual machine images that have supported Linux OS to add to scope",
-          "description": "Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+          "displayName": "Additional Virtual Machine Images",
+          "description": "List of virtual machine images that have supported Linux OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
         },
         "defaultValue": []
       }
@@ -99,15 +99,15 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "6.*"
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "6*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "8*"
                       }
                     ]
@@ -137,7 +137,11 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "12*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "15*"
                       }
                     ]
@@ -157,15 +161,15 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "14.04*LTS"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "16.04*LTS"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "18.04*LTS"
                       }
                     ]
@@ -185,7 +189,7 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "20_04-lts*"
                       }
                     ]
@@ -205,19 +209,15 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "6.*"
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "6*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "7.*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "8*"
                       }
                     ]
@@ -241,15 +241,15 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "like": "6.*"
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "6*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "8*"
                       }
                     ]
@@ -267,7 +267,7 @@
                     "equals": "cloudera-centos-os"
                   },
                   {
-                    "field": "Microsoft.Compute/imageSKU",
+                    "field": "Microsoft.Compute/imageSku",
                     "like": "7*"
                   }
                 ]
@@ -287,11 +287,11 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "8"
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "9"
                       }
                     ]
@@ -311,7 +311,7 @@
                     ]
                   },
                   {
-                    "field": "Microsoft.Compute/imageSKU",
+                    "field": "Microsoft.Compute/imageSku",
                     "like": "10"
                   }
                 ]
@@ -324,9 +324,6 @@
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Compute/virtualMachines/extensions",
-          "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
-          ],
           "existenceCondition": {
             "allOf": [
               {
@@ -342,58 +339,11 @@
                 "equals": "Succeeded"
               }
             ]
-          },
-          "deployment": {
-            "properties": {
-              "mode": "incremental",
-              "template": {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
-                "parameters": {
-                  "vmName": {
-                    "type": "string"
-                  },
-                  "location": {
-                    "type": "string"
-                  }
-                },
-                "variables": {
-                  "vmExtensionName": "AzureMonitorLinuxAgent",
-                  "vmExtensionPublisher": "Microsoft.Azure.Monitor",
-                  "vmExtensionType": "AzureMonitorLinuxAgent",
-                  "vmExtensionTypeHandlerVersion": "1.5"
-                },
-                "resources": [
-                  {
-                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
-                    "location": "[parameters('location')]",
-                    "apiVersion": "2019-07-01",
-                    "properties": {
-                      "publisher": "[variables('vmExtensionPublisher')]",
-                      "type": "[variables('vmExtensionType')]",
-                      "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
-                      "autoUpgradeMinorVersion": true,
-                      "settings": {},
-                      "protectedSettings": {}
-                    }
-                  }
-                ]
-              },
-              "parameters": {
-                "vmName": {
-                  "value": "[field('name')]"
-                },
-                "location": {
-                  "value": "[field('location')]"
-                }
-              }
-            }
           }
         }
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/a4034bc6-ae50-406d-bf76-50f4ee5a7811",
-  "name": "a4034bc6-ae50-406d-bf76-50f4ee5a7811"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1afdc4b6-581a-45fb-b630-f1e6051e3e7a",
+  "name": "1afdc4b6-581a-45fb-b630-f1e6051e3e7a"
 }
