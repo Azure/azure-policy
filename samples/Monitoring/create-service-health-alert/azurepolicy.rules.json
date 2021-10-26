@@ -1,0 +1,190 @@
+{
+    "if": {
+      "field": "type",
+      "equals": "Microsoft.Resources/subscriptions"
+    },
+    "then": {
+      "effect": "[parameters('effect')]",
+      "details": {
+        "type": "Microsoft.Insights/ActivityLogAlerts",
+        "roleDefinitionIds": [
+          "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+        ],
+        "resourceGroupName": "[parameters('resourceGroupName')]",
+        "name": "[parameters('activityLogAlertName')]",
+        "existenceCondition": {
+          "count": {
+            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*]",
+            "where": {
+              "anyOf": [
+                {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                      "equals": "category"
+                    },
+                    {
+                      "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].equals",
+                      "equals": "ServiceHealth"
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                      "equals": "properties.incidentType"
+                    },
+                    {
+                      "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].equals",
+                      "equals": "Incident"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "equals": 2
+        },
+        "deploymentScope": "subscription",
+        "deployment": {
+          "location": "eastus",
+          "properties": {
+            "mode": "incremental",
+            "template": {
+              "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+              "contentVersion": "1.0.0.0",
+              "parameters": {
+                "resourceGroupName": {
+                  "type": "string"
+                },
+                "actionGroupName": {
+                  "type": "string"
+                },
+                "actionGroupShortName": {
+                  "type": "string"
+                },
+                "emailAddress": {
+                  "type": "string"
+                },
+                "activityLogAlertName": {
+                  "type": "string"
+                }
+              },
+              "resources": [
+                {
+                  "type": "Microsoft.Resources/resourceGroups",
+                  "apiVersion": "2020-10-01",
+                  "name": "[parameters('resourceGroupName')]",
+                  "location": "westeurope",
+                  "properties": {}
+                },
+                {
+                  "type": "Microsoft.Resources/deployments",
+                  "apiVersion": "2020-10-01",
+                  "name": "alertAndActionGroupDeployment",
+                  "resourceGroup": "[parameters('resourceGroupName')]",
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]"
+                  ],
+                  "properties": {
+                    "mode": "Incremental",
+                    "template": {
+                      "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                      "contentVersion": "1.0.0.0",
+                      "resources": [
+                        {
+                          "type": "Microsoft.Insights/actionGroups",
+                          "apiVersion": "2019-06-01",
+                          "name": "[parameters('actionGroupName')]",
+                          "location": "Global",
+                          "properties": {
+                            "groupShortName": "[parameters('actionGroupShortName')]",
+                            "enabled": true,
+                            "emailReceivers": [
+                              {
+                                "name": "emailReceiver",
+                                "emailAddress": "[parameters('emailAddress')]"
+                              }
+                            ],
+                            "smsReceivers": [],
+                            "webhookReceivers": [],
+                            "itsmReceivers": [],
+                            "azureAppPushReceivers": [],
+                            "automationRunbookReceivers": [],
+                            "voiceReceivers": [],
+                            "logicAppReceivers": [],
+                            "azureFunctionReceivers": [],
+                            "armRoleReceivers": []
+                          }
+                        },
+                        {
+                          "type": "Microsoft.Insights/activityLogAlerts",
+                          "apiVersion": "2020-10-01",
+                          "name": "[parameters('activityLogAlertName')]",
+                          "location": "Global",
+                          "dependsOn": [
+                            "[parameters('actionGroupName')]"
+                          ],
+                          "properties": {
+                            "enabled": true,
+                            "scopes": [
+                              "[subscription().id]"
+                            ],
+                            "condition": {
+                              "allOf": [
+                                {
+                                  "field": "category",
+                                  "equals": "ServiceHealth"
+                                },
+                                {
+                                  "field": "properties.incidentType",
+                                  "equals": "Incident"
+                                },
+                                {
+                                  "field": "properties.impactedServices[*].ImpactedRegions[*].RegionName",
+                                  "containsAny": [
+                                    "Global",
+                                    "West Europe",
+                                    "North Europe"
+                                  ]
+                                }
+                              ]
+                            },
+                            "actions": {
+                              "actionGroups": [
+                                {
+                                  "actionGroupId": "[concat(subscription().id, '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Insights/actionGroups/', parameters('actionGroupName'))]"
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "parameters": {
+              "resourceGroupName": {
+                "value": "[parameters('resourceGroupName')]"
+              },
+              "actionGroupName": {
+                "value": "[parameters('actionGroupName')]"
+              },
+              "actionGroupShortName": {
+                "value": "[parameters('actionGroupShortName')]"
+              },
+              "emailAddress": {
+                "value": "[parameters('emailAddress')]"
+              },
+              "activityLogAlertName": {
+                "value": "[parameters('activityLogAlertName')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
