@@ -1,0 +1,58 @@
+{
+ "properties": {
+  "displayName": "Public IP addresses should have diagnostic logging enabled for Azure DDoS Protection Standard",
+  "policyType": "BuiltIn",
+  "mode": "All",
+  "description": "Enable resource logs for public IP addresses in diagnostic settings and stream to a Log Analytics workspace.  Get detailed visibility into attack traffic and actions taken to mitigate DDoS attacks via notifications, reports, and flow logs.",
+  "metadata": {
+   "version": "1.0.0",
+   "category": "Monitoring"
+  },
+  "parameters": {
+    "effect": {
+     "type": "String",
+     "metadata": {
+      "displayName": "Effect",
+      "description": "Enable or disable the execution of the policy"
+     },
+     "allowedValues": [
+      "AuditIfNotExists",
+      "Deny",
+      "Disabled"
+    ],
+    "defaultValue": "AuditIfNotExists"
+    }  
+  },
+  "policyRule": {
+   "if": {
+    "field": "type",
+    "equals": "Microsoft.Network/publicIPAddresses"
+   },
+   "then": {
+    "effect": "[parameters('effect')]",
+    "details": {
+     "type": "Microsoft.Insights/diagnosticSettings",
+     "existenceCondition": {
+      "allOf": [
+       {
+        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+        "equals": "true"
+       },
+       {
+        "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+        "equals": "true"
+       },
+       {
+        "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+        "exists": "true"
+       }
+      ]
+     }
+    }
+   }
+  }
+ },
+ "id": "/providers/Microsoft.Authorization/policyDefinitions/b6020039-df36-46f3-980c-6f76edb98c1f",
+ "type": "Microsoft.Authorization/policyDefinitions",
+ "name": "b6020039-df36-46f3-980c-6f76edb98c1f"
+}
