@@ -1,0 +1,104 @@
+{
+  "properties": {
+    "displayName": "Windows Arc machines should have Azure Monitor Agent installed",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Windows Arc machines should be monitored and secured through the deployed Azure Monitor Agent. The Azure Monitor Agent collects telemetry data from the guest OS. Windows Arc machines in supported regions are monitored for Azure Monitor Agent deployment. Learn more: https://aka.ms/AMAOverview.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "equals": "Windows"
+          },
+          {
+            "field": "location",
+            "in": [
+              "australiacentral",
+              "australiaeast",
+              "australiasoutheast",
+              "brazilsouth",
+              "canadacentral",
+              "canadaeast",
+              "centralindia",
+              "centralus",
+              "eastasia",
+              "eastus2euap",
+              "eastus",
+              "eastus2",
+              "francecentral",
+              "germanywestcentral",
+              "japaneast",
+              "japanwest",
+              "jioindiawest",
+              "koreacentral",
+              "koreasouth",
+              "northcentralus",
+              "northeurope",
+              "norwayeast",
+              "southafricanorth",
+              "southcentralus",
+              "southeastasia",
+              "southindia",
+              "switzerlandnorth",
+              "uaenorth",
+              "uksouth",
+              "ukwest",
+              "westcentralus",
+              "westeurope",
+              "westindia",
+              "westus",
+              "westus2"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "AzureMonitorWindowsAgent"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+                "equals": "Microsoft.Azure.Monitor"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ec621e21-8b48-403d-a549-fc9023d4747f",
+  "name": "ec621e21-8b48-403d-a549-fc9023d4747f"
+}
