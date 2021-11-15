@@ -1,13 +1,12 @@
 {
   "properties": {
     "displayName": "SQL server should use customer-managed keys to encrypt data at rest",
-    "description": "Your Azure SQL Server are created using a customer-managed key for Transparent Data Encryption. Implementing Transparent Data Encryption (TDE) with your own key provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties. This recommendation applies to organizations with a related compliance requirement.",
+    "description": "Implementing Transparent Data Encryption (TDE) with your own key provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties. This recommendation applies to organizations with a related compliance requirement.",
     "policyType": "BuiltIn",
-    "mode": "Indexed",
+    "mode": "All",
     "metadata": {
-      "version": "1.0.0-preview",
-      "category": "SQL",
-      "preview": true
+      "version": "2.0.0",
+      "category": "SQL"
     },
     "parameters": {
       "effect": {
@@ -26,24 +25,44 @@
     },
     "policyRule": {
       "if": {
-        "allOf": [
+        "anyOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Sql/servers"
-          },
-          {
-            "value": "[resourcegroup().managedBy]",
-            "notContains": "/providers/Microsoft.Synapse/"
-          },
-          {
-            "anyOf": [
+            "allOf": [
               {
-                "field": "Microsoft.Sql/servers/keyid",
-                "exists": false
+                "field": "type",
+                "equals": "Microsoft.Sql/servers"
               },
               {
-                "field": "Microsoft.Sql/servers/keyid",
-                "equals": ""
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Synapse/"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Sql/servers/keyid",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.Sql/servers/keyid",
+                    "equals": ""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Sql/servers/encryptionProtector"
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Synapse/"
+              },
+              {
+                "field": "Microsoft.Sql/servers/encryptionProtector/serverKeyType",
+                "notequals": "AzureKeyVault"
               }
             ]
           }

@@ -1,10 +1,10 @@
-﻿{
+{
   "properties": {
     "displayName": "Azure Security Benchmark",
     "policyType": "BuiltIn",
     "description": "The Azure Security Benchmark initiative represents the policies and controls implementing security recommendations defined in Azure Security Benchmark v2, see https://aka.ms/azsecbm. This also serves as the Azure Security Center default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Azure Security Center.",
     "metadata": {
-      "version": "31.0.0",
+      "version": "32.0.4",
       "category": "Security Center"
     },
     "policyDefinitionGroups": [
@@ -386,7 +386,8 @@
         ],
         "metadata": {
           "displayName": "Log Analytics agent health issues should be resolved on your machines",
-          "description": "Security Center uses the Log Analytics agent, formerly known as the Microsoft Monitoring Agent (MMA). To make sure your virtual machines are successfully monitored, you need to make sure the agent is installed on the virtual machines and properly collects security events to the configured workspace."
+          "description": "Security Center uses the Log Analytics agent, formerly known as the Microsoft Monitoring Agent (MMA). To make sure your virtual machines are successfully monitored, you need to make sure the agent is installed on the virtual machines and properly collects security events to the configured workspace.",
+          "deprecated": true
         }
       },
       "installLogAnalyticsAgentOnVmMonitoringEffect": {
@@ -2559,7 +2560,7 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Web Application Firewall (WAF) should be enabled for Azure Front Door Service service",
+          "displayName": "Azure Web Application Firewall should be enabled for Azure Front Door entry-points",
           "description": "Deploy Azure Web Application Firewall (WAF) in front of public facing web applications for additional inspection of incoming traffic. Web Application Firewall (WAF) provides centralized protection of your web applications from common exploits and vulnerabilities such as SQL injections, Cross-Site Scripting, local and remote file executions. You can also restrict access to your web applications by countries, IP address ranges, and other http(s) parameters via custom rules."
         }
       },
@@ -2666,7 +2667,7 @@
         "defaultValue": "^(.+){0}$",
         "metadata": {
           "displayName": "Allowed registry or registries regex",
-          "description": "The RegEx rule used to match allowed container image field in a Kubernetes cluster. For example, to allow any Azure Container Registry image by matching partial path: \"^[^\\/]+\\.azurecr\\.io\\/.+$\". For multiple registries: \"^([^\\/]+\\.azurecr\\.io|registry\\.io)\\/.+$\"."
+          "description": "The RegEx rule used to match allowed container image field in a Kubernetes cluster. For example, to allow any Azure Container Registry image by matching partial path: ^[^\\/]+\\.azurecr\\.io\\/.+$ and for multiple registries: ^([^\\/]+\\.azurecr\\.io|registry\\.io)\\/.+$"
         }
       },
       "allowedContainerImagesNamespaceExclusion": {
@@ -2725,7 +2726,7 @@
           "-1"
         ],
         "metadata": {
-          "displayName": "Allowed container ports list",
+          "displayName": "Allowed container ports list in Kubernetes cluster",
           "description": "List of container ports allowed in Kubernetes cluster. Use ; to separate values"
         }
       },
@@ -2760,7 +2761,7 @@
           "-1"
         ],
         "metadata": {
-          "displayName": "Allowed service ports list",
+          "displayName": "Allowed service ports list in Kubernetes cluster",
           "description": "List of service ports allowed in Kubernetes cluster. Use ; to separate values"
         }
       },
@@ -2962,7 +2963,7 @@
         "type": "Integer",
         "defaultValue": 0,
         "metadata": {
-          "displayName": "Min host port",
+          "displayName": "Min host port for pod in Kubernetes cluster",
           "description": "The minimum value in the allowable host port range that pods can use in the host network namespace."
         }
       },
@@ -2970,7 +2971,7 @@
         "type": "Integer",
         "defaultValue": 0,
         "metadata": {
-          "displayName": "Max host port",
+          "displayName": "Max host port for pod in Kubernetes cluster",
           "description": "The maximum value in the allowable host port range that pods can use in the host network namespace."
         }
       },
@@ -3002,7 +3003,7 @@
       "AllowedHostPathVolumesInKubernetesClusterList": {
         "type": "Object",
         "metadata": {
-          "displayName": "Allowed host paths",
+          "displayName": "Allowed host paths for pod in Kubernetes cluster",
           "description": "The host paths allowed for pod hostPath volumes to use. Provide an empty paths list to block all host paths.",
           "schema": {
             "type": "object",
@@ -3169,8 +3170,8 @@
         "type": "Array",
         "defaultValue": [ "kube-system", "gatekeeper-system", "azure-arc" ],
         "metadata": {
-          "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+          "displayName": "Kubernetes namespaces to exclude from evaluation of HTTPS only access",
+          "description": "List of Kubernetes namespaces to exclude from evaluation of HTTPS only access. To list multiple namespaces, use semicolons (;) to seperate them"
         }
       },
       "kubernetesClustersShouldBeAccessibleOnlyOverHTTPSNamespaces": {
@@ -3331,6 +3332,18 @@
           "description": "Disable automounting API credentials to prevent a potentially compromised Pod resource to run API commands against Kubernetes clusters. For more information, see https://aka.ms/kubepolicydoc."
         }
       },
+      "KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringNamespaceExclusion": {
+        "type": "Array",
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ],
+        "metadata": {
+          "displayName": "Kubernetes namespaces to exclude from restricting automounting API credentials",
+          "description": "List of Kubernetes namespaces to exclude from evaluation to restrict automounting API credentials. To list multiple namespaces, use semicolons (;) to separate them."
+        }
+      },
       "KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringEffect": {
         "type": "string",
         "defaultValue": "audit",
@@ -3342,6 +3355,18 @@
         "metadata": {
           "displayName": "Kubernetes clusters should not grant CAPSYSADMIN security capabilities",
           "description": "To reduce the attack surface of your containers, restrict CAP_SYS_ADMIN Linux capabilities. For more information, see https://aka.ms/kubepolicydoc."
+        }
+      },
+      "KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringNamespaceExclusion": {
+        "type": "Array",
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ],
+        "metadata": {
+          "displayName": "Kubernetes namespaces to exclude from restricting CAP_SYS_ADMIN Linux capabilities",
+          "description": "List of Kubernetes namespaces to exclude from evaluation to restrict CAP_SYS_ADMIN Linux capabilities. To list multiple namespaces, use semicolons (;) to separate them."
         }
       },
       "installEndpointProtectionMonitoringEffect": {
@@ -3383,18 +3408,6 @@
           }
         },
         "groupNames": ["Azure_Security_Benchmark_v3.0_IM-3"]
-      },
-      {
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d62cfe2b-3ab0-4d41-980d-76803b58ca65",
-        "policyDefinitionReferenceId": "resolveLogAnalyticsHealthIssuesMonitoring",
-        "parameters":
-        {
-          "effect":
-          {
-            "value": "[parameters('resolveLogAnalyticsHealthIssuesMonitoringEffect')]"
-          }
-        },
-        "groupNames": ["Azure_Security_Benchmark_v3.0_LT-5"]
       },
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a4fe33eb-e377-4efb-ab31-0784311bc499",
@@ -4465,6 +4478,18 @@
         "groupNames": ["Azure_Security_Benchmark_v3.0_LT-3"]
       },
       {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/91a78b24-f231-4a8a-8da9-02c35b2b6510",
+        "policyDefinitionReferenceId": "resourceLogsInAppServicesShouldBeEnabledMonitoringEffect",
+        "parameters":
+        {
+          "effect":
+          {
+            "value": "[parameters('diagnosticLogsInAppServicesShouldBeEnabledMonitoringEffect')]"
+          }
+        },
+        "groupNames": ["Azure_Security_Benchmark_v3.0_LT-3"]
+      },
+      {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c4d441f8-f9d9-4a9e-9cef-e82117cb3eef",
         "policyDefinitionReferenceId": "managedIdentityShouldBeUsedInYourAPIAppMonitoringEffect",
         "parameters":
@@ -5340,7 +5365,7 @@
           {
             "value": "[parameters('kubernetesClustersShouldBeAccessibleOnlyOverHTTPSMonitoringEffect')]"
           },
-          "excludedNamespaces":
+          "excludedNamespaces": 
           {
             "value": "[parameters('kubernetesClustersShouldBeAccessibleOnlyOverHTTPSExcludedNamespaces')]"
           },
@@ -5439,6 +5464,10 @@
           "effect":
           {
             "value": "[parameters('KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringEffect')]"
+          },
+          "excludedNamespaces":
+          {
+            "value": "[parameters('KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringNamespaceExclusion')]"
           }
         },
         "groupNames": ["Azure_Security_Benchmark_v3.0_PV-2"]
@@ -5451,6 +5480,10 @@
           "effect":
           {
             "value": "[parameters('KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringEffect')]"
+          },
+          "excludedNamespaces":
+          {
+            "value": "[parameters('KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringNamespaceExclusion')]"
           }
         },
         "groupNames": ["Azure_Security_Benchmark_v3.0_PV-2"]
