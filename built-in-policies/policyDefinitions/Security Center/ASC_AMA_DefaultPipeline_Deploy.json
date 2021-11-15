@@ -6,7 +6,7 @@
       "description": "Configure machines to automatically create the Azure Security Center pipeline for Azure Monitor Agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and Log Analytics workspace in the same region as the machine to store audit records. Target virtual machines must be in a supported location.",
       "metadata": {
         "category": "Security Center",
-        "version": "3.0.0-preview",
+        "version": "4.0.0-preview",
         "preview": true
       },
       "parameters": {
@@ -68,7 +68,6 @@
             "type": "Microsoft.Insights/dataCollectionRules",
             "deploymentScope": "subscription",
             "roleDefinitionIds": [
-              "/providers/microsoft.authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9",
               "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
             ],
             "existenceScope": "subscription",
@@ -153,9 +152,6 @@
                     "workspaceName": "[concat('defaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode'))]",
                     "dcrName": "[concat('Microsoft-Security-', parameters('location'), '-dcr')]",
                     "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
-                    "MonitoringContributorRoleId": "749f88d5-cbae-40b8-bcfc-e573ddc772fa",
-                    "dcrRoleDefinitionId": "[concat('/subscriptions/', variables('subscriptionId'), '/providers/Microsoft.Authorization/roleDefinitions/', variables('MonitoringContributorRoleId'))]",
-                    "AzureSecurityCenterPrincipalId": "6878917f-bc1d-4e4e-bb24-12924205b215",
                     "dcraName" : "[concat(parameters('vmName'),'/Microsoft.Insights/Security-RulesAssociation')]",
                     "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]",
                     "deployDataCollectionRulesAssociation": "[concat('deployDataCollectionRulesAssociation-', uniqueString(deployment().name))]"
@@ -186,15 +182,6 @@
                                 },
                                 "dcrName": {
                                     "value": "[variables('dcrName')]"
-                                },
-                                "dcrId": {
-                                  "value": "[variables('dcrId')]"
-                                },
-                                "dcrRoleDefinitionId": {
-                                  "value": "[variables('dcrRoleDefinitionId')]"
-                                },
-                                "AzureSecurityCenterPrincipalId": {
-                                  "value": "[variables('AzureSecurityCenterPrincipalId')]"
                                 }
                             },
                             "template": {
@@ -209,22 +196,9 @@
                                     },
                                     "dcrName": {
                                       "type": "string"
-                                    },
-                                    "dcrId": {
-                                      "type": "string"
-                                    },
-                                    "dcrRoleDefinitionId": {
-                                      "type": "string"
-                                    },
-                                    "AzureSecurityCenterPrincipalId": {
-                                      "type": "string"
                                     }
                                 },
                                 "variables": {
-                                    "securitySolution": {
-                                      "Name": "[Concat('Security', '(', parameters('workspaceName'), ')')]",
-                                      "GalleryName": "Security"
-                                    },
                                     "securityCenterFreeSolution": {
                                       "Name": "[Concat('SecurityCenterFree', '(', parameters('workspaceName'), ')')]",
                                       "GalleryName": "SecurityCenterFree"
@@ -244,24 +218,6 @@
                                             "features": {
                                             "searchVersion": 1
                                             }
-                                        }
-                                    },
-                                    {
-                                        "type": "Microsoft.OperationsManagement/solutions",
-                                        "name": "[variables('securitySolution').Name]",
-                                        "apiVersion": "2015-11-01-preview",
-                                        "location": "[parameters('defaultRGLocation')]",
-                                        "dependsOn": [
-                                            "[parameters('workspaceName')]"
-                                        ],
-                                        "properties": {
-                                          "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-                                        },
-                                        "plan": {
-                                            "name": "[variables('securitySolution').Name]",
-                                            "publisher": "Microsoft",
-                                            "product": "[Concat('OMSGallery/', variables('securitySolution').GalleryName)]",
-                                            "promotionCode": ""
                                         }
                                     },
                                     {
@@ -390,19 +346,6 @@
                                                 }
                                             ]
                                         }
-                                    },
-                                    {
-                                      "type": "Microsoft.Authorization/roleAssignments",
-                                      "apiVersion": "2020-04-01-preview",
-                                      "name": "[guid(parameters('dcrId'))]",
-                                      "scope": "[parameters('dcrId')]",
-                                      "dependsOn": [
-                                        "[parameters('dcrId')]"
-                                      ],
-                                      "properties": {
-                                        "roleDefinitionId": "[parameters('dcrRoleDefinitionId')]",
-                                        "principalId": "[parameters('AzureSecurityCenterPrincipalId')]"
-                                      }
                                     }
                                 ]
                             }

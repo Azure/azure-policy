@@ -6,7 +6,7 @@
     "description": "Configure supported Windows virtual machines to automatically enable Secure Boot to mitigate against malicious and unauthorized changes to the boot chain. Once enabled, only trusted bootloaders, kernel and kernel drivers will be allowed to run.",
     "metadata": {
       "category": "Security Center",
-      "version": "1.0.0-preview",
+      "version": "3.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -31,8 +31,20 @@
             "equals": "Microsoft.Compute/virtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.offer",
-            "like": "windows*"
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.offer",
+                "like": "windows*"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                "like": "Windows*"
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.securityType",
+            "equals": "TrustedLaunch"
           },
           {
             "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings",

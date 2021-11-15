@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure Azure Kubernetes Service clusters to enable Azure Defender profile",
+    "displayName": "Configure Azure Kubernetes Service clusters to enable Defender profile",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Azure Defender for Kubernetes provides cloud-native Kubernetes security capabilities including environment hardening, workload protection, and run-time protection.<br/> When you enable the SecurityProfile.AzureDefender on your Azure Kubernetes Service cluster, an agent is deployed to your cluster to collect security event data.<br>Learn more about Azure Defender for Kubernetes: https://docs.microsoft.com/azure/security-center/defender-for-kubernetes-introduction.",
+    "description": "Microsoft Defender for Containers provides cloud-native Kubernetes security capabilities including environment hardening, workload protection, and run-time protection. When you enable the SecurityProfile.AzureDefender on your Azure Kubernetes Service cluster, an agent is deployed to your cluster to collect security event data. Learn more about Microsoft Defender for Containers: https://docs.microsoft.com/azure/security-center/defender-for-kubernetes-introduction.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -179,7 +179,7 @@
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
-                    "name": "[parameters('clusterName')]-securityprofile-deploy",
+                    "name": "[concat('securityprofile-deploy-', '-',  uniqueString(parameters('clusterResourceId')))]",
                     "apiVersion": "2020-10-01",
                     "subscriptionId": "[variables('subscriptionId')]",
                     "resourceGroup": "[split(parameters('clusterResourceId'),'/')[4]]",
@@ -236,7 +236,10 @@
                           }
                         ]
                       }
-                    }
+                    },
+                    "dependsOn": [
+                      "[variables('deployDefaultAscResourceGroup')]"
+                    ]
                   }
                 ]
               }
