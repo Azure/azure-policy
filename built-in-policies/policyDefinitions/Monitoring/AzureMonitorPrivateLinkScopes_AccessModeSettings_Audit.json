@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Azure Monitor Private Link Scope should block access to non private link resources",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",  
+    "description": "Azure Private Link lets you connect your virtual networks to Azure resources through a private endpoint to an Azure Monitor Private Link scope (AMPLS). Private Link Access modes are set on your AMPLS to control whether ingestion and query requests from your networks can reach all resources, or only Private Link resources (to prevent data exfiltration). Learn more about private links at: https://docs.microsoft.com/azure/azure-monitor/logs/private-link-security#private-link-access-modes-private-only-vs-open.",
+    "metadata": {
+        "version": "1.0.0", 
+        "category": "Monitoring" 
+    },
+    "parameters": {
+      "effect": {
+          "type": "String",
+          "metadata": {
+              "displayName": "Effect",
+              "description": "The effect determines what happens when the policy rule is evaluated to match"
+          },
+          "allowedValues": [
+              "Audit",
+              "Deny",
+              "Disabled"
+          ],
+          "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+          "allOf": [
+              {
+                  "field": "type",
+                  "equals": "Microsoft.Insights/privateLinkScopes"
+              },
+              {
+                  "anyOf": [
+                      {
+                          "field": "Microsoft.Insights/privateLinkScopes/accessModeSettings.ingestionAccessMode",
+                          "notEquals": "PrivateOnly"
+                      },
+                      {
+                          "field": "Microsoft.Insights/privateLinkScopes/accessModeSettings.queryAccessMode",
+                          "notEquals": "PrivateOnly"
+                      }
+                  ]
+              }
+          ]
+      },
+      "then": {
+          "effect": "[parameters('effect')]"
+      }
+   }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a499fed8-bcc8-4195-b154-641f14743757",
+  "name": "a499fed8-bcc8-4195-b154-641f14743757"
+}
