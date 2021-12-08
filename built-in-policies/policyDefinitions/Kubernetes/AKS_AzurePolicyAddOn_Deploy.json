@@ -5,17 +5,30 @@
     "mode": "Indexed",
     "description": "Use Azure Policy Add-on to manage and report on the compliance state of your Azure Kubernetes Service (AKS) clusters. For more information, see https://aka.ms/akspolicydoc.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Kubernetes"
     },
-    "parameters": {},
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+            "DeployIfNotExists",
+            "Disabled"
+        ],
+        "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
     "policyRule": {
       "if": {
         "field": "type",
         "equals": "Microsoft.ContainerService/managedClusters"
       },
       "then": {
-        "effect": "deployIfNotExists",
+        "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.ContainerService/managedClusters",
           "name": "[field('name')]",
@@ -58,7 +71,7 @@
                         "outputs": {
                           "aksCluster": {
                             "type": "object",
-                            "value": "[reference(resourceId(parameters('clusterResourceGroupName'), 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-04-01', 'Full')]"
+                            "value": "[reference(resourceId(parameters('clusterResourceGroupName'), 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2021-07-01', 'Full')]"
                           }
                         }
                       }

@@ -5,7 +5,7 @@
       "mode": "Indexed",
       "description": "This policy automatically deploys diagnostic settings to network security groups. A storage account with name '{storagePrefixParameter}{NSGLocation}' will be automatically created.",
       "metadata": {
-         "version": "1.0.0",
+         "version": "2.0.0",
          "category": "Monitoring"
       },
       "parameters": {
@@ -100,6 +100,9 @@
                               "resourceGroup": "[parameters('rgName')]",
                               "properties": {
                                  "mode": "incremental",
+                                 "expressionEvaluationOptions": {
+                                    "scope": "inner"
+                                 },
                                  "parameters": {
                                     "location": {
                                        "value": "[parameters('location')]"
@@ -119,11 +122,14 @@
                                           "type": "string"
                                        }
                                     },
+                                    "variables": {
+                                       "storageAccountName": "[concat(substring(concat(parameters('storageprefix'), uniqueString(subscription().id)),0,sub(24,length(parameters('location')))), parameters('location'))]"
+                                    },
                                     "resources": [
                                        {
                                           "apiVersion": "2017-06-01",
                                           "type": "Microsoft.Storage/storageAccounts",
-                                          "name": "[concat(parameters('storageprefix'), parameters('location'))]",
+                                          "name": "[variables('storageAccountName')]",
                                           "sku": {
                                              "name": "Standard_LRS",
                                              "tier": "Standard"
@@ -148,7 +154,7 @@
                                     "outputs": {
                                        "storageAccountId": {
                                           "type": "string",
-                                          "value": "[resourceId(parameters('rgName'), 'Microsoft.Storage/storageAccounts',concat(parameters('storagePrefix'), parameters('location')))]"
+                                          "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
                                        }
                                     }
                                  }
