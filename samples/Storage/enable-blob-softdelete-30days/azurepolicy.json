@@ -1,0 +1,101 @@
+{
+    "properties": {
+        "mode": "All",
+        "policyRule": {
+          "if": {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Storage/storageAccounts"
+              },
+              {
+                "field": "kind",
+                "in": [
+                  "Storage",
+                  "StorageV2",
+                  "BlobStorage",
+                  "BlockBlobStorage"
+                ]
+              }
+            ]
+          },
+          "then": {
+            "effect": "deployIfNotExists",
+            "details": {
+              "type": "Microsoft.Storage/storageAccounts/blobServices",
+              "roleDefinitionIds": [
+                "/providers/Microsoft.Authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab"
+            ],
+            "existenceCondition": {
+                "allOf": [
+                    {
+                        "field": "Microsoft.Storage/storageAccounts/blobServices/default.deleteRetentionPolicy.enabled",
+                        "equals": true
+                    },
+                    {
+                        "field": "Microsoft.Storage/storageAccounts/blobServices/deleteRetentionPolicy.days",
+                        "equals": "[parameters('retentionInDays')]"
+                    }
+                ] 
+              },
+              "deployment": {
+                "properties": {
+                  "mode": "incremental",
+                  "parameters": {
+                    "accountName": {
+                      "value": "[field('name')]"
+                    },
+                    "storageAccountName": {
+                      "value": "[field('name')]"
+                    },
+                    "retentionInDays": {
+                      "value": "[parameters('retentionInDays')]"
+                    }
+                  },
+                  "template": {
+                    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                      "accountName": {
+                        "type": "string"
+                      },
+                      "storageAccountName": {
+                        "type": "string"
+                      },
+                      "retentionInDays": {
+                        "type": "int"
+                      }
+                    },
+                    "resources": [
+                      {
+                        "name": "[concat(parameters('storageAccountName'), '/default')]",
+                        "type": "Microsoft.Storage/storageAccounts/blobServices",
+                        "apiVersion": "2019-06-01",
+                        "properties": {
+                          "deleteRetentionPolicy": {
+                            "enabled": true,
+                            "days": "[parameters('retentionInDays')]"
+                          }
+                        }
+                      }
+                    ],
+                    "variables": {},
+                    "outputs": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": {
+          "retentionInDays": {
+            "type": "Integer",
+            "metadata": {
+              "displayName": "Retention in days",
+              "description": "This defines how long the deleted object should be retained for"
+            },
+            "defaultValue": 30
+          }
+        }
+    }
+}
