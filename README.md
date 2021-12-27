@@ -256,3 +256,21 @@ Mitigation: update the policy assignment's effect to 'Disabled'.
 Some containers are currently marked as non-compliant without ability to modify, such as Istio init containers. This is because some containers like Istio are loaded as side cars, which thus prevents annotation from being set ahead of time. As a solution for this scenario, we are working on updating policy definitions that target RP mode Microsoft.Kubernetes.Data with an 'excludedContainers' parameter to exclude containers in the constraint template and Azure Policy definition by Fall 2021.
 
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
+
+### Resource types that do not display non-compliance messages in the portal during preflight validation   
+
+There are resource types that do not properly display non-compliance messages in the portal during preflight validation, but instead they show a link to the activity log.
+
+This behavior is seen in the following resource types:
+- Microsoft.Kusto/clusters
+- Microsoft.Cdn/profiles
+- Microsoft.ContainerRegistry/registries
+- Microsoft.Cache/Redis
+
+This behavior is also seen in resource types from the following RPs:
+- Microsoft.DataLakeAnalytics
+- Microsoft.DataLakeStore
+- Microsoft.DBforMySQL
+- Microsoft.HDInsight
+
+For support involving these compliance message issues, please first follow up with the respective RP listed above.
