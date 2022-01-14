@@ -2,46 +2,46 @@
   "properties": {
     "displayName": "Configure Azure Monitor Private Link Scope to block access to non private link resources",
     "policyType": "BuiltIn",
-    "mode": "Indexed",  
+    "mode": "Indexed",
     "description": "Azure Private Link lets you connect your virtual networks to Azure resources through a private endpoint to an Azure Monitor Private Link scope (AMPLS). Private Link Access modes are set on your AMPLS to control whether ingestion and query requests from your networks can reach all resources, or only Private Link resources (to prevent data exfiltration). Learn more about private links at: https://docs.microsoft.com/azure/azure-monitor/logs/private-link-security#private-link-access-modes-private-only-vs-open.",
     "metadata": {
-        "version": "1.0.0", 
-        "category": "Monitoring" 
+      "version": "1.0.0",
+      "category": "Monitoring"
     },
     "parameters": {
       "effect": {
-          "type": "String",
-          "metadata": {
-              "displayName": "Effect",
-              "description": "The effect determines what happens when the policy rule is evaluated to match"
-          },
-          "allowedValues": [
-            "Modify",
-            "Disabled"
-          ],
-          "defaultValue": "Modify"
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
       }
     },
     "policyRule": {
       "if": {
-          "allOf": [
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Insights/privateLinkScopes"
+          },
+          {
+            "anyOf": [
               {
-                  "field": "type",
-                  "equals": "Microsoft.Insights/privateLinkScopes"
+                "field": "Microsoft.Insights/privateLinkScopes/accessModeSettings.ingestionAccessMode",
+                "notEquals": "PrivateOnly"
               },
               {
-                  "anyOf": [
-                      {
-                          "field": "Microsoft.Insights/privateLinkScopes/accessModeSettings.ingestionAccessMode",
-                          "notEquals": "PrivateOnly"
-                      },
-                      {
-                          "field": "Microsoft.Insights/privateLinkScopes/accessModeSettings.queryAccessMode",
-                          "notEquals": "PrivateOnly"
-                      }
-                  ]
+                "field": "Microsoft.Insights/privateLinkScopes/accessModeSettings.queryAccessMode",
+                "notEquals": "PrivateOnly"
               }
-          ]
+            ]
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",
@@ -64,7 +64,7 @@
           ]
         }
       }
-   }
+    }
   },
   "id": "/providers/Microsoft.Authorization/policyDefinitions/bec5db8e-c4e3-40f9-a545-e0bd00065c82",
   "name": "bec5db8e-c4e3-40f9-a545-e0bd00065c82"
