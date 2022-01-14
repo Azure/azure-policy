@@ -1,135 +1,135 @@
 {
-   "properties": {
-      "displayName": "Configure Arc-enabled machines running SQL Server to have SQL Server extension installed.",
-      "policyType": "BuiltIn",
-      "mode": "Indexed",
-      "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled windows server, the latter should have SQL Server extension installed and the server's managed identity should be configured with Azure Connected SQL Server Onboarding role",
-      "metadata": {
-         "version": "2.0.0",
-         "category": "SQL"
-      },
-      "parameters": {
-         "effect": {
-            "type": "string",
-            "defaultValue": "DeployIfNotExists",
-            "allowedValues": [
-                "DeployIfNotExists",
-                "Disabled"
-            ],
-            "metadata": {
-                "displayName": "Effect",
-                "description": "Enable or disable the execution of the policy"
-            }
+  "properties": {
+    "displayName": "Configure Arc-enabled machines running SQL Server to have SQL Server extension installed.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled windows server, the latter should have SQL Server extension installed and the server's managed identity should be configured with Azure Connected SQL Server Onboarding role",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "SQL"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
         }
-      },
-      "policyRule": {
-         "if": {
-            "allOf": [
-                {
-                    "field": "type",
-                    "equals": "Microsoft.HybridCompute/machines"
-                },
-                {
-                    "field": "Microsoft.HybridCompute/imageOffer",
-                    "like": "windows*"
-                },
-                {
-                    "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
-                    "equals": "true"
-                }
-            ]
-         },
-         "then": {
-            "effect": "[parameters('effect')]",
-            "details": {
-               "type": "Microsoft.HybridCompute/machines/extensions",
-               "roleDefinitionIds": [
-                  "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
-                  "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
-               ],
-               "existenceCondition": {
-                    "allOf": [
-                        {
-                            "field": "Microsoft.HybridCompute/machines/extensions/type",
-                            "equals": "WindowsAgent.SqlServer"
-                        },
-                        {
-                            "field": "Microsoft.HybridCompute/machines/extensions/publisher",
-                            "equals": "Microsoft.AzureData"
-                        },
-                        {
-                            "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
-                            "equals": "Succeeded"
-                        }
-                    ]
-               },
-               "deployment": {
-                  "properties": {
-                     "mode": "incremental",
-                     "template": {
-                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {
-                           "vmName": {
-                              "type": "string"
-                           },
-                           "location": {
-                              "type": "string"
-                           }
-                        },
-                           "variables": {
-                              "vmExtensionName": "WindowsAgent.SqlServer",
-                              "vmExtensionPublisher": "Microsoft.AzureData",
-                              "vmExtensionType": "WindowsAgent.SqlServer"
-                           },
-                           "resources": [
-                              {
-                                 "type": "Microsoft.Authorization/roleAssignments",
-                                 "apiVersion": "2018-09-01-preview",
-                                 "name": "[guid(resourceGroup().id, parameters('vmName'), deployment().name)]",
-                                 "properties": {
-                                   "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/e8113dcec5294d3391fae9b972617508",
-                                   "principalId": "[reference(resourceId('Microsoft.HybridCompute/machines', parameters('vmName')), '2021-06-10-preview', 'Full').identity.principalId]"
-                                 }
-                               },
-                              {
-                                 "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
-                                 "type": "Microsoft.HybridCompute/machines/extensions",
-                                 "location": "[parameters('location')]",
-                                 "apiVersion": "2019-12-12",
-                                 "properties": {
-                                    "publisher": "[variables('vmExtensionPublisher')]",
-                                    "type": "[variables('vmExtensionType')]",
-                                    "settings": {
-                                       "SqlManagement": {
-                                            "IsEnabled":true
-                                       },
-                                       "ExcludedInstances": []
-                                    }
-                                 }
-                              }
-                           ],
-                        "outputs": {
-                           "policy": {
-                              "type": "string",
-                              "value": "[concat('Enabled extension for VM', ': ', parameters('vmName'))]"
-                           }
-                        }
-                     },
-                     "parameters": {
-                        "vmName": {
-                           "value": "[field('name')]"
-                        },
-                        "location": {
-                           "value": "[field('location')]"
-                        }
-                     }
-                  }
-               }
-            }
-         }
       }
-   },
-   "id": "/providers/Microsoft.Authorization/policyDefinitions/fd2d1a6e-6d95-4df2-ad00-504bf0273406",
-   "name": "fd2d1a6e-6d95-4df2-ad00-504bf0273406"
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
+            "equals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
+            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "WindowsAgent.SqlServer"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+                "equals": "Microsoft.AzureData"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "vmExtensionName": "WindowsAgent.SqlServer",
+                  "vmExtensionPublisher": "Microsoft.AzureData",
+                  "vmExtensionType": "WindowsAgent.SqlServer"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Authorization/roleAssignments",
+                    "apiVersion": "2018-09-01-preview",
+                    "name": "[guid(resourceGroup().id, parameters('vmName'), deployment().name)]",
+                    "properties": {
+                      "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/e8113dcec5294d3391fae9b972617508",
+                      "principalId": "[reference(resourceId('Microsoft.HybridCompute/machines', parameters('vmName')), '2021-06-10-preview', 'Full').identity.principalId]"
+                    }
+                  },
+                  {
+                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                    "type": "Microsoft.HybridCompute/machines/extensions",
+                    "location": "[parameters('location')]",
+                    "apiVersion": "2019-12-12",
+                    "properties": {
+                      "publisher": "[variables('vmExtensionPublisher')]",
+                      "type": "[variables('vmExtensionType')]",
+                      "settings": {
+                        "SqlManagement": {
+                          "IsEnabled": true
+                        },
+                        "ExcludedInstances": []
+                      }
+                    }
+                  }
+                ],
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Enabled extension for VM', ': ', parameters('vmName'))]"
+                  }
+                }
+              },
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fd2d1a6e-6d95-4df2-ad00-504bf0273406",
+  "name": "fd2d1a6e-6d95-4df2-ad00-504bf0273406"
 }
