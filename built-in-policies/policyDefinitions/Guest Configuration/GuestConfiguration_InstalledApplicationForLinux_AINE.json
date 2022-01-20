@@ -6,7 +6,7 @@
     "description": "Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol. Machines are non-compliant if the Chef InSpec resource indicates that one or more of the packages provided by the parameter are not installed.",
     "metadata": {
       "category": "Guest Configuration",
-      "version": "3.1.0",
+      "version": "4.0.0",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
@@ -312,7 +312,8 @@
                               "microsoft-ads",
                               "center-for-internet-security-inc",
                               "Oracle",
-                              "AzureDatabricks"
+                              "AzureDatabricks",
+                              "azureopenshift"
                             ]
                           }
                         ]
@@ -330,12 +331,32 @@
                 "equals": "true"
               },
               {
-                "field": "type",
-                "equals": "Microsoft.HybridCompute/machines"
-              },
-              {
-                "field": "Microsoft.HybridCompute/imageOffer",
-                "like": "linux*"
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.HybridCompute/machines"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/imageOffer",
+                        "like": "linux*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                      },
+                      {
+                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
+                        "like": "linux*"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }

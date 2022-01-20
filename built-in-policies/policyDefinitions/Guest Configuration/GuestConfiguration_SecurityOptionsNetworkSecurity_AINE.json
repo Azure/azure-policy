@@ -6,7 +6,7 @@
     "description": "Windows machines should have the specified Group Policy settings in the category 'Security Options - Network Security' for including Local System behavior, PKU2U, LAN Manager, LDAP client, and NTLM SSP. This policy requires that the Guest Configuration prerequisites have been deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
     "metadata": {
       "category": "Guest Configuration",
-      "version": "2.0.0",
+      "version": "3.0.0",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
@@ -27,7 +27,8 @@
         "type": "string",
         "metadata": {
           "displayName": "Include Arc connected servers",
-          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
         },
         "allowedValues": [
           "true",
@@ -143,7 +144,7 @@
                       },
                       {
                         "field": "Microsoft.Compute/imageOffer",
-                        "equals": "dsvm-windows"
+                        "like": "dsvm-win*"
                       }
                     ]
                   },
@@ -257,12 +258,32 @@
                 "equals": "true"
               },
               {
-                "field": "type",
-                "equals": "Microsoft.HybridCompute/machines"
-              },
-              {
-                "field": "Microsoft.HybridCompute/imageOffer",
-                "like": "windows*"
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.HybridCompute/machines"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/imageOffer",
+                        "like": "windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                      },
+                      {
+                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
+                        "like": "windows*"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
