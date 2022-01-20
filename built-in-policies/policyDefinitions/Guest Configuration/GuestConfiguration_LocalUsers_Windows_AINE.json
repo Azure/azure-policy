@@ -6,7 +6,7 @@
     "description": "Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol. This definition is not supported on Windows Server 2012 or 2012 R2. Managing user accounts using Azure Active Directory is a best practice for management of identities. Reducing local machine accounts helps prevent the proliferation of identities managed outside a central system. Machines are non-compliant if local user accounts exist that are enabled and not listed in the policy parameter.",
     "metadata": {
       "category": "Guest Configuration",
-      "version": "1.0.0",
+      "version": "2.0.0",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
@@ -237,12 +237,32 @@
                 "equals": "true"
               },
               {
-                "field": "type",
-                "equals": "Microsoft.HybridCompute/machines"
-              },
-              {
-                "field": "Microsoft.HybridCompute/imageOffer",
-                "like": "windows*"
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.HybridCompute/machines"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/imageOffer",
+                        "like": "windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                      },
+                      {
+                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
+                        "like": "windows*"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
