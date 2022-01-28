@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure machines to automatically create the Azure Security Center pipeline for Azure Monitor Agent",
+    "displayName": "[Preview]: Configure machines to automatically create the Azure Security Center user-defined pipeline for Azure Monitor Agent",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure machines to automatically create the Azure Security Center pipeline for Azure Monitor Agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and Log Analytics workspace in the same region as the machine to store audit records. Target virtual machines must be in a supported location.",
+    "description": "Configure machines to automatically create the Azure Security Center user-defined pipeline for Azure Monitor Agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and Log Analytics workspace in the same region as the machine to store audit records. Target virtual machines must be in a supported location.",
     "metadata": {
       "category": "Security Center",
-      "version": "5.0.0-preview",
+      "version": "1.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -20,6 +20,22 @@
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "userWorkspaceResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace Resource Id",
+          "description": "Select the Log Analytics workspace to which the virtual machines in scope will send their logs. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace"
+        }
+      },
+      "workspaceRegion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace region",
+          "description": "Region of the Workspace to which the virtual machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
+          "strongType": "location"
         }
       }
     },
@@ -85,11 +101,11 @@
             "allOf": [
               {
                 "field": "location",
-                "equals": "[field('location')]"
+                "equals": "[parameters('workspaceRegion')]"
               },
               {
                 "field": "name",
-                "equals": "[concat('Microsoft-Security-', field('location'), '-dcr')]"
+                "equals": "[concat('Microsoft-Security-', parameters('workspaceRegion'), '-dcr')]"
               }
             ]
           },
@@ -101,11 +117,14 @@
                 "resourceGroup": {
                   "value": "[resourceGroup().name]"
                 },
-                "location": {
-                  "value": "[field('location')]"
-                },
                 "vmName": {
                   "value": "[field('name')]"
+                },
+                "userWorkspaceResourceId": {
+                  "value": "[parameters('userWorkspaceResourceId')]"
+                },
+                "workspaceRegion": {
+                  "value": "[parameters('workspaceRegion')]"
                 }
               },
               "template": {
@@ -115,10 +134,13 @@
                   "resourceGroup": {
                     "type": "string"
                   },
-                  "location": {
+                  "vmName": {
                     "type": "string"
                   },
-                  "vmName": {
+                  "userWorkspaceResourceId": {
+                    "type": "string"
+                  },
+                  "workspaceRegion": {
                     "type": "string"
                   }
                 },
@@ -162,12 +184,12 @@
                     "westus": "WUS",
                     "westus2": "WUS2"
                   },
-                  "locationCode": "[variables('locationLongNameToShortMap')[parameters('location')]]",
+                  "locationCode": "[variables('locationLongNameToShortMap')[parameters('workspaceRegion')]]",
                   "subscriptionId": "[subscription().subscriptionId]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
-                  "defaultRGLocation": "[parameters('location')]",
-                  "workspaceName": "[concat('defaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode'))]",
-                  "dcrName": "[concat('Microsoft-Security-', parameters('location'), '-dcr')]",
+                  "defaultRGLocation": "[parameters('workspaceRegion')]",
+                  "workspaceResourceId": "[parameters('userWorkspaceResourceId')]",
+                  "dcrName": "[concat('Microsoft-Security-', parameters('workspaceRegion'), '-dcr')]",
                   "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
                   "dcraName": "[concat(parameters('vmName'),'/Microsoft.Insights/Security-RulesAssociation')]",
                   "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]",
@@ -194,11 +216,14 @@
                         "defaultRGLocation": {
                           "value": "[variables('defaultRGLocation')]"
                         },
-                        "workspaceName": {
-                          "value": "[variables('workspaceName')]"
+                        "workspaceResourceId": {
+                          "value": "[variables('workspaceResourceId')]"
                         },
                         "dcrName": {
                           "value": "[variables('dcrName')]"
+                        },
+                        "dcrId": {
+                          "value": "[variables('dcrId')]"
                         }
                       },
                       "template": {
@@ -208,61 +233,23 @@
                           "defaultRGLocation": {
                             "type": "string"
                           },
-                          "workspaceName": {
+                          "workspaceResourceId": {
                             "type": "string"
                           },
                           "dcrName": {
                             "type": "string"
+                          },
+                          "dcrId": {
+                            "type": "string"
                           }
                         },
-                        "variables": {
-                          "securityCenterFreeSolution": {
-                            "Name": "[Concat('SecurityCenterFree', '(', parameters('workspaceName'), ')')]",
-                            "GalleryName": "SecurityCenterFree"
-                          }
-                        },
+                        "variables": {},
                         "resources": [
-                          {
-                            "type": "Microsoft.OperationalInsights/workspaces",
-                            "name": "[parameters('workspaceName')]",
-                            "apiVersion": "2015-11-01-preview",
-                            "location": "[parameters('defaultRGLocation')]",
-                            "properties": {
-                              "sku": {
-                                "name": "pernode"
-                              },
-                              "retentionInDays": 30,
-                              "features": {
-                                "searchVersion": 1
-                              }
-                            }
-                          },
-                          {
-                            "type": "Microsoft.OperationsManagement/solutions",
-                            "name": "[variables('securityCenterFreeSolution').Name]",
-                            "apiVersion": "2015-11-01-preview",
-                            "location": "[parameters('defaultRGLocation')]",
-                            "dependsOn": [
-                              "[parameters('workspaceName')]"
-                            ],
-                            "properties": {
-                              "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
-                            },
-                            "plan": {
-                              "name": "[variables('securityCenterFreeSolution').Name]",
-                              "publisher": "Microsoft",
-                              "product": "[Concat('OMSGallery/', variables('securityCenterFreeSolution').GalleryName)]",
-                              "promotionCode": ""
-                            }
-                          },
                           {
                             "type": "Microsoft.Insights/dataCollectionRules",
                             "name": "[parameters('dcrName')]",
                             "apiVersion": "2019-11-01-preview",
                             "location": "[parameters('defaultRGLocation')]",
-                            "dependsOn": [
-                              "[parameters('workspaceName')]"
-                            ],
                             "properties": {
                               "description": "Data collection rule for Azure Security Center. Deleting this rule will break the detection of security vulnerabilities.",
                               "dataSources": {
@@ -344,7 +331,7 @@
                               "destinations": {
                                 "logAnalytics": [
                                   {
-                                    "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]",
+                                    "workspaceResourceId": "[parameters('workspaceResourceId')]",
                                     "name": "LogAnalyticsDest"
                                   }
                                 ]
@@ -385,9 +372,6 @@
                         "scope": "inner"
                       },
                       "parameters": {
-                        "location": {
-                          "value": "[parameters('location')]"
-                        },
                         "vmName": {
                           "value": "[parameters('vmName')]"
                         },
@@ -402,9 +386,6 @@
                         "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
                         "parameters": {
-                          "location": {
-                            "type": "string"
-                          },
                           "vmName": {
                             "type": "string"
                           },
@@ -438,6 +419,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/8b5ad9ab-3d44-4a6e-9ac3-75b04ea5fd28",
-  "name": "8b5ad9ab-3d44-4a6e-9ac3-75b04ea5fd28"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c15c5978-ab6e-4599-a1c3-90a7918f5371",
+  "name": "c15c5978-ab6e-4599-a1c3-90a7918f5371"
 }
