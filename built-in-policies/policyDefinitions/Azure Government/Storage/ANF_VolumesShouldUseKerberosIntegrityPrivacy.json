@@ -1,0 +1,110 @@
+{
+  "properties": {
+    "displayName": "Azure NetApp Files Volumes of type NFSv4.1 should use Kerberos data integrity or data privacy",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Ensure that at least either Kerberos integrity (krb5i) or Kerberos privacy (krb5p) is selected to ensure data integrity and data privacy.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes"
+          },
+          {
+            "count": {
+              "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/protocolTypes[*]",
+              "where": {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/protocolTypes[*]",
+                "equals": "NFSv4.1"
+              }
+            },
+            "greater": 0
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/kerberosEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/kerberosEnabled",
+                "equals": "false"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/kerberosEnabled",
+                    "equals": "true"
+                  },
+                  {
+                    "count": {
+                      "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*]",
+                      "where": {
+                        "anyOf": [
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5iReadWrite",
+                                "equals": "false"
+                              },
+                              {
+                                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5iReadOnly",
+                                "equals": "false"
+                              },
+                              {
+                                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5pReadWrite",
+                                "equals": "false"
+                              },
+                              {
+                                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5pReadOnly",
+                                "equals": "false"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5ReadOnly",
+                            "equals": "true"
+                          },
+                          {
+                            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5ReadWrite",
+                            "equals": "true"
+                          }
+                        ]
+                      }
+                    },
+                    "greater": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/16f4af95-96b1-4220-805a-367ca59cd72e",
+  "name": "16f4af95-96b1-4220-805a-367ca59cd72e"
+}
