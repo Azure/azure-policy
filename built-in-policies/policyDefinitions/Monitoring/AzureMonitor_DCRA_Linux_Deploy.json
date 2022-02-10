@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure Linux machines to be associated with a Data Collection Rule",
+    "displayName": "Configure Linux Machines to be associated with a Data Collection Rule",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy a Data Collection Rule Association to link a Linux virtual machine, virtual machine scale set, or Arc machine to the specified Data Collection Rule. The list of locations and OS images are updated over time as support is increased.",
+    "description": "Deploy Association to link Linux virtual machines, virtual machine scale sets, and Arc machines to the specified Data Collection Rule. The list of locations and OS images are updated over time as support is increased.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Monitoring"
     },
     "parameters": {
@@ -24,8 +24,8 @@
       "listOfLinuxImageIdToInclude": {
         "type": "Array",
         "metadata": {
-          "displayName": "Additional Virtual Machine Images",
-          "description": "List of virtual machine images that have supported Linux OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+          "displayName": "Additional Linux Machine Images",
+          "description": "List of machine images that have supported Linux OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
         },
         "defaultValue": []
       },
@@ -33,7 +33,8 @@
         "type": "String",
         "metadata": {
           "displayName": "Data Collection Rule Resource Id",
-          "description": "Resource Id of the Data Collection Rule to be applied on the virtual machines in scope."
+          "description": "Resource Id of the Data Collection Rule to be applied on the Linux machines in scope.",
+          "strongType": "Microsoft.Insights/dataCollectionRules"
         }
       }
     },
@@ -44,9 +45,11 @@
             "field": "location",
             "in": [
               "australiacentral",
+              "australiacentral2",
               "australiaeast",
               "australiasoutheast",
               "brazilsouth",
+              "brazilsoutheast",
               "canadacentral",
               "canadaeast",
               "centralindia",
@@ -56,6 +59,7 @@
               "eastus",
               "eastus2",
               "francecentral",
+              "francesouth",
               "germanywestcentral",
               "japaneast",
               "japanwest",
@@ -65,11 +69,13 @@
               "northcentralus",
               "northeurope",
               "norwayeast",
+              "norwaywest",
               "southafricanorth",
               "southcentralus",
               "southeastasia",
               "southindia",
               "switzerlandnorth",
+              "switzerlandwest",
               "uaenorth",
               "uksouth",
               "ukwest",
@@ -393,33 +399,33 @@
                 "resources": [
                   {
                     "condition": "[equals(toLower(parameters('type')), 'microsoft.compute/virtualmachines')]",
-                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', variables('associationName'))]",
-                    "type": "Microsoft.Compute/virtualMachines/providers/dataCollectionRuleAssociations",
-                    "location": "[parameters('location')]",
-                    "apiVersion": "2019-11-01-preview",
+                    "name": "[variables('associationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
                     "properties": {
                       "dataCollectionRuleId": "[parameters('dcrResourceId')]"
-                    }
+                    },
+                    "scope": "[concat('Microsoft.Compute/virtualMachines/', parameters('resourceName'))]"
                   },
                   {
                     "condition": "[equals(toLower(parameters('type')), 'microsoft.compute/virtualmachinescalesets')]",
-                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', variables('associationName'))]",
-                    "type": "Microsoft.Compute/virtualMachineScaleSets/providers/dataCollectionRuleAssociations",
-                    "location": "[parameters('location')]",
-                    "apiVersion": "2019-11-01-preview",
+                    "name": "[variables('associationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
                     "properties": {
                       "dataCollectionRuleId": "[parameters('dcrResourceId')]"
-                    }
+                    },
+                    "scope": "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('resourceName'))]"
                   },
                   {
                     "condition": "[equals(toLower(parameters('type')), 'microsoft.hybridcompute/machines')]",
-                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', variables('associationName'))]",
-                    "type": "Microsoft.HybridCompute/machines/providers/dataCollectionRuleAssociations",
-                    "location": "[parameters('location')]",
-                    "apiVersion": "2019-11-01-preview",
+                    "name": "[variables('associationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
                     "properties": {
                       "dataCollectionRuleId": "[parameters('dcrResourceId')]"
-                    }
+                    },
+                    "scope": "[concat('Microsoft.HybridCompute/machines/', parameters('resourceName'))]"
                   }
                 ]
               },

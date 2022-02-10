@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "Queue Storage should use customer-managed key for encryption",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Secure your queue storage with greater flexibility using customer-managed keys. When you specify a customer-managed key, that key is used to protect and control access to the key that encrypts your data. Using customer-managed keys provides additional capabilities to control rotation of the key encryption key or cryptographically erase data.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/encryption.keySource",
+            "equals": "Microsoft.Keyvault"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/encryption.services.queue.keyType",
+            "notEquals": "Account"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f0e5abd0-2554-4736-b7c0-4ffef23475ef",
+  "name": "f0e5abd0-2554-4736-b7c0-4ffef23475ef"
+}

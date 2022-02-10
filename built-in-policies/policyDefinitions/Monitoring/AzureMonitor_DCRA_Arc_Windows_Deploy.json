@@ -1,0 +1,154 @@
+{
+  "properties": {
+    "displayName": "Configure Windows Arc Machines to be associated with a Data Collection Rule",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploy Association to link Windows Arc machines to specified Data Collection Rule. The list of locations are updated over time as support is increased.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "dcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule to be applied on the Windows Arc machines in scope.",
+          "strongType": "Microsoft.Insights/dataCollectionRules"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "equals": "Windows"
+          },
+          {
+            "field": "location",
+            "in": [
+              "australiacentral",
+              "australiacentral2",
+              "australiaeast",
+              "australiasoutheast",
+              "brazilsouth",
+              "brazilsoutheast",
+              "canadacentral",
+              "canadaeast",
+              "centralindia",
+              "centralus",
+              "eastasia",
+              "eastus2euap",
+              "eastus",
+              "eastus2",
+              "francecentral",
+              "francesouth",
+              "germanywestcentral",
+              "japaneast",
+              "japanwest",
+              "jioindiawest",
+              "koreacentral",
+              "koreasouth",
+              "northcentralus",
+              "northeurope",
+              "norwayeast",
+              "norwaywest",
+              "southafricanorth",
+              "southcentralus",
+              "southeastasia",
+              "southindia",
+              "switzerlandnorth",
+              "switzerlandwest",
+              "uaenorth",
+              "uksouth",
+              "ukwest",
+              "westcentralus",
+              "westeurope",
+              "westindia",
+              "westus",
+              "westus2"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+            "equals": "[parameters('dcrResourceId')]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "dcrResourceId": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "associationName": "[concat('assoc-', uniqueString(parameters('dcrResourceId')))]"
+                },
+                "resources": [
+                  {
+                    "name": "[variables('associationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionRuleId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.HybridCompute/machines/', parameters('resourceName'))]"
+                  }
+                ]
+              },
+              "parameters": {
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "dcrResourceId": {
+                  "value": "[parameters('dcrResourceId')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c24c537f-2516-4c2f-aac5-2cd26baa3d26",
+  "name": "c24c537f-2516-4c2f-aac5-2cd26baa3d26"
+}
