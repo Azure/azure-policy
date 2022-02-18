@@ -5,7 +5,7 @@
     "displayName": "Configure virtual machines to be onboarded to Azure Automanage",
     "description": "Azure Automanage enrolls, configures, and monitors virtual machines with best practice as defined in the Microsoft Cloud Adoption Framework for Azure. Use this policy to apply Automanage to your selected scope.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Automanage"
     },
     "parameters": {
@@ -28,10 +28,27 @@
           "description": "Enable or disable the execution of this policy"
         },
         "allowedValues": [
+          "AuditIfNotExists",
           "DeployIfNotExists",
           "Disabled"
         ],
         "defaultValue": "DeployIfNotExists"
+      },
+      "inclusionTagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Inclusion Tag Name",
+          "description": "Name of the tag to use for including VMs in the scope of this policy. This should be used along with the Inclusion Tag Value parameter."
+        },
+        "defaultValue": ""
+      },
+      "inclusionTagValues": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Inclusion Tag Values",
+          "description": "Value of the tag to use for including VMs in the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Inclusion Tag Name parameter."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -59,7 +76,10 @@
           },
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "in": [
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.HybridCompute/machines"
+            ]
           },
           {
             "anyOf": [
@@ -447,6 +467,90 @@
                   {
                     "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.sku",
                     "exists": "false"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "CentOS*"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "notLike": "Linux 6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "Windows Server*"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "notLike": "2008*"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "Red Hat Enterprise Linux 8.*"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "Red Hat Enterprise Linux 7.*"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "Ubuntu 18.04*"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "Ubuntu 16.04*"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "Ubuntu 20.04*"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "in": [
+                      "SUSE Linux Enterprise Server 12 SP3",
+                      "SUSE Linux Enterprise Server 12 SP4",
+                      "SUSE Linux Enterprise Server 12 SP5"
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/osSku",
+                    "like": "SUSE Linux Enterprise Server 15*"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "[concat('tags[', parameters('inclusionTagName'), ']')]",
+                    "in": "[parameters('inclusionTagValues')]"
+                  },
+                  {
+                    "value": "[empty(parameters('inclusionTagValues'))]",
+                    "equals": "true"
+                  },
+                  {
+                    "value": "[empty(parameters('inclusionTagName'))]",
+                    "equals": "true"
                   }
                 ]
               }
