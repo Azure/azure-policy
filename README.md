@@ -80,7 +80,7 @@ To report issues in the Azure Policy online documentation, look for a feedback a
 
 ### New built-in Policy Proposals
 
-If you have ideas for new built-in policies you want to suggest to Microsoft, you can submit them to [**Ideas**](https://feedback.azure.com/d365community/forum/675ae472-f324-ec11-b6e6-000d3a4f0da0) with Category: Azure Policy. These suggestions are actively reviewed and prioritized for implementation.
+If you have ideas for new built-in policies you want to suggest to Microsoft, you can submit them to [**Ideas**](https://feedback.azure.com/d365community/forum/675ae472-f324-ec11-b6e6-000d3a4f0da0) with Category: "Azure Policy". These suggestions are actively reviewed and prioritized for implementation.
 
 ### Other Support for Azure Policy
 
