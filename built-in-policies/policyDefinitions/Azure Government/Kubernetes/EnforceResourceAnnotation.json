@@ -1,13 +1,12 @@
 {
   "properties": {
-    "displayName": "[Preview]: Kubernetes clusters should gate deployment of vulnerable images",
+    "displayName": "Kubernetes resources should have required annotations",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Protect your Kubernetes clusters and container workloads from potential threats by restricting deployment of container images with vulnerable software components. Use Azure Defender CI/CD scanning (https://aka.ms/AzureDefenderCICDscanning) and Azure defender for container registries (https://aka.ms/AzureDefenderForContainerRegistries) to identify and patch vulnerabilities prior to deployment. Evaluation prerequisite: Policy Addon and Azure Defender Profile. Only applicable for private preview customers.",
+    "description": "Ensure that required annotations are attached on a given Kubernetes resource kind for improved resource management of your Kubernetes resources. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.0.3-preview",
-      "category": "Kubernetes",
-      "preview": true
+      "version": "1.0.0",
+      "category": "Kubernetes"
     },
     "parameters": {
       "effect": {
@@ -39,12 +38,12 @@
         "type": "Array",
         "metadata": {
           "displayName": "Namespace inclusions",
-          "description": "List of Kubernetes namespaces the policy would apply to. An empty list means the policy is applied to all resources in all namespaces."
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
         },
         "defaultValue": []
       },
       "labelSelector": {
-        "type": "Object",
+        "type": "object",
         "metadata": {
           "displayName": "Kubernetes label selector",
           "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
@@ -83,7 +82,7 @@
                     ]
                   },
                   "values": {
-                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "description": "Values is an array of string values. If the operator is In or NotIn, the values array should not be empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
                     "type": "array",
                     "items": {
                       "type": "string"
@@ -102,66 +101,51 @@
           "additionalProperties": false
         }
       },
-      "excludedImages": {
-        "type": "Array",
+      "kind": {
+        "type": "String",
         "metadata": {
-          "displayName": "Excluded images regex",
-          "description": "A list of RegEx rules used to exclude container images from policy evaluation. For example: exclude all images from the repo microsoft-defender-in-cluster-defense-repo in the blockreg ACR -  [\"(blockreg.azurecr.io/microsoft-defender-in-cluster-defense-repo).*\"]. Use an empty list to apply this policy to all container images."
-        },
-        "defaultValue": []
+          "displayName": "Resource Kind",
+          "description": "Kubernetes resource kind to enforce annotations for. One assignment can only restrict single resource kind. It is case-sensitive, please start with upper case. For example \"Pod\""
+        }
       },
-      "severityThresholdForExcludingNotPatchableFindings": {
-        "type": "string",
-        "metadata": {
-          "displayName": "Severity threshold for excluding vulnerabilities without a patch",
-          "description": "Specify the maximum severity for exempting vulnerabilities without a patch. For example, specify Medium to ignore Low and Medium vulnerabilities without a patch."
-        },
-        "allowedValues": [
-          "None",
-          "Low",
-          "Medium",
-          "High"
-        ],
-        "defaultValue": "None"
-      },
-      "excludeFindingIDs": {
-        "type": "Array",
-        "metadata": {
-          "displayName": "Exclude findings IDs",
-          "description": "A list of finding IDs that the policy should exempt."
-        },
-        "defaultValue": []
-      },
-      "severity": {
+      "annotations": {
         "type": "Object",
         "metadata": {
-          "displayName": "Severity threshold",
-          "description": "The number of allowed findings per severity for an image. e.g. \"{\"High\":0,\"Medium\":3,\"Low\":10}\""
-        },
-        "defaultValue": {
-          "High": 0,
-          "Medium": 0,
-          "Low": 0
+          "displayName": "Required Annotations",
+          "description": "Annotations to be forced on certain Kubernetes resource. The annotations requires key and value allowed regex. Note that annotation values only support string values"
         },
         "schema": {
           "type": "object",
           "properties": {
-            "High": {
-              "type": "integer"
-            },
-            "Medium": {
-              "type": "integer"
-            },
-            "Low": {
-              "type": "integer"
+            "annotations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "description": "Provide a required annotation key to enforce on a Kubernetes resource kind."
+                  },
+                  "allowedRegex": {
+                    "type": "string",
+                    "description": "Provide the allowed annotation value as a regex match."
+                  }
+                },
+                "required": [
+                  "key",
+                  "allowedRegex"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [
-            "High",
-            "Medium",
-            "Low"
+            "annotations"
           ],
           "additionalProperties": false
+        },
+        "defaultValue": {
+          "annotations": []
         }
       }
     },
@@ -175,21 +159,19 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-no-vulnerable-images/v1/template.yaml",
-          "constraint": "https://store.policy.core.windows.net/kubernetes/container-no-vulnerable-images/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/enforce-required-annotation/v1/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/enforce-required-annotation/v1/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "excludedImages": "[parameters('excludedImages')]",
-            "severityThresholdForExcludingNotPatchableFindings": "[parameters('severityThresholdForExcludingNotPatchableFindings')]",
-            "excludeFindingIDs": "[parameters('excludeFindingIDs')]",
-            "severity": "[parameters('severity')]"
+            "kinds": "[parameters('kind')]",
+            "annotations": "[parameters('annotations').annotations]"
           }
         }
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/13cd7ae3-5bc0-4ac4-a62d-4f7c120b9759",
-  "name": "13cd7ae3-5bc0-4ac4-a62d-4f7c120b9759"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9a5f4e39-e427-4d5d-ae73-93db00328bec",
+  "name": "9a5f4e39-e427-4d5d-ae73-93db00328bec"
 }

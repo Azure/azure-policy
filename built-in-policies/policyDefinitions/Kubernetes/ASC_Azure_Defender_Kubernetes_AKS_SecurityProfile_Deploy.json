@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Microsoft Defender for Containers provides cloud-native Kubernetes security capabilities including environment hardening, workload protection, and run-time protection. When you enable the SecurityProfile.AzureDefender on your Azure Kubernetes Service cluster, an agent is deployed to your cluster to collect security event data. Learn more about Microsoft Defender for Containers: https://docs.microsoft.com/azure/defender-for-cloud/defender-for-containers-introduction?tabs=defender-for-container-arch-aks.",
     "metadata": {
-      "version": "2.0.0-preview",
+      "version": "3.0.2-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -21,6 +21,16 @@
           "Disabled"
         ],
         "defaultValue": "DeployIfNotExists"
+      },
+      "logAnalyticsWorkspaceResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "LogAnalyticsWorkspaceResourceId",
+          "description": "Optional Log Analytics workspace resource id. If provided, will be used as part of the feature configuration. Otherwise, default workspace will be provisioned. Value format should be '​/subscriptions/XXX/resourcegroups/XXX/providers/Microsoft.OperationalInsights/workspaces/XXX'.",
+          "strongType": "Microsoft.OperationalInsights/workspaces",
+          "assignPermissions": true
+        },
+        "defaultValue": ""
       }
     },
     "policyRule": {
@@ -56,6 +66,9 @@
                 },
                 "clusterName": {
                   "value": "[field('name')]"
+                },
+                "logAnalyticsWorkspaceResourceId": {
+                  "value": "[parameters('logAnalyticsWorkspaceResourceId')]"
                 }
               },
               "template": {
@@ -70,34 +83,48 @@
                   },
                   "clusterName": {
                     "type": "string"
+                  },
+                  "logAnalyticsWorkspaceResourceId": {
+                    "type": "string"
                   }
                 },
                 "variables": {
                   "locationLongNameToShortMap": {
                     "australiacentral": "CAU",
+                    "australiacentral2": "CBR2",
                     "australiaeast": "EAU",
                     "australiasoutheast": "SEAU",
                     "brazilsouth": "CQ",
-                    "canadacentral": "CCA",
-                    "centralindia": "CIN",
+                    "brazilsoutheast": "BRSE",
+                    "canadacentral": "CCAN",
+                    "canadaeast": "YQ",
+                    "centralindia": "CID",
                     "centralus": "CUS",
                     "eastasia": "EA",
                     "eastus": "EUS",
                     "eastus2": "EUS2",
-                    "eastus2euap": "eus2p",
+                    "eastus2euap": "EAPEUS2",
                     "germanywestcentral": "DEWC",
                     "francecentral": "PAR",
+                    "francesouth": "MRS",
                     "japaneast": "EJP",
+                    "japanwest": "OS",
+                    "jioindiacentral": "JINC",
+                    "jioindiawest": "JINW",
                     "koreacentral": "SE",
+                    "koreasouth": "PS",
                     "northcentralus": "NCUS",
                     "northeurope": "NEU",
                     "norwayeast": "NOE",
+                    "norwaywest": "NOW",
                     "southafricanorth": "JNB",
                     "southcentralus": "SCUS",
                     "southeastasia": "SEA",
+                    "southindia": "MA",
                     "swedencentral": "SEC",
                     "switzerlandnorth": "CHN",
                     "switzerlandwest": "CHW",
+                    "uaecentral": "AUH",
                     "uaenorth": "DXB",
                     "uksouth": "SUK",
                     "ukwest": "WUK",
@@ -105,28 +132,25 @@
                     "westeurope": "WEU",
                     "westus": "WUS",
                     "westus2": "WUS2",
-                    "usgovvirginia": "USGV",
-                    "usgovarizona": "USGA",
-                    "usgovtexas": "USGT",
-                    "chinaeast": "CNE",
-                    "chinaeast2": "CNE2",
-                    "chinawest": "CNW",
-                    "chinawest2": "CNW2"
+                    "westus3": "USW3"
                   },
                   "locationCode": "[variables('locationLongNameToShortMap')[parameters('clusterRegion')]]",
                   "subscriptionId": "[subscription().subscriptionId]",
+                  "shouldProvisionDefaultWorkspace": "[empty(parameters('logAnalyticsWorkspaceResourceId'))]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                   "workspaceName": "[concat('DefaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode'))]",
                   "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]"
                 },
                 "resources": [
                   {
+                    "condition": "[variables('shouldProvisionDefaultWorkspace')]",
                     "type": "Microsoft.Resources/resourceGroups",
                     "name": "[variables('defaultRGName')]",
                     "apiVersion": "2019-05-01",
                     "location": "[parameters('clusterRegion')]"
                   },
                   {
+                    "condition": "[variables('shouldProvisionDefaultWorkspace')]",
                     "type": "Microsoft.Resources/deployments",
                     "name": "[variables('deployDefaultAscResourceGroup')]",
                     "apiVersion": "2020-06-01",
@@ -180,8 +204,9 @@
                     ]
                   },
                   {
+                    "condition": "[variables('shouldProvisionDefaultWorkspace')]",
                     "type": "Microsoft.Resources/deployments",
-                    "name": "[concat('securityprofile-deploy-', '-',  uniqueString(parameters('clusterResourceId')))]",
+                    "name": "[concat('securityprofile-deploy-', uniqueString(parameters('clusterResourceId')))]",
                     "apiVersion": "2020-10-01",
                     "subscriptionId": "[variables('subscriptionId')]",
                     "resourceGroup": "[split(parameters('clusterResourceId'),'/')[4]]",
@@ -193,9 +218,6 @@
                       "parameters": {
                         "workspaceResourceId": {
                           "value": "[concat('/subscriptions/', variables('subscriptionId'), '/resourcegroups/', variables('defaultRGName'), '/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
-                        },
-                        "clusterResourceId": {
-                          "value": "[parameters('clusterResourceId')]"
                         },
                         "clusterName": {
                           "value": "[parameters('clusterName')]"
@@ -209,9 +231,6 @@
                         "contentVersion": "1.0.0.0",
                         "parameters": {
                           "workspaceResourceId": {
-                            "type": "string"
-                          },
-                          "clusterResourceId": {
                             "type": "string"
                           },
                           "clusterName": {
@@ -242,6 +261,62 @@
                     "dependsOn": [
                       "[variables('deployDefaultAscResourceGroup')]"
                     ]
+                  },
+                  {
+                    "condition": "[not(variables('shouldProvisionDefaultWorkspace'))]",
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[concat('securityprofile-deploy-withworkspace-', uniqueString(parameters('clusterResourceId')))]",
+                    "apiVersion": "2020-10-01",
+                    "subscriptionId": "[variables('subscriptionId')]",
+                    "resourceGroup": "[split(parameters('clusterResourceId'),'/')[4]]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "parameters": {
+                        "workspaceResourceId": {
+                          "value": "[parameters('logAnalyticsWorkspaceResourceId')]"
+                        },
+                        "clusterName": {
+                          "value": "[parameters('clusterName')]"
+                        },
+                        "clusterRegion": {
+                          "value": "[parameters('clusterRegion')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "workspaceResourceId": {
+                            "type": "string"
+                          },
+                          "clusterName": {
+                            "type": "string"
+                          },
+                          "clusterRegion": {
+                            "type": "string"
+                          }
+                        },
+                        "resources": [
+                          {
+                            "type": "Microsoft.ContainerService/ManagedClusters",
+                            "name": "[parameters('clusterName')]",
+                            "apiVersion": "2021-07-01",
+                            "location": "[parameters('clusterRegion')]",
+                            "properties": {
+                              "securityProfile": {
+                                "azureDefender": {
+                                  "enabled": true,
+                                  "logAnalyticsWorkspaceResourceId": "[parameters('workspaceResourceId')]"
+                                }
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
                   }
                 ]
               }
