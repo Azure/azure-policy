@@ -1,0 +1,45 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Kubernetes Service Clusters should disable Command Invoke",
+    "description": "Disabling command invoke can enhance the security by avoiding bypass of restricted network access or Kubernetes role-based access control",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/apiServerAccessProfile.disableRunCommand",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/89f2d532-c53c-4f8f-9afa-4927b1114a0d",
+  "name": "89f2d532-c53c-4f8f-9afa-4927b1114a0d"
+}
