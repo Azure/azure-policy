@@ -5,7 +5,7 @@
     "mode": "Microsoft.MachineLearningServices.Data",
     "description": "Provide code signing for training code in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "4.0.0-preview",
+      "version": "5.0.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -72,6 +72,14 @@
           "description": "Public key text in PGP public key format, with newline characters encoded as string literals \"\\r\" and \"\\n\". This is another allowed signing key that is used only for the special case of Aether module import into Azure Machine Learning."
         },
         "defaultValue": ""
+      },
+      "tags": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Tags applied to compute",
+          "description": "Assign a list of tags to match with the tags provided with the compute in the job. The policy is applied only if all tags match {e.g. [ \"tagKey:tagValue\", ... ]"
+        },
+        "defaultValue": []
       },
       "effect": {
         "type": "String",
@@ -140,6 +148,16 @@
                 "notEquals": "MachineLearningCompute"
               }
             ]
+          },
+          {
+            "count": {
+              "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+              "where": {
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                "in": "[parameters('tags')]"
+              }
+            },
+            "equals": "[length(parameters('tags'))]"
           }
         ]
       },

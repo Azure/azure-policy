@@ -5,7 +5,7 @@
     "mode": "Microsoft.MachineLearningServices.Data",
     "description": "Provide registries that are allowed in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "4.0.0-preview",
+      "version": "5.0.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -61,6 +61,14 @@
         "metadata": {
           "displayName": "Azure Container Registries",
           "description": "List of Azure Container Registries that can be used with Azure ML. Ex. amlrepo.azurecr.io;amlrepo.azurecr.io/foo"
+        },
+        "defaultValue": []
+      },
+      "tags": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Tags applied to compute",
+          "description": "Assign a list of tags to match with the tags provided with the compute in the job. The policy is applied only if all tags match {e.g. [ \"tagKey:tagValue\", ... ]"
         },
         "defaultValue": []
       },
@@ -131,6 +139,16 @@
                 "notEquals": "MachineLearningCompute"
               }
             ]
+          },
+          {
+            "count": {
+              "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+              "where": {
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                "in": "[parameters('tags')]"
+              }
+            },
+            "equals": "[length(parameters('tags'))]"
           }
         ]
       },

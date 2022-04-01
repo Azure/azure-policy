@@ -5,7 +5,7 @@
     "mode": "Microsoft.MachineLearningServices.Data",
     "description": "Provide log filter expression and datastore to be used for full logs in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "3.0.0-preview",
+      "version": "4.0.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -57,6 +57,14 @@
           "displayName": "Datastore",
           "description": "Datastore used to store filtered logs. Ex. LogsDatastore which is configured in AML."
         }
+      },
+      "tags": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Tags applied to compute",
+          "description": "Assign a list of tags to match with the tags provided with the compute in the job. The policy is applied only if all tags match {e.g. [ \"tagKey:tagValue\", ... ]"
+        },
+        "defaultValue": []
       },
       "effect": {
         "type": "String",
@@ -125,6 +133,16 @@
                 "notEquals": "MachineLearningCompute"
               }
             ]
+          },
+          {
+            "count": {
+              "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+              "where": {
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                "in": "[parameters('tags')]"
+              }
+            },
+            "equals": "[length(parameters('tags'))]"
           }
         ]
       },
