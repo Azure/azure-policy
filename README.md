@@ -39,15 +39,16 @@ Check here for a current list of [**known issues**](#known-issues) for Azure Pol
   - [Policy](https://docs.microsoft.com/powershell/module/az.resources/#policies)
   - [Guest Configuration (preview)](https://www.powershellgallery.com/packages/AzureRM.GuestConfiguration)
 - REST API
-  - [Events](https://docs.microsoft.com/rest/api/policy-insights/policyevents)
-  - [States](https://docs.microsoft.com/rest/api/policy-insights/policystates)
-  - [Assignments](https://docs.microsoft.com/rest/api/resources/policyassignments)
-  - [Policy Definitions](https://docs.microsoft.com/rest/api/resources/policydefinitions)
-  - [Initiative Definitions](https://docs.microsoft.com/rest/api/resources/policysetdefinitions)
-  - [Policy Tracked Resources](https://docs.microsoft.com/rest/api/policy-insights/policytrackedresources)
-  - [Remediations](https://docs.microsoft.com/rest/api/policy-insights/remediations)
+  - [Policy Definitions](https://docs.microsoft.com/en-us/rest/api/policy/policy-definitions)
+  - [Initiative Definitions](https://docs.microsoft.com/en-us/rest/api/policy/policy-set-definitions)
+  - [Assignments](https://docs.microsoft.com/en-us/rest/api/policy/policy-assignments)
+  - [Exemptions](https://docs.microsoft.com/en-us/rest/api/policy/policy-exemptions)
+  - [States](https://docs.microsoft.com/en-us/rest/api/policy/policy-states)
+  - [Events](https://docs.microsoft.com/en-us/rest/api/policy/policy-events)
+  - [Remediations](https://docs.microsoft.com/en-us/rest/api/policy/remediations)
+  - [Metadata](https://docs.microsoft.com/en-us/rest/api/policy/policy-metadata)
+  - [Policy Tracked Resources](https://docs.microsoft.com/en-us/rest/api/policy/policy-tracked-resources)
   - [Guest Configuration (preview)](https://docs.microsoft.com/rest/api/guestconfiguration/)
-
 
 ## Getting Support
 
