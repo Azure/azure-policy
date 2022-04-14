@@ -275,3 +275,8 @@ This behavior is also seen in resource types from the following RPs:
 - Microsoft.HDInsight
 
 For support involving these compliance message issues, please first follow up with the respective RP listed above.
+
+### Resource types that do not support creation of Policy exemptions
+These resource types do not allow Policy exemptions on resources due to deny assignments. Workaround is to use exclusions at the assignment level. 
+
+- Microsoft.Databricks/* 
