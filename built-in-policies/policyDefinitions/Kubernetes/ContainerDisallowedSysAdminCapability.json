@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "To reduce the attack surface of your containers, restrict CAP_SYS_ADMIN Linux capabilities. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.2.0",
+      "version": "3.3.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -111,6 +111,14 @@
           "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
         },
         "defaultValue": []
+      },
+      "excludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Image exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -125,8 +133,8 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v2/template.yaml",
-          "constraint": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v2/constraint.yaml",
+          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v3/template.yaml",
+          "constraint": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v3/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
@@ -134,7 +142,8 @@
             "disallowedCapabilities": [
               "SYS_ADMIN"
             ],
-            "excludedContainers": "[parameters('excludedContainers')]"
+            "excludedContainers": "[parameters('excludedContainers')]",
+            "excludedImages": "[parameters('excludedImages')]"
           }
         }
       }
