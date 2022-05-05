@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Configure auto-assessment (every 24 hours) for OS updates on native Azure virtual machines. You can control the scope of assignment according to machine subscription, resource group, location or tag. Learn more about this for Windows: https://aka.ms/computevm-windowspatchassessmentmode, for Linux: https://aka.ms/computevm-linuxpatchassessmentmode.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "2.0.0-preview",
       "category": "Update Management Center",
       "preview": true
     },
@@ -20,7 +20,7 @@
           "ImageDefault",
           "AutomaticByPlatform"
         ],
-        "defaultValue": "ImageDefault"
+        "defaultValue": "AutomaticByPlatform"
       },
       "osType": {
         "type": "String",
@@ -70,10 +70,6 @@
           {
             "field": "type",
             "equals": "Microsoft.Compute/virtualMachines"
-          },
-          {
-            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-            "equals": "[parameters('osType')]"
           },
           {
             "anyOf": [
@@ -128,76 +124,133 @@
               {
                 "allOf": [
                   {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Canonical"
+                    "value": "[parameters('osType')]",
+                    "equals": "Linux"
                   },
                   {
                     "anyOf": [
                       {
                         "allOf": [
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "equals": "UbuntuServer"
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Canonical"
                           },
                           {
-                            "field": "Microsoft.Compute/imageSKU",
-                            "equals": "18.04-LTS"
+                            "anyOf": [
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "UbuntuServer"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "18.04-LTS"
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "0001-com-ubuntu-pro-bionic"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "pro-18_04-lts"
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "0001-com-ubuntu-server-focal"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "20_04-lts"
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "0001-com-ubuntu-pro-focal"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "pro-20_04-lts"
+                                  }
+                                ]
+                              }
+                            ]
                           }
                         ]
                       },
                       {
                         "allOf": [
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "equals": "0001-com-ubuntu-pro-bionic"
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Redhat"
                           },
                           {
-                            "field": "Microsoft.Compute/imageSKU",
-                            "equals": "pro-18_04-lts"
+                            "anyOf": [
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "RHEL"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "in": [
+                                      "7.2",
+                                      "7.3",
+                                      "7.4",
+                                      "7.5",
+                                      "7.6",
+                                      "7.7",
+                                      "7.8",
+                                      "7_9",
+                                      "7-RAW",
+                                      "7-LVM",
+                                      "8",
+                                      "8.1",
+                                      "8.2",
+                                      "8_3",
+                                      "8_4",
+                                      "8-LVM"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "RHEL-RAW"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "8-raw"
+                                  }
+                                ]
+                              }
+                            ]
                           }
                         ]
                       },
                       {
                         "allOf": [
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "equals": "0001-com-ubuntu-server-focal"
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "OpenLogic"
                           },
                           {
-                            "field": "Microsoft.Compute/imageSKU",
-                            "equals": "20_04-lts"
-                          }
-                        ]
-                      },
-                      {
-                        "allOf": [
-                          {
                             "field": "Microsoft.Compute/imageOffer",
-                            "equals": "0001-com-ubuntu-pro-focal"
-                          },
-                          {
-                            "field": "Microsoft.Compute/imageSKU",
-                            "equals": "pro-20_04-lts"
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Redhat"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "allOf": [
-                          {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "equals": "RHEL"
+                            "equals": "Centos"
                           },
                           {
                             "field": "Microsoft.Compute/imageSKU",
@@ -208,16 +261,14 @@
                               "7.5",
                               "7.6",
                               "7.7",
-                              "7.8",
+                              "7_8",
                               "7_9",
-                              "7-RAW",
                               "7-LVM",
-                              "8",
-                              "8.1",
-                              "8.2",
+                              "8.0",
+                              "8_1",
+                              "8_2",
                               "8_3",
-                              "8_4",
-                              "8-LVM"
+                              "8-lvm"
                             ]
                           }
                         ]
@@ -225,12 +276,22 @@
                       {
                         "allOf": [
                           {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "SUSE"
+                          },
+                          {
                             "field": "Microsoft.Compute/imageOffer",
-                            "equals": "RHEL-RAW"
+                            "in": [
+                              "sles-12-sp5",
+                              "sles-15-sp2"
+                            ]
                           },
                           {
                             "field": "Microsoft.Compute/imageSKU",
-                            "equals": "8-raw"
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
                           }
                         ]
                       }
@@ -241,58 +302,9 @@
               {
                 "allOf": [
                   {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "OpenLogic"
+                    "value": "[parameters('osType')]",
+                    "equals": "Windows"
                   },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "Centos"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "in": [
-                      "7.2",
-                      "7.3",
-                      "7.4",
-                      "7.5",
-                      "7.6",
-                      "7.7",
-                      "7_8",
-                      "7_9",
-                      "7-LVM",
-                      "8.0",
-                      "8_1",
-                      "8_2",
-                      "8_3",
-                      "8-lvm"
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "SUSE"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "sles-12-sp5",
-                      "sles-15-sp2"
-                    ]
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "in": [
-                      "gen1",
-                      "gen2"
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
                   {
                     "field": "Microsoft.Compute/imagePublisher",
                     "equals": "MicrosoftWindowsServer"
