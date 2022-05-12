@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Linux virtual machines for collecting telemetry data from the guest OS. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Monitoring"
     },
     "parameters": {
@@ -120,15 +120,15 @@
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
                       "RHEL",
-                      "RHEL-SAP-HANA"
+                      "RHEL-BYOS",
+                      "RHEL-HA",
+                      "RHEL-SAP",
+                      "RHEL-SAP-APPS",
+                      "RHEL-SAP-HA"
                     ]
                   },
                   {
                     "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "6*"
-                      },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
@@ -136,6 +136,14 @@
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm8*"
                       }
                     ]
                   }
@@ -148,28 +156,59 @@
                     "equals": "SUSE"
                   },
                   {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "SLES",
-                      "SLES-HPC",
-                      "SLES-HPC-Priority",
-                      "SLES-SAP",
-                      "SLES-SAP-BYOS",
-                      "SLES-Priority",
-                      "SLES-BYOS",
-                      "SLES-SAPCAL",
-                      "SLES-Standard"
-                    ]
-                  },
-                  {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "12*"
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "SLES",
+                              "SLES-HPC",
+                              "SLES-HPC-Priority",
+                              "SLES-SAP",
+                              "SLES-SAP-BYOS",
+                              "SLES-Priority",
+                              "SLES-BYOS",
+                              "SLES-SAPCAL",
+                              "SLES-Standard"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSku",
+                                "like": "12*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageSku",
+                                "like": "15*"
+                              }
+                            ]
+                          }
+                        ]
                       },
                       {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "15*"
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-12*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-15*"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
@@ -225,16 +264,30 @@
                     "equals": "Canonical"
                   },
                   {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "0001-com-ubuntu-server-focal"
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "0001-com-ubuntu-server-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "0001-com-ubuntu-pro-*"
+                      }
+                    ]
                   },
                   {
                     "anyOf": [
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "in": [
+                          "pro-16_04-lts",
+                          "pro-16_04-lts-gen2",
+                          "pro-18_04-lts",
+                          "pro-18_04-lts-gen2",
                           "20_04-lts",
-                          "20_04-lts-gen2"
+                          "20_04-lts-gen2",
+                          "pro-20_04-lts",
+                          "pro-20_04-lts-gen2"
                         ]
                       }
                     ]
@@ -253,10 +306,6 @@
                   },
                   {
                     "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "6*"
-                      },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
@@ -326,20 +375,12 @@
                   {
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
-                      "debian"
+                      "Debian"
                     ]
                   },
                   {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "8"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "9"
-                      }
-                    ]
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "9"
                   }
                 ]
               },
@@ -357,7 +398,10 @@
                   },
                   {
                     "field": "Microsoft.Compute/imageSku",
-                    "like": "10"
+                    "in": [
+                      "10",
+                      "10-gen2"
+                    ]
                   }
                 ]
               }
