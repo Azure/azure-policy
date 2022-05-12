@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "The Azure Security Benchmark initiative represents the policies and controls implementing security recommendations defined in Azure Security Benchmark v2, see https://aka.ms/azsecbm. This also serves as the Azure Security Center default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Azure Security Center.",
     "metadata": {
-      "version": "39.0.0",
+      "version": "40.1.0",
       "category": "Security Center"
     },
     "policyDefinitionGroups": [
@@ -352,14 +352,15 @@
     "parameters": {
       "useServicePrincipalToProtectSubscriptionsMonitoringEffect": {
         "type": "string",
-        "defaultValue": "AuditIfNotExists",
+        "defaultValue": "Disabled",
         "allowedValues": [
           "AuditIfNotExists",
           "Disabled"
         ],
         "metadata": {
           "displayName": "Service principals should be used to protect your subscriptions instead of management certificates",
-          "description": "Management certificates allow anyone who authenticates with them to manage the subscription(s) they are associated with. To manage subscriptions more securely, use of service principals with Resource Manager is recommended to limit the impact of a certificate compromise."
+          "description": "[Deprecated: With Cloud Services (classic) retiring (see https://azure.microsoft.com/updates/cloud-services-retirement-announcement), there will no longer be a need for this assessment as management certificates will be obsolete.] Management certificates allow anyone who authenticates with them to manage the subscription(s) they are associated with. To manage subscriptions more securely, use of service principals with Resource Manager is recommended to limit the impact of a certificate compromise.",
+          "deprecated": true
         }
       },
       "updateOsVersionMonitoringEffect": {
@@ -2675,6 +2676,14 @@
           "description": "Enable or disable reporting of the Azure Policy Add-on is enabled on Azure Kubernetes managed cluster"
         }
       },
+      "excludedImagesInKubernetesCluster": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Kubernetes image to exclude from monitoring of all container related polices",
+          "description": "The list of InitContainers and Containers to exclude from Kubernetes container related policy evaluation. It will apply to all container related policies except 'Container images should be deployed from trusted registries only' and 'Kubernetes clusters should gate deployment of vulnerable images'. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+        },
+        "defaultValue": []
+      },
       "allowedContainerImagesInKubernetesClusterEffect": {
         "type": "string",
         "defaultValue": "audit",
@@ -3446,18 +3455,6 @@
       }
     },
     "policyDefinitions": [
-      {
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6646a0bd-e110-40ca-bb97-84fcee63c414",
-        "policyDefinitionReferenceId": "useServicePrincipalToProtectSubscriptionsMonitoring",
-        "parameters": {
-          "effect": {
-            "value": "[parameters('useServicePrincipalToProtectSubscriptionsMonitoringEffect')]"
-          }
-        },
-        "groupNames": [
-          "Azure_Security_Benchmark_v3.0_IM-3"
-        ]
-      },
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a4fe33eb-e377-4efb-ab31-0784311bc499",
         "policyDefinitionReferenceId": "installLogAnalyticsAgentOnVmMonitoring",
@@ -5063,6 +5060,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('privilegedContainerNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5102,6 +5102,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('memoryAndCPULimitsInKubernetesClusterNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5164,6 +5167,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('MustRunAsNonRootNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5192,6 +5198,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('NoPrivilegeEscalationInKubernetesClusterNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5207,6 +5216,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('NoSharingSensitiveHostNamespacesInKubernetesNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5222,6 +5234,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('ReadOnlyRootFileSystemInKubernetesClusterNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5243,6 +5258,9 @@
           },
           "requiredDropCapabilities": {
             "value": "[parameters('DropCapabilitiesInKubernetesClusterList')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5261,6 +5279,9 @@
           },
           "allowedProfiles": {
             "value": "[parameters('AllowedAppArmorProfilesInKubernetesClusterList')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5285,6 +5306,9 @@
           },
           "maxPort": {
             "value": "[parameters('AllowedHostMaxPortInKubernetesCluster')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5303,6 +5327,9 @@
           },
           "allowedHostPaths": {
             "value": "[parameters('AllowedHostPathVolumesInKubernetesClusterList')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
@@ -5462,6 +5489,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringNamespaceExclusion')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
         },
         "groupNames": [
