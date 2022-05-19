@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Device Update for IoT Hub accounts to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling the public network access property improves security by ensuring your Device Update for IoT Hub can only be accessed from a private endpoint. This policy disables public network access on Device Update for IoT Hub resources.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Internet of Things"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DeviceUpdate/accounts"
+          },
+          {
+            "field": "Microsoft.DeviceUpdate/accounts/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2020-03-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.DeviceUpdate/accounts/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/27573ebe-7ef3-4472-a8e1-33aef9ea65c5",
+  "name": "27573ebe-7ef3-4472-a8e1-33aef9ea65c5"
+}
