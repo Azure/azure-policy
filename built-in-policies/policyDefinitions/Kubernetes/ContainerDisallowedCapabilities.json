@@ -5,31 +5,37 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Prevent specific security capabilities in Kubernetes clusters to prevent ungranted privileges on the Pod resource. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "2.0.0-preview",
-      "category": "Kubernetes",
-      "preview": true
+      "version": "3.2.0",
+      "category": "Kubernetes"
     },
     "parameters": {
       "effect": {
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
         },
         "allowedValues": [
           "audit",
+          "Audit",
           "deny",
-          "disabled"
+          "Deny",
+          "disabled",
+          "Disabled"
         ],
-        "defaultValue": "audit"
+        "defaultValue": "Audit"
       },
       "excludedNamespaces": {
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         },
-        "defaultValue": [ "kube-system", "gatekeeper-system", "azure-arc" ]
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ]
       },
       "namespaces": {
         "type": "Array",
@@ -105,6 +111,22 @@
           "description": "List of capabilities that containers are not able to use"
         },
         "defaultValue": []
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "excludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Image exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -119,13 +141,15 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v1/template.yaml",
-          "constraint": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v3/template.yaml",
+          "constraint": "https://store.policy.core.windows.net/kubernetes/container-disallowed-capabilities/v3/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "disallowedCapabilities": "[parameters('disallowedCapabilities')]"
+            "disallowedCapabilities": "[parameters('disallowedCapabilities')]",
+            "excludedContainers": "[parameters('excludedContainers')]",
+            "excludedImages": "[parameters('excludedImages')]"
           }
         }
       }

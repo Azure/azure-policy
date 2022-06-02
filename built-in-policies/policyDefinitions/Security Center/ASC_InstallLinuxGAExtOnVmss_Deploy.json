@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "Configure supported Linux virtual machine scale sets to automatically install the Guest Attestation extension",
+    "displayName": "[Preview]: Configure supported Linux virtual machine scale sets to automatically install the Guest Attestation extension",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Configure supported Linux virtual machines scale sets to automatically install the Guest Attestation extension to allow Azure Security Center to proactively attest and monitor the boot integrity. Boot integrity is attested via Remote Attestation.",
     "metadata": {
       "category": "Security Center",
-      "version": "1.0.0-preview",
+      "version": "5.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -20,6 +20,14 @@
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "attestationEndpoint": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+          "displayName": "Guest attestation tenant URL",
+          "description": "The Microsoft Azure Attestation (MAA) custom tenant URL."
         }
       }
     },
@@ -95,8 +103,76 @@
                     "like": "gen2"
                   }
                 ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "CENTOS"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "8_3-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Oracle"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Oracle-Linux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "ol83-lvm-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoftcblmariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cbl-mariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "1-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "debian"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "debian-11"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "11-gen2"
+                  }
+                ]
               }
             ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.securityType",
+            "equals": "TrustedLaunch"
           },
           {
             "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings",
@@ -147,6 +223,9 @@
                 },
                 "location": {
                   "value": "[field('location')]"
+                },
+                "attestationEndpoint": {
+                  "value": "[parameters('attestationEndpoint')]"
                 }
               },
               "template": {
@@ -158,6 +237,9 @@
                   },
                   "location": {
                     "type": "string"
+                  },
+                  "attestationEndpoint": {
+                    "type": "string"
                   }
                 },
                 "variables": {
@@ -165,8 +247,7 @@
                   "extensionPublisher": "Microsoft.Azure.Security.LinuxAttestation",
                   "extensionVersion": "1.0",
                   "maaTenantName": "GuestAttestation",
-                  "ascReportingEndpoint": "https://eus2.service.attest.azure.net/",
-                  "maaEndpoint": "https://sharedeus2.eus2.attest.azure.net/"
+                  "ascReportingEndpoint": ""
                 },
                 "resources": [
                   {
@@ -182,7 +263,7 @@
                       "settings": {
                         "AttestationConfig": {
                           "MaaSettings": {
-                            "maaEndpoint": "[variables('maaEndpoint')]",
+                            "maaEndpoint": "[parameters('attestationEndpoint')]",
                             "maaTenantName": "[variables('maaTenantName')]"
                           },
                           "AscSettings": {

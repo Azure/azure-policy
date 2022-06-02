@@ -1,0 +1,110 @@
+{
+  "properties": {
+    "displayName": "Azure NetApp Files Volumes of type NFSv4.1 should use Kerberos data encryption",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Only allow the use of Kerberos privacy (5p) security mode to ensure data is encrypted.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes"
+          },
+          {
+            "count": {
+              "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/protocolTypes[*]",
+              "where": {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/protocolTypes[*]",
+                "equals": "NFSv4.1"
+              }
+            },
+            "greater": 0
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/kerberosEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/kerberosEnabled",
+                "equals": "false"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/kerberosEnabled",
+                    "equals": "true"
+                  },
+                  {
+                    "count": {
+                      "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*]",
+                      "where": {
+                        "anyOf": [
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5pReadWrite",
+                                "equals": "false"
+                              },
+                              {
+                                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5pReadOnly",
+                                "equals": "false"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5ReadOnly",
+                            "equals": "true"
+                          },
+                          {
+                            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5ReadWrite",
+                            "equals": "true"
+                          },
+                          {
+                            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5iReadOnly",
+                            "equals": "true"
+                          },
+                          {
+                            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/exportPolicy.rules[*].kerberos5iReadWrite",
+                            "equals": "true"
+                          }
+                        ]
+                      }
+                    },
+                    "greater": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7c6c7139-7d8e-45d0-9d94-72386a61308b",
+  "name": "7c6c7139-7d8e-45d0-9d94-72386a61308b"
+}

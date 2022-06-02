@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Hotpatch should be enabled for Windows Server Azure Edition VMs",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Minimize reboots and install updates quickly with hotpatch. Learn more at https://docs.microsoft.com/azure/automanage/automanage-hotpatch",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Automanage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.sku",
+            "in": [
+              "2022-datacenter-azure-edition",
+              "2022-datacenter-azure-edition-core",
+              "2022-datacenter-azure-edition-core-smalldisk",
+              "2022-datacenter-azure-edition-smalldisk"
+            ]
+          },
+          {
+            "not": {
+              "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.enableHotpatching",
+              "equals": "true"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6d02d2f7-e38b-4bdc-96f3-adc0a8726abc",
+  "name": "6d02d2f7-e38b-4bdc-96f3-adc0a8726abc"
+}

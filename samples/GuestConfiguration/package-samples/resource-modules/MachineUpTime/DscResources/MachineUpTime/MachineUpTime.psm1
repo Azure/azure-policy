@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-        Retrieves information on the current machine's uptime.
+        Retrieves the Complaince Status of the Node based on the Last Date the VM was restarted.
 
     .PARAMETER NumberOfDays
-        The number of days within which the current machine is expected to have restarted.
+        The number of days afterwhich the node is considered not compliant if it is not restarted.
 #>
 function Get-TargetResource
 {
@@ -17,25 +17,29 @@ function Get-TargetResource
         $NumberOfDays
     )
 
-    $machineUptimeInfo = @{
-        NumberOfDays = Get-NumberOfDaysSinceLastStart
+    $reasons = @(Get-ReasonsLastBootUpTimeDoNotMatchExpected $NumberOfDays )
+    
+    $machineUpTimeInfo = @{
+        NumberOfDays = $NumberOfDays
     }
-
-    $reasons = @(Get-ReasonsUptimeDoesNotMatchExpected -NumberOfDays $NumberOfDays)
     
     if ($null -ne $reasons -and $reasons.Count -gt 0)
     {
-        $machineUptimeInfo['Reasons'] = $reasons
+        $machineUpTimeInfo['Reasons'] = $reasons
     }
     
-    return $machineUptimeInfo
+    return $machineUpTimeInfo
 }
 <#
     .SYNOPSIS
-        Tests whether or not the current machine has been restarted within the specified number of days.
+        Test whether or not the Node is complaint based on whether the VM has been restarted within X days.
+
+    .DESCRIPTION
+        Returns false if the VM is not restarted within X days, that could indicate that the target node is not part of the normal maintenance cycle, for example that is has not received updates.
+        Returns true otherwise.
 
     .PARAMETER NumberOfDays
-        The number of days within which the current machine is expected to have restarted.
+        The number of days afterwhich the node is considered not compliant if it is not restarted.
 #>
 function Test-TargetResource
 {
@@ -49,7 +53,7 @@ function Test-TargetResource
         $NumberOfDays
     )
 
-    $reasons = @(Get-ReasonsUptimeDoesNotMatchExpected -NumberOfDays $NumberOfDays)
+    $reasons = @(Get-ReasonsLastBootUpTimeDoNotMatchExpected $NumberOfDays)
 
     if ($null -ne $reasons -and $reasons.Count -gt 0)
     {
@@ -76,15 +80,18 @@ function Set-TargetResource
 
     throw 'Set functionality is not supported in this version of the DSC resource.'
 }
-
 <#
     .SYNOPSIS
-        Returns Guest Configuration Reasons if the current machine has not restarted within the specified number of days.
+        Compares LastBootUpTime with the Current Date time of the VM.
 
+    .DESCRIPTION
+        Compares LastBootUpTime with the Current Date time of the VM it will return a reasone 
+        when the Difference is greater than the Number of Days specified as Input.
+    
     .PARAMETER NumberOfDays
-        The number of days within which the current machine is expected to have restarted.
+        The number of days afterwhich the node is considered not compliant if it is not restarted.
 #>
-function Get-ReasonsUptimeDoesNotMatchExpected
+function Get-ReasonsLastBootUpTimeDoNotMatchExpected
 {
     [CmdletBinding()]
     [OutputType([Hashtable[]])]
@@ -95,38 +102,21 @@ function Get-ReasonsUptimeDoesNotMatchExpected
         [String]
         $NumberOfDays
     )
-
     $reasons = @()
-    $reasonCodePrefix = 'MachineUptime:MachineUptime'
+    $reasonCodePrefix = 'MachineUpTime:MachineUpTime'
     
-    $numberOfDaysSinceLastStart = Get-NumberOfDaysSinceLastStart
-
-    if ($numberOfDaysSinceLastStart -gt $NumberOfDays)
+    Write-Verbose -Message  "Check if the difference between VM's LastBootUpTime and current datatime is less than NumberOfDays"
+    $lastbootuptime = (Get-CimInstance -ClassName Win32_Operatingsystem).LastBootUpTime
+    Write-Verbose "Last Bootuptime $lastbootuptime" -Verbose
+    $CurrentDate =  Get-Date
+    
+    if(($CurrentDate - $lastbootuptime).TotalDays -gt $NumberOfDays)
     {
         $reasons += @{
-            Code   = '{0}:{1}' -f $reasonCodePrefix, 'MachineUptimeGreaterThanExpected'
-            Phrase = ("This machine has not restarted within '{0}' days. Last start time was '{1}' days ago." -f $NumberOfDays, $numberOfDaysSinceLastStart)
+            Code   = '{0}:{1}' -f $reasonCodePrefix, 'LastBootUpTime'
+            Phrase = ("The VM was not restarted within '{0}' days, LastBootUpTime was on '{1}' that could indicate that the target node is not part of the normal maintenance cycle, and has not received updates. '{0}'." -f $NumberOfDays ,($lastbootuptime))
         }
     }
-
     return $reasons
 }
 
-<#
-    .SYNOPSIS
-        Retrieves the number of days since the current machine has started.
-#>
-function Get-NumberOfDaysSinceLastStart
-{
-    [CmdletBinding()]
-    [OutputType([int])]
-    param ()
-
-    $lastStartTime = (Get-CimInstance -ClassName Win32_Operatingsystem).LastBootUpTime
-    Write-Verbose -Message "Last start time: $lastBootUpTime"
-
-    $currentDate =  Get-Date
-    $daysSinceLastStart = [int](($currentDate - $lastStartTime).TotalDays)
-
-    return $daysSinceLastStart
-}

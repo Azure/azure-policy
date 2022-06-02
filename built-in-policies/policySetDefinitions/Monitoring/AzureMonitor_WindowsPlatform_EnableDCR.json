@@ -1,0 +1,92 @@
+{
+  "properties": {
+    "displayName": "Configure Windows machines to run Azure Monitor Agent and associate them to a Data Collection Rule",
+    "policyType": "BuiltIn",
+    "description": "Monitor and secure your Windows virtual machines, virtual machine scale sets, and Arc machines by deploying the Azure Monitor Agent extension and associating the machines with a specified Data Collection Rule. Deployment will occur on machines with supported OS images (or machines matching the provided list of images) in supported regions.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "listOfWindowsImageIdToInclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Additional Virtual Machine Images",
+          "description": "List of virtual machine images that have supported Windows OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        },
+        "defaultValue": []
+      },
+      "DcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule that the virtual machines in scope should point to."
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ca817e41-e85a-4783-bc7f-dc532d36235e",
+        "policyDefinitionReferenceId": "deployAzureMonitoringAgentWindows",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfWindowsImageIdToInclude": {
+            "value": "[parameters('listOfWindowsImageIdToInclude')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4efbd9d8-6bc6-45f6-9be2-7fe9dd5d89ff",
+        "policyDefinitionReferenceId": "deployAzureMonitorAgentWindowsVMSS",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfWindowsImageIdToInclude": {
+            "value": "[parameters('listOfWindowsImageIdToInclude')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/94f686d6-9a24-4e19-91f1-de937dc171a4",
+        "policyDefinitionReferenceId": "deployAzureMonitorAgentWindowsHybridVM",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/eab1f514-22e3-42e3-9a1f-e1dc9199355c",
+        "policyDefinitionReferenceId": "associateDataCollectionRuleWindows",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfWindowsImageIdToInclude": {
+            "value": "[parameters('listOfWindowsImageIdToInclude')]"
+          },
+          "DcrResourceId": {
+            "value": "[parameters('DcrResourceId')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/9575b8b7-78ab-4281-b53b-d3c1ace2260b",
+  "name": "9575b8b7-78ab-4281-b53b-d3c1ace2260b"
+}

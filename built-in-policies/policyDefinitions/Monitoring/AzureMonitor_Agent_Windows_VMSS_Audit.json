@@ -1,0 +1,295 @@
+{
+  "properties": {
+    "displayName": "Windows virtual machine scale sets should have Azure Monitor Agent installed",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Windows virtual machine scale sets should be monitored and secured through the deployed Azure Monitor Agent. The Azure Monitor Agent collects telemetry data from the guest OS. Virtual machine scale sets with supported OS and in supported regions are monitored for Azure Monitor Agent deployment. Learn more: https://aka.ms/AMAOverview.",
+    "metadata": {
+      "version": "3.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      },
+      "listOfWindowsImageIdToInclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Additional Virtual Machine Images",
+          "description": "List of virtual machine images that have supported Windows OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "field": "location",
+            "in": [
+              "australiacentral",
+              "australiaeast",
+              "australiasoutheast",
+              "brazilsouth",
+              "canadacentral",
+              "canadaeast",
+              "centralindia",
+              "centralus",
+              "eastasia",
+              "eastus2euap",
+              "eastus",
+              "eastus2",
+              "francecentral",
+              "germanywestcentral",
+              "japaneast",
+              "japanwest",
+              "jioindiawest",
+              "koreacentral",
+              "koreasouth",
+              "northcentralus",
+              "northeurope",
+              "norwayeast",
+              "southafricanorth",
+              "southcentralus",
+              "southeastasia",
+              "southindia",
+              "switzerlandnorth",
+              "uaenorth",
+              "uksouth",
+              "ukwest",
+              "westcentralus",
+              "westeurope",
+              "westindia",
+              "westus",
+              "westus2"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imageId",
+                "in": "[parameters('listOfWindowsImageIdToInclude')]"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServer"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2008-R2-SP1*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2012-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2016-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2019-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2022-*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServerSemiAnnual"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "in": [
+                      "Datacenter-Core-1709-smalldisk",
+                      "Datacenter-Core-1709-with-Containers-smalldisk",
+                      "Datacenter-Core-1803-with-Containers-smalldisk"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServerHPCPack"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServerHPCPack"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftSQLServer"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2022"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2022-BYOL"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2019"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2019-BYOL"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2016"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2016-BYOL"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2012R2"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2012R2-BYOL"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftRServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "MLServer-WS2016"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftVisualStudio"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "VisualStudio",
+                      "Windows"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftDynamicsAX"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Dynamics"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "equals": "Pre-Req-AX7-Onebox-U8"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "windows-data-science-vm"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsDesktop"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Windows-10"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "equals": "AzureMonitorWindowsAgent"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.Azure.Monitor"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3672e6f7-a74d-4763-b138-fcf332042f8f",
+  "name": "3672e6f7-a74d-4763-b138-fcf332042f8f"
+}

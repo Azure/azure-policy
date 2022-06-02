@@ -2,9 +2,9 @@
   "properties": {
     "displayName": "HITRUST/HIPAA",
     "policyType": "BuiltIn",
-    "description": "This initiative includes audit and virtual machine extension deployment policies that address a subset of HITRUST/HIPAA controls. Additional policies will be added in upcoming releases. For more information, visit https://aka.ms/hipaa-blueprint.",
+    "description": "This initiative includes policies that address a subset of HITRUST/HIPAA controls. Additional policies will be added in upcoming releases. For more information, visit https://aka.ms/hipaa-init.",
     "metadata": {
-      "version": "6.0.0",
+      "version": "10.1.1",
       "category": "Regulatory Compliance"
     },
     "policyDefinitionGroups": [
@@ -2305,12 +2305,12 @@
       "IncludeArcMachines": {
         "type": "string",
         "metadata": {
-            "displayName": "Include Arc connected servers for Guest Configuration policies",
-            "description": "Optionally choose to audit settings inside Arc connected servers using Guest Configuration policies. By selecting this option, you agree to be charged monthly per Arc connected machine."
+          "displayName": "Include Arc connected servers for Guest Configuration policies",
+          "description": "Optionally choose to audit settings inside Arc connected servers using Guest Configuration policies. By selecting this option, you agree to be charged monthly per Arc connected machine."
         },
         "allowedValues": [
-            "true",
-            "false"
+          "true",
+          "false"
         ],
         "defaultValue": "false"
       },
@@ -2462,6 +2462,28 @@
           "description": "Audit diagnostic setting for selected resource types"
         }
       },
+      "logsEnabled-7f89b1eb-583c-429a-8828-af049802c1d9": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Include logs when auditing diagnostic logging settings."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
+      "metricsEnabled-7f89b1eb-583c-429a-8828-af049802c1d9": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Include metrics when auditing diagnostic logging settings."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
       "membersToInclude": {
         "type": "string",
         "metadata": {
@@ -2546,9 +2568,23 @@
       },
       "ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoringEffect": {
         "type": "string",
-        "defaultValue": "AuditIfNotExists",
+        "defaultValue": "Disabled",
         "allowedValues": [
           "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "SQL Managed Instance TDE protector should be encrypted with your own key",
+          "description": "Enable or disable the monitoring of Transparent Data Encryption (TDE) with your own key support. TDE with your own key support provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties.",
+          "deprecated": true
+        }
+      },
+      "ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyWithDenyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
           "Disabled"
         ],
         "metadata": {
@@ -2564,7 +2600,7 @@
           "Disabled"
         ],
         "metadata": {
-          "displayName": "Disk encryption should be applied on virtual machines",
+          "displayName": "Virtual machines should encrypt temp disks, caches, and data flows between Compute and Storage resources",
           "description": "Enable or disable the monitoring for VM disk encryption"
         }
       },
@@ -2610,7 +2646,7 @@
         "metadata": {
           "displayName": "Vulnerabilities should be remediated by a Vulnerability Assessment solution",
           "description": "Enable or disable the detection of VM vulnerabilities by a vulnerability assessment solution",
-		      "deprecated": true
+          "deprecated": true
         }
       },
       "EnableInsecureGuestLogons": {
@@ -2651,9 +2687,23 @@
       },
       "ensureServerTDEIsEncryptedWithYourOwnKeyMonitoringEffect": {
         "type": "string",
-        "defaultValue": "AuditIfNotExists",
+        "defaultValue": "Disabled",
         "allowedValues": [
           "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "SQL server TDE protector should be encrypted with your own key",
+          "description": "Enable or disable the monitoring of Transparent Data Encryption (TDE) with your own key support. TDE with your own key support provides increased transparency and control over the TDE Protector, increased security with an HSM-backed external service, and promotion of separation of duties.",
+          "deprecated": true
+        }
+      },
+      "ensureServerTDEIsEncryptedWithYourOwnKeyWithDenyMonitoringEffect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
           "Disabled"
         ],
         "metadata": {
@@ -3329,10 +3379,10 @@
       },
       {
         "policyDefinitionReferenceId": "ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoring",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/048248b0-55cd-46da-b1ff-39efd52db260",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ac01ad65-10e5-46df-bdd9-6b0cad13e1d2",
         "parameters": {
           "effect": {
-            "value": "[parameters('ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyMonitoringEffect')]"
+            "value": "[parameters('ensureManagedInstanceTDEIsEncryptedWithYourOwnKeyWithDenyMonitoringEffect')]"
           }
         },
         "groupNames": [
@@ -3386,8 +3436,7 @@
             "value": "[parameters('installedApplicationsOnWindowsVM')]"
           }
         },
-        "groupNames": [
-        ]
+        "groupNames": []
       },
       {
         "policyDefinitionReferenceId": "AzureBaseline_SecurityOptionsAudit",
@@ -3401,7 +3450,7 @@
           }
         },
         "groupNames": [
-            "hipaa-0605.10h1System.12-10.h"
+          "hipaa-0605.10h1System.12-10.h"
         ]
       },
       {
@@ -3413,7 +3462,7 @@
           }
         },
         "groupNames": [
-            "hipaa-0605.10h1System.12-10.h"
+          "hipaa-0605.10h1System.12-10.h"
         ]
       },
       {
@@ -3428,16 +3477,16 @@
           }
         },
         "groupNames": [
-            "hipaa-0635.10k1Organizational.12-10.k",
-            "hipaa-0636.10k2Organizational.1-10.k",
-            "hipaa-0637.10k2Organizational.2-10.k",
-            "hipaa-0638.10k2Organizational.34569-10.k",
-            "hipaa-0639.10k2Organizational.78-10.k",
-            "hipaa-0640.10k2Organizational.1012-10.k",
-            "hipaa-0641.10k2Organizational.11-10.k",
-            "hipaa-0642.10k3Organizational.12-10.k",
-            "hipaa-0643.10k3Organizational.3-10.k",
-            "hipaa-0644.10k3Organizational.4-10.k"
+          "hipaa-0635.10k1Organizational.12-10.k",
+          "hipaa-0636.10k2Organizational.1-10.k",
+          "hipaa-0637.10k2Organizational.2-10.k",
+          "hipaa-0638.10k2Organizational.34569-10.k",
+          "hipaa-0639.10k2Organizational.78-10.k",
+          "hipaa-0640.10k2Organizational.1012-10.k",
+          "hipaa-0641.10k2Organizational.11-10.k",
+          "hipaa-0642.10k3Organizational.12-10.k",
+          "hipaa-0643.10k3Organizational.3-10.k",
+          "hipaa-0644.10k3Organizational.4-10.k"
         ]
       },
       {
@@ -3487,7 +3536,7 @@
           }
         },
         "groupNames": [
-            "hipaa-0709.10m1Organizational.1-10.m"
+          "hipaa-0709.10m1Organizational.1-10.m"
         ]
       },
       {
@@ -3507,8 +3556,7 @@
             "value": "[parameters('TurnOffMulticastNameResolution')]"
           }
         },
-        "groupNames": [
-        ]
+        "groupNames": []
       },
       {
         "policyDefinitionReferenceId": "Deploynetworkwatcherwhenvirtualnetworksarecreated",
@@ -3581,7 +3629,7 @@
           }
         },
         "groupNames": [
-            "hipaa-0858.09m1Organizational.4-09.m"
+          "hipaa-0858.09m1Organizational.4-09.m"
         ]
       },
       {
@@ -3598,10 +3646,10 @@
       },
       {
         "policyDefinitionReferenceId": "ensureServerTDEIsEncryptedWithYourOwnKeyMonitoring",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0d134df8-db83-46fb-ad72-fe0c9428c8dd",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0a370ff3-6cab-4e85-8995-295fd854c5b8",
         "parameters": {
           "effect": {
-            "value": "[parameters('ensureServerTDEIsEncryptedWithYourOwnKeyMonitoringEffect')]"
+            "value": "[parameters('ensureServerTDEIsEncryptedWithYourOwnKeyWithDenyMonitoringEffect')]"
           }
         },
         "groupNames": [
@@ -3692,7 +3740,7 @@
           }
         },
         "groupNames": [
-            "hipaa-0861.09m2Organizational.67-09.m"
+          "hipaa-0861.09m2Organizational.67-09.m"
         ]
       },
       {
@@ -3716,8 +3764,7 @@
             "value": "[parameters('IncludeArcMachines')]"
           }
         },
-        "groupNames": [
-        ]
+        "groupNames": []
       },
       {
         "policyDefinitionReferenceId": "AuditSqlServerLevelAuditingSettings",
@@ -3768,8 +3815,7 @@
             "value": "[parameters('IncludeArcMachines')]"
           }
         },
-        "groupNames": [
-        ]
+        "groupNames": []
       },
       {
         "policyDefinitionReferenceId": "identityEnableMFAForWritePermissionsMonitoring",
@@ -3844,7 +3890,7 @@
           }
         },
         "groupNames": [
-            "hipaa-1148.01c2System.78-01.c"
+          "hipaa-1148.01c2System.78-01.c"
         ]
       },
       {
@@ -3927,7 +3973,7 @@
           }
         },
         "groupNames": [
-            "hipaa-1637.12b2Organizational.2-12.b"
+          "hipaa-1637.12b2Organizational.2-12.b"
         ]
       },
       {
@@ -4022,15 +4068,6 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "customSubscriptionOwnerRolesShouldNotExist",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/10ee2ea2-fb4d-45b8-a7e9-a2e770044cd9",
-        "parameters": {},
-        "groupNames": [
-          "hipaa-1276.09c2Organizational.2-09.c",
-          "hipaa-1278.09c2Organizational.56-09.c"
-        ]
-      },
-      {
         "policyDefinitionReferenceId": "AuditWindowsVMsInWhichTheAdministratorsGroupContainsAnyOfTheSpecifiedMembers",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/69bf4abd-ca1e-4cf6-8b5a-762d42e61d4f",
         "parameters": {
@@ -4079,14 +4116,6 @@
         "parameters": {},
         "groupNames": [
           "hipaa-0201.09j1Organizational.124-09.j"
-        ]
-      },
-      {
-        "policyDefinitionReferenceId": "unattachedDisksShouldBeEncrypted",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2c89a2e5-7285-40fe-afe0-ae8654b92fb2",
-        "parameters": {},
-        "groupNames": [
-          "hipaa-0303.09o2Organizational.2-09.o"
         ]
       },
       {
@@ -4282,6 +4311,12 @@
         "parameters": {
           "listOfResourceTypes": {
             "value": "[parameters('listOfResourceTypes')]"
+          },
+          "logsEnabled": {
+            "value": "[parameters('logsEnabled-7f89b1eb-583c-429a-8828-af049802c1d9')]"
+          },
+          "metricsEnabled": {
+            "value": "[parameters('metricsEnabled-7f89b1eb-583c-429a-8828-af049802c1d9')]"
           }
         },
         "groupNames": [
@@ -4348,7 +4383,7 @@
           }
         },
         "groupNames": [
-            "hipaa-1232.09c3Organizational.12-09.c"
+          "hipaa-1232.09c3Organizational.12-09.c"
         ]
       },
       {
@@ -4441,8 +4476,8 @@
         ]
       },
       {
-        "policyDefinitionReferenceId": "diagnosticsLogsInSelectiveAppServicesMonitoringEffect",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b607c5de-e7d9-4eee-9e5c-83f1bcee4fa0",
+        "policyDefinitionReferenceId": "diagnosticLogsInAppServicesShouldBeEnabledMonitoringEffect",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/91a78b24-f231-4a8a-8da9-02c35b2b6510",
         "parameters": {},
         "groupNames": [
           "hipaa-1209.09aa3System.2-09.aa"

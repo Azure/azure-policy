@@ -1,0 +1,23 @@
+[ClassVersion("1.0.0.0")] 
+class Reason
+{
+    [Read] String Phrase;
+    [Read] String Code;
+};
+
+[ClassVersion("1.0.0.0")]
+class SecureWebServerInfo
+{
+    [Read] String Protocol;
+    [Read, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
+};
+
+[ClassVersion("1.0.0.0"), FriendlyName("SecureWebServer")]
+class SecureWebServer : OMI_BaseResource
+{
+    [Key, Description("Specifies the resource is a single instance, the value must be 'Yes'"), ValueMap{"Yes"}, Values{"Yes"}] String IsSingleInstance;
+    [Write] String MinimumTLSVersion;
+    [Read, EmbeddedInstance("SecureWebServerInfo")] String Protocols[];
+    [Read] Boolean IsWebServer;
+    [Read, EmbeddedInstance("Reason")] String Reasons[];
+};

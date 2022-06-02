@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "Configure supported Windows virtual machines to automatically install the Guest Attestation extension",
+    "displayName": "[Preview]: Configure supported Windows virtual machines to automatically install the Guest Attestation extension",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Configure supported Windows virtual machines to automatically install the Guest Attestation extension to allow Azure Security Center to proactively attest and monitor the boot integrity. Boot integrity is attested via Remote Attestation.",
     "metadata": {
       "category": "Security Center",
-      "version": "1.0.0-preview",
+      "version": "4.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -21,6 +21,14 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "attestationEndpoint": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+          "displayName": "Guest attestation tenant URL",
+          "description": "The Microsoft Azure Attestation (MAA) custom tenant URL."
+        }
       }
     },
     "policyRule": {
@@ -31,8 +39,20 @@
             "equals": "Microsoft.Compute/virtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.offer",
-            "like": "windows*"
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.offer",
+                "like": "windows*"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                "like": "Windows*"
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.securityType",
+            "equals": "TrustedLaunch"
           },
           {
             "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings",
@@ -83,6 +103,9 @@
                 },
                 "location": {
                   "value": "[field('location')]"
+                },
+                "attestationEndpoint": {
+                  "value": "[parameters('attestationEndpoint')]"
                 }
               },
               "template": {
@@ -94,6 +117,9 @@
                   },
                   "location": {
                     "type": "string"
+                  },
+                  "attestationEndpoint": {
+                    "type": "string"
                   }
                 },
                 "variables": {
@@ -101,8 +127,7 @@
                   "extensionPublisher": "Microsoft.Azure.Security.WindowsAttestation",
                   "extensionVersion": "1.0",
                   "maaTenantName": "GuestAttestation",
-                  "ascReportingEndpoint": "https://eus2.service.attest.azure.net/",
-                  "maaEndpoint": "https://sharedeus2.eus2.attest.azure.net/"
+                  "ascReportingEndpoint": ""
                 },
                 "resources": [
                   {
@@ -118,7 +143,7 @@
                       "settings": {
                         "AttestationConfig": {
                           "MaaSettings": {
-                            "maaEndpoint": "[variables('maaEndpoint')]",
+                            "maaEndpoint": "[parameters('attestationEndpoint')]",
                             "maaTenantName": "[variables('maaTenantName')]"
                           },
                           "AscSettings": {

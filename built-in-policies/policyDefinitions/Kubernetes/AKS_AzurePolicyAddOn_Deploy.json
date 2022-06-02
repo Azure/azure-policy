@@ -5,22 +5,36 @@
     "mode": "Indexed",
     "description": "Use Azure Policy Add-on to manage and report on the compliance state of your Azure Kubernetes Service (AKS) clusters. For more information, see https://aka.ms/akspolicydoc.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "4.0.0",
       "category": "Kubernetes"
     },
-    "parameters": {},
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
     "policyRule": {
       "if": {
         "field": "type",
         "equals": "Microsoft.ContainerService/managedClusters"
       },
       "then": {
-        "effect": "deployIfNotExists",
+        "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.ContainerService/managedClusters",
           "name": "[field('name')]",
           "roleDefinitionIds": [
-            "/providers/Microsoft.Authorization/roleDefinitions/ed7f3fbd-7b88-4dd4-9017-9adb7ce333f8"
+            "/providers/Microsoft.Authorization/roleDefinitions/ed7f3fbd-7b88-4dd4-9017-9adb7ce333f8",
+            "/providers/Microsoft.Authorization/roleDefinitions/18ed5180-3e48-46fd-8541-4ea054d57064"
           ],
           "existenceCondition": {
             "field": "Microsoft.ContainerService/managedClusters/addonProfiles.azurePolicy.enabled",
@@ -58,7 +72,7 @@
                         "outputs": {
                           "aksCluster": {
                             "type": "object",
-                            "value": "[reference(resourceId(parameters('clusterResourceGroupName'), 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2020-04-01', 'Full')]"
+                            "value": "[reference(resourceId(parameters('clusterResourceGroupName'), 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2021-07-01', 'Full')]"
                           }
                         }
                       }
@@ -86,13 +100,12 @@
                         },
                         "resources": [
                           {
-                            "apiVersion": "2020-04-01",
+                            "apiVersion": "2021-07-01",
                             "type": "Microsoft.ContainerService/managedClusters",
                             "name": "[parameters('aksClusterName')]",
                             "location": "[parameters('aksClusterContent').location]",
                             "sku": "[parameters('aksClusterContent').sku]",
                             "tags": "[if(contains(parameters('aksClusterContent'), 'tags'), parameters('aksClusterContent').tags, json('null'))]",
-                            "identity": "[if(contains(parameters('aksClusterContent'), 'identity'), parameters('aksClusterContent').identity, json('null'))]",
                             "properties": {
                               "kubernetesVersion": "[parameters('aksClusterContent').properties.kubernetesVersion]",
                               "dnsPrefix": "[parameters('aksClusterContent').properties.dnsPrefix]",

@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-        Retrieves the domain membership information of the current machine.
+        Retrieves the Complaince Status of the Node based on the Domain Name the Machine has joined .
 
     .PARAMETER DomainName
-        The name of the domain that the machine is expected to be joined to.
+        The Fully qualified DNS name of the domain.
 #>
 function Get-TargetResource
 {
@@ -17,26 +17,29 @@ function Get-TargetResource
         $DomainName
     )
 
-    $domainMembershipInfo = @{
-        DomainName = Get-MachineDomainName
+    $reasons = @(Get-ReasonsDomainNameDoNotMatchExpected $DomainName )
+    
+    $DomainNameInfo = @{
+        DomainName = $DomainName
     }
-
-    $reasons = @(Get-ReasonsDomainNameDoNotMatchExpected -DomainName $DomainName)
     
     if ($null -ne $reasons -and $reasons.Count -gt 0)
     {
-        $domainMembershipInfo['Reasons'] = $reasons
+        $DomainNameInfo['Reasons'] = $reasons
     }
     
-    return $domainMembershipInfo
+    return $DomainNameInfo
 }
-
 <#
     .SYNOPSIS
-        Tests whether or not the current machine joined to the domain with the specified name.
+        Test whether or not the Node is complaint based on whether the Domain Name the VM currently joined to matching the Name specified by the user.
+
+    .DESCRIPTION
+        Returns false if the Domain Name the VM currently joined to is not matching the Name specified by the user.
+        Returns true otherwise.
 
     .PARAMETER DomainName
-        The name of the domain that the machine is expected to be joined to.
+        The Fully qualified DNS name of the domain.
 #>
 function Test-TargetResource
 {
@@ -50,7 +53,7 @@ function Test-TargetResource
         $DomainName
     )
 
-    $reasons = @(Get-ReasonsDomainNameDoNotMatchExpected -DomainName $DomainName)
+    $reasons = @(Get-ReasonsDomainNameDoNotMatchExpected $DomainName)
 
     if ($null -ne $reasons -and $reasons.Count -gt 0)
     {
@@ -77,13 +80,15 @@ function Set-TargetResource
 
     throw 'Set functionality is not supported in this version of the DSC resource.'
 }
-
 <#
     .SYNOPSIS
-        Retrieves the reasons that the current machine is not joined to the domain with the specified name.
+        Compares the Domain Name the VM currently joined to the Name specified by the user.
 
+    .DESCRIPTION
+        Compares the Domain Name the VM currently joined to the Name specified by the user.
+    
     .PARAMETER DomainName
-        The name of the domain that the machine is expected to be joined to.
+        The Fully qualified DNS name of the domain.
 #>
 function Get-ReasonsDomainNameDoNotMatchExpected
 {
@@ -96,34 +101,20 @@ function Get-ReasonsDomainNameDoNotMatchExpected
         [String]
         $DomainName
     )
-
     $reasons = @()
-    $reasonCodePrefix = 'DomainMembership:DomainMembership'
+    $reasonCodePrefix = 'DomainName:DomainName'
     
-    $machineDomainName = Get-MachineDomainName
-    Write-Verbose -Message "Machine is currently joined to the domain with the name '$machineDomainName'."
-
-    if ($DomainName -ine $machineDomainName)
+    Write-Verbose -Message  "Check if the Machine joined DomainName and the user specified DomainName Match..."
+    $DNSDomainName = (Get-CimInstance -ClassName win32_computersystem).Domain
+    Write-Verbose "Machine is currently joined to $DNSDomainName" -Verbose
+        
+    if($DomainName.ToLower() -ne $DNSDomainName.ToLower())
     {
         $reasons += @{
-            Code   = '{0}:{1}' -f $reasonCodePrefix, 'MachineDomainNameDoesNotMatchSpecified'
-            Phrase = ("This machine is joined to the domain '{0}', but it was expected to be joined to the domain '{1}'." -f $machineDomainName, $DomainName)
+            Code   = '{0}:{1}' -f $reasonCodePrefix, 'DNSDomainName'
+            Phrase = ("The Domain Name the VM is currently joined to '{0}' does not match the one specified by the User '{1}' .." -f $DNSDomainName ,$DomainName)
         }
     }
-
     return $reasons
 }
 
-<#
-    .SYNOPSIS
-        Retrieves the name of the domain that the current machine is joined to.
-#>
-function Get-MachineDomainName
-{
-    [CmdletBinding()]
-    [OutputType([String])]
-    param ()
-    
-    Write-Verbose -Message  "Retrieving the machine-joined domain name..."
-    return (Get-CimInstance -ClassName 'win32_computersystem').Domain
-}

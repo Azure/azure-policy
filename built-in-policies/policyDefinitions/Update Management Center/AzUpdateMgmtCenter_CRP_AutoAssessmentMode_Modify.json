@@ -1,0 +1,360 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure periodic checking for missing system updates on azure virtual machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configure auto-assessment (every 24 hours) for OS updates on native Azure virtual machines. You can control the scope of assignment according to machine subscription, resource group, location or tag. Learn more about this for Windows: https://aka.ms/computevm-windowspatchassessmentmode, for Linux: https://aka.ms/computevm-linuxpatchassessmentmode.",
+    "metadata": {
+      "version": "2.0.0-preview",
+      "category": "Update Management Center",
+      "preview": true
+    },
+    "parameters": {
+      "assessmentMode": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Assessment mode",
+          "description": "Assessment mode for the machines."
+        },
+        "allowedValues": [
+          "ImageDefault",
+          "AutomaticByPlatform"
+        ],
+        "defaultValue": "AutomaticByPlatform"
+      },
+      "osType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "OS type",
+          "description": "OS type for the machines."
+        },
+        "allowedValues": [
+          "Windows",
+          "Linux"
+        ],
+        "defaultValue": "Windows"
+      },
+      "locations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Machines locations",
+          "description": "The list of locations from which machines need to be targeted.",
+          "strongType": "location"
+        },
+        "defaultValue": []
+      },
+      "tagValues": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Tags on machines",
+          "description": "The list of tags that need to matched for getting target machines."
+        },
+        "defaultValue": {}
+      },
+      "tagOperator": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag operator",
+          "description": "Matching condition for resource tags"
+        },
+        "allowedValues": [
+          "All",
+          "Any"
+        ],
+        "defaultValue": "Any"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[empty(parameters('locations'))]",
+                "equals": true
+              },
+              {
+                "field": "location",
+                "in": "[parameters('locations')]"
+              }
+            ]
+          },
+          {
+            "field": "[if(equals(parameters('osType'), 'Windows'), 'Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.assessmentMode', 'Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.assessmentMode')]",
+            "notEquals": "[parameters('assessmentMode')]"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[empty(parameters('tagValues'))]",
+                "equals": true
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('tagOperator')]",
+                    "equals": "Any"
+                  },
+                  {
+                    "value": "[greaterOrEquals(if(empty(field('tags')), 0, length(intersection(parameters('tagValues'), field('tags')))), 1)]",
+                    "equals": true
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('tagOperator')]",
+                    "equals": "All"
+                  },
+                  {
+                    "value": "[equals(if(empty(field('tags')), 0, length(intersection(parameters('tagValues'), field('tags')))), length(parameters('tagValues')))]",
+                    "equals": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('osType')]",
+                    "equals": "Linux"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Canonical"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "UbuntuServer"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "18.04-LTS"
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "0001-com-ubuntu-pro-bionic"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "pro-18_04-lts"
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "0001-com-ubuntu-server-focal"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "20_04-lts"
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "0001-com-ubuntu-pro-focal"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "pro-20_04-lts"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Redhat"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "RHEL"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "in": [
+                                      "7.2",
+                                      "7.3",
+                                      "7.4",
+                                      "7.5",
+                                      "7.6",
+                                      "7.7",
+                                      "7.8",
+                                      "7_9",
+                                      "7-RAW",
+                                      "7-LVM",
+                                      "8",
+                                      "8.1",
+                                      "8.2",
+                                      "8_3",
+                                      "8_4",
+                                      "8-LVM"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "RHEL-RAW"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "equals": "8-raw"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "OpenLogic"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "Centos"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "7.2",
+                              "7.3",
+                              "7.4",
+                              "7.5",
+                              "7.6",
+                              "7.7",
+                              "7_8",
+                              "7_9",
+                              "7-LVM",
+                              "8.0",
+                              "8_1",
+                              "8_2",
+                              "8_3",
+                              "8-lvm"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "SUSE"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "sles-12-sp5",
+                              "sles-15-sp2"
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('osType')]",
+                    "equals": "Windows"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "WindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "in": [
+                      "2008-R2-SP1",
+                      "2012-R2-Datacenter",
+                      "2016-Datacenter",
+                      "2016-Datacenter-Server-Core",
+                      "2019-Datacenter",
+                      "2019-Datacenter-Core"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "modify",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[equals(parameters('osType'), 'Windows')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.assessmentMode",
+              "value": "[parameters('assessmentMode')]"
+            },
+            {
+              "condition": "[equals(parameters('osType'), 'Linux')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.assessmentMode",
+              "value": "[parameters('assessmentMode')]"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/59efceea-0c96-497e-a4a1-4eb2290dac15",
+  "name": "59efceea-0c96-497e-a4a1-4eb2290dac15"
+}

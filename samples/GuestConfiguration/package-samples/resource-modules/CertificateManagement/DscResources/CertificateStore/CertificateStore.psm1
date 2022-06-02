@@ -26,24 +26,22 @@ function Get-ReasonsCertificateStoreDoesNotMatchExpected
         $IncludeExpiredCertificates = $false
     )
 
-    $reasonCodePrefix = "CertificateManagement:CertificateStore:"
     $reasons = @()
 
     $nonCompliantCertificates = @()
-    $allCertificatesUnderPath = Get-ChildItem -Path $CertificateStorePath -Recurse
-    
+    $allCertificatesUnderPath = Get-ChildItem -Path $CertificateStorePath -Recurse | Sort-Object -Unique
+
     if ($PSBoundParameters.ContainsKey('CertificateThumbprintsToInclude') -and $null -ne $CertificateThumbprintsToInclude -and $CertificateThumbprintsToInclude.Count -gt 0)
     {
-        $allCertificateThumbprints = $allCertificatesUnderPath.Thumbprint
         foreach ($certificateThumbprintExpected in $CertificateThumbprintsToInclude)
         {
-            if ($allCertificateThumbprints -notcontains $certificateThumbprintExpected)
+            if ($allCertificatesUnderPath.Thumbprint -notcontains $certificateThumbprintExpected)
             {
                 if ($CertificateThumbprintsToExclude -notcontains $certificateThumbprintExpected)
                 {
-                    Write-Verbose -Message "Could not find expected thumbprint: $certificateThumbprintExpected"
+                    Write-Verbose -Message 'Could not find expected thumbprint.'
                     $reason = @{
-                        Code = $reasonCodePrefix + 'ExpectedCertificateNotFound'
+                        Code = 'CertificateManagement:CertificateStore:ExpectedCertificateNotFound'
                         Phrase = "The certificate with thumbprint '$certificateThumbprintExpected' was not found in the certificate store at the path '$CertificateStorePath'."
                     }
                     $reasons += $reason
@@ -91,7 +89,7 @@ function Get-ReasonsCertificateStoreDoesNotMatchExpected
             {
                 if ($CertificateThumbprintsToInclude -notcontains $nonCompliantCertificate.Thumbprint)
                 {
-                    Write-Verbose -Message "Certificate '$($nonCompliantCertificate.Thumbprint)' not included."
+                    Write-Verbose -Message "Certificate not included."
                     $certificateReasonValid = $false
                 }
             }
@@ -100,16 +98,16 @@ function Get-ReasonsCertificateStoreDoesNotMatchExpected
             {
                 if ($CertificateThumbprintsToExclude -contains $nonCompliantCertificate.Thumbprint)
                 {
-                    Write-Verbose -Message "Certificate '$($nonCompliantCertificate.Thumbprint)' excluded."
+                    Write-Verbose -Message "Certificate excluded."
                     $certificateReasonValid = $false
                 }
             }
 
             if ($certificateReasonValid)
             {
-                Write-Verbose -Message "Found expiring certificate: '$($nonCompliantCertificate.Thumbprint)'"
+                Write-Verbose -Message 'Found expiring certificate.'
                 $reason = @{
-                    Code = $reasonCodePrefix + 'CertificateExpiringWithinMaximumDays'
+                    Code = 'CertificateManagement:CertificateStore:CertificateExpiringWithinMaximumDays'
                     Phrase = "The certificate with thumbprint '$($nonCompliantCertificate.Thumbprint)' and friendly name '$($nonCompliantCertificate.FriendlyName)' is expiring after '$($nonCompliantCertificate.NotAfter)' which is within the specified '$ExpirationLimitInDays' days."
                 }
                 $reasons += $reason
@@ -144,7 +142,6 @@ function Get-TargetResource
         $CertificateThumbprintsToExclude = '',
 
         [Parameter()]
-        [ValidateSet('true', 'false')]
         [String]
         $IncludeExpiredCertificates = 'false'
     )
@@ -207,7 +204,6 @@ function Test-TargetResource
         $CertificateThumbprintsToExclude = '',
 
         [Parameter()]
-        [ValidateSet('true', 'false')]
         [String]
         $IncludeExpiredCertificates = 'false'
     )
@@ -265,7 +261,6 @@ function Set-TargetResource
         $CertificateThumbprintsToExclude = '',
 
         [Parameter()]
-        [ValidateSet('true', 'false')]
         [String]
         $IncludeExpiredCertificates = 'false'
     )

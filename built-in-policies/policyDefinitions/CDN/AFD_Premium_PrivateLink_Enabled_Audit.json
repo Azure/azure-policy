@@ -1,0 +1,85 @@
+{
+  "properties": {
+    "displayName": "Secure private connectivity between Azure Front Door Premium and Azure Storage Blob, or Azure App Service",
+    "description": "Private link ensures private connectivity between AFD Premium and Azure Storage Blob or Azure App Service over the Azure backbone network, without the Azure Storage Blob or the Azure App Service being publicly exposed to the internet.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "CDN"
+    },
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "originType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Origin Type",
+          "description": "Azure Storage Blob or Azure App Service origin type"
+        },
+        "allowedValues": [
+          "StorageBlob",
+          "AppService"
+        ],
+        "defaultValue": "StorageBlob"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Cdn/profiles/originGroups/origins"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('originType')]",
+                    "equals": "StorageBlob"
+                  },
+                  {
+                    "field": "Microsoft.Cdn/profiles/originGroups/origins/hostName",
+                    "like": "*.blob.core.windows.net"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('originType')]",
+                    "equals": "AppService"
+                  },
+                  {
+                    "field": "Microsoft.Cdn/profiles/originGroups/origins/hostName",
+                    "like": "*.azurewebsites.net"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.Cdn/profiles/originGroups/origins/sharedPrivateLinkResource.privateLink",
+            "exists": false
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/daba2cce-8326-4af3-b049-81a362da024d",
+  "name": "daba2cce-8326-4af3-b049-81a362da024d"
+}

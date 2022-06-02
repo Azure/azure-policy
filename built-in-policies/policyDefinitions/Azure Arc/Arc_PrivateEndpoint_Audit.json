@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "displayName": "Azure Arc Private Link Scopes should be configured with a private endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Azure Arc Private Link Scopes, data leakage risks are reduced. Learn more about private links at: https://aka.ms/arc/privatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Arc"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/privateLinkScopes"
+          },
+          {
+            "count": {
+              "field": "Microsoft.HybridCompute/privateLinkScopes/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.HybridCompute/privateLinkScopes/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7eab1da3-2bf0-4ff0-8303-1a4277c380e8",
+  "name": "7eab1da3-2bf0-4ff0-8303-1a4277c380e8"
+}

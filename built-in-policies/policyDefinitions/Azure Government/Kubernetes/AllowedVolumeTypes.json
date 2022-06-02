@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Pods can only use allowed volume types in a Kubernetes cluster. This recommendation is part of Pod Security Policies which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "3.2.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -13,20 +13,23 @@
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
         },
         "allowedValues": [
           "audit",
+          "Audit",
           "deny",
-          "disabled"
+          "Deny",
+          "disabled",
+          "Disabled"
         ],
-        "defaultValue": "audit"
+        "defaultValue": "Audit"
       },
       "excludedNamespaces": {
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         },
         "defaultValue": [
           "kube-system",
@@ -108,6 +111,14 @@
           "description": "The list of volume types that can be used by a pod. Provide empty list as input to block everything."
         },
         "defaultValue": []
+      },
+      "excludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Image exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -120,13 +131,14 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.azure.us/kubernetes/allowed-volume-types/v1/template.yaml",
-          "constraint": "https://store.policy.azure.us/kubernetes/allowed-volume-types/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/allowed-volume-types/v2/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/allowed-volume-types/v2/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "volumes": "[parameters('allowedVolumeTypes')]"
+            "volumes": "[parameters('allowedVolumeTypes')]",
+            "excludedImages": "[parameters('excludedImages')]"
           }
         }
       }

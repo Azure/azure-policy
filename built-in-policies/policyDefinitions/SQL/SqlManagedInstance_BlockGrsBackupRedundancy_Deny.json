@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "policyType": "BuiltIn",
     "metadata": {
-      "version": "1.0.1",
+      "version": "2.0.0",
       "category": "SQL"
     },
     "parameters": {
@@ -30,18 +30,52 @@
             "equals": "Microsoft.Sql/managedInstances"
           },
           {
-            "not": {
-              "anyOf": [
-                {
-                  "field": "Microsoft.Sql/managedInstances/storageAccountType",
-                  "equals": "LRS"
-                },
-                {
-                  "field": "Microsoft.Sql/managedInstances/storageAccountType",
-                  "equals": "ZRS"
-                }
-              ]
-            }
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "lessOrEquals": "2021-02-01-preview"
+                  },
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "field": "Microsoft.Sql/managedInstances/storageAccountType",
+                          "equals": "LRS"
+                        },
+                        {
+                          "field": "Microsoft.Sql/managedInstances/storageAccountType",
+                          "equals": "ZRS"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "greater": "2021-02-01-preview"
+                  },
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "field": "Microsoft.Sql/managedInstances/requestedBackupStorageRedundancy",
+                          "equals": "Local"
+                        },
+                        {
+                          "field": "Microsoft.Sql/managedInstances/requestedBackupStorageRedundancy",
+                          "equals": "Zone"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
