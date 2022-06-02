@@ -277,6 +277,6 @@ This behavior is also seen in resource types from the following RPs:
 For support involving these compliance message issues, please first follow up with the respective RP listed above.
 
 ### Resource types that do not support creation of Policy exemptions
-These resource types do not allow Policy exemptions on resources due to deny assignments. Workaround is to use exclusions at the assignment level. 
+These resource types do not allow Policy exemptions on resources due to [deny assignments](https://docs.microsoft.com/azure/role-based-access-control/deny-assignments). Workaround is to use [exclusions](https://docs.microsoft.com/azure/governance/policy/concepts/assignment-structure#excluded-scopes) at the assignment level. 
 
 - Microsoft.Databricks/* 
