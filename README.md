@@ -112,7 +112,7 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
             }
    ```
 - Microsoft.DataLakeStore/accounts
-  - This type behaves similarly to Microsoft.Sql/servers/auditingSettings. Compliance of some fields cannot be determined except in AuditIfNotExits and DeployIfNotExists.
+  - This type behaves similarly to Microsoft.Sql/servers/auditingSettings. Compliance of some fields cannot be determined except in `AuditIfNotExists` and `DeployIfNotExists` policies.
 - Microsoft.DataLakeStore/accounts/encryptionState 
   - This property of this type is populated differently when queried than when created or updated unless non-standard parameters are provided. This means deny policies will work, but compliance audits will generally not be correct.
 - Microsoft.Sql 'master' database 
