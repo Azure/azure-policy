@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "This policy creates a Guest Configuration assignment to set specified time zone on Windows virtual machines.",
     "metadata": {
-      "version": "1.1.0",
+      "version": "2.0.0",
       "category": "Guest Configuration",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
@@ -16,7 +16,8 @@
         "type": "string",
         "metadata": {
           "displayName": "Include Arc connected servers",
-          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
         },
         "allowedValues": [
           "true",
@@ -228,7 +229,7 @@
                       },
                       {
                         "field": "Microsoft.Compute/imageOffer",
-                        "equals": "dsvm-windows"
+                        "like": "dsvm-win*"
                       }
                     ]
                   },
@@ -342,12 +343,32 @@
                 "equals": "true"
               },
               {
-                "field": "type",
-                "equals": "Microsoft.HybridCompute/machines"
-              },
-              {
-                "field": "Microsoft.HybridCompute/imageOffer",
-                "like": "windows*"
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.HybridCompute/machines"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/imageOffer",
+                        "like": "windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                      },
+                      {
+                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
+                        "like": "windows*"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -357,7 +378,7 @@
         "effect": "deployIfNotExists",
         "details": {
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+            "/providers/microsoft.authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31"
           ],
           "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
           "name": "SetWindowsTimeZone",
@@ -424,7 +445,7 @@
                       "guestConfiguration": {
                         "name": "[parameters('configurationName')]",
                         "version": "1.*",
-                        "assignmentType": "DeployAndAutoCorrect",
+                        "assignmentType": "ApplyAndAutoCorrect",
                         "configurationParameter": [
                           {
                             "name": "[WindowsTimeZone]WindowsTimeZone1;TimeZone",
@@ -444,7 +465,7 @@
                       "guestConfiguration": {
                         "name": "[parameters('configurationName')]",
                         "version": "1.*",
-                        "assignmentType": "DeployAndAutoCorrect",
+                        "assignmentType": "ApplyAndAutoCorrect",
                         "configurationParameter": [
                           {
                             "name": "[WindowsTimeZone]WindowsTimeZone1;TimeZone",
