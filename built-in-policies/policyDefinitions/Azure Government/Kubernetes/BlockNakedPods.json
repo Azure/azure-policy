@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Kubernetes clusters should not use the default namespace",
+    "displayName": "Kubernetes cluster should not use naked pods",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Prevent usage of the default namespace in Kubernetes clusters to protect against unauthorized access for ConfigMap, Pod, Secret, Service, and ServiceAccount resource types. For more information, see https://aka.ms/kubepolicydoc.",
+    "description": "Block usage of naked Pods. Naked Pods will not be rescheduled in the event of a node failure. Pods should be managed by Deployment, Replicset, Daemonset or Jobs",
     "metadata": {
-      "version": "3.0.0",
+      "version": "1.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -13,14 +13,11 @@
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
         },
         "allowedValues": [
-          "audit",
           "Audit",
-          "deny",
           "Deny",
-          "disabled",
           "Disabled"
         ],
         "defaultValue": "Audit"
@@ -43,9 +40,7 @@
           "displayName": "Namespace inclusions",
           "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
         },
-        "defaultValue": [
-          "default"
-        ]
+        "defaultValue": []
       },
       "labelSelector": {
         "type": "object",
@@ -111,8 +106,6 @@
       "if": {
         "field": "type",
         "in": [
-          "AKS Engine",
-          "Microsoft.Kubernetes/connectedClusters",
           "Microsoft.ContainerService/managedClusters"
         ]
       },
@@ -121,15 +114,13 @@
         "details": {
           "templateInfo": {
             "sourceType": "PublicURL",
-            "url": "https://store.policy.core.windows.net/kubernetes/block-default-namespace/v1/template.yaml"
+            "url": "https://store.policy.azure.us/kubernetes/block-naked-pods/v1/template.yaml"
           },
           "apiGroups": [
             ""
           ],
           "kinds": [
-            "Pod",
-            "Service",
-            "ServiceAccount"
+            "Pod"
           ],
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
@@ -138,6 +129,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/9f061a12-e40d-4183-a00e-171812443373",
-  "name": "9f061a12-e40d-4183-a00e-171812443373"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/65280eef-c8b4-425e-9aec-af55e55bf581",
+  "name": "65280eef-c8b4-425e-9aec-af55e55bf581"
 }
