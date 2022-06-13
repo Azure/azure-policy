@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Restrict containers' pull policy to enforce containers to use only allowed images on deployments",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -111,6 +111,14 @@
           "IfNotPresent",
           "Never"
         ]
+      },
+      "excludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Image exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -132,7 +140,7 @@
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
             "allowedPullPolicy": "[parameters('allowedPullPolicy')]",
-            "excludedImages": []
+            "excludedImages": "[parameters('excludedImages')]"
           }
         }
       }

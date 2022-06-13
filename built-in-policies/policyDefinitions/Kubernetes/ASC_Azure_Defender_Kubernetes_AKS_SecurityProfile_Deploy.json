@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Microsoft Defender for Containers provides cloud-native Kubernetes security capabilities including environment hardening, workload protection, and run-time protection. When you enable the SecurityProfile.AzureDefender on your Azure Kubernetes Service cluster, an agent is deployed to your cluster to collect security event data. Learn more about Microsoft Defender for Containers: https://docs.microsoft.com/azure/defender-for-cloud/defender-for-containers-introduction?tabs=defender-for-container-arch-aks.",
     "metadata": {
-      "version": "3.0.3-preview",
+      "version": "3.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -96,14 +96,14 @@
                     "australiasoutheast": "SEAU",
                     "brazilsouth": "CQ",
                     "brazilsoutheast": "BRSE",
-                    "canadacentral": "CCAN",
+                    "canadacentral": "CCA",
                     "canadaeast": "YQ",
-                    "centralindia": "CID",
+                    "centralindia": "CIN",
                     "centralus": "CUS",
                     "eastasia": "EA",
                     "eastus": "EUS",
                     "eastus2": "EUS2",
-                    "eastus2euap": "EAPEUS2",
+                    "eastus2euap": "eus2p",
                     "germanywestcentral": "DEWC",
                     "francecentral": "PAR",
                     "francesouth": "MRS",
@@ -139,7 +139,8 @@
                   "shouldProvisionDefaultWorkspace": "[empty(parameters('logAnalyticsWorkspaceResourceId'))]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                   "workspaceName": "[concat('DefaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode'))]",
-                  "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]"
+                  "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]",
+                  "getResourceDeploymentName": "[concat('getExistingCluster-', uniqueString(deployment().name))]"
                 },
                 "resources": [
                   {
@@ -184,7 +185,7 @@
                           {
                             "type": "Microsoft.OperationalInsights/workspaces",
                             "name": "[parameters('workspaceName')]",
-                            "apiVersion": "2015-11-01-preview",
+                            "apiVersion": "2021-06-01",
                             "location": "[parameters('clusterRegion')]",
                             "properties": {
                               "sku": {
@@ -204,7 +205,42 @@
                     ]
                   },
                   {
-                    "condition": "[variables('shouldProvisionDefaultWorkspace')]",
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2020-06-01",
+                    "name": "[variables('getResourceDeploymentName')]",
+                    "location": "[parameters('clusterRegion')]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "parameters": {
+                        "clusterResourceId": {
+                          "value": "[parameters('clusterResourceId')]"
+                        },
+                        "clusterName": {
+                          "value": "[parameters('clusterName')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "clusterResourceId": {
+                            "type": "string"
+                          },
+                          "clusterName": {
+                            "type": "string"
+                          }
+                        },
+                        "resources": [],
+                        "outputs": {
+                          "existingCluster": {
+                            "type": "object",
+                            "value": "[reference(resourceId(variables('subscriptionId'), split(parameters('clusterResourceId'),'/')[4], 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2022-02-01', 'Full')]"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
                     "type": "Microsoft.Resources/deployments",
                     "name": "[concat('securityprofile-deploy-', uniqueString(parameters('clusterResourceId')))]",
                     "apiVersion": "2020-10-01",
@@ -217,13 +253,16 @@
                       },
                       "parameters": {
                         "workspaceResourceId": {
-                          "value": "[concat('/subscriptions/', variables('subscriptionId'), '/resourcegroups/', variables('defaultRGName'), '/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
+                          "value": "[if(variables('shouldProvisionDefaultWorkspace'), concat('/subscriptions/', variables('subscriptionId'), '/resourcegroups/', variables('defaultRGName'), '/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName')), parameters('logAnalyticsWorkspaceResourceId'))]"
                         },
                         "clusterName": {
                           "value": "[parameters('clusterName')]"
                         },
                         "clusterRegion": {
                           "value": "[parameters('clusterRegion')]"
+                        },
+                        "aksClusterContent": {
+                          "value": "[reference(variables('getResourceDeploymentName')).outputs.existingCluster.value]"
                         }
                       },
                       "template": {
@@ -238,13 +277,16 @@
                           },
                           "clusterRegion": {
                             "type": "string"
+                          },
+                          "aksClusterContent": {
+                            "type": "object"
                           }
                         },
                         "resources": [
                           {
                             "type": "Microsoft.ContainerService/ManagedClusters",
                             "name": "[parameters('clusterName')]",
-                            "apiVersion": "2021-07-01",
+                            "apiVersion": "2022-02-01",
                             "location": "[parameters('clusterRegion')]",
                             "properties": {
                               "securityProfile": {
@@ -252,7 +294,16 @@
                                   "enabled": true,
                                   "logAnalyticsWorkspaceResourceId": "[parameters('workspaceResourceId')]"
                                 }
-                              }
+                              },
+                              "nodeResourceGroup": "[parameters('aksClusterContent').properties.nodeResourceGroup]",
+                              "enableRBAC": "[if(contains(parameters('aksClusterContent').properties, 'enableRBAC'), parameters('aksClusterContent').properties.enableRBAC, json('null'))]",
+                              "enablePodSecurityPolicy": "[if(contains(parameters('aksClusterContent').properties, 'enablePodSecurityPolicy'), parameters('aksClusterContent').properties.enablePodSecurityPolicy, json('null'))]",
+                              "networkProfile": "[if(contains(parameters('aksClusterContent').properties, 'networkProfile'), parameters('aksClusterContent').properties.networkProfile, json('null'))]",
+                              "aadProfile": "[if(contains(parameters('aksClusterContent').properties, 'aadProfile'), parameters('aksClusterContent').properties.aadProfile, json('null'))]",
+                              "autoScalerProfile": "[if(contains(parameters('aksClusterContent').properties, 'autoScalerProfile'), parameters('aksClusterContent').properties.autoScalerProfile, json('null'))]",
+                              "apiServerAccessProfile": "[if(contains(parameters('aksClusterContent').properties, 'apiServerAccessProfile'), parameters('aksClusterContent').properties.apiServerAccessProfile, json('null'))]",
+                              "diskEncryptionSetID": "[if(contains(parameters('aksClusterContent').properties, 'diskEncryptionSetID'), parameters('aksClusterContent').properties.diskEncryptionSetID, json('null'))]",
+                              "identityProfile": "[if(contains(parameters('aksClusterContent').properties, 'identityProfile'), parameters('aksClusterContent').properties.identityProfile, json('null'))]"
                             }
                           }
                         ]
@@ -261,62 +312,6 @@
                     "dependsOn": [
                       "[variables('deployDefaultAscResourceGroup')]"
                     ]
-                  },
-                  {
-                    "condition": "[not(variables('shouldProvisionDefaultWorkspace'))]",
-                    "type": "Microsoft.Resources/deployments",
-                    "name": "[concat('securityprofile-deploy-withworkspace-', uniqueString(parameters('clusterResourceId')))]",
-                    "apiVersion": "2020-10-01",
-                    "subscriptionId": "[variables('subscriptionId')]",
-                    "resourceGroup": "[split(parameters('clusterResourceId'),'/')[4]]",
-                    "properties": {
-                      "mode": "Incremental",
-                      "expressionEvaluationOptions": {
-                        "scope": "inner"
-                      },
-                      "parameters": {
-                        "workspaceResourceId": {
-                          "value": "[parameters('logAnalyticsWorkspaceResourceId')]"
-                        },
-                        "clusterName": {
-                          "value": "[parameters('clusterName')]"
-                        },
-                        "clusterRegion": {
-                          "value": "[parameters('clusterRegion')]"
-                        }
-                      },
-                      "template": {
-                        "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {
-                          "workspaceResourceId": {
-                            "type": "string"
-                          },
-                          "clusterName": {
-                            "type": "string"
-                          },
-                          "clusterRegion": {
-                            "type": "string"
-                          }
-                        },
-                        "resources": [
-                          {
-                            "type": "Microsoft.ContainerService/ManagedClusters",
-                            "name": "[parameters('clusterName')]",
-                            "apiVersion": "2021-07-01",
-                            "location": "[parameters('clusterRegion')]",
-                            "properties": {
-                              "securityProfile": {
-                                "azureDefender": {
-                                  "enabled": true,
-                                  "logAnalyticsWorkspaceResourceId": "[parameters('workspaceResourceId')]"
-                                }
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    }
                   }
                 ]
               }

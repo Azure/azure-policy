@@ -5,7 +5,7 @@
     "mode": "Microsoft.MachineLearningServices.Data",
     "description": "Provide allowed module authors in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "5.0.0-preview",
+      "version": "6.0.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -143,14 +143,30 @@
             ]
           },
           {
-            "count": {
-              "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
-              "where": {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
-                "in": "[parameters('tags')]"
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "value": "[length(parameters('tags'))]",
+                    "notEquals": 0
+                  },
+                  {
+                    "value": "[length(field('Microsoft.MachineLearningServices.Data/workspaces/tags[*]'))]",
+                    "equals": 0
+                  }
+                ]
+              },
+              {
+                "count": {
+                  "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                  "where": {
+                    "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                    "in": "[parameters('tags')]"
+                  }
+                },
+                "equals": "[length(parameters('tags'))]"
               }
-            },
-            "equals": "[length(parameters('tags'))]"
+            ]
           }
         ]
       },
