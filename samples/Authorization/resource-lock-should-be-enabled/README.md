@@ -3,13 +3,10 @@ With this policy: any resource that has the tag key *LockLevel* with the value *
 
 # Lock resources
 
-Published in the Blog post [Compliance and delegation of Azure Locks through Azure Policy](https://medium.com/microsoftazure/compliance-and-delegation-of-azure-master-through-azure-policy-9f464d40faee).
+See more information and a complete walk-through in the following Blog post [Compliance and delegation of Azure Locks through Azure Policy](https://medium.com/microsoftazure/compliance-and-delegation-of-azure-master-through-azure-policy-9f464d40faee).
 
 
-## Azure Policy Docs
-
-See more information and a complete walk-through of using this sample on:
-[Compliance and delegation of Azure Locks through Azure Policy](https://medium.com/microsoftazure/compliance-and-delegation-of-azure-master-through-azure-policy-9f464d40faee).
+Before implementing Azure Locks make sure you have read the following documentation [Considerations before applying your locks](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/lock-resources?tabs=json&WT.mc_id=AZ-MVP-5003548#considerations-before-applying-your-locks).
 
 ## Try with Azure portal
 
