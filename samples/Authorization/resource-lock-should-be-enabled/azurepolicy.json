@@ -1,0 +1,125 @@
+{
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "d1ad6c00-a48d-4039-87a9-8662253c303f",
+    "properties": {
+        "displayName": "Resource Lock should be enabled",
+        "description": "With this policy: any resource that has the tag key LockLevel with the value CanNotDelete means authorized users can read and modify the resource, but they can t delete it.",
+        "policyType": "Custom",
+        "mode": "Indexed",
+        "metadata": {
+            "category": "Backup"
+        },
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable, disable or audit the execution of the policy"
+                },
+                "allowedValues": [
+                    "DeployIfNotExists",
+                    "Disabled",
+                    "AuditIfNotExists"
+                ],
+                "defaultValue": "DeployIfNotExists"
+            },
+            "tagName": {
+                "type": "string",
+                "metadata": {
+                    "displayName": "Exclusion Tag Name",
+                    "description": "Name of the tag to use for excluding resources from this policy. This should be used along with the Exclusion Tag Value parameter."
+                },
+                "defaultValue": "_MVP_Resource_Lock_should_be_enabled"
+            },
+            "tagValue": {
+                "type": "string",
+                "metadata": {
+                    "displayName": "Exclusion Tag Value",
+                    "description": "Value of the tag to use for excluding resources from this policy. This should be used along with the Exclusion Tag Name parameter."
+                },
+                "defaultValue": "exclude"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "tags.LockLevel",
+                        "equals": "CanNotDelete"
+                    },
+                    {
+                        "value": "[length(split(field('type'),'/'))]",
+                        "equals" : 2
+                    },
+                    {
+                        "not": {
+                            "field": "[concat('tags[',parameters('tagName'), ']')]",
+                            "equals": "[parameters('tagValue')]"
+                        }
+                    }
+                ]
+            },
+            "then": {
+                "effect": "[parameters('effect')]",
+                "details": {
+                    "roleDefinitionIds": [
+                        "/providers/microsoft.authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+                    ],
+                    "type": "Microsoft.Authorization/locks",
+                    "name": "ResourceLockedByPolicy",
+                    "existenceCondition": {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.Authorization/locks/level",
+                                "In": ["CanNotDelete"]
+                            },
+                            {
+                                "field": "Microsoft.Authorization/locks/notes",
+                                "equals": "Locked by Azure Policy"
+                            }
+                        ]
+                    },
+                    "deployment": {
+                        "properties": {
+                            "mode": "incremental",
+                            "template": {
+                                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                                "contentVersion": "1.0.0.0",
+                                "parameters": {
+                                    "resourceName": {
+                                        "type": "string"
+                                    },
+                                    "resourceType": {
+                                        "type": "string"
+                                    }
+                                },
+                                "variables": {},
+                                "resources": [
+                                    {
+                                        "type": "Microsoft.Authorization/locks",
+                                        "apiVersion": "2016-09-01",
+                                        "name": "ResourceLockedByPolicy",
+                                        "scope": "[concat(parameters('resourceType'),'/', parameters('resourceName'))]",
+                                        "properties": {
+                                            "level": "CanNotDelete",
+                                            "notes": "Locked by Azure Policy"
+                                        }
+                                    }
+                                ],
+                                "outputs": {}
+                            },
+                            "parameters": {
+                                "resourceName": {
+                                    "value": "[field('name')]"
+                                },
+                                "resourceType": {
+                                    "value": "[field('type')]"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
