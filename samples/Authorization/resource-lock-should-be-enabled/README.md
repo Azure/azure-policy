@@ -39,5 +39,5 @@ definition=$(az policy definition create --name 'resource-lock-should-be-enabled
 scope=$(az group show --name 'YourResourceGroup')
 
 # Create the Policy Assignment
-assignment=$(az policy assignment create --name 'resource-lock-should-be-enabled-assignment' --display-name 'Resource Lock should be enabled Assignment' --mi-system-assigned --location eastus --role Owner --identity-scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r`)
+assignment=$(az policy assignment create --name 'resource-lock-should-be-enabled-assignment' --display-name 'Resource Lock should be enabled Assignment' --mi-system-assigned --location eastus --role Owner --identity-scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r` --scope `echo $scope | jq '.id' -r` --policy `echo $definition | jq '.name' -r`)
 ```
