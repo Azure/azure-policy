@@ -220,6 +220,7 @@ All Databricks resources bypass policy enforcement at creation time. Databricks 
 
 - Microsoft.Resources/deployments
 - Microsoft.Billing/*
+- Microsoft.Capacity/reservationOrders/*
 
 ### Resource types that exceed current enforcement and compliance scale
 
