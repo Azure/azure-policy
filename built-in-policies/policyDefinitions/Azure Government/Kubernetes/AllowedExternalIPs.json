@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Use allowed external IPs to avoid the potential attack (CVE-2020-8554) in a Kubernetes cluster. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "4.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -13,20 +13,23 @@
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
         },
         "allowedValues": [
           "audit",
+          "Audit",
           "deny",
-          "disabled"
+          "Deny",
+          "disabled",
+          "Disabled"
         ],
-        "defaultValue": "audit"
+        "defaultValue": "Audit"
       },
       "excludedNamespaces": {
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation. Providing a value for this parameter is optional."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. Providing a value for this parameter is optional. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         },
         "defaultValue": [
           "kube-system",
@@ -120,8 +123,16 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.azure.us/kubernetes/allowed-external-ips/v1/template.yaml",
-          "constraint": "https://store.policy.azure.us/kubernetes/allowed-external-ips/v1/constraint.yaml",
+          "templateInfo": {
+            "sourceType": "PublicURL",
+            "url": "https://store.policy.azure.us/kubernetes/allowed-external-ips/v1/template.yaml"
+          },
+          "apiGroups": [
+            ""
+          ],
+          "kinds": [
+            "Service"
+          ],
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",

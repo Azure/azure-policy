@@ -4,7 +4,7 @@
     "policyType": "BuiltIn",
     "description": "This initiative includes the policies for the Kubernetes cluster pod security restricted standards. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "2.1.1",
+      "version": "2.3.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -16,10 +16,13 @@
         },
         "allowedValues": [
           "audit",
+          "Audit",
           "deny",
-          "disabled"
+          "Deny",
+          "disabled",
+          "Disabled"
         ],
-        "defaultValue": "audit"
+        "defaultValue": "Audit"
       },
       "excludedNamespaces": {
         "type": "Array",
@@ -38,6 +41,37 @@
         "metadata": {
           "displayName": "Namespace inclusions",
           "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "allowedCapabilities": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed add capabilities",
+          "description": "The list of capabilities that are allowed to be added to a container."
+        },
+        "defaultValue": [
+          "CHOWN",
+          "DAC_OVERRIDE",
+          "FSETID",
+          "FOWNER",
+          "MKNOD",
+          "NET_RAW",
+          "SETGID",
+          "SETUID",
+          "SETFCAP",
+          "SETPCAP",
+          "NET_BIND_SERVICE",
+          "SYS_CHROOT",
+          "KILL",
+          "AUDIT_WRITE"
+        ]
+      },
+      "requiredDropCapabilities": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Required drop capabilities",
+          "description": "The list of capabilities that must be dropped by a container."
         },
         "defaultValue": []
       }
@@ -126,25 +160,10 @@
             "value": "[parameters('namespaces')]"
           },
           "allowedCapabilities": {
-            "value": [
-              "CHOWN",
-              "DAC_OVERRIDE",
-              "FSETID",
-              "FOWNER",
-              "MKNOD",
-              "NET_RAW",
-              "SETGID",
-              "SETUID",
-              "SETFCAP",
-              "SETPCAP",
-              "NET_BIND_SERVICE",
-              "SYS_CHROOT",
-              "KILL",
-              "AUDIT_WRITE"
-            ]
+            "value": "[parameters('allowedCapabilities')]"
           },
           "requiredDropCapabilities": {
-            "value": []
+            "value": "[parameters('requiredDropCapabilities')]"
           }
         }
       },

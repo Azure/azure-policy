@@ -1,0 +1,71 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Application Insights components to disable public network access for log ingestion and querying",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable components log ingestion and querying from public networks access to improve security. Only private-link connected networks will be able to ingest and query logs on this workspace. Learn more at https://aka.ms/AzMonPrivateLink#configure-application-insights.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Insights/components"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Insights/components/publicNetworkAccessForIngestion",
+                "notEquals": "Disabled"
+              },
+              {
+                "field": "Microsoft.Insights/components/publicNetworkAccessForQuery",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "Audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/ae349356-3a1b-4a5e-921d-050484c6347e"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Insights/components/publicNetworkAccessForIngestion",
+              "value": "Disabled"
+            },
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Insights/components/publicNetworkAccessForQuery",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dddfa1af-dcd6-42f4-b5b0-e1db01e0b405",
+  "name": "dddfa1af-dcd6-42f4-b5b0-e1db01e0b405"
+}

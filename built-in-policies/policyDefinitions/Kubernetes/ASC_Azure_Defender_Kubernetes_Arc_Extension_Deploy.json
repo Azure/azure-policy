@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure Azure Arc enabled Kubernetes clusters to install Azure Defender's extension",
+    "displayName": "[Preview]: Configure Azure Arc enabled Kubernetes clusters to install Microsoft Defender for Cloud extension",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Azure Defender's extension for Azure Arc provides threat protection for your Arc enabled Kubernetes clusters. The extension collects data from all nodes in the cluster and sends it to the Azure Defender for Kubernetes backend in the cloud for further analysis. Learn more in https://docs.microsoft.com/azure/security-center/defender-for-kubernetes-azure-arc.",
+    "description": "Microsoft Defender for Cloud extension for Azure Arc provides threat protection for your Arc enabled Kubernetes clusters. The extension collects data from all nodes in the cluster and sends it to the Azure Defender for Kubernetes backend in the cloud for further analysis. Learn more in https://docs.microsoft.com/azure/defender-for-cloud/defender-for-containers-enable?pivots=defender-for-container-arc.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "6.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
@@ -21,6 +21,29 @@
           "Disabled"
         ],
         "defaultValue": "DeployIfNotExists"
+      },
+      "logAnalyticsWorkspaceResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "LogAnalyticsWorkspaceResourceId",
+          "description": "Optional Log Analytics workspace resource id. If provided, will be used as part of the feature configuration. Otherwise, default workspace will be provisioned. Value format should be '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{resourcegroup}/providers/Microsoft.OperationalInsights/workspaces/{logAnalyticsWorkspaceName}'",
+          "strongType": "Microsoft.OperationalInsights/workspaces",
+          "assignPermissions": true
+        },
+        "defaultValue": ""
+      },
+      "excludedDistributions": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "ExcludedDistributions",
+          "description": "Distributions to be excluded from the policy"
+        },
+        "defaultValue": [
+          "aks",
+          "aks_management",
+          "eks",
+          "gke"
+        ]
       }
     },
     "policyRule": {
@@ -32,12 +55,7 @@
           },
           {
             "field": "Microsoft.Kubernetes/connectedClusters/distribution",
-            "in": [
-              "generic",
-              "openshift",
-              "rancher_rke",
-              "tkg"
-            ]
+            "notIn": "[parameters('excludedDistributions')]"
           },
           {
             "field": "Microsoft.Kubernetes/connectedClusters/connectivityStatus",
@@ -57,8 +75,8 @@
                 "equals": "microsoft.azuredefender.kubernetes"
               },
               {
-                "field": "Microsoft.KubernetesConfiguration/extensions/installState",
-                "equals": "Installed"
+                "field": "Microsoft.KubernetesConfiguration/extensions/provisioningState",
+                "equals": "Succeeded"
               }
             ]
           },
@@ -76,6 +94,9 @@
                 },
                 "clusterResourceId": {
                   "value": "[field('id')]"
+                },
+                "logAnalyticsWorkspaceResourceId": {
+                  "value": "[parameters('logAnalyticsWorkspaceResourceId')]"
                 }
               },
               "template": {
@@ -87,15 +108,21 @@
                   },
                   "clusterResourceId": {
                     "type": "string"
+                  },
+                  "logAnalyticsWorkspaceResourceId": {
+                    "type": "string"
                   }
                 },
                 "variables": {
                   "locationLongNameToShortMap": {
                     "australiacentral": "CAU",
+                    "australiacentral2": "CBR2",
                     "australiaeast": "EAU",
                     "australiasoutheast": "SEAU",
                     "brazilsouth": "CQ",
+                    "brazilsoutheast": "BRSE",
                     "canadacentral": "CCA",
+                    "canadaeast": "YQ",
                     "centralindia": "CIN",
                     "centralus": "CUS",
                     "eastasia": "EA",
@@ -104,17 +131,25 @@
                     "eastus2euap": "eus2p",
                     "germanywestcentral": "DEWC",
                     "francecentral": "PAR",
+                    "francesouth": "MRS",
                     "japaneast": "EJP",
+                    "japanwest": "OS",
+                    "jioindiacentral": "JINC",
+                    "jioindiawest": "JINW",
                     "koreacentral": "SE",
+                    "koreasouth": "PS",
                     "northcentralus": "NCUS",
                     "northeurope": "NEU",
                     "norwayeast": "NOE",
+                    "norwaywest": "NOW",
                     "southafricanorth": "JNB",
                     "southcentralus": "SCUS",
                     "southeastasia": "SEA",
+                    "southindia": "MA",
                     "swedencentral": "SEC",
                     "switzerlandnorth": "CHN",
                     "switzerlandwest": "CHW",
+                    "uaecentral": "AUH",
                     "uaenorth": "DXB",
                     "uksouth": "SUK",
                     "ukwest": "WUK",
@@ -122,28 +157,27 @@
                     "westeurope": "WEU",
                     "westus": "WUS",
                     "westus2": "WUS2",
-                    "usgovvirginia": "USGV",
-                    "usgovarizona": "USGA",
-                    "usgovtexas": "USGT",
-                    "chinaeast": "CNE",
-                    "chinaeast2": "CNE2",
-                    "chinawest": "CNW",
-                    "chinawest2": "CNW2"
+                    "westus3": "USW3"
                   },
                   "locationCode": "[variables('locationLongNameToShortMap')[parameters('clusterRegion')]]",
                   "subscriptionId": "[subscription().subscriptionId]",
+                  "shouldProvisionDefaultResources": "[empty(parameters('logAnalyticsWorkspaceResourceId'))]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                   "workspaceName": "[concat('DefaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode'))]",
-                  "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]"
+                  "deployDefaultAscResourceGroup": "[concat('deployDefaultAscResourceGroup-', uniqueString(deployment().name))]",
+                  "defaultWorkspaceResourceId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourcegroups/', variables('defaultRGName'), '/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]",
+                  "desiredWorkspaceResourceId": "[if(variables('shouldProvisionDefaultResources'), variables('defaultWorkspaceResourceId'), parameters('logAnalyticsWorkspaceResourceId'))]"
                 },
                 "resources": [
                   {
+                    "condition": "[variables('shouldProvisionDefaultResources')]",
                     "type": "Microsoft.Resources/resourceGroups",
                     "name": "[variables('defaultRGName')]",
                     "apiVersion": "2019-05-01",
                     "location": "[parameters('clusterRegion')]"
                   },
                   {
+                    "condition": "[variables('shouldProvisionDefaultResources')]",
                     "type": "Microsoft.Resources/deployments",
                     "name": "[variables('deployDefaultAscResourceGroup')]",
                     "apiVersion": "2020-06-01",
@@ -177,7 +211,7 @@
                           {
                             "type": "Microsoft.OperationalInsights/workspaces",
                             "name": "[parameters('workspaceName')]",
-                            "apiVersion": "2015-11-01-preview",
+                            "apiVersion": "2021-06-01",
                             "location": "[parameters('clusterRegion')]",
                             "properties": {
                               "sku": {
@@ -198,7 +232,7 @@
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
-                    "name": "[Concat('arc-k8s-defender-extension', '-',  uniqueString(parameters('clusterResourceId')))]",
+                    "name": "[concat('arc-k8s-defender-extension', '-',  uniqueString(parameters('clusterResourceId')))]",
                     "apiVersion": "2020-10-01",
                     "subscriptionId": "[variables('subscriptionId')]",
                     "resourceGroup": "[split(parameters('clusterResourceId'),'/')[4]]",
@@ -209,7 +243,7 @@
                       },
                       "parameters": {
                         "workspaceResourceId": {
-                          "value": "[concat('/subscriptions/', variables('subscriptionId'), '/resourcegroups/', variables('defaultRGName'), '/providers/Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
+                          "value": "[variables('desiredWorkspaceResourceId')]"
                         },
                         "clusterResourceId": {
                           "value": "[parameters('clusterResourceId')]"

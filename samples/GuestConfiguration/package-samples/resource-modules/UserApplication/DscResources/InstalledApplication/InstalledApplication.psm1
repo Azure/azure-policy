@@ -135,25 +135,7 @@ function Get-AllInstalledApplications
     return $applicationMetaData
 }
 
-<#
-    .SYNOPSIS
-        Retrieves the installation status and information of the applications with the specified
-        names.
-
-    .PARAMETER Name
-        The name(s) of the application(s) of which to check the installation status.
-        Multiple entries should be seperated by a comma.
-        Example: 'Google Chrome, .Net Core*, Firefox'
-
-    .PARAMETER Ensure
-        Specifies whether or not the applications with the specified names should be installed or
-        not installed.
-
-        The value 'Present' indicates that the specified applications should be installed.
-        The value 'Absent' indicates that the specified applications should not be installed.
-        The default value is 'Present.
-#>
-function Get-TargetResource
+function Get-ReasonsApplicationInstallationDoesNotMatch
 {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -169,13 +151,15 @@ function Get-TargetResource
         $Ensure = 'Present'
     )
 
+    $reasons = @()
+    $reasonCodePrefix = 'UserApplication:InstalledApplication'
+
     $applicationsInstalled = @()
     $applicationsNotInstalled = @()
-    $reasons = @()
-
+    
     $allInstalledApplications = Get-AllInstalledApplications
 
-    if ($applicationNames -contains ';')
+    if ($Name.Contains(';'))
     {
         $applicationNames = $Name.Split(';')
     }
@@ -191,18 +175,15 @@ function Get-TargetResource
         $installedApplication = Find-InstalledApplication -Name $applicationName -AllInstalledApplications $allInstalledApplications 
         if ($installedApplication.Count -eq 0)
         {
+            Write-Verbose -Message "Specified application '$applicationName' is not installed." -Verbose
             $applicationsNotInstalled += $applicationName
         }
         else
         {
+            Write-Verbose -Message "Specified application '$applicationName' is installed." -Verbose
             $applicationsInstalled += $installedApplication
         }
     }
-
-    # Retrieve the desired application installation information
-    $applicationInfo = @(Get-InstalledApplicationInfo -InstalledApplications $applicationsInstalled -NotInstalledApplications $applicationsNotInstalled)
-
-    $reasonCodePrefix = 'UserApplication:InstalledApplication'
 
     if (($Ensure -ieq 'Present') -and ($applicationsNotInstalled.Count -gt 0))
     {
@@ -242,12 +223,69 @@ function Get-TargetResource
         }
     }
 
-    return @{
-        Name            = $Name
-        Ensure          = $Ensure
-        ApplicationInfo = $applicationInfo
-        Reasons         = $reasons
+    return $reasons
+}
+
+<#
+    .SYNOPSIS
+        Retrieves the installation status and information of the applications with the specified
+        names.
+
+    .PARAMETER Name
+        The name(s) of the application(s) of which to check the installation status.
+        Multiple entries should be seperated by a comma.
+        Example: 'Google Chrome, .Net Core*, Firefox'
+
+    .PARAMETER Ensure
+        Specifies whether or not the applications with the specified names should be installed or
+        not installed.
+
+        The value 'Present' indicates that the specified applications should be installed.
+        The value 'Absent' indicates that the specified applications should not be installed.
+        The default value is 'Present.
+#>
+function Get-TargetResource
+{
+    [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [String]
+        $Name,
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present'
+    )
+
+    $applicationInstallationInfo = @{
+        Name = $Name
+        Ensure = $Ensure
+        ApplicationInfo = @()
     }
+
+    $reasons = @(Get-ReasonsApplicationInstallationDoesNotMatch -Name $Name -Ensure $Ensure)
+
+    if ($null -ne $reasons -and $reasons.Count -gt 0)
+    {
+        $applicationInstallationInfo['Reasons'] = $reasons
+
+        if ($Ensure -eq 'Absent')
+        {
+            $applicationInstallationInfo['Ensure'] = 'Present'
+        }
+        else
+        {
+            $applicationInstallationInfo['Ensure'] = 'Absent'
+        }
+    }
+
+    # Retrieve the desired application installation information
+    # $applicationInfo = @(Get-InstalledApplicationInfo -InstalledApplications $applicationsInstalled -NotInstalledApplications $applicationsNotInstalled)
+
+    return $applicationInstallationInfo
 }
 
 <#
@@ -291,29 +329,11 @@ function Test-TargetResource
         $Ensure = 'Present'
     )
 
-    $allInstalledApplications = Get-AllInstalledApplications
+    $reasons = @(Get-ReasonsApplicationInstallationDoesNotMatch -Name $Name -Ensure $Ensure)
 
-    if ($applicationNames -contains ';')
+    if ($null -ne $reasons -and $reasons.Count -gt 0)
     {
-        $applicationNames = $Name.Split(';')
-    }
-    else
-    {
-        $applicationNames = $Name.Split(',')
-    }
-
-    $applicationsInstalled = @()
-
-    # Return false if Ensure == Present and at least one specified app is not installed or
-    # Ensure == Absent and at least one specified app is installed
-    foreach ($applicationName in $applicationNames)
-    {
-        $applicationName = $applicationName.Trim()
-        $applicationsInstalled = Find-InstalledApplication -Name $applicationName -AllInstalledApplications $allInstalledApplications 
-        if (($applicationsInstalled.Count -eq 0 -and $Ensure -ieq 'Present') -or ($applicationsInstalled.Count -ne 0 -and $Ensure -ieq 'Absent'))
-        {
-            return $false
-        }
+        return $false
     }
 
     return $true

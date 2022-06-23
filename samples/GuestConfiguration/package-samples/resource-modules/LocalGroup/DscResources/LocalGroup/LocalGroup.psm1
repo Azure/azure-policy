@@ -1,3 +1,52 @@
+function Test-LocalGroupExists
+{
+    [CmdletBinding()]
+    [OutputType([String[]])]
+    param
+    (
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $GroupName
+    )
+
+    $allGroups = net localgroup
+
+    if ($null -ne $allGroups -and $allGroups.Count -gt 0)
+    {
+        <#
+            Here is an example of the output from the net localgroup command: 
+            
+            Aliases for \\KTK-PC
+
+            -------------------------------------------------------------------------------
+            *Administrators
+            *MyTestGroup
+            *MyTestGroup1
+            *MyTestGroup2
+            *TestGroup
+            *TestGroupWithMembersToInclude3
+            *Users
+            The command completed successfully.
+
+        #>
+        $firstGroupIndex = 4
+        $lastGroupIndex = $allGroups.Count - 3
+
+        if ($lastGroupIndex -ge $firstGroupIndex)
+        {
+            $localGroups = $allGroups[$firstGroupIndex..$lastGroupIndex]
+
+            if ($localGroups -contains "*$GroupName")
+            {
+                return $true
+            }
+        }
+    }
+
+    return $false
+}
+
 function Get-LocalGroupMembers
 {
     [CmdletBinding()]
@@ -56,15 +105,20 @@ function Get-ReasonsLocalGroupMembersDoNotMatchExpected
         [String]
         $GroupName,
 
-        [Parameter(ParameterSetName = "Members")]
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [String[]]
         $Members,
 
-        [Parameter(ParameterSetName = "MembersToIncludeOrExclude")]
+        [Parameter()]
         [String[]]
         $MembersToInclude,
 
-        [Parameter(ParameterSetName = "MembersToIncludeOrExclude")]
+        [Parameter()]
         [String[]]
         $MembersToExclude
     )
@@ -72,15 +126,37 @@ function Get-ReasonsLocalGroupMembersDoNotMatchExpected
     $reasons = @()
     $reasonCodePrefix = 'LocalGroup:LocalGroup'
 
-    $actualMembersList = @(Get-LocalGroupMembers -GroupName $GroupName)
+    $localGroupExists = Test-LocalGroupExists -GroupName $GroupName
 
-    if ($PSCmdlet.ParameterSetName -eq 'Members' -and $null -ne $Members)
+    if ($Ensure -eq 'Absent')
     {
-        Write-Verbose -Message "Processing Members parameter..."
-        if ($Members.Count -gt 0)
+        if ($localGroupExists)
+        {
+            Write-Verbose -Message "A local group with the name '$GroupName' exists but was expected to be absent."
+            $reason = @{
+                Code = $reasonCodePrefix + ':GroupExists'
+                Phrase = "A local group with the name '$GroupName' exists but was expected to be absent."
+            }
+            $reasons += $reason
+        }
+    }
+    elseif ($Ensure -eq 'Present' -and -not $localGroupExists)
+    {
+        Write-Verbose -Message "A local group with the name '$GroupName' does not exist."
+        $reason = @{
+            Code = $reasonCodePrefix + ':GroupDoesNotExist'
+            Phrase = "A local group with the name '$GroupName' does not exist."
+        }
+        $reasons += $reason
+    }
+    else
+    {
+        $actualMembersList = @(Get-LocalGroupMembers -GroupName $GroupName)
+
+        if ($null -ne $Members -and $Members.Count -gt 0)
         {
             Write-Verbose -Message "Comparing $($Members.Count) members..."
-            if ($null -eq $actualMembersList -or $actualMembersList.Count -eq 0)
+            if ($null -eq $actualMembersList)
             {
                 Write-Verbose -Message 'Group is empty when members were expected.'
                 $reason = @{
@@ -118,26 +194,11 @@ function Get-ReasonsLocalGroupMembersDoNotMatchExpected
                 }
             }
         }
-        else
-        {
-            if ($null -ne $actualMembersList -and $actualMembersList.Count -gt 0)
-            {
-                Write-Verbose -Message 'Group is not empty when no members were expected.'
-                $reason = @{
-                    Code = $reasonCodePrefix + ':GroupNotEmptyWhenNoMembersExpected'
-                    Phrase = "Found members in the local group with the name '$GroupName' when no members were expected."
-                }
-                $reasons += $reason
-            }
-        }   
-    }
 
-    if ($PSCmdlet.ParameterSetName -eq 'MembersToIncludeOrExclude')
-    {
         if ($null -ne $MembersToInclude -and $MembersToInclude.Count -gt 0)
         {
             Write-Verbose -Message "Comparing $($MembersToInclude.Count) members to include..."
-            if ($null -eq $actualMembersList -or $actualMembersList.Count -eq 0)
+            if ($null -eq $actualMembersList)
             {
                 Write-Verbose -Message 'Group is empty when members were expected.'
                 $reason = @{
@@ -170,7 +231,7 @@ function Get-ReasonsLocalGroupMembersDoNotMatchExpected
         if ($null -ne $MembersToExclude -and $MembersToExclude.Count -gt 0)
         {
             Write-Verbose -Message "Comparing $($MembersToExclude.Count) members to exclude..."
-            if ($null -eq $actualMembersList -or $actualMembersList.Count -eq 0)
+            if ($null -eq $actualMembersList)
             {
                 Write-Verbose -Message 'Group is empty but members were not expected.'
             }
@@ -211,6 +272,11 @@ function Get-TargetResource
         $GroupName,
 
         [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [String]
         $Members,
 
@@ -223,52 +289,43 @@ function Get-TargetResource
         $MembersToExclude
     )
 
-    $actualMembersList = @(Get-LocalGroupMembers -GroupName $GroupName)
-    $actualMembersListAsString = $actualMembersList -join '; '
-
-    $localGroupInfo = @{
-        GroupName = $GroupName
-        Members = $actualMembersListAsString
+    if (Test-LocalGroupExists -GroupName $GroupName)
+    {
+        $actualMembersList = @(Get-LocalGroupMembers -GroupName $GroupName)
+        $actualMembersListAsString = $actualMembersList -join '; '
+    
+        $localGroupInfo = @{
+            GroupName = $GroupName
+            Members = $actualMembersListAsString
+            Ensure = 'Present'
+        }
+    }
+    else
+    {
+        $localGroupInfo = @{
+            GroupName = $GroupName
+            Ensure = 'Absent'
+        }
     }
 
     $getReasonsLocalGroupMembersDoNotMatchExpectedParameters = @{
         GroupName = $GroupName
+        Ensure = $Ensure
     }
 
-    if ($PSBoundParameters.ContainsKey('Members') -and $null -ne $Members)
+    if ($null -ne $Members -and -not [String]::IsNullOrEmpty($Members))
     {
-        if ([String]::IsNullOrEmpty($Members))
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['Members'] = @()
-        }
-        else
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['Members'] = $Members.Split(';').Trim()
-        }
+        $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['Members'] = $Members.Split(';').Trim()
     }
 
-    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and $null -ne $MembersToInclude)
+    if ($null -ne $MembersToInclude -and -not [String]::IsNullOrEmpty($MembersToInclude))
     {
-        if ([String]::IsNullOrEmpty($MembersToInclude))
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToInclude'] = @()
-        }
-        else
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToInclude'] = $MembersToInclude.Split(';').Trim()
-        }
+        $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToInclude'] = $MembersToInclude.Split(';').Trim()
     }
     
-    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and $null -ne $MembersToExclude)
+    if ($null -ne $MembersToExclude -and -not [String]::IsNullOrEmpty($MembersToExclude))
     {
-        if ([String]::IsNullOrEmpty($MembersToExclude))
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToExclude'] = @()
-        }
-        else
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToExclude'] = $MembersToExclude.Split(';').Trim()
-        }
+        $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToExclude'] = $MembersToExclude.Split(';').Trim()
     }
 
     $reasons = @(Get-ReasonsLocalGroupMembersDoNotMatchExpected @getReasonsLocalGroupMembersDoNotMatchExpectedParameters)
@@ -293,6 +350,11 @@ function Test-TargetResource
         $GroupName,
 
         [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
+
+        [Parameter()]
         [String]
         $Members,
 
@@ -307,42 +369,22 @@ function Test-TargetResource
 
     $getReasonsLocalGroupMembersDoNotMatchExpectedParameters = @{
         GroupName = $GroupName
+        Ensure = $Ensure
     }
 
-    if ($PSBoundParameters.ContainsKey('Members') -and $null -ne $Members)
+    if ($null -ne $Members -and -not [String]::IsNullOrEmpty($Members))
     {
-        if ([String]::IsNullOrEmpty($Members))
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['Members'] = @()
-        }
-        else
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['Members'] = $Members.Split(';').Trim()
-        }
+        $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['Members'] = $Members.Split(';').Trim()
     }
 
-    if ($PSBoundParameters.ContainsKey('MembersToInclude') -and $null -ne $MembersToInclude)
+    if ($null -ne $MembersToInclude -and -not [String]::IsNullOrEmpty($MembersToInclude))
     {
-        if ([String]::IsNullOrEmpty($MembersToInclude))
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToInclude'] = @()
-        }
-        else
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToInclude'] = $MembersToInclude.Split(';').Trim()
-        }
+        $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToInclude'] = $MembersToInclude.Split(';').Trim()
     }
     
-    if ($PSBoundParameters.ContainsKey('MembersToExclude') -and $null -ne $MembersToExclude)
+    if ($null -ne $MembersToExclude -and -not [String]::IsNullOrEmpty($MembersToExclude))
     {
-        if ([String]::IsNullOrEmpty($MembersToExclude))
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToExclude'] = @()
-        }
-        else
-        {
-            $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToExclude'] = $MembersToExclude.Split(';').Trim()
-        }
+        $getReasonsLocalGroupMembersDoNotMatchExpectedParameters['MembersToExclude'] = $MembersToExclude.Split(';').Trim()
     }
 
     $reasons = @(Get-ReasonsLocalGroupMembersDoNotMatchExpected @getReasonsLocalGroupMembersDoNotMatchExpectedParameters)
@@ -364,6 +406,11 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [String]
         $GroupName,
+
+        [Parameter()]
+        [ValidateSet('Present', 'Absent')]
+        [String]
+        $Ensure = 'Present',
 
         [Parameter()]
         [String]

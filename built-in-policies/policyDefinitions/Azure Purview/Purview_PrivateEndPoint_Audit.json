@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "displayName": "Azure Purview accounts should use private link",
+    "policyType": "BuiltIn",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your Azure Purview accounts instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/purview-private-link.",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Purview"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Purview/accounts"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Purview/accounts/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.Purview/accounts/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9259053b-ddb8-40ab-842a-0aef19d0ade4",
+  "name": "9259053b-ddb8-40ab-842a-0aef19d0ade4"
+}

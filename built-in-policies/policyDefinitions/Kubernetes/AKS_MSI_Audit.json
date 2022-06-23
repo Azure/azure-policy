@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Kubernetes Service Clusters should use managed identities",
+    "description": "Use managed identities to wrap around service principals, simplify cluster management and avoid the complexity required to managed service principals. Learn more at: https://aka.ms/aks-update-managed-identities",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/servicePrincipalProfile",
+            "exists": "True"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/servicePrincipalProfile.clientId",
+            "notEquals": "msi"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/da6e2401-19da-4532-9141-fb8fbde08431",
+  "name": "da6e2401-19da-4532-9141-fb8fbde08431"
+}

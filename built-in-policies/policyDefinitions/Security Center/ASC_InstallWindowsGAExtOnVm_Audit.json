@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "Guest Attestation extension should be installed on supported Windows virtual machines",
+    "displayName": "[Preview]: Guest Attestation extension should be installed on supported Windows virtual machines",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Install Guest Attestation extension on supported virtual machines to allow Azure Security Center to proactively attest and monitor the boot integrity. Once installed, boot integrity will be attested via Remote Attestation. This assessment only applies to trusted launch enabled virtual machines.",
     "metadata": {
       "category": "Security Center",
-      "version": "1.0.0-preview",
+      "version": "3.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -31,8 +31,20 @@
             "equals": "Microsoft.Compute/virtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.offer",
-            "like": "windows*"
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.offer",
+                "like": "windows*"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                "like": "Windows*"
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.securityType",
+            "equals": "TrustedLaunch"
           },
           {
             "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings",

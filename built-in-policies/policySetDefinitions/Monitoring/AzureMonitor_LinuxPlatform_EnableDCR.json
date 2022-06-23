@@ -1,0 +1,92 @@
+{
+  "properties": {
+    "displayName": "Configure Linux machines to run Azure Monitor Agent and associate them to a Data Collection Rule",
+    "policyType": "BuiltIn",
+    "description": "Monitor and secure your Linux virtual machines, virtual machine scale sets, and Arc machines by deploying the Azure Monitor Agent extension and associating the machines with a specified Data Collection Rule. Deployment will occur on machines with supported OS images (or machines matching the provided list of images) in supported regions.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "listOfLinuxImageIdToInclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Additional Virtual Machine Images",
+          "description": "List of virtual machine images that have supported Linux OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        },
+        "defaultValue": []
+      },
+      "dcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule that the virtual machines in scope should be associated with."
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a4034bc6-ae50-406d-bf76-50f4ee5a7811",
+        "policyDefinitionReferenceId": "deployAzureMonitorAgentLinuxVM",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfLinuxImageIdToInclude": {
+            "value": "[parameters('listOfLinuxImageIdToInclude')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/56a3e4f8-649b-4fac-887e-5564d11e8d3a",
+        "policyDefinitionReferenceId": "deployAzureMonitorAgentLinuxVMSS",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfLinuxImageIdToInclude": {
+            "value": "[parameters('listOfLinuxImageIdToInclude')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/845857af-0333-4c5d-bbbc-6076697da122",
+        "policyDefinitionReferenceId": "deployAzureMonitorAgentLinuxHybridVM",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2ea82cdd-f2e8-4500-af75-67a2e084ca74",
+        "policyDefinitionReferenceId": "associateDataCollectionRuleLinux",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfLinuxImageIdToInclude": {
+            "value": "[parameters('listOfLinuxImageIdToInclude')]"
+          },
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/118f04da-0375-44d1-84e3-0fd9e1849403",
+  "name": "118f04da-0375-44d1-84e3-0fd9e1849403"
+}

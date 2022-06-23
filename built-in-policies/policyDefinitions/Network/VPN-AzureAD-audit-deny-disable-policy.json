@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "VPN gateways should use only Azure Active Directory (Azure AD) authentication for point-to-site users",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling local authentication methods improves security by ensuring that VPN Gateways use only Azure Active Directory identities for authentication. Learn more about Azure AD authentication at https://docs.microsoft.com/azure/vpn-gateway/openvpn-azure-ad-tenant",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/virtualNetworkGateways"
+          },
+          {
+            "field": "Microsoft.Network/virtualNetworkGateways/vpnClientConfiguration.vpnClientAddressPool.addressPrefixes",
+            "exists": "true"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/virtualNetworkGateways/vpnClientConfiguration.vpnAuthenticationTypes[*]",
+              "where": {
+                "field": "Microsoft.Network/virtualNetworkGateways/vpnClientConfiguration.vpnAuthenticationTypes[*]",
+                "notcontains": "AAD"
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/21a6bc25-125e-4d13-b82d-2e19b7208ab7",
+  "name": "21a6bc25-125e-4d13-b82d-2e19b7208ab7"
+}

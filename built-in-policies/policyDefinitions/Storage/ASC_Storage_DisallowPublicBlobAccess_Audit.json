@@ -1,27 +1,30 @@
 {
   "properties": {
-    "displayName": "Storage account public access should be disallowed",
+    "displayName": "[Preview]: Storage account public access should be disallowed",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Anonymous public read access to containers and blobs in Azure Storage is a convenient way to share data but might present security risks. To prevent data breaches caused by undesired anonymous access, Microsoft recommends preventing public access to a storage account unless your scenario requires it.",
     "metadata": {
-      "version": "2.0.1-preview",
+      "version": "3.1.0-preview",
       "category": "Storage",
       "preview": true
     },
     "parameters": {
       "effect": {
         "type": "string",
-        "defaultValue": "audit",
-        "allowedValues": [
-          "audit",
-          "deny",
-          "disabled"
-        ],
         "metadata": {
           "displayName": "Effect",
           "description": "The effect determines what happens when the policy rule is evaluated to match"
-        }
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
       }
     },
     "policyRule": {
@@ -32,12 +35,30 @@
             "equals": "Microsoft.Storage/storageAccounts"
           },
           {
-            "field": "id",
-            "notContains": "/resourceGroups/databricks-rg-"
+            "not": {
+              "allOf": [
+                {
+                  "field": "id",
+                  "contains": "/resourceGroups/aro-"
+                },
+                {
+                  "anyOf": [
+                    {
+                      "field": "name",
+                      "like": "cluster*"
+                    },
+                    {
+                      "field": "name",
+                      "like": "imageregistry*"
+                    }
+                  ]
+                }
+              ]
+            }
           },
           {
             "not": {
-              "field":"Microsoft.Storage/storageAccounts/allowBlobPublicAccess",
+              "field": "Microsoft.Storage/storageAccounts/allowBlobPublicAccess",
               "equals": "false"
             }
           }

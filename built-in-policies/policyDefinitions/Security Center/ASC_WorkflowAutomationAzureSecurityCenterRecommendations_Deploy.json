@@ -5,7 +5,7 @@
     "mode": "All",
     "description": "Enable automation of Azure Security Center recommendations. This policy deploys a workflow automation with your conditions and triggers on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "4.0.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -31,13 +31,25 @@
           "strongType": "location"
         }
       },
+      "createResourceGroup": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Create resource group",
+          "description": "If a resource group does not exists in the scope, a new resource group will be created. If the resource group exists and this flag is set to 'true' the policy will re-deploy the resource group. Please note this will reset any Azure Tag on the resource group."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
       "recommendationNames": {
         "type": "Array",
         "metadata": {
           "displayName": "Recommendation IDs",
           "description": "For all recommendations, leave empty. For specific recommendations, enter a list of recommendation IDs separated by semicolons (';'). Recommendation IDs are available through the Assessments API (https://docs.microsoft.com/en-us/rest/api/securitycenter/assessments), or Azure Resource Graph Explorer, choose securityresources and microsoft.security/assessments."
         },
-        "defaultValue": [ ]
+        "defaultValue": []
       },
       "recommendationSeverities": {
         "type": "Array",
@@ -214,6 +226,9 @@
                   "resourceGroupLocation": {
                     "type": "string"
                   },
+                  "createResourceGroup": {
+                    "type": "bool"
+                  },
                   "recommendationNames": {
                     "type": "array"
                   },
@@ -257,12 +272,11 @@
                 },
                 "resources": [
                   {
+                    "condition": "[parameters('createResourceGroup')]",
                     "name": "[parameters('resourceGroupName')]",
                     "type": "Microsoft.Resources/resourceGroups",
                     "apiVersion": "2019-10-01",
-                    "location": "[parameters('resourceGroupLocation')]",
-                    "tags": { },
-                    "properties": { }
+                    "location": "[parameters('resourceGroupLocation')]"
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -277,16 +291,16 @@
                       "template": {
                         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
-                        "parameters": { },
-                        "variables": { },
+                        "parameters": {},
+                        "variables": {},
                         "resources": [
                           {
-                            "tags": { },
+                            "tags": {},
                             "apiVersion": "2019-01-01-preview",
                             "location": "[parameters('resourceGroupLocation')]",
                             "name": "[parameters('automationName')]",
                             "type": "Microsoft.Security/automations",
-                            "dependsOn": [ ],
+                            "dependsOn": [],
                             "properties": {
                               "description": "Workflow Automation for Azure Security Center recommendations via policy",
                               "isEnabled": true,
@@ -353,6 +367,9 @@
                 },
                 "resourceGroupLocation": {
                   "value": "[parameters('resourceGroupLocation')]"
+                },
+                "createResourceGroup": {
+                  "value": "[parameters('createResourceGroup')]"
                 },
                 "recommendationNames": {
                   "value": "[parameters('recommendationNames')]"

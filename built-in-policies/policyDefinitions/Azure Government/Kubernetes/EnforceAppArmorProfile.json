@@ -5,7 +5,7 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Containers should only use allowed AppArmor profiles in a Kubernetes cluster. This recommendation is part of Pod Security Policies which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "4.2.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -13,20 +13,23 @@
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
         },
         "allowedValues": [
           "audit",
+          "Audit",
           "deny",
-          "disabled"
+          "Deny",
+          "disabled",
+          "Disabled"
         ],
-        "defaultValue": "audit"
+        "defaultValue": "Audit"
       },
       "excludedNamespaces": {
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         },
         "defaultValue": [
           "kube-system",
@@ -105,7 +108,25 @@
         "type": "Array",
         "metadata": {
           "displayName": "Allowed AppArmor profiles",
-          "description": "The list of AppArmor profiles that containers are allowed to use. E.g. 'runtime/default;docker/default'. Provide empty list as input to block everything."
+          "description": "The list of AppArmor profiles that containers are allowed to use. E.g. [ \"runtime/default\", \"docker/default\" ]. Provide empty list as input to block everything."
+        },
+        "defaultValue": [
+          "runtime/default"
+        ]
+      },
+      "excludedContainers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Containers exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "excludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Image exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
         },
         "defaultValue": []
       }
@@ -120,13 +141,15 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "constraintTemplate": "https://store.policy.azure.us/kubernetes/enforce-apparmor-profile/v1/template.yaml",
-          "constraint": "https://store.policy.azure.us/kubernetes/enforce-apparmor-profile/v1/constraint.yaml",
+          "constraintTemplate": "https://store.policy.azure.us/kubernetes/enforce-apparmor-profile/v3/template.yaml",
+          "constraint": "https://store.policy.azure.us/kubernetes/enforce-apparmor-profile/v3/constraint.yaml",
           "excludedNamespaces": "[parameters('excludedNamespaces')]",
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "allowedProfiles": "[parameters('allowedProfiles')]"
+            "allowedProfiles": "[parameters('allowedProfiles')]",
+            "excludedContainers": "[parameters('excludedContainers')]",
+            "excludedImages": "[parameters('excludedImages')]"
           }
         }
       }

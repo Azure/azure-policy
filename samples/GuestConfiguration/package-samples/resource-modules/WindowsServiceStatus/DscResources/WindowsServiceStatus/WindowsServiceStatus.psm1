@@ -18,22 +18,26 @@ function Get-ReasonsServiceStatusNotCompliant
 
     foreach ($service in $serviceInfo)
     {
-        if($service.Status -ne 'Running' ){
+        if ($service.Status -ne 'Running' )
+        {
 
-           if ($service.Status -eq 'Absent') {
+           if ($service.Status -eq 'Absent')
+           {
                 $reasons += @{
                     Code   = '{0}:{1}' -f $reasonCodePrefix, 'ServicesNotInstalled'
                     Phrase = ("The service with the name '{0}' was not found." -f $service.Name)
                 }
             }
-            else {
-                    $reasons += @{
+            else
+            {
+                $reasons += @{
                     Code   = '{0}:{1}' -f $reasonCodePrefix, 'ServiceStatusUnexpected'
                     Phrase = ("The service with the name '{0}' has the unexpected status '{1}'. The 'Running' status was expected." -f $service.Name, $service.Status)
                 }
             }
         }
     }
+
     return $reasons
 }
 <#
@@ -57,44 +61,41 @@ function Get-ServiceInfo
         $ServiceName
     )
 
-    [System.Collections.Hashtable[]] $serviceInfo = @()
+    $serviceInfo = @()
+
     if ($ServiceName.Contains(';'))
     {
         $serviceNames = $ServiceName.Split(';')
     }
-    else {
-        $serviceNames = $ServiceName
+    else
+    {
+        $serviceNames = @($ServiceName)
     }
    
-
     foreach ($name in $serviceNames)
     {   
-        if(-not [String]::IsNullOrEmpty($name)){
-            $serviceObjects = Get-Service -Name $name -ErrorAction SilentlyContinue
-            if($null -ne $serviceObjects){
-                foreach($service in $serviceObjects){
-                        $serviceInfo += @{
-                            Name           = $service.Name
-                            DisplayName    = $service.DisplayName
-                            Status         = $service.Status
-                            DependentServices     =$service.DependentServices
-                            ServicesDependedOn    = $service.ServicesDependedOn
-                            CanPauseAndContinue   = $service.CanPauseAndContinue
-                            CanShutdown      = $service.CanShutdown
-                            CanStop          = $service.CanStop
-                            ServiceType      = $service.ServiceType
+        if (-not [String]::IsNullOrEmpty($name))
+        {
+            $serviceObjects = @(Get-Service -Name $name -ErrorAction 'SilentlyContinue')
 
-                        }
+            if ($null -ne $serviceObjects)
+            {
+                foreach ($service in $serviceObjects)
+                {
+                    $serviceInfo += @{
+                        Name   = $service.Name
+                        Status = $service.Status
+                    }
                 }
             }
-            else{
+            else
+            {
                 $serviceInfo += @{
                     Name   = $name
                     Status = 'Absent'
                 }
             }
         }
-        
     }
 
     return $serviceInfo
@@ -112,7 +113,7 @@ function Get-ServiceInfo
 function Get-TargetResource
 {
     [CmdletBinding()]
-    [OutputType([System.Collections.Hashtable])]
+    [OutputType([Hashtable])]
     param
     (
         [Parameter(Mandatory = $true)]
@@ -120,19 +121,18 @@ function Get-TargetResource
         $ServiceName
     )
 
-    $ServiceStatusInfo = @{
+    $serviceStatusInfo = @{
         ServiceName = $ServiceName
-        ServiceInfo = Get-ServiceInfo -ServiceName $ServiceName
     }
 
     $reasons = @(Get-ReasonsServiceStatusNotCompliant -ServiceName $ServiceName)
 
     if ($null -ne $reasons -and $reasons.Count -gt 0)
     {
-        $ServiceStatusInfo['Reasons'] = $reasons
+        $serviceStatusInfo['Reasons'] = $reasons
     }
 
-    return $ServiceStatusInfo
+    return $serviceStatusInfo
 }
 
 <#
@@ -182,7 +182,6 @@ function Set-TargetResource
         [String]
         $ServiceName
     )
-
 
     throw 'Set functionality is not supported in this version of the DSC resource.'
 }

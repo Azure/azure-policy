@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure code signing for training code for specified Azure Machine Learning computes",
+    "displayName": "[Preview]: Configure code signing for training code for specified Azure Machine Learning computes",
     "policyType": "BuiltIn",
     "mode": "Microsoft.MachineLearningServices.Data",
     "description": "Provide code signing for training code in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "2.1.0-preview",
+      "version": "6.1.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -28,6 +28,7 @@
           "MachineLearningCompute",
           "AzureDataFactory",
           "HDInsight",
+          "SynapseSpark",
           "Any"
         ],
         "defaultValue": "Any"
@@ -45,12 +46,41 @@
         ],
         "defaultValue": "Any"
       },
+      "trustIPProtectedComponent": {
+        "type": "String",
+        "metadata": {
+          "displayName": "allow Intellectual Property Protected component job to run and honor component service validation result for IP Protected job",
+          "description": "\"Yes: Honor component IP protected validation result\". \"No: Do not honor component IP protected validation result\". \"None: Apply the policy regardless it is IP Protected job or not\"."
+        },
+        "allowedValues": [
+          "Yes",
+          "No",
+          "None"
+        ],
+        "defaultValue": "None"
+      },
       "signingKey": {
         "type": "String",
         "metadata": {
           "displayName": "PGP public key",
           "description": "Public key text in PGP public key format, with newline characters encoded as string literals \"\\r\" and \"\\n\"."
         }
+      },
+      "optionalSecondSigningKey": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Second PGP public key",
+          "description": "Public key text in PGP public key format, with newline characters encoded as string literals \"\\r\" and \"\\n\". This is another allowed signing key that is used only for the special case of Aether module import into Azure Machine Learning."
+        },
+        "defaultValue": ""
+      },
+      "tags": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Tags applied to compute",
+          "description": "Assign a list of tags to match with the tags provided with the compute in the job. The policy is applied only if all tags match {e.g. [ \"tagKey:tagValue\", ... ]"
+        },
+        "defaultValue": []
       },
       "effect": {
         "type": "String",
@@ -71,7 +101,7 @@
           {
             "anyOf": [
               {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/name",
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computeName",
                 "in": "[parameters('computeNames')]"
               },
               {
@@ -87,7 +117,7 @@
                 "equals": "Any"
               },
               {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computeType",
                 "equals": "[parameters('computeType')]"
               }
             ]
@@ -97,7 +127,7 @@
               {
                 "allOf": [
                   {
-                    "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                    "field": "Microsoft.MachineLearningServices.Data/workspaces/computeType",
                     "equals": "MachineLearningCompute"
                   },
                   {
@@ -107,7 +137,7 @@
                         "equals": "Any"
                       },
                       {
-                        "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/isIsolatedNetwork",
+                        "field": "Microsoft.MachineLearningServices.Data/workspaces/isIsolatedNetwork",
                         "equals": "[parameters('isIsolatedNetwork')]"
                       }
                     ]
@@ -115,8 +145,34 @@
                 ]
               },
               {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computeType",
                 "notEquals": "MachineLearningCompute"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "value": "[length(parameters('tags'))]",
+                    "notEquals": 0
+                  },
+                  {
+                    "value": "[length(field('Microsoft.MachineLearningServices.Data/workspaces/tags[*]'))]",
+                    "equals": 0
+                  }
+                ]
+              },
+              {
+                "count": {
+                  "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                  "where": {
+                    "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                    "in": "[parameters('tags')]"
+                  }
+                },
+                "equals": "[length(parameters('tags'))]"
               }
             ]
           }
@@ -126,8 +182,11 @@
         "effect": "[parameters('effect')]",
         "details": {
           "setting": {
-            "name": "signingKey",
-            "value": "[parameters('signingKey')]"
+            "name": "signingKeys",
+            "value": {
+              "allowedList": "[createArray(parameters('signingKey'), parameters('optionalSecondSigningKey'))]",
+              "trustIPProtectedComponent": "[parameters('trustIPProtectedComponent')]"
+            }
           }
         }
       }

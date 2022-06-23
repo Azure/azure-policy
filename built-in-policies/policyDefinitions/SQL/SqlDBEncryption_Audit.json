@@ -5,21 +5,21 @@
     "mode": "Indexed",
     "description": "Transparent data encryption should be enabled to protect data-at-rest and meet compliance requirements",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "SQL"
     },
     "parameters": {
       "effect": {
-        "type": "string",
-        "defaultValue": "AuditIfNotExists",
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
         "allowedValues": [
           "AuditIfNotExists",
           "Disabled"
         ],
-        "metadata": {
-          "displayName": "Effect",
-          "description": "Enable or disable the execution of the policy"
-        }
+        "defaultValue": "AuditIfNotExists"
       }
     },
     "policyRule": {
@@ -41,9 +41,13 @@
           "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
           "name": "current",
           "existenceCondition": {
-            "allOf": [
+            "anyOf": [
               {
                 "field": "Microsoft.Sql/transparentDataEncryption.status",
+                "equals": "enabled"
+              },
+              {
+                "field": "Microsoft.Sql/servers/databases/transparentDataEncryption/state",
                 "equals": "enabled"
               }
             ]

@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure allowed registries for specified Azure Machine Learning computes",
+    "displayName": "[Preview]: Configure allowed registries for specified Azure Machine Learning computes",
     "policyType": "BuiltIn",
     "mode": "Microsoft.MachineLearningServices.Data",
     "description": "Provide registries that are allowed in specified Azure Machine Learning computes and can be assigned at the workspace. For more information, visit https://aka.ms/amlpolicydoc.",
     "metadata": {
-      "version": "2.0.0-preview",
+      "version": "6.0.0-preview",
       "category": "Machine Learning",
       "preview": true
     },
@@ -43,11 +43,32 @@
         ],
         "defaultValue": "Any"
       },
+      "trustIPProtectedComponent": {
+        "type": "String",
+        "metadata": {
+          "displayName": "allow Intellectual Property Protected component job to run and honor component service validation result for IP Protected job",
+          "description": "\"Yes: Honor component IP protected validation result\". \"No: Do not honor component IP protected validation result\". \"None: Apply the policy regardless it is IP Protected job or not\"."
+        },
+        "allowedValues": [
+          "Yes",
+          "No",
+          "None"
+        ],
+        "defaultValue": "None"
+      },
       "allowedACRs": {
         "type": "Array",
         "metadata": {
           "displayName": "Azure Container Registries",
           "description": "List of Azure Container Registries that can be used with Azure ML. Ex. amlrepo.azurecr.io;amlrepo.azurecr.io/foo"
+        },
+        "defaultValue": []
+      },
+      "tags": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Tags applied to compute",
+          "description": "Assign a list of tags to match with the tags provided with the compute in the job. The policy is applied only if all tags match {e.g. [ \"tagKey:tagValue\", ... ]"
         },
         "defaultValue": []
       },
@@ -70,7 +91,7 @@
           {
             "anyOf": [
               {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/name",
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computeName",
                 "in": "[parameters('computeNames')]"
               },
               {
@@ -86,7 +107,7 @@
                 "equals": "Any"
               },
               {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computeType",
                 "equals": "[parameters('computeType')]"
               }
             ]
@@ -96,7 +117,7 @@
               {
                 "allOf": [
                   {
-                    "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                    "field": "Microsoft.MachineLearningServices.Data/workspaces/computeType",
                     "equals": "MachineLearningCompute"
                   },
                   {
@@ -106,7 +127,7 @@
                         "equals": "Any"
                       },
                       {
-                        "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/isIsolatedNetwork",
+                        "field": "Microsoft.MachineLearningServices.Data/workspaces/isIsolatedNetwork",
                         "equals": "[parameters('isIsolatedNetwork')]"
                       }
                     ]
@@ -114,8 +135,34 @@
                 ]
               },
               {
-                "field": "Microsoft.MachineLearningServices.Data/workspaces/computes/type",
+                "field": "Microsoft.MachineLearningServices.Data/workspaces/computeType",
                 "notEquals": "MachineLearningCompute"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "value": "[length(parameters('tags'))]",
+                    "notEquals": 0
+                  },
+                  {
+                    "value": "[length(field('Microsoft.MachineLearningServices.Data/workspaces/tags[*]'))]",
+                    "equals": 0
+                  }
+                ]
+              },
+              {
+                "count": {
+                  "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                  "where": {
+                    "field": "Microsoft.MachineLearningServices.Data/workspaces/tags[*]",
+                    "in": "[parameters('tags')]"
+                  }
+                },
+                "equals": "[length(parameters('tags'))]"
               }
             ]
           }
@@ -126,7 +173,10 @@
         "details": {
           "setting": {
             "name": "allowedACRs",
-            "value": "[parameters('allowedACRs')]"
+            "value": {
+              "allowedList": "[parameters('allowedACRs')]",
+              "trustIPProtectedComponent": "[parameters('trustIPProtectedComponent')]"
+            }
           }
         }
       }

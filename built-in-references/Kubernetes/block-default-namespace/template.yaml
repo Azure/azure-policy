@@ -15,6 +15,7 @@ spec:
         violation[{"msg": msg}] {
           obj := input.review.object
           is_default_namespace(obj.metadata)
+          not is_allowed(obj)
           msg := sprintf("Usage of the default namespace is not allowed, name: %v, kind: %v", [obj.metadata.name, obj.kind])
         }
 
@@ -24,4 +25,20 @@ spec:
 
         is_default_namespace(metadata) {
           metadata.namespace == "default"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "ServiceAccount"
+          obj.metadata.name == "default"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "Secret"
+          obj.type == "kubernetes.io/service-account-token"
+          obj.metadata.annotations["kubernetes.io/service-account.name"] == "default"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "Service"
+          obj.metadata.name == "kubernetes"
         }

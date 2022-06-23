@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Azure NetApp Files SMB Volumes should use SMB3 encryption",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Disallow the creation of SMB Volumes without SMB3 encryption to ensure data integrity and data privacy.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes"
+          },
+          {
+            "count": {
+              "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/protocolTypes[*]",
+              "where": {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/protocolTypes[*]",
+                "equals": "CIFS"
+              }
+            },
+            "greater": 0
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/smbEncryption",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/smbEncryption",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ddcf4b94-9dfa-4a80-aca6-22bb654fde72",
+  "name": "ddcf4b94-9dfa-4a80-aca6-22bb654fde72"
+}

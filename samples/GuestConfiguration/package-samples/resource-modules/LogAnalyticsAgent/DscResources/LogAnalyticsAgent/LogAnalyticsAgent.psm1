@@ -109,50 +109,33 @@ function Get-ReasonsLogAnalyticsAgentNotHealthy
     {
         Write-Verbose -Message "Micorosft Monitoring Agent application is installed."
 
-        try
+        $healthService = New-Object -ComObject 'AgentConfigManager.MgmtSvcCfg'
+        $workspaceIdList = @($WorkspaceId.Split(';').Trim())
+        foreach ($individualWorkspaceId in $workspaceIdList)
         {
-            $healthService = New-Object -ComObject 'AgentConfigManager.MgmtSvcCfg'
-        }
-        catch
-        {
-            Write-Verbose -Message "Failed to create an AgentConfigManager.MgmtSvcCfg COM object to read the status of the Log Analytics agent connection."
-            $reason = @{
-                Code = $reasonCodePrefix + ':COMObjectCreationFailure'
-                Phrase = "Failed to create an AgentConfigManager.MgmtSvcCfg COM object to read the status of the Log Analytics agent connection. The Microsoft Monitoring Agent application may not have installed correctly."
-            }
-            $reasons += $reason
-            $mmaInstalled = $false
-        }
+            $workspace = $healthService.GetCloudWorkspace($individualWorkspaceId)
 
-        if ($mmaInstalled)
-        {
-            $workspaceIdList = @($WorkspaceId.Split(';').Trim())
-            foreach ($individualWorkspaceId in $workspaceIdList)
+            if ($null -eq $workspace)
             {
-                $workspace = $healthService.GetCloudWorkspace($individualWorkspaceId)
+                Write-Verbose -Message "Could not find a workspace with the specified workspace ID '$individualWorkspaceId' connected to this machine."
+                $reason = @{
+                    Code = $reasonCodePrefix + ':WorkspaceNotFound'
+                    Phrase = "Could not find a workspace with the specified workspace ID '$individualWorkspaceId' connected to this machine."
+                }
+                $reasons += $reason
+            }
+            else
+            {
+                $workspaceConnectionStatus = $workspace.ConnectionStatus
 
-                if ($null -eq $workspace)
+                if ($workspaceConnectionStatus -ne 0)
                 {
-                    Write-Verbose -Message "Could not find a workspace with the specified workspace ID '$individualWorkspaceId' connected to this machine."
+                    Write-Verbose -Message "The connected workspace with the ID '$individualWorkspaceId' has an unexpected connection status with the code '$($workspaceConnectionStatus)' and the message '$($workspace.ConnectionStatusText)'."
                     $reason = @{
-                        Code = $reasonCodePrefix + ':WorkspaceNotFound'
-                        Phrase = "Could not find a workspace with the specified workspace ID '$individualWorkspaceId' connected to this machine."
+                        Code = $reasonCodePrefix + ':WorkspaceUnexpectedConnectionStatus'
+                        Phrase = "The connected workspace with the ID '$individualWorkspaceId' has an unexpected connection status with the code '$($workspaceConnectionStatus)' and the message '$($workspace.ConnectionStatusText)'."
                     }
                     $reasons += $reason
-                }
-                else
-                {
-                    $workspaceConnectionStatus = $workspace.ConnectionStatus
-
-                    if ($workspaceConnectionStatus -ne 0)
-                    {
-                        Write-Verbose -Message "The connected workspace with the ID '$individualWorkspaceId' has an unexpected connection status with the code '$($workspaceConnectionStatus)' and the message '$($workspace.ConnectionStatusText)'."
-                        $reason = @{
-                            Code = $reasonCodePrefix + ':WorkspaceUnexpectedConnectionStatus'
-                            Phrase = "The connected workspace with the ID '$individualWorkspaceId' has an unexpected connection status with the code '$($workspaceConnectionStatus)' and the message '$($workspace.ConnectionStatusText)'."
-                        }
-                        $reasons += $reason
-                    }
                 }
             }
         }
