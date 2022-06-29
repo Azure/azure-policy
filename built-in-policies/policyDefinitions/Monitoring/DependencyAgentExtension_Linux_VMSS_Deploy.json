@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Deploy Dependency agent for Linux virtual machine scale sets if the VM Image (OS) is in the list defined and the agent is not installed. Note: if your scale set upgradePolicy is set to Manual, you need to apply the extension to the all virtual machines in the set by calling upgrade on them. In CLI this would be az vmss update-instances.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Monitoring"
     },
     "parameters": {
@@ -122,30 +122,53 @@
                     "equals": "SUSE"
                   },
                   {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "SLES",
-                      "SLES-HPC",
-                      "SLES-HPC-Priority",
-                      "SLES-SAP",
-                      "SLES-SAP-BYOS",
-                      "SLES-Priority",
-                      "SLES-BYOS",
-                      "SLES-SAPCAL",
-                      "SLES-Standard"
-                    ]
-                  },
-                  {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "in": [
-                          "12-SP2",
-                          "12-SP3",
-                          "12-SP4",
-                          "12-SP5",
-                          "15",
-                          "15-SP1"
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "SLES",
+                              "SLES-HPC",
+                              "SLES-HPC-Priority",
+                              "SLES-SAP",
+                              "SLES-SAP-BYOS",
+                              "SLES-Priority",
+                              "SLES-BYOS",
+                              "SLES-SAPCAL",
+                              "SLES-Standard"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "in": [
+                                  "12-SP2",
+                                  "12-SP3",
+                                  "12-SP4",
+                                  "12-SP5",
+                                  "15",
+                                  "15-SP1"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "sles-12-sp5*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
                         ]
                       }
                     ]
@@ -241,13 +264,13 @@
                   "vmExtensionName": "DependencyAgentLinux",
                   "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
                   "vmExtensionType": "DependencyAgentLinux",
-                  "vmExtensionTypeHandlerVersion": "9.7"
+                  "vmExtensionTypeHandlerVersion": "9.10"
                 },
                 "resources": [
                   {
                     "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
                     "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
-                    "apiVersion": "2018-06-01",
+                    "apiVersion": "2021-04-01",
                     "location": "[parameters('location')]",
                     "properties": {
                       "publisher": "[variables('vmExtensionPublisher')]",

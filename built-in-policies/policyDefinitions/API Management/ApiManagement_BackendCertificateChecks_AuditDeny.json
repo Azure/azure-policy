@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Calls to API backends should not bypass certificate thumbprint or name validation",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Calls from API management to API backends should validate certificate thumbprint and certificate name.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "API Management"
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service/backends"
+          },
+          {
+            "anyof": [
+              {
+                "field": "Microsoft.ApiManagement/service/backends/tls.validateCertificateChain",
+                "equals": false
+              },
+              {
+                "field": "Microsoft.ApiManagement/service/backends/tls.validateCertificateName",
+                "equals": false
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/92bb331d-ac71-416a-8c91-02f2cb734ce4",
+  "name": "92bb331d-ac71-416a-8c91-02f2cb734ce4"
+}
