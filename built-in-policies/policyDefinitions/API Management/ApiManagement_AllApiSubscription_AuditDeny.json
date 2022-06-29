@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "API Management subscriptions should not be scoped at the All API scope.",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "API Management subscriptions should be scoped at the product or individual API instead of all APIs, which could expose all APIs in the API Management instance.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "API Management"
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service/subscriptions"
+          },
+          {
+            "field": "Microsoft.ApiManagement/service/subscriptions/scope",
+            "contains": "apis"
+          },
+          {
+            "field": "Microsoft.ApiManagement/service/subscriptions/state",
+            "equals": "active"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3aa03346-d8c5-4994-a5bc-7652c2a2aef1",
+  "name": "3aa03346-d8c5-4994-a5bc-7652c2a2aef1"
+}
