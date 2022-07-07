@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "App Service Apps should be injected into a virtual network",
+    "displayName": "App Service apps should be injected into a virtual network",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Injecting App Service Apps in a virtual network unlocks advanced App Service networking and security features and provides you with greater control over your network security configuration. Learn more at: https://docs.microsoft.com/azure/app-service/web-sites-integrate-with-vnet.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -25,14 +25,30 @@
     },
     "policyRule": {
       "if": {
-        "allOf": [
+        "anyOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Web/sites"
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Web/sites"
+              },
+              {
+                "field": "Microsoft.Web/sites/virtualNetworkSubnetId",
+                "equals": ""
+              }
+            ]
           },
           {
-            "field": "Microsoft.Web/sites/virtualNetworkSubnetId",
-            "equals": ""
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Web/sites/slots"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/virtualNetworkSubnetId",
+                "equals": ""
+              }
+            ]
           }
         ]
       },

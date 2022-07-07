@@ -3,9 +3,9 @@
     "displayName": "Function apps should use an Azure file share for its content directory",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "The content directory of a function app should be located on an Azure file share. The storage account information for the file share must be provided before any publishing activity. To learn more about using Azure Files for hosting app service content refer to https://go.microsoft.com/fwlink/?linkid=2151594.",
+    "description": "The content directory of a Function app should be located on an Azure file share. The storage account information for the file share must be provided before any publishing activity. To learn more about using Azure Files for hosting app service content refer to https://go.microsoft.com/fwlink/?linkid=2151594.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -24,18 +24,46 @@
     },
     "policyRule": {
       "if": {
-        "allOf": [
+        "anyOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Web/sites"
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Web/sites"
+              },
+              {
+                "field": "kind",
+                "contains": "functionapp"
+              },
+              {
+                "field": "kind",
+                "notContains": "workflowapp"
+              },
+              {
+                "field": "Microsoft.Web/sites/storageAccountRequired",
+                "equals": "true"
+              }
+            ]
           },
           {
-            "field": "kind",
-            "like": "functionapp*"
-          },
-          {
-            "field": "Microsoft.Web/sites/storageAccountRequired",
-            "equals": "true"
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Web/sites/slots"
+              },
+              {
+                "field": "kind",
+                "contains": "functionapp"
+              },
+              {
+                "field": "kind",
+                "notContains": "workflowapp"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/storageAccountRequired",
+                "equals": "true"
+              }
+            ]
           }
         ]
       },

@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Ensure WEB app has 'Client Certificates (Incoming client certificates)' set to 'On'",
+    "displayName": "App Service apps should have 'Client Certificates (Incoming client certificates)' enabled",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Client certificates allow for the app to request a certificate for incoming requests. Only clients that have a valid certificate will be able to reach the app.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -26,16 +26,52 @@
       "if": {
         "allOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Web/sites"
-          },
-          {
             "field": "kind",
-            "like": "app*"
+            "notContains": "functionapp"
           },
           {
-            "field": "Microsoft.Web/sites/clientCertEnabled",
-            "equals": "false"
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.Web/sites"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Web/sites/clientCertEnabled",
+                        "exists": "false"
+                      },
+                      {
+                        "field": "Microsoft.Web/sites/clientCertEnabled",
+                        "equals": "false"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.Web/sites/slots"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Web/sites/slots/clientCertEnabled",
+                        "exists": "false"
+                      },
+                      {
+                        "field": "Microsoft.Web/sites/slots/clientCertEnabled",
+                        "equals": "false"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       },

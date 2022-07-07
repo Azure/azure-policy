@@ -5,7 +5,7 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -138,7 +138,7 @@
         "type": "String",
         "metadata": {
           "displayName": "cloud-controller-manager - Enabled",
-          "description": "Whether to stream cloud-controller-manager logs to the Log Analytics workspace - True or False, Public Cloud only"
+          "description": "Whether to stream cloud-controller-manager logs to the Log Analytics workspace - True or False"
         },
         "allowedValues": [
           "True",
@@ -150,7 +150,7 @@
         "type": "String",
         "metadata": {
           "displayName": "csi-azuredisk-controller - Enabled",
-          "description": "Whether to stream csi-azuredisk-controller logs to the Log Analytics workspace - True or False, Public Cloud only"
+          "description": "Whether to stream csi-azuredisk-controller logs to the Log Analytics workspace - True or False"
         },
         "allowedValues": [
           "True",
@@ -162,7 +162,7 @@
         "type": "String",
         "metadata": {
           "displayName": "csi-azurefile-controller - Enabled",
-          "description": "Whether to stream csi-azurefile-controller logs to the Log Analytics workspace - True or False, Public Cloud only"
+          "description": "Whether to stream csi-azurefile-controller logs to the Log Analytics workspace - True or False"
         },
         "allowedValues": [
           "True",
@@ -174,7 +174,7 @@
         "type": "String",
         "metadata": {
           "displayName": "csi-snapshot-controller - Enabled",
-          "description": "Whether to stream csi-snapshot-controller logs to the Log Analytics workspace - True or False, Public Cloud only"
+          "description": "Whether to stream csi-snapshot-controller logs to the Log Analytics workspace - True or False"
         },
         "allowedValues": [
           "True",
@@ -199,12 +199,92 @@
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
-                "equals": "True"
+                "count": {
+                  "value": [
+                    {
+                      "category": "kube-apiserver",
+                      "enabled": "[parameters('kube-apiserver')]"
+                    },
+                    {
+                      "category": "kube-audit",
+                      "enabled": "[parameters('kube-audit')]"
+                    },
+                    {
+                      "category": "kube-controller-manager",
+                      "enabled": "[parameters('kube-controller-manager')]"
+                    },
+                    {
+                      "category": "kube-scheduler",
+                      "enabled": "[parameters('kube-scheduler')]"
+                    },
+                    {
+                      "category": "cluster-autoscaler",
+                      "enabled": "[parameters('cluster-autoscaler')]"
+                    },
+                    {
+                      "category": "kube-audit-admin",
+                      "enabled": "[parameters('kube-audit-admin')]"
+                    },
+                    {
+                      "category": "guard",
+                      "enabled": "[parameters('guard')]"
+                    },
+                    {
+                      "category": "cloud-controller-manager",
+                      "enabled": "[parameters('cloud-controller-manager')]"
+                    },
+                    {
+                      "category": "csi-azuredisk-controller",
+                      "enabled": "[parameters('csi-azuredisk-controller')]"
+                    },
+                    {
+                      "category": "csi-azurefile-controller",
+                      "enabled": "[parameters('csi-azurefile-controller')]"
+                    },
+                    {
+                      "category": "csi-snapshot-controller",
+                      "enabled": "[parameters('csi-snapshot-controller')]"
+                    }
+                  ],
+                  "name": "logCategoriesParameter",
+                  "where": {
+                    "count": {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                      "where": {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[current('logCategoriesParameter').enabled]"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "[current('logCategoriesParameter').category]"
+                          }
+                        ]
+                      }
+                    },
+                    "greater": 0
+                  }
+                },
+                "equals": 11
               },
               {
-                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
-                "equals": "True"
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/metrics[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/metrics[*].category",
+                        "equals": "AllMetrics"
+                      },
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
+                        "equals": "[parameters('AllMetrics')]"
+                      }
+                    ]
+                  }
+                },
+                "greater": 0
               },
               {
                 "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
