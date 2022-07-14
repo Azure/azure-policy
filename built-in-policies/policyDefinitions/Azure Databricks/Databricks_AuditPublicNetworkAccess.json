@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Azure Databricks Workspaces should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Databricks Workspaces should have public network access disabled. Disabling public network access improves security by ensuring that the resource isn't exposed on the public internet. You can limit exposure of your resources by creating private endpoints instead. Learn more at: https://docs.microsoft.com/azure/databricks/administration-guide/cloud-configurations/azure/vnet-inject",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Databricks"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Databricks/workspaces"
+          },
+          {
+            "field": "Microsoft.Databricks/workspaces/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0e7849de-b939-4c50-ab48-fc6b0f5eeba2",
+  "name": "0e7849de-b939-4c50-ab48-fc6b0f5eeba2"
+}

@@ -5,7 +5,7 @@
     "mode": "All",
     "description": "Enable export to Event Hub of Microsoft Defender for Cloud data. This policy deploys an export to Event Hub configuration with your conditions and target Event Hub on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
-      "version": "4.0.1",
+      "version": "4.1.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -50,7 +50,9 @@
           "Regulatory compliance",
           "Overall secure score - snapshot",
           "Secure score controls - snapshot",
-          "Regulatory compliance - snapshot"
+          "Regulatory compliance - snapshot",
+          "Security recommendations - snapshot",
+          "Security findings - snapshot"
         ],
         "defaultValue": [
           "Security recommendations",
@@ -60,7 +62,9 @@
           "Regulatory compliance",
           "Overall secure score - snapshot",
           "Secure score controls - snapshot",
-          "Regulatory compliance - snapshot"
+          "Regulatory compliance - snapshot",
+          "Security recommendations - snapshot",
+          "Security findings - snapshot"
         ]
       },
       "recommendationNames": {
@@ -275,6 +279,30 @@
                                 "equals": "Regulatory compliance - snapshot"
                               }
                             ]
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/automations/sources[*].eventSource",
+                                "equals": "AssessmentsSnapshot"
+                              },
+                              {
+                                "value": "[current('dataType')]",
+                                "equals": "Security recommendations - snapshot"
+                              }
+                            ]
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/automations/sources[*].eventSource",
+                                "equals": "SubAssessmentsSnapshot"
+                              },
+                              {
+                                "value": "[current('dataType')]",
+                                "equals": "Security findings - snapshot"
+                              }
+                            ]
                           }
                         ]
                       }
@@ -358,7 +386,9 @@
                     "Regulatory compliance": "RegulatoryComplianceAssessment",
                     "Overall secure score - snapshot": "SecureScoresSnapshot",
                     "Secure score controls - snapshot": "SecureScoreControlsSnapshot",
-                    "Regulatory compliance - snapshot": "RegulatoryComplianceAssessmentSnapshot"
+                    "Regulatory compliance - snapshot": "RegulatoryComplianceAssessmentSnapshot",
+                    "Security recommendations - snapshot": "AssessmentsSnapshot",
+                    "Security findings - snapshot": "SubAssessmentsSnapshot"
                   },
                   "alertSeverityMap": {
                     "High": "high",
@@ -478,7 +508,9 @@
                     "Regulatory compliance": "[variables('ruleSetsForSecureRegulatoryComplianceObj')]",
                     "Overall secure score - snapshot": null,
                     "Secure score controls - snapshot": "[variables('ruleSetsForSecureScoreControlsObj')]",
-                    "Regulatory compliance - snapshot": "[variables('ruleSetsForSecureRegulatoryComplianceObj')]"
+                    "Regulatory compliance - snapshot": "[variables('ruleSetsForSecureRegulatoryComplianceObj')]",
+                    "Security recommendations - snapshot": "[variables('ruleSetsForSecureRegulatoryComplianceObj')]",
+                    "Security findings - snapshot": "[variables('ruleSetsForSubAssessmentsObj')]"
                   },
                   "sourcesWithoutSubAssessments": {
                     "copy": [
