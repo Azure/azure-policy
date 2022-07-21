@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Secure communication between your containers with Azure Virtual Networks. When you specify a virtual network, resources within the virtual network can securely and privately communicate with each other.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Container Instance"
     },
     "parameters": {
@@ -31,8 +31,38 @@
             "equals": "Microsoft.ContainerInstance/containerGroups"
           },
           {
-            "field": "Microsoft.ContainerInstance/containerGroups/networkProfile.id",
-            "exists": false
+            "not": {
+              "field": "Microsoft.ContainerInstance/containerGroups/ipAddress.type",
+              "equals": "Private"
+            }
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "greater": "2021-03-01"
+                  },
+                  {
+                    "field": "Microsoft.ContainerInstance/containerGroups/subnetIds[*].id",
+                    "exists": false
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "lessOrEquals": "2021-03-01"
+                  },
+                  {
+                    "field": "Microsoft.ContainerInstance/containerGroups/networkProfile.id",
+                    "exists": false
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
