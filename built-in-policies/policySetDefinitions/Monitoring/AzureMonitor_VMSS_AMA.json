@@ -1,0 +1,202 @@
+{
+  "properties": {
+    "displayName": "Enable Azure Monitor for VMSS with Azure Monitoring Agent(AMA)",
+    "policyType": "BuiltIn",
+    "description": "Enable Azure Monitor for the virtual machines scale set (VMSS) with AMA. Takes Log Analytics workspace as parameter and asks for an option to enable Processes and Dependencies.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "parameters": {
+      "logAnalyticsWorkspace": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace"
+        }
+      },
+      "dataCollectionRuleName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Name of the Data Collection Rule(DCR)",
+          "description": "This is the name of the AMA-VMI Data Collection Rule(DCR)"
+        },
+        "defaultValue": "ama-vmi-default"
+      },
+      "enableProcessesAndDependencies": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Processes and Dependencies",
+          "description": "This is the flag for enabling processes and dependencies data collection in VMInsights"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "bringYourOwnUserAssignedManagedIdentity": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Bring Your Own User-Assigned Managed Identity",
+          "description": "If set to true, Azure Monitor Agent will use the user-assigned managed identity specified via the 'User-Assigned Managed Identity ...' parameters for authentication. Otherwise, Azure Monitor Agent will use the user-assigned managed identity /subscriptions/<subscription-id>/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-<location> for authentication."
+        },
+        "allowedValues": [
+          false,
+          true
+        ]
+      },
+      "userAssignedManagedIdentityName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Name",
+          "description": "The name of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
+        },
+        "defaultValue": ""
+      },
+      "userAssignedManagedIdentityResourceGroup": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource Group",
+          "description": "The resource group of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
+        },
+        "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for all constituent policies",
+          "description": "Enable or disable the execution of each of the constituent policies in the initiative."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "listOfImageIdToInclude_windows": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Optional: List of VM images that have supported Windows OS to add to scope",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        }
+      },
+      "listOfImageIdToInclude_linux": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Optional: List of VM images that have supported Linux OS to add to scope",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "AddUserAssignedManagedIdentity_VMSS",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/516187d4-ef64-4a1b-ad6b-a7348502976c",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "identityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/59c3d93f-900b-4827-a8bd-562e7b956e7c",
+        "policyDefinitionReferenceId": "DeployAzureMonitorAgentLinuxVMSSWithUAI",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedManagedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "userAssignedManagedIdentityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          },
+          "listOfLinuxImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_linux')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/98569e20-8f32-4f31-bf34-0e91590ae9d3",
+        "policyDefinitionReferenceId": "deployAzureMonitorAgentWindowsVMSSWithUAI",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfWindowsImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_windows')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedManagedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "userAssignedManagedIdentityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DependencyAgentExtension_Windows_VMSS_AMA_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/af0082fd-fa58-4349-b916-b0e47abb0935",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_windows')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DependencyAgentExtension_Linux_VMSS_AMA_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2fea0c12-e7d4-4e03-b7bf-c34b2b8d787d",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_linux')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "VMInsightsDCR_DCRA_VMSS_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c7f3bf36-b807-4f18-82dc-f480ad713635",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "workspaceResourceId": {
+            "value": "[parameters('logAnalyticsWorkspace')]"
+          },
+          "userGivenDcrName": {
+            "value": "[parameters('dataCollectionRuleName')]"
+          },
+          "enableProcessesAndDependencies": {
+            "value": "[parameters('enableProcessesAndDependencies')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/1f9b0c83-b4fa-4585-a686-72b74aeabcfd",
+  "name": "1f9b0c83-b4fa-4585-a686-72b74aeabcfd"
+}

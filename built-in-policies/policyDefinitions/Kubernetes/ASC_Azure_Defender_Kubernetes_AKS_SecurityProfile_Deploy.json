@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Microsoft Defender for Containers provides cloud-native Kubernetes security capabilities including environment hardening, workload protection, and run-time protection. When you enable the SecurityProfile.AzureDefender on your Azure Kubernetes Service cluster, an agent is deployed to your cluster to collect security event data. Learn more about Microsoft Defender for Containers: https://docs.microsoft.com/azure/defender-for-cloud/defender-for-containers-introduction?tabs=defender-for-container-arch-aks.",
     "metadata": {
-      "version": "3.1.1",
+      "version": "4.0.0",
       "category": "Kubernetes"
     },
     "parameters": {
@@ -45,7 +45,7 @@
           "name": "[field('name')]",
           "evaluationDelay": "PT30M",
           "existenceCondition": {
-            "field": "Microsoft.ContainerService/managedClusters/securityProfile.azureDefender.enabled",
+            "field": "Microsoft.ContainerService/managedClusters/securityProfile.defender.securityMonitoring.enabled",
             "equals": "true"
           },
           "roleDefinitionIds": [
@@ -233,7 +233,7 @@
                         "outputs": {
                           "existingCluster": {
                             "type": "object",
-                            "value": "[reference(resourceId(variables('subscriptionId'), split(parameters('clusterResourceId'),'/')[4], 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2022-02-01', 'Full')]"
+                            "value": "[reference(resourceId(variables('subscriptionId'), split(parameters('clusterResourceId'),'/')[4], 'Microsoft.ContainerService/managedClusters', parameters('clusterName')), '2022-06-01', 'Full')]"
                           }
                         }
                       }
@@ -285,12 +285,14 @@
                           {
                             "type": "Microsoft.ContainerService/ManagedClusters",
                             "name": "[parameters('clusterName')]",
-                            "apiVersion": "2022-02-01",
+                            "apiVersion": "2022-06-01",
                             "location": "[parameters('clusterRegion')]",
                             "properties": {
                               "securityProfile": {
-                                "azureDefender": {
-                                  "enabled": true,
+                                "defender": {
+                                  "securityMonitoring": {
+                                    "enabled": true
+                                  },
                                   "logAnalyticsWorkspaceResourceId": "[parameters('workspaceResourceId')]"
                                 }
                               },

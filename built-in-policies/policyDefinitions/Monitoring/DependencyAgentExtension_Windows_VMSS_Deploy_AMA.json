@@ -1,29 +1,20 @@
 {
   "properties": {
-    "displayName": "Deploy - Configure Log Analytics extension to be enabled on Windows virtual machines",
+    "displayName": "Deploy Dependency agent to be enabled on Windows virtual machine scale sets with Azure Monitoring Agent settings",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Log Analytics extension for Windows virtual machines if the virtual machine image is in the list defined and the extension is not installed. Deprecation notice: The Log Analytics agent is on a deprecation path and won't be supported after August 31, 2024. You must migrate to the replacement 'Azure Monitor agent' prior to that date.",
+    "description": "Deploy Dependency agent for Windows virtual machine scale sets with Azure Monitoring Agent settings if the virtual machine image is in the list defined and the agent is not installed. If your scale set upgradePolicy is set to Manual, you need to apply the extension to all the virtual machines in the set by updating them.",
     "metadata": {
-      "version": "3.0.1",
+      "version": "1.0.0",
       "category": "Monitoring"
     },
     "parameters": {
-      "logAnalytics": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Log Analytics workspace",
-          "description": "Log Analytics workspace is used to receive performance data. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
-          "strongType": "omsWorkspace",
-          "assignPermissions": true
-        }
-      },
       "listOfImageIdToInclude": {
         "type": "Array",
         "defaultValue": [],
         "metadata": {
           "displayName": "Optional: List of virtual machine images that have supported Windows OS to add to scope",
-          "description": "Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
         }
       },
       "effect": {
@@ -44,7 +35,7 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
           },
           {
             "anyOf": [
@@ -236,23 +227,19 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
           ],
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                "equals": "MicrosoftMonitoringAgent"
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "equals": "DependencyAgentWindows"
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                "equals": "Microsoft.EnterpriseCloud.Monitoring"
-              },
-              {
-                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                "equals": "Succeeded"
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.Azure.Monitoring.DependencyAgent"
               }
             ]
           },
@@ -268,34 +255,27 @@
                   },
                   "location": {
                     "type": "string"
-                  },
-                  "logAnalytics": {
-                    "type": "string"
                   }
                 },
                 "variables": {
-                  "vmExtensionName": "MicrosoftMonitoringAgent",
-                  "vmExtensionPublisher": "Microsoft.EnterpriseCloud.Monitoring",
-                  "vmExtensionType": "MicrosoftMonitoringAgent",
-                  "vmExtensionTypeHandlerVersion": "1.0"
+                  "vmExtensionName": "DependencyAgentWindows",
+                  "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                  "vmExtensionType": "DependencyAgentWindows",
+                  "vmExtensionTypeHandlerVersion": "9.10"
                 },
                 "resources": [
                   {
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
                     "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
-                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "apiVersion": "2021-04-01",
                     "location": "[parameters('location')]",
-                    "apiVersion": "2018-06-01",
                     "properties": {
                       "publisher": "[variables('vmExtensionPublisher')]",
                       "type": "[variables('vmExtensionType')]",
                       "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
                       "autoUpgradeMinorVersion": true,
                       "settings": {
-                        "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]",
-                        "stopOnMultipleConnections": "true"
-                      },
-                      "protectedSettings": {
-                        "workspaceKey": "[listKeys(parameters('logAnalytics'), '2015-03-20').primarySharedKey]"
+                        "enableAMA": "true"
                       }
                     }
                   }
@@ -303,7 +283,7 @@
                 "outputs": {
                   "policy": {
                     "type": "string",
-                    "value": "[concat('Enabled extension for VM', ': ', parameters('vmName'))]"
+                    "value": "[concat('Enabled extension for: ', parameters('vmName'))]"
                   }
                 }
               },
@@ -313,9 +293,6 @@
                 },
                 "location": {
                   "value": "[field('location')]"
-                },
-                "logAnalytics": {
-                  "value": "[parameters('logAnalytics')]"
                 }
               }
             }
@@ -324,6 +301,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/0868462e-646c-4fe3-9ced-a733534b6a2c",
-  "name": "0868462e-646c-4fe3-9ced-a733534b6a2c"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/af0082fd-fa58-4349-b916-b0e47abb0935",
+  "name": "af0082fd-fa58-4349-b916-b0e47abb0935"
 }

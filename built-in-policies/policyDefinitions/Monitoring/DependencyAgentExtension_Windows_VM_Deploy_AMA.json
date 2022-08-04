@@ -1,29 +1,20 @@
 {
   "properties": {
-    "displayName": "Deploy - Configure Log Analytics extension to be enabled on Windows virtual machines",
+    "displayName": "Deploy Dependency agent to be enabled on Windows virtual machines with Azure Monitoring Agent settings",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Log Analytics extension for Windows virtual machines if the virtual machine image is in the list defined and the extension is not installed. Deprecation notice: The Log Analytics agent is on a deprecation path and won't be supported after August 31, 2024. You must migrate to the replacement 'Azure Monitor agent' prior to that date.",
+    "description": "Deploy Dependency agent for Windows virtual machines with Azure Monitoring Agent settings if the virtual machine image is in the list defined and the agent is not installed.",
     "metadata": {
-      "version": "3.0.1",
+      "version": "1.0.0",
       "category": "Monitoring"
     },
     "parameters": {
-      "logAnalytics": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Log Analytics workspace",
-          "description": "Log Analytics workspace is used to receive performance data. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
-          "strongType": "omsWorkspace",
-          "assignPermissions": true
-        }
-      },
       "listOfImageIdToInclude": {
         "type": "Array",
         "defaultValue": [],
         "metadata": {
           "displayName": "Optional: List of virtual machine images that have supported Windows OS to add to scope",
-          "description": "Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
         }
       },
       "effect": {
@@ -244,11 +235,11 @@
             "allOf": [
               {
                 "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                "equals": "MicrosoftMonitoringAgent"
+                "equals": "DependencyAgentWindows"
               },
               {
                 "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+                "equals": "Microsoft.Azure.Monitoring.DependencyAgent"
               },
               {
                 "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
@@ -268,34 +259,27 @@
                   },
                   "location": {
                     "type": "string"
-                  },
-                  "logAnalytics": {
-                    "type": "string"
                   }
                 },
                 "variables": {
-                  "vmExtensionName": "MicrosoftMonitoringAgent",
-                  "vmExtensionPublisher": "Microsoft.EnterpriseCloud.Monitoring",
-                  "vmExtensionType": "MicrosoftMonitoringAgent",
-                  "vmExtensionTypeHandlerVersion": "1.0"
+                  "vmExtensionName": "DependencyAgentWindows",
+                  "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                  "vmExtensionType": "DependencyAgentWindows",
+                  "vmExtensionTypeHandlerVersion": "9.10"
                 },
                 "resources": [
                   {
-                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
                     "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                    "apiVersion": "2021-04-01",
                     "location": "[parameters('location')]",
-                    "apiVersion": "2018-06-01",
                     "properties": {
                       "publisher": "[variables('vmExtensionPublisher')]",
                       "type": "[variables('vmExtensionType')]",
                       "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
                       "autoUpgradeMinorVersion": true,
                       "settings": {
-                        "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]",
-                        "stopOnMultipleConnections": "true"
-                      },
-                      "protectedSettings": {
-                        "workspaceKey": "[listKeys(parameters('logAnalytics'), '2015-03-20').primarySharedKey]"
+                        "enableAMA": "true"
                       }
                     }
                   }
@@ -313,9 +297,6 @@
                 },
                 "location": {
                   "value": "[field('location')]"
-                },
-                "logAnalytics": {
-                  "value": "[parameters('logAnalytics')]"
                 }
               }
             }
@@ -324,6 +305,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/0868462e-646c-4fe3-9ced-a733534b6a2c",
-  "name": "0868462e-646c-4fe3-9ced-a733534b6a2c"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/89ca9cc7-25cd-4d53-97ba-445ca7a1f222",
+  "name": "89ca9cc7-25cd-4d53-97ba-445ca7a1f222"
 }
