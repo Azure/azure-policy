@@ -1,23 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure Log Analytics extension on Azure Arc enabled Windows servers",
+    "displayName": "Configure Dependency agent on Azure Arc enabled Windows servers with Azure Monitoring Agent settings",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Enable VM insights on servers and machines connected to Azure through Arc enabled servers by installing the Log Analytics virtual machine extension. VM insights uses the Log Analytics agent to collect the guest OS performance data, and provides insights into their performance. See more - https://aka.ms/vminsightsdocs. Deprecation notice: The Log Analytics agent is on a deprecation path and won't be supported after August 31, 2024. You must migrate to the replacement 'Azure Monitor agent' prior to that date.",
+    "description": "Enable VM insights on servers and machines connected to Azure through Arc enabled servers by installing the Dependency agent virtual machine extension with Azure Monitoring Agent settings. VM insights uses the Dependency agent to collect network metrics and discovered data about processes running on the machine and external process dependencies. See more - https://aka.ms/vminsightsdocs.",
     "metadata": {
-      "version": "2.1.1",
+      "version": "1.0.0",
       "category": "Monitoring"
     },
     "parameters": {
-      "logAnalytics": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Log Analytics workspace",
-          "description": "Specify the Log Analytics workspace the agent should be connected to. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
-          "strongType": "omsWorkspace",
-          "assignPermissions": true
-        }
-      },
       "effect": {
         "type": "string",
         "defaultValue": "DeployIfNotExists",
@@ -55,15 +46,15 @@
             "allOf": [
               {
                 "field": "Microsoft.HybridCompute/machines/extensions/type",
-                "equals": "MicrosoftMonitoringAgent"
+                "equals": "DependencyAgentWindows"
               },
               {
                 "field": "Microsoft.HybridCompute/machines/extensions/publisher",
-                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+                "equals": "Microsoft.Azure.Monitoring.DependencyAgent"
               },
               {
                 "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
-                "notEquals": "Failed"
+                "equals": "Succeeded"
               }
             ]
           },
@@ -79,31 +70,24 @@
                   },
                   "location": {
                     "type": "string"
-                  },
-                  "logAnalytics": {
-                    "type": "string"
                   }
                 },
                 "variables": {
-                  "vmExtensionName": "MicrosoftMonitoringAgent",
-                  "vmExtensionPublisher": "Microsoft.EnterpriseCloud.Monitoring",
-                  "vmExtensionType": "MicrosoftMonitoringAgent"
+                  "DaExtensionName": "DependencyAgentWindows",
+                  "DaExtensionType": "DependencyAgentWindows"
                 },
                 "resources": [
                   {
-                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
                     "type": "Microsoft.HybridCompute/machines/extensions",
+                    "apiVersion": "2020-03-11-preview",
+                    "name": "[concat(parameters('vmName'), '/', variables('DaExtensionName'))]",
                     "location": "[parameters('location')]",
-                    "apiVersion": "2019-12-12",
                     "properties": {
-                      "publisher": "[variables('vmExtensionPublisher')]",
-                      "type": "[variables('vmExtensionType')]",
+                      "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                      "type": "[variables('DaExtensionType')]",
+                      "autoUpgradeMinorVersion": true,
                       "settings": {
-                        "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]",
-                        "stopOnMultipleConnections": "true"
-                      },
-                      "protectedSettings": {
-                        "workspaceKey": "[listKeys(parameters('logAnalytics'), '2015-03-20').primarySharedKey]"
+                        "enableAMA": "true"
                       }
                     }
                   }
@@ -111,7 +95,7 @@
                 "outputs": {
                   "policy": {
                     "type": "string",
-                    "value": "[concat('Enabled extension for VM', ': ', parameters('vmName'))]"
+                    "value": "[concat('Enabled DA extension for VM', ': ', parameters('vmName'))]"
                   }
                 }
               },
@@ -121,9 +105,6 @@
                 },
                 "location": {
                   "value": "[field('location')]"
-                },
-                "logAnalytics": {
-                  "value": "[parameters('logAnalytics')]"
                 }
               }
             }
@@ -132,6 +113,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/69af7d4a-7b18-4044-93a9-2651498ef203",
-  "name": "69af7d4a-7b18-4044-93a9-2651498ef203"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/84cfed75-dfd4-421b-93df-725b479d356a",
+  "name": "84cfed75-dfd4-421b-93df-725b479d356a"
 }
