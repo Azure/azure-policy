@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "Use private DNS zones to override the DNS resolution for a private endpoint. A private DNS zone links to your virtual network to resolve to CosmosDB account. Learn more at: https://aka.ms/privatednszone.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Cosmos DB"
     },
     "parameters": {
@@ -46,10 +46,18 @@
           },
           {
             "count": {
-              "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
+              "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*]",
               "where": {
-                "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
-                "equals": "[parameters('privateEndpointGroupId')]"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].privateLinkServiceId",
+                    "contains": "Microsoft.DocumentDb/databaseAccounts"
+                  },
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
+                    "equals": "[parameters('privateEndpointGroupId')]"
+                  }
+                ]
               }
             },
             "greaterOrEquals": 1
