@@ -1,0 +1,28 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazureenforcecsidriverv1
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureEnforceCSIDriverV1
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazureenforcecsidriverv1
+
+        violation[{"msg": msg, "details": {}}] {
+            obj := input.review.object
+            provisioner := obj.provisioner
+            intreeProvisioner(provisioner)
+            msg := sprintf("Storage class %v use intree provisioner %v is not allowed", [obj.metadata.name, provisioner])
+        }
+
+        intreeProvisioner(provisioner) {
+            provisioner == "kubernetes.io/azure-file"
+        }
+
+        intreeProvisioner(provisioner) {
+            provisioner == "kubernetes.io/azure-disk"
+        }

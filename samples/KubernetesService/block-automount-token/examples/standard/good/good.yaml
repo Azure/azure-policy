@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-account
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-service-account
+  labels:
+    app: nginx-service-account
+spec:
+  serviceAccountName: test-account
+  automountServiceAccountToken: false
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      limits:
+        cpu: "100m"
+        memory: "30Mi"
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-account-image-exclusion
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-service-account-image-exclusion
+  labels:
+    app: nginx-service-account
+spec:
+  serviceAccountName: test-account-image-exclusion
+  automountServiceAccountToken: true
+  containers:
+  - name: nginx
+    image: exception.azurecr.io/exception:1.0.0
+    resources:
+      limits:
+        cpu: "100m"
+        memory: "30Mi"

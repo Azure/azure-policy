@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: image-allow
+  labels:
+    app: container-allowed-images
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  initContainers:
+  - image: exception.azurecr.io/exception:1.0.0
+    name: container-exclude
+    imagePullPolicy: Always
+  containers:
+  - name: c1
+    image: mcr.microsoft.com/oss/nginx/nginx:1.17.3-alpine # pullPolicy will be set IfNotPresent, referring to https://kubernetes.io/docs/concepts/containers/images/#imagepullpolicy-defaulting
+  - name: c2
+    image: mcr.microsoft.com/oss/nginx/nginx
+    imagePullPolicy: IfNotPresent
+  - name: c3
+    image: mcr.microsoft.com/oss/nginx/nginx:latest
+    imagePullPolicy: Never

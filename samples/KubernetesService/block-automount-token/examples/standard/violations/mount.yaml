@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-account-bad
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-service-account-violation
+  labels:
+    app: nginx-service-account
+spec:
+  serviceAccountName: test-account-bad
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-l9xgc
+      readOnly: true
+    resources:
+      limits:
+        cpu: "100m"
+        memory: "30Mi"
+  volumes:
+  - name: default-token-l9xgc
+    secret:
+      defaultMode: 420
+      secretName: default-token-l9xgc
