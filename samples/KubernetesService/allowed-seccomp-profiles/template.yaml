@@ -1,0 +1,100 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazureallowedseccomp
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureAllowedSeccomp
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedProfiles:
+              type: array
+              items:
+                type: string
+            excludedContainers:
+              type: array
+              items:
+                type: string
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazureallowedseccomp
+
+        import data.lib.exclude_container_image.is_excluded
+
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            metadata := input.review.object.metadata
+            not input_wildcard_allowed(metadata)
+            container := input_containers[_]
+            not input_container_excluded(container.name)
+            not is_excluded(container)
+            not input_container_allowed(metadata, container)
+            msg := sprintf("Seccomp profile is not allowed, pod: %v, container: %v, Allowed profiles: %v", [metadata.name, container.name, input.parameters.allowedProfiles])
+        }
+
+        input_wildcard_allowed(metadata) {
+            input.parameters.allowedProfiles[_] == "*"
+        }
+
+        input_container_allowed(metadata, container) {
+            not get_container_profile(metadata, container)
+            metadata.annotations["seccomp.security.alpha.kubernetes.io/pod"] == input.parameters.allowedProfiles[_]
+        }
+
+        input_container_allowed(metadata, container) {
+          profile := get_container_profile(metadata, container)
+          profile == input.parameters.allowedProfiles[_]
+        }
+
+        get_container_profile(metadata, container) = profile {
+          value := metadata.annotations[key]
+            startswith(key, "container.seccomp.security.alpha.kubernetes.io/")
+            [prefix, name] := split(key, "/")
+            name == container.name
+            profile = value
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.ephemeralContainers[_]
+        }
+        input_container_excluded(field) {
+            field == input.parameters.excludedContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }

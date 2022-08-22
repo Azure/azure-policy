@@ -1,0 +1,19 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazureblocknakedpodsv1
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureBlockNakedPodsV1
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazureblocknakedpodsv1
+
+        violation[{"msg": msg}] {
+          obj := input.review.object
+          not obj.metadata.ownerReferences
+          msg := sprintf("Naked pod is not allowed, pod: %v", [obj.metadata.name])
+        }

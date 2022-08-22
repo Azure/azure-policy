@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: windows-server-host-filesystem-win
+  labels:
+    app: windows-server-host-filesystem-win
+spec:
+  nodeSelector:
+    kubernetes.io/os: windows
+  containers:
+  - name: windows-server
+    image: mcr.microsoft.com/windows/servercore:ltsc2019
+    command:
+      - "powershell.exe"
+      - "-command"
+    args:
+      - "Start-Sleep -s 1000"
+    volumeMounts:
+    - mountPath: C:\var\lib\kubelet
+      name: kubelet
+      readOnly: true
+  volumes:
+  - name: kubelet
+    hostPath:
+      path: C:\var\lib\kubelet # directory location on host
