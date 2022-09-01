@@ -1,12 +1,13 @@
 {
   "properties": {
-    "displayName": "Deploy Dependency agent for Linux virtual machine scale sets with Azure Monitoring Agent settings",
+    "displayName": "[Preview]: Deploy Dependency agent for Linux virtual machine scale sets with Azure Monitoring Agent settings",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Deploy Dependency agent for Linux virtual machine scale sets with Azure Monitoring Agent settings if the VM Image (OS) is in the list defined and the agent is not installed. Note: if your scale set upgradePolicy is set to Manual, you need to apply the extension to the all virtual machines in the set by calling upgrade on them. In CLI this would be az vmss update-instances.",
     "metadata": {
-      "version": "1.0.0",
-      "category": "Monitoring"
+      "version": "1.1.1-preview",
+      "category": "Monitoring",
+      "preview": true
     },
     "parameters": {
       "listOfImageIdToInclude": {
@@ -28,6 +29,18 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "enableProcessesAndDependencies": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Processes and Dependencies",
+          "description": "This is the flag for enabling processes and dependencies data collection in VMInsights. If you are using this standalone policy and what to install Dependency Agent, keep this value as true."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       }
     },
     "policyRule": {
@@ -36,6 +49,10 @@
           {
             "field": "type",
             "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "value": "[parameters('enableProcessesAndDependencies')]",
+            "equals": true
           },
           {
             "anyOf": [
