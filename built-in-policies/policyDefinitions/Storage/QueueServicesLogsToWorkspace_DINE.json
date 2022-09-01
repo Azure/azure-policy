@@ -1,36 +1,37 @@
 {
   "properties": {
-    "displayName": "Deploy Diagnostic Settings for Key Vault to Log Analytics workspace",
+    "displayName": "Configure diagnostic settings for Queue Services to Log Analytics workspace",
+    "description": "Deploys the diagnostic settings for Queue Services to stream resource logs to a Log Analytics workspace when any queue Service which is missing this diagnostic settings is created or updated.",
     "policyType": "BuiltIn",
-    "mode": "Indexed",
-    "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Log Analytics workspace when any Key Vault which is missing this diagnostic settings is created or updated.",
+    "mode": "All",
     "metadata": {
-      "version": "3.0.0",
-      "category": "Monitoring"
+      "category": "Storage",
+      "version": "1.0.0"
     },
     "parameters": {
       "effect": {
-        "type": "string",
-        "defaultValue": "DeployIfNotExists",
-        "allowedValues": [
-          "DeployIfNotExists",
-          "Disabled"
-        ],
+        "type": "String",
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
-        }
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
       },
       "profileName": {
-        "type": "string",
-        "defaultValue": "setbypolicy_logAnalytics",
+        "type": "String",
         "metadata": {
           "displayName": "Profile name",
           "description": "The diagnostic settings profile name"
-        }
+        },
+        "defaultValue": "queueServicesDiagnosticsLogsToWorkspace"
       },
       "logAnalytics": {
-        "type": "string",
+        "type": "String",
         "metadata": {
           "displayName": "Log Analytics workspace",
           "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
@@ -39,94 +40,53 @@
         }
       },
       "metricsEnabled": {
-        "type": "string",
-        "defaultValue": "False",
-        "allowedValues": [
-          "True",
-          "False"
-        ],
+        "type": "Boolean",
         "metadata": {
           "displayName": "Enable metrics",
           "description": "Whether to enable metrics stream to the Log Analytics workspace - True or False"
-        }
-      },
-      "logsEnabled": {
-        "type": "string",
-        "defaultValue": "True",
-        "allowedValues": [
-          "True",
-          "False"
-        ],
-        "metadata": {
-          "displayName": "Enable logs",
-          "description": "Whether to enable logs stream to the Log Analytics workspace - True or False"
-        }
-      },
-      "matchWorkspace": {
-        "type": "boolean",
-        "defaultValue": false,
+        },
         "allowedValues": [
           true,
           false
         ],
+        "defaultValue": false
+      },
+      "logsEnabled": {
+        "type": "Boolean",
         "metadata": {
-          "displayName": "Workspace id must match",
-          "description": "Whether to require that the workspace of the diagnostic settings matches the workspace deployed by this policy"
-        }
+          "displayName": "Enable logs",
+          "description": "Whether to enable logs stream to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       }
     },
     "policyRule": {
       "if": {
         "field": "type",
-        "equals": "Microsoft.KeyVault/vaults"
+        "equals": "Microsoft.Storage/storageAccounts/queueServices"
       },
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Insights/diagnosticSettings",
           "name": "[parameters('profileName')]",
-          "evaluationDelay": "AfterProvisioning",
           "existenceCondition": {
             "allOf": [
               {
-                "count": {
-                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
-                  "where": {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
-                        "equals": "[parameters('logsEnabled')]"
-                      },
-                      {
-                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
-                        "equals": "AuditEvent"
-                      }
-                    ]
-                  }
-                },
-                "greaterOrEquals": 1
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "[parameters('logsEnabled')]"
               },
               {
-                "count": {
-                  "field": "Microsoft.Insights/diagnosticSettings/metrics[*]",
-                  "where": {
-                    "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
-                    "equals": "[parameters('metricsEnabled')]"
-                  }
-                },
-                "greaterOrEquals": 1
+                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                "equals": "[parameters('metricsEnabled')]"
               },
               {
-                "anyOf": [
-                  {
-                    "value": "[parameters('matchWorkspace')]",
-                    "equals": false
-                  },
-                  {
-                    "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
-                    "equals": "[parameters('logAnalytics')]"
-                  }
-                ]
+                "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                "equals": "[parameters('logAnalytics')]"
               }
             ]
           },
@@ -163,8 +123,8 @@
                 "variables": {},
                 "resources": [
                   {
-                    "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
-                    "apiVersion": "2017-05-01-preview",
+                    "type": "Microsoft.Storage/storageAccounts/queueServices/providers/diagnosticSettings",
+                    "apiVersion": "2021-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('profileName'))]",
                     "location": "[parameters('location')]",
                     "dependsOn": [],
@@ -172,21 +132,21 @@
                       "workspaceId": "[parameters('logAnalytics')]",
                       "metrics": [
                         {
-                          "category": "AllMetrics",
-                          "enabled": "[parameters('metricsEnabled')]",
-                          "retentionPolicy": {
-                            "enabled": false,
-                            "days": 0
-                          }
+                          "category": "Transaction",
+                          "enabled": "[parameters('metricsEnabled')]"
                         }
                       ],
                       "logs": [
                         {
-                          "category": "AuditEvent",
+                          "category": "StorageRead",
                           "enabled": "[parameters('logsEnabled')]"
                         },
                         {
-                          "category": "AzurePolicyEvaluationDetails",
+                          "category": "StorageWrite",
+                          "enabled": "[parameters('logsEnabled')]"
+                        },
+                        {
+                          "category": "StorageDelete",
                           "enabled": "[parameters('logsEnabled')]"
                         }
                       ]
@@ -200,7 +160,7 @@
                   "value": "[field('location')]"
                 },
                 "resourceName": {
-                  "value": "[field('name')]"
+                  "value": "[field('fullName')]"
                 },
                 "logAnalytics": {
                   "value": "[parameters('logAnalytics')]"
@@ -221,6 +181,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/bef3f64c-5290-43b7-85b0-9b254eef4c47",
-  "name": "bef3f64c-5290-43b7-85b0-9b254eef4c47"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7bd000e3-37c7-4928-9f31-86c4b77c5c45",
+  "name": "7bd000e3-37c7-4928-9f31-86c4b77c5c45"
 }
