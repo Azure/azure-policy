@@ -6,7 +6,7 @@
     "description": "Configure system-assigned managed identity to virtual machines hosted in Azure that are supported by Azure Monitor and do not have a system-assigned managed identity. A system-assigned managed identity is a prerequisite for all Azure Monitor assignments and must be added to machines before using any Azure Monitor extension. Target virtual machines must be in a supported location.",
     "metadata": {
       "category": "Monitoring",
-      "version": "5.0.0-preview",
+      "version": "6.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -21,6 +21,14 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "listOfImageIdToInclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Additional Machine Images",
+          "description": "List of virtual machine scale set images that have supported OS to add to scope. Example values: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -39,6 +47,14 @@
             ]
           },
           {
+            "field": "identity.type",
+            "notContains": "SystemAssigned"
+          },
+          {
+            "value": "[requestContext().apiVersion]",
+            "greaterOrEquals": "2018-10-01"
+          },
+          {
             "field": "location",
             "in": [
               "australiacentral",
@@ -49,10 +65,11 @@
               "canadaeast",
               "centralindia",
               "centralus",
+              "centraluseuap",
               "eastasia",
-              "eastus2euap",
               "eastus",
               "eastus2",
+              "eastus2euap",
               "francecentral",
               "germanywestcentral",
               "japaneast",
@@ -63,10 +80,12 @@
               "northcentralus",
               "northeurope",
               "norwayeast",
+              "qatarcentral",
               "southafricanorth",
               "southcentralus",
               "southeastasia",
               "southindia",
+              "swedencentral",
               "switzerlandnorth",
               "uaenorth",
               "uksouth",
@@ -75,11 +94,16 @@
               "westeurope",
               "westindia",
               "westus",
-              "westus2"
+              "westus2",
+              "westus3"
             ]
           },
           {
             "anyOf": [
+              {
+                "field": "Microsoft.Compute/imageId",
+                "in": "[parameters('listOfImageIdToInclude')]"
+              },
               {
                 "allOf": [
                   {
@@ -90,15 +114,16 @@
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
                       "RHEL",
-                      "RHEL-SAP-HANA"
+                      "RHEL-ARM64",
+                      "RHEL-BYOS",
+                      "RHEL-HA",
+                      "RHEL-SAP",
+                      "RHEL-SAP-APPS",
+                      "RHEL-SAP-HA"
                     ]
                   },
                   {
                     "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "6*"
-                      },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
@@ -106,6 +131,14 @@
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm8*"
                       }
                     ]
                   }
@@ -118,77 +151,115 @@
                     "equals": "SUSE"
                   },
                   {
-                    "field": "Microsoft.Compute/imageOffer",
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "SLES",
+                              "SLES-HPC",
+                              "SLES-HPC-Priority",
+                              "SLES-SAP",
+                              "SLES-SAP-BYOS",
+                              "SLES-Priority",
+                              "SLES-BYOS",
+                              "SLES-SAPCAL",
+                              "SLES-Standard"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSku",
+                                "like": "12*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageSku",
+                                "like": "15*"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-12*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-15*"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "UbuntuServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "0001-com-ubuntu-server-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "0001-com-ubuntu-pro-*"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
                     "in": [
-                      "SLES",
-                      "SLES-HPC",
-                      "SLES-HPC-Priority",
-                      "SLES-SAP",
-                      "SLES-SAP-BYOS",
-                      "SLES-Priority",
-                      "SLES-BYOS",
-                      "SLES-SAPCAL",
-                      "SLES-Standard"
-                    ]
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "12*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "15*"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Canonical"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "UbuntuServer"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "14.04*LTS"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "16.04*LTS"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "18.04*LTS"
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Canonical"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "0001-com-ubuntu-server-focal"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "20_04-lts*"
-                      }
+                      "14.04.0-lts",
+                      "14.04.1-lts",
+                      "14.04.2-lts",
+                      "14.04.3-lts",
+                      "14.04.4-lts",
+                      "14.04.5-lts",
+                      "16_04_0-lts-gen2",
+                      "16_04-lts-gen2",
+                      "16.04-lts",
+                      "16.04.0-lts",
+                      "18_04-lts-arm64",
+                      "18_04-lts-gen2",
+                      "18.04-lts",
+                      "20_04-lts-arm64",
+                      "20_04-lts-gen2",
+                      "20_04-lts",
+                      "22_04-lts-gen2",
+                      "22_04-lts",
+                      "pro-16_04-lts-gen2",
+                      "pro-16_04-lts",
+                      "pro-18_04-lts-gen2",
+                      "pro-18_04-lts",
+                      "pro-20_04-lts-gen2",
+                      "pro-20_04-lts",
+                      "pro-22_04-lts-gen2",
+                      "pro-22_04-lts"
                     ]
                   }
                 ]
@@ -205,10 +276,6 @@
                   },
                   {
                     "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "6*"
-                      },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
@@ -273,25 +340,49 @@
                 "allOf": [
                   {
                     "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "almalinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "almalinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "ctrliqinc1648673227698"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "rocky-8*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "rocky-8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
                     "equals": "credativ"
                   },
                   {
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
-                      "debian"
+                      "Debian"
                     ]
                   },
                   {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "8"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "9"
-                      }
-                    ]
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "9"
                   }
                 ]
               },
@@ -304,12 +395,40 @@
                   {
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
-                      "debian-10"
+                      "debian-10",
+                      "debian-11"
                     ]
                   },
                   {
                     "field": "Microsoft.Compute/imageSku",
-                    "like": "10"
+                    "in": [
+                      "10",
+                      "10-gen2",
+                      "11",
+                      "11-gen2"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoftcblmariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cbl-mariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "in": [
+                      "1-gen2",
+                      "cbl-mariner-1",
+                      "cbl-mariner-2",
+                      "cbl-mariner-2-arm64",
+                      "cbl-mariner-2-gen2"
+                    ]
                   }
                 ]
               },
@@ -497,14 +616,6 @@
                 "exists": "true"
               }
             ]
-          },
-          {
-            "value": "[requestContext().apiVersion]",
-            "greaterOrEquals": "2018-10-01"
-          },
-          {
-            "field": "identity.type",
-            "notContains": "SystemAssigned"
           }
         ]
       },
