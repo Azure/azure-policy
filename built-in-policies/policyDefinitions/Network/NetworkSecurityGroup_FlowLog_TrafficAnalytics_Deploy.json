@@ -5,7 +5,7 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.1",
+      "version": "1.1.0",
       "category": "Network"
     },
     "parameters": {
@@ -86,6 +86,14 @@
           "displayName": "Network Watcher name",
           "description": "The name of the network watcher under which the flow log resources are created. Make sure it belongs to the same region as the network security group."
         }
+      },
+      "retentionDays": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Number of days to retain flowlogs",
+          "description": "The number of days for which flowlog data will be retained in storage account. If you want to retain data forever and do not want to apply any retention policy, set retention (days) to 0."
+        },
+        "defaultValue": "30"
       }
     },
     "policyRule": {
@@ -173,6 +181,9 @@
                   },
                   "targetResource": {
                     "type": "string"
+                  },
+                  "retentionDays": {
+                    "type": "string"
                   }
                 },
                 "resources": [
@@ -208,8 +219,8 @@
                                 }
                               },
                               "retentionPolicy": {
-                                "days": "0",
-                                "enabled": "false"
+                                "days": "[parameters('retentionDays')]",
+                                "enabled": "true"
                               },
                               "format": {
                                 "type": "JSON",
@@ -253,6 +264,9 @@
                 },
                 "targetResource": {
                   "value": "[concat(resourceGroup().id, '/providers/Microsoft.Network/networkSecurityGroups/', field('name'))]"
+                },
+                "retentionDays": {
+                  "value": "[parameters('retentionDays')]"
                 }
               }
             }
