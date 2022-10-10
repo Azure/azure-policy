@@ -3,10 +3,10 @@
     "displayName": "[Preview]: Guest Attestation extension should be installed on supported Linux virtual machines",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Install Guest Attestation extension on supported Linux virtual machines to allow Azure Security Center to proactively attest and monitor the boot integrity. Once installed, boot integrity will be attested via Remote Attestation. This assessment only applies to trusted launch enabled Linux virtual machines.",
+    "description": "Install Guest Attestation extension on supported Linux virtual machines to allow Azure Security Center to proactively attest and monitor the boot integrity. Once installed, boot integrity will be attested via Remote Attestation. This assessment applies to Trusted Launch and Confidential Linux virtual machines.",
     "metadata": {
       "category": "Security Center",
-      "version": "5.0.0-preview",
+      "version": "6.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -65,6 +65,22 @@
                   {
                     "field": "Microsoft.Compute/imageSku",
                     "like": "20_04-lts-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "0001-com-ubuntu-confidential-vm-focal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "20_04-lts-cvm"
                   }
                 ]
               },
@@ -168,7 +184,10 @@
           },
           {
             "field": "Microsoft.Compute/virtualMachines/securityProfile.securityType",
-            "equals": "TrustedLaunch"
+            "in": [
+              "TrustedLaunch",
+              "ConfidentialVM"
+            ]
           },
           {
             "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings",
