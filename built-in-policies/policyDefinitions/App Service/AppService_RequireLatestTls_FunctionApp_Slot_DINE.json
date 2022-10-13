@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure App Service apps to use the latest TLS version",
+    "displayName": "Configure Function app slots to use the latest TLS version",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Periodically, newer versions are released for TLS either due to security flaws, include additional functionality, and enhance speed. Upgrade to the latest TLS version for App Service apps to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
+    "description": "Periodically, newer versions are released for TLS either due to security flaws, include additional functionality, and enhance speed. Upgrade to the latest TLS version for Function apps to take advantage of security fixes, if any, and/or new functionalities of the latest version.",
     "metadata": {
-      "version": "1.0.1",
+      "version": "1.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -27,21 +27,25 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Web/sites"
+            "equals": "Microsoft.Web/sites/slots"
           },
           {
             "field": "kind",
-            "notContains": "functionapp"
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
           }
         ]
       },
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Web/sites/config",
+          "type": "Microsoft.Web/sites/slots/config",
           "name": "web",
           "existenceCondition": {
-            "field": "Microsoft.Web/sites/config/minTlsVersion",
+            "field": "Microsoft.Web/sites/slots/config/minTlsVersion",
             "equals": "1.2"
           },
           "roleDefinitionIds": [
@@ -53,6 +57,9 @@
               "parameters": {
                 "siteName": {
                   "value": "[field('name')]"
+                },
+                "siteId": {
+                  "value": "[field('id')]"
                 }
               },
               "template": {
@@ -61,14 +68,17 @@
                 "parameters": {
                   "siteName": {
                     "type": "string"
+                  },
+                  "siteId": {
+                    "type": "string"
                   }
                 },
                 "variables": {},
                 "resources": [
                   {
-                    "type": "Microsoft.Web/sites/config",
+                    "type": "Microsoft.Web/sites/slots/config",
                     "apiVersion": "2021-02-01",
-                    "name": "[concat(parameters('siteName'), '/web')]",
+                    "name": "[format('{0}/{1}/web', split(split(parameters('siteId'),'/')[7]), parameters('siteName'))]",
                     "properties": {
                       "minTlsVersion": "1.2"
                     }
@@ -82,6 +92,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/ae44c1d1-0df2-4ca9-98fa-a3d3ae5b409d",
-  "name": "ae44c1d1-0df2-4ca9-98fa-a3d3ae5b409d"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fa3a6357-c6d6-4120-8429-855577ec0063",
+  "name": "fa3a6357-c6d6-4120-8429-855577ec0063"
 }
