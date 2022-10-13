@@ -3,9 +3,9 @@
     "displayName": "Configure Arc-enabled machines running SQL Server to have SQL Server extension installed.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled Windows Server, the latter should have SQL Server extension installed and the server's managed identity should be configured with Azure Connected SQL Server Onboarding role",
+    "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled Windows/Linux Server, the latter should have SQL Server extension installed",
     "metadata": {
-      "version": "2.1.0",
+      "version": "3.0.0",
       "category": "SQL"
     },
     "parameters": {
@@ -30,10 +30,6 @@
             "equals": "Microsoft.HybridCompute/machines"
           },
           {
-            "field": "Microsoft.HybridCompute/imageOffer",
-            "like": "windows*"
-          },
-          {
             "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
             "equals": "true"
           }
@@ -50,16 +46,24 @@
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.HybridCompute/machines/extensions/type",
-                "equals": "WindowsAgent.SqlServer"
-              },
-              {
                 "field": "Microsoft.HybridCompute/machines/extensions/publisher",
                 "equals": "Microsoft.AzureData"
               },
               {
                 "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
                 "equals": "Succeeded"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/type",
+                    "equals": "WindowsAgent.SqlServer"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/type",
+                    "equals": "LinuxAgent.SqlServer"
+                  }
+                ]
               }
             ]
           },
@@ -75,23 +79,17 @@
                   },
                   "location": {
                     "type": "string"
+                  },
+                  "agentName": {
+                    "type": "string"
                   }
                 },
                 "variables": {
-                  "vmExtensionName": "WindowsAgent.SqlServer",
+                  "vmExtensionName": "[parameters('agentName')]",
                   "vmExtensionPublisher": "Microsoft.AzureData",
-                  "vmExtensionType": "WindowsAgent.SqlServer"
+                  "vmExtensionType": "[parameters('agentName')]"
                 },
                 "resources": [
-                  {
-                    "type": "Microsoft.Authorization/roleAssignments",
-                    "apiVersion": "2021-04-01-preview",
-                    "name": "[guid(resourceGroup().id, parameters('vmName'), deployment().name)]",
-                    "properties": {
-                      "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/e8113dcec5294d3391fae9b972617508",
-                      "principalId": "[reference(resourceId('Microsoft.HybridCompute/machines', parameters('vmName')), '2021-05-20', 'Full').identity.principalId]"
-                    }
-                  },
                   {
                     "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
                     "type": "Microsoft.HybridCompute/machines/extensions",
@@ -122,6 +120,9 @@
                 },
                 "location": {
                   "value": "[field('location')]"
+                },
+                "agentName": {
+                  "value": "[if(startsWith(field('Microsoft.HybridCompute/machines/osName'),'windows'), 'WindowsAgent.SqlServer', 'LinuxAgent.SqlServer')]"
                 }
               }
             }

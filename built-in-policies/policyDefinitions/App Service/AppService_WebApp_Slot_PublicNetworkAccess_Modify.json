@@ -1,11 +1,11 @@
 {
   "properties": {
-    "displayName": "Configure Function app slots to only be accessible over HTTPS",
+    "displayName": "Configure App Service app slots to disable public network access",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Use of HTTPS ensures server/service authentication and protects data in transit from network layer eavesdropping attacks.",
+    "description": "Disable public network access for your App Services so that it is not accessible over the public internet. This can reduce data leakage risks. Learn more at: https://aka.ms/app-service-private-endpoint.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "1.0.0",
       "category": "App Service"
     },
     "parameters": {
@@ -31,21 +31,17 @@
           },
           {
             "field": "kind",
-            "contains": "functionapp"
-          },
-          {
-            "field": "kind",
-            "notContains": "workflowapp"
+            "notContains": "functionapp"
           },
           {
             "anyOf": [
               {
-                "field": "Microsoft.Web/sites/slots/httpsOnly",
+                "field": "Microsoft.Web/sites/slots/publicNetworkAccess",
                 "exists": "false"
               },
               {
-                "field": "Microsoft.Web/sites/slots/httpsOnly",
-                "equals": "false"
+                "field": "Microsoft.Web/sites/slots/publicNetworkAccess",
+                "notEquals": "Disabled"
               }
             ]
           }
@@ -60,16 +56,16 @@
           "conflictEffect": "audit",
           "operations": [
             {
-              "condition": "[greaterOrEquals(requestContext().apiVersion, '2019-08-01')]",
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-03-01')]",
               "operation": "addOrReplace",
-              "field": "Microsoft.Web/sites/slots/httpsOnly",
-              "value": true
+              "field": "Microsoft.Web/sites/slots/publicNetworkAccess",
+              "value": "Disabled"
             }
           ]
         }
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/08cf2974-d178-48a0-b26d-f6b8e555748b",
-  "name": "08cf2974-d178-48a0-b26d-f6b8e555748b"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c6c3e00e-d414-4ca4-914f-406699bb8eee",
+  "name": "c6c3e00e-d414-4ca4-914f-406699bb8eee"
 }
