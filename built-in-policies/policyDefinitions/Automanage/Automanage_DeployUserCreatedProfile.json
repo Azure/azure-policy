@@ -5,7 +5,7 @@
     "displayName": "Configure virtual machines to be onboarded to Azure Automanage with Custom Configuration Profile",
     "description": "Azure Automanage enrolls, configures, and monitors virtual machines with best practice as defined in the Microsoft Cloud Adoption Framework for Azure. Use this policy to apply Automanage with your own customized Configuration Profile to your selected scope.",
     "metadata": {
-      "version": "1.2.0",
+      "version": "1.3.0",
       "category": "Automanage"
     },
     "parameters": {
@@ -50,6 +50,22 @@
     "policyRule": {
       "if": {
         "allOf": [
+          {
+            "anyOf": [
+              {
+                "field": "[concat('tags[', parameters('inclusionTagName'), ']')]",
+                "in": "[parameters('inclusionTagValues')]"
+              },
+              {
+                "value": "[empty(parameters('inclusionTagValues'))]",
+                "equals": "true"
+              },
+              {
+                "value": "[empty(parameters('inclusionTagName'))]",
+                "equals": "true"
+              }
+            ]
+          },
           {
             "field": "location",
             "in": [
@@ -531,22 +547,6 @@
                   {
                     "field": "Microsoft.HybridCompute/machines/osSku",
                     "like": "SUSE Linux Enterprise Server 15*"
-                  }
-                ]
-              },
-              {
-                "anyOf": [
-                  {
-                    "field": "[concat('tags[', parameters('inclusionTagName'), ']')]",
-                    "in": "[parameters('inclusionTagValues')]"
-                  },
-                  {
-                    "value": "[empty(parameters('inclusionTagValues'))]",
-                    "equals": "true"
-                  },
-                  {
-                    "value": "[empty(parameters('inclusionTagName'))]",
-                    "equals": "true"
                   }
                 ]
               }
