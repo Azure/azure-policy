@@ -218,7 +218,8 @@ All Databricks resources bypass policy enforcement at creation time. Databricks 
 
 ### Resources that are exempt from policy evaluation
 
-- Microsoft.Resources/deployments
+- Microsoft.Resources/*, except resource groups and subscriptions. 
+   - For example, `Microsoft.Resources/deployments` and `Microsoft.Resources/templateSpecs` are not evaluated by policy.
 - Microsoft.Billing/*
 - Microsoft.Capacity/reservationOrders/*
 
