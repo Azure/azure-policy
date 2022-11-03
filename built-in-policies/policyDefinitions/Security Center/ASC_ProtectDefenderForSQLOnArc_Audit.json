@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Arc-enabled SQL Server defender status should be protected",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Defender for SQL provides functionality for surfacing and mitigating potential database vulnerabilities, detecting anomalous activities that could indicate threats to SQL databases, and discovering and classifying sensitive data.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureArcData/sqlServerInstances"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.AzureArcData/sqlServerInstances/azureDefenderStatus",
+                "notEquals": "Protected"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.AzureArcData/sqlServerInstances/azureDefenderStatus",
+                    "Equals": "Protected"
+                  },
+                  {
+                    "value": "[field('Microsoft.AzureArcData/sqlServerInstances/azureDefenderStatusLastUpdated')]",
+                    "less": "[addDays(utcNow(), -1)]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/938c4981-c2c9-4168-9cd6-972b8675f906",
+  "name": "938c4981-c2c9-4168-9cd6-972b8675f906"
+}
