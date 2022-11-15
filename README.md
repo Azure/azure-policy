@@ -273,8 +273,10 @@ This behavior is also seen in resource types from the following RPs:
 
 ### Azure Policy Extension for Arc is not compatible on Kubernetes 1.25 (preview) version
 
-Policy extension for Arc installation will fail on 1.25 clusters with the following error code via gatekeeper controller and policy webhook pods: 
+Policy extension for Arc installation will fail on 1.25 clusters with the following error code and message: 
 Code: ExtensionOperationFailed
+"err [unable to build kubernetes objects from release manifest:
+unable to recognize "": no matches for kind "PodSecurityPolicy" in version "policy/v1beta1"]} occurred while doing the operation :"
 
 Mitigation: Avoid using K8s 1.25 (preview) with the Azure Policy Extension for Arc. The extension can be used with any GA supported version such as 1.22, 1.23, or 1.24. 
 Feature team is actively working on fixing this issue. We will update this known issue once the resolution is available.
