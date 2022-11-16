@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pass-example
+  labels:
+    app: scenario-container-allowed-pull-policy
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  initContainers:
+  - image: exception.azurecr.io/exception:1.0.0 # bypassed by the image exclusion parameter
+    name: image-exclude
+    imagePullPolicy: Always
+  containers:
+  - name: container1
+    image: mcr.microsoft.com/aks/policy/example:v1.0.0 # pullPolicy will be set IfNotPresent, referring to https://kubernetes.io/docs/concepts/containers/images/#imagepullpolicy-defaulting
+  - name: container2
+    image: mcr.microsoft.com/aks/policy/example
+    imagePullPolicy: IfNotPresent
+  - name: container3
+    image: mcr.microsoft.com/aks/policy/example:v1.0.0
+    imagePullPolicy: Never

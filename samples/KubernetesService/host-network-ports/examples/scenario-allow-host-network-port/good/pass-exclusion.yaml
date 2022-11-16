@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pass-exclusion
+  labels:
+    app: scenario-allow-host-network-port
+spec:
+  hostNetwork: true
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: container-exclude # bypassed by the container exclusion parameter
+    image: mcr.microsoft.com/aks/policy/example:v1.0.0
+    ports:
+    - containerPort: 9001
+      hostPort: 9001
+  - name: image-exception
+    image: exception.azurecr.io/exception:1.0.0 # bypassed by the image exclusion parameter
+    ports:
+    - containerPort: 9002
+      hostPort: 9002
