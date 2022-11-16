@@ -237,12 +237,7 @@ These are resource types that have significant policy scenarios, but are not sup
 Work to increase the scale that policy can be performantly applied to resource types is in progress. Planned availability date is not yet determined.
 
 ### Azure Policy Add-on not compatible on AKS Kubernetes 1.19 (preview) version
-1.19 clusters will return this error via gatekeeper controller and policy webhook pods: 
- certificate relies on legacy Common Name field, use SANs or temporarily enable Common Name matching 
-
-Mitigation: Avoid using K8s 1.19 (preview) with the Azure Policy add-on. The add-on can be used with any GA supported version such as 1.16, 1.17, or 1.18. 
-Feature team is actively working on fixing this issue. GitHub issue tracking this on AKS side https://github.com/Azure/AKS/issues/1869 
-
+This issue has been resolved. 
 
 ### Indexed Resource types always non-complaint to tagging policies 
 As of February 2021, index resources that don't support tags aren't applicable to polices that inspect tags.
@@ -253,9 +248,7 @@ May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a str
 July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
 
 ### Resources that exceed current Azure policy assignment delete latencies
-
-Microsoft.KeyVault.Data: a deleted policy assignment can take up to 24 hours to stop being enforced. 
-Mitigation: update the policy assignment's effect to 'Disabled'.
+The issue related to mode = Microsoft.KeyVault.Data has been resolved. 
 
 ### Microsoft.Kubernetes.Data policies that evaluate containers do not currently support container exclusions.  
 This issue has been resolved. 
@@ -277,5 +270,15 @@ This behavior is also seen in resource types from the following RPs:
 - Microsoft.DataLakeStore
 - Microsoft.DBforMySQL
 - Microsoft.HDInsight
+
+### Azure Policy Extension for Arc is not compatible on Kubernetes 1.25 (preview) version
+
+Policy extension for Arc installation will fail on 1.25 clusters with the following error code and message: 
+Code: ExtensionOperationFailed
+"err [unable to build kubernetes objects from release manifest:
+unable to recognize "": no matches for kind "PodSecurityPolicy" in version "policy/v1beta1"]} occurred while doing the operation :"
+
+Mitigation: Avoid using K8s 1.25 (preview) with the Azure Policy Extension for Arc. The extension can be used with any GA supported version such as 1.22, 1.23, or 1.24. 
+Feature team is actively working on fixing this issue. We will update this known issue once the resolution is available.
 
 For support involving these compliance message issues, please first follow up with the respective RP listed above.
