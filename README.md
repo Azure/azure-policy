@@ -164,7 +164,6 @@ Service Fabric applications created via direct requests to the Service Fabric cl
 
 In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource provider selects the values for properties not provided in the payload. Such a resource might be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this class of behavior:
 
-- Microsoft.Sql/servers/firewallRules
 - Microsoft.Automation/certificates
 - Microsoft.Security/securityContacts
 
