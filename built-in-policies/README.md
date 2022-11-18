@@ -18,19 +18,19 @@ Each policy definition and initiative contains a version in its metadata section
 
 This version is incremented according to the following rules (subject to change):
    - **Major Version** (**1**.0.0)
+      
+      Starting in November 2022, there will be no further changes to the major versions of built in policies. Changes that required a major version to be incremented in the past will now increment the minor version instead. The Azure Policy team is working to add "full" versions support for policy resources, where each policy could have multiple versions that can be referenced individually. Temporarily blocking updates to major versions is required to complete this work.
+   - **Minor Version** (1.**0**.0)
       - Policy Definitions
          - Rule logic changes
          - ifNotExists existence condition changes
          - Major changes to the effect of the policy (i.e. adding a new resource to a deployment)
-      - Policy Set Definitions
-         - Addition or removal of a policy definition from the policy set
-   - **Minor Version** (1.**0**.0)
-      - Policy Definitions
          - Changes to effect details that don't meet the major version criteria
          - Adding new parameter allowed values
          - Adding new parameters (with default values)
          - Other minor changes to existing parameters
       - Policy Set Definitions
+         - Addition or removal of a policy definition from the policy set
          - Adding new parameter allowed values
          - Adding new parameters (with default values)
          - Other minor changes to existing parameters
