@@ -281,3 +281,8 @@ Mitigation: Avoid using K8s 1.25 (preview) with the Azure Policy Extension for A
 Feature team is actively working on fixing this issue. We will update this known issue once the resolution is available.
 
 For support involving these compliance message issues, please first follow up with the respective RP listed above.
+
+### Resource types that do not support creation of Policy exemptions
+These resource types do not allow Policy exemptions on resources due to [deny assignments](https://docs.microsoft.com/azure/role-based-access-control/deny-assignments). Workaround is to use [exclusions](https://docs.microsoft.com/azure/governance/policy/concepts/assignment-structure#excluded-scopes) at the assignment level. 
+
+- Microsoft.Databricks/* 
