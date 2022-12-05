@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: pass-exclusion
+    labels:
+        app: scenario-selinux
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: image-exclude
+    image: exception.azurecr.io/exception:1.0.0 # bypassed by the image exclusion parameter
+    securityContext:
+      seLinuxOptions:
+        level: s1:c234,c567
+        user: sysadm_u
+        role: sysadm_r
+        type: svirt_lxc_net_t
+    resources:
+      limits:
+        cpu: "100m"
+        memory: "30Mi"

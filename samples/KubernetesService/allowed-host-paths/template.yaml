@@ -1,12 +1,12 @@
 apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
-  name: k8sazurehostfilesystem
+  name: k8sazurev3hostfilesystem
 spec:
   crd:
     spec:
       names:
-        kind: K8sAzureHostFilesystem
+        kind: K8sAzureV3HostFilesystem
       validation:
         # Schema for the `parameters` field
         openAPIV3Schema:
@@ -36,24 +36,33 @@ spec:
   targets:
     - target: admission.k8s.gatekeeper.sh
       rego: |
-        package k8sazurehostfilesystem
+        package k8sazurev3hostfilesystem
 
         import data.lib.exclude_container_image.is_excluded
 
+        # The following scenario will be viewed as non-compliant:
+        ## exist hostPath volume mounted on container not in the allowed list
+        ## hostPath is set readonly but mounted as writable
+
+        # disallowed due to not in allowed paths
         violation[{"msg": msg, "details": {}}] {
             not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
             volume := input_hostpath_volumes[_]
             allowedPaths := get_allowed_paths(input)
-            input_hostpath_violation(allowedPaths, volume)
+            not input_hostpath_allowed(allowedPaths, volume)
             msg := sprintf("HostPath volume %v is not allowed, pod: %v. Allowed path: %v", [volume, input.review.object.metadata.name, allowedPaths])
         }
-
-        input_hostpath_violation(allowedPaths, volume) {
-            # An empty list means all host paths are blocked
-            allowedPaths == []
-        }
-        input_hostpath_violation(allowedPaths, volume) {
-            not input_hostpath_allowed(allowedPaths, volume)
+        
+        # disallowed due to mounted as writeable
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            volume := input_hostpath_volumes[_]
+            allowedPaths := get_allowed_paths(input)
+            allowedHostPath := allowedPaths[_]
+            allowedHostPath.readOnly
+            path_matches(allowedHostPath.pathPrefix, volume.hostPath.path)
+            writeable_input_volume_mounts(volume.name)
+            msg := sprintf("HostPath volume %v does not meet the readonly requirement, pod: %v. Allowed path: %v", [volume, input.review.object.metadata.name, allowedPaths])
         }
 
         get_allowed_paths(arg) = out {
@@ -71,14 +80,6 @@ spec:
         input_hostpath_allowed(allowedPaths, volume) {
             allowedHostPath := allowedPaths[_]
             path_matches(allowedHostPath.pathPrefix, volume.hostPath.path)
-            not allowedHostPath.readOnly == true
-        }
-
-        input_hostpath_allowed(allowedPaths, volume) {
-            allowedHostPath := allowedPaths[_]
-            path_matches(allowedHostPath.pathPrefix, volume.hostPath.path)
-            allowedHostPath.readOnly
-            not writeable_input_volume_mounts(volume.name)
         }
 
         writeable_input_volume_mounts(volume_name) {

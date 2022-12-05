@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pass-exclusion # bypassed by the container exclusion parameter
+  labels:
+    app: scenario-container-no-privilege-escalation
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: image-exclude
+    image: exception.azurecr.io/exception:1.0.0 # bypassed by the image exclusion parameter
+    securityContext:
+      allowPrivilegeEscalation: true
+  initContainers:
+  - name: container-exclude # bypassed by the container exclusion parameter
+    image: mcr.microsoft.com/aks/policy/example:v1.0.0
+    securityContext:
+      allowPrivilegeEscalation: true

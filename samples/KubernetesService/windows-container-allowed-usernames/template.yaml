@@ -1,12 +1,12 @@
 apiVersion: templates.gatekeeper.sh/v1beta1
 kind: ConstraintTemplate
 metadata:
-  name: k8sazurewindowscontainerallowedusernamesv1
+  name: k8sazurev1windowscontainerallowedusernames
 spec:
   crd:
     spec:
       names:
-        kind: K8sAzureWindowsContainerAllowedUsernamesV1
+        kind: K8sAzureV1WindowsContainerAllowedUsernames
       validation:
         # Schema for the `parameters` field
         openAPIV3Schema:
@@ -29,7 +29,7 @@ spec:
   targets:
     - target: admission.k8s.gatekeeper.sh
       rego: |
-        package k8sazurewindowscontainerallowedusernamesv1
+        package k8sazurev1windowscontainerallowedusernames
 
         import data.lib.exclude_container_image.is_excluded
 
@@ -70,11 +70,30 @@ spec:
             out = username
         }
 
-        # returns runAsUserName as ContainerUser if NOT set for both container and pod
+        # for nano based images, returns runAsUserName as ContainerUser if NOT set for both container and pod
         get_username(c) = out {
             not c.securityContext.windowsOptions.runAsUserName
             not input.review.object.spec.securityContext.windowsOptions.runAsUserName
+            nano_server_image(c)
             out = "ContainerUser"
+        }
+
+        # for other images, returns runAsUserName as ContainerAdministrator if NOT set for both container and pod
+        get_username(c) = out {
+            not c.securityContext.windowsOptions.runAsUserName
+            not input.review.object.spec.securityContext.windowsOptions.runAsUserName
+            not nano_server_image(c)
+            out = "ContainerAdministrator"
+        }
+
+        nano_server_image(c) {
+          not is_null(c.image)
+          regex.match("mcr.microsoft.com/windows/nanoserver:*", c.image)
+        }
+
+        nano_server_image(c) {
+          not is_null(c.image)
+          regex.match("mcr.microsoft.com/windows/nanoserver", c.image)
         }
 
         isWindowsPod {

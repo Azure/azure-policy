@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: test-account
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pass-exclusion
+  labels:
+    app: scenario-block-automount-token
+spec:
+  serviceAccountName: test-account
+  automountServiceAccountToken: true
+  containers:
+  - name: image-exclude
+    image: exception.azurecr.io/exception:1.0.0 # bypassed by the image exclusion parameter
+    resources:
+      limits:
+        cpu: "100m"
+        memory: "30Mi"
