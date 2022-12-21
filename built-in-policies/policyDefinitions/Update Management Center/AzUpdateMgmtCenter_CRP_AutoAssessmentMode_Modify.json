@@ -5,10 +5,11 @@
     "mode": "Indexed",
     "description": "Configure auto-assessment (every 24 hours) for OS updates on native Azure virtual machines. You can control the scope of assignment according to machine subscription, resource group, location or tag. Learn more about this for Windows: https://aka.ms/computevm-windowspatchassessmentmode, for Linux: https://aka.ms/computevm-linuxpatchassessmentmode.",
     "metadata": {
-      "version": "3.0.0-preview",
+      "version": "4.0.0-preview",
       "category": "Update Management Center",
       "preview": true
     },
+    "version": "4.0.0-preview",
     "parameters": {
       "assessmentMode": {
         "type": "String",
@@ -84,7 +85,7 @@
             ]
           },
           {
-            "field": "[if(equals(parameters('osType'), 'Windows'), 'Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.assessmentMode', 'Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.assessmentMode')]",
+            "field": "[if(equals(tolower(parameters('osType')), 'windows'), 'Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.assessmentMode', 'Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.assessmentMode')]",
             "notEquals": "[parameters('assessmentMode')]"
           },
           {
@@ -424,13 +425,13 @@
           "conflictEffect": "audit",
           "operations": [
             {
-              "condition": "[equals(parameters('osType'), 'Windows')]",
+              "condition": "[equals(tolower(parameters('osType')), 'windows')]",
               "operation": "addOrReplace",
               "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.assessmentMode",
               "value": "[parameters('assessmentMode')]"
             },
             {
-              "condition": "[equals(parameters('osType'), 'Linux')]",
+              "condition": "[equals(tolower(parameters('osType')), 'linux')]",
               "operation": "addOrReplace",
               "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.assessmentMode",
               "value": "[parameters('assessmentMode')]"

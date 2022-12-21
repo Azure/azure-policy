@@ -1,0 +1,122 @@
+{
+  "properties": {
+    "displayName": "Azure Kubernetes Clusters should enable Container Storage Interface(CSI)",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "The Container Storage Interface (CSI) is a standard for exposing arbitrary block and file storage systems to containerized workloads on Azure Kubernetes Service. To learn more, https://aka.ms/aks-csi-driver",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy",
+          "portalReview": true
+        }
+      },
+      "enableDiskCSI": {
+        "type": "String",
+        "defaultValue": "true",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Enable Disk CSI Monitoring",
+          "description": "Enable monitoring of disk CSI driver. 'false' will skip monitoring",
+          "portalReview": true
+        }
+      },
+      "enableFileCSI": {
+        "type": "String",
+        "defaultValue": "true",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Enable File CSI Monitoring",
+          "description": "Enable monitoring of file CSI driver. 'false' will skip monitoring",
+          "portalReview": true
+        }
+      },
+      "enableSnapshotCSI": {
+        "type": "String",
+        "defaultValue": "true",
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Enable Snapshot CSI Monitoring",
+          "description": "Enable monitoring of snapshot CSI driver. 'false' will skip monitoring",
+          "portalReview": true
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/storageProfile.diskCSIDriver.enabled",
+                    "equals": false
+                  },
+                  {
+                    "value": "[parameters('enableDiskCSI')]",
+                    "equals": "true"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/storageProfile.fileCSIDriver.enabled",
+                    "equals": false
+                  },
+                  {
+                    "value": "[parameters('enableFileCSI')]",
+                    "equals": "true"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/storageProfile.snapshotController.enabled",
+                    "equals": false
+                  },
+                  {
+                    "value": "[parameters('enableSnapshotCSI')]",
+                    "equals": "true"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c5110b6e-5272-4989-9935-59ad06fdf341",
+  "name": "c5110b6e-5272-4989-9935-59ad06fdf341"
+}
