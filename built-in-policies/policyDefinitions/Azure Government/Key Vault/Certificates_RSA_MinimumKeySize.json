@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "Certificates using RSA cryptography should have the specified minimum key size",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Manage your organizational compliance requirements by specifying a minimum key size for RSA certificates stored in your key vault.",
+    "metadata": {
+      "version": "2.1.0",
+      "category": "Key Vault"
+    },
+    "version": "2.1.0",
+    "parameters": {
+      "minimumRSAKeySize": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Minimum RSA key size",
+          "description": "The minimum key size for RSA certificates."
+        },
+        "allowedValues": [
+          2048,
+          3072,
+          4096
+        ]
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keyType",
+            "in": [
+              "RSA",
+              "RSA-HSM"
+            ]
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/keyProperties.keySize",
+            "less": "[parameters('minimumRSAKeySize')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cee51871-e572-4576-855c-047c820360f0",
+  "name": "cee51871-e572-4576-855c-047c820360f0"
+}

@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Keys should have the specified maximum validity period",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Manage your organizational compliance requirements by specifying the maximum amount of time in days that a key can be valid within your key vault.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Key Vault"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "maximumValidityInDays": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "The maximum validity period in days",
+          "description": "Specify the maximum number of days a key can be valid for. Keys should be ephemeral. Using a key with a long validity period is not recommended."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/keys"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault.Data/vaults/keys/attributes.expiresOn",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.KeyVault.Data/vaults/keys/attributes.expiresOn",
+                "greater": "[addDays(field('Microsoft.KeyVault.Data/vaults/keys/attributes.createdOn'), parameters('maximumValidityInDays'))]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/49a22571-d204-4c91-a7b6-09b1a586fbc9",
+  "name": "49a22571-d204-4c91-a7b6-09b1a586fbc9"
+}

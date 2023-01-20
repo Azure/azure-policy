@@ -2,13 +2,13 @@
   "properties": {
     "displayName": "Service Bus Namespaces should disable public network access",
     "policyType": "BuiltIn",
-    "mode": "Indexed",
+    "mode": "All",
     "description": "Azure Service Bus should have public network access disabled. Disabling public network access improves security by ensuring that the resource isn't exposed on the public internet. You can limit exposure of your resources by creating private endpoints instead. Learn more at: https://docs.microsoft.com/azure/service-bus-messaging/private-link-service",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Service Bus"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -26,14 +26,30 @@
     },
     "policyRule": {
       "if": {
-        "allOf": [
+        "anyOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.ServiceBus/namespaces/networkRuleSets"
+            "allOf": [
+              {
+                "equals": "Microsoft.ServiceBus/namespaces/networkRuleSets",
+                "field": "type"
+              },
+              {
+                "notEquals": "Disabled",
+                "field": "Microsoft.ServiceBus/namespaces/networkRuleSets/publicNetworkAccess"
+              }
+            ]
           },
           {
-            "field": "Microsoft.ServiceBus/namespaces/networkRuleSets/publicNetworkAccess",
-            "notEquals": "Disabled"
+            "allOf": [
+              {
+                "equals": "Microsoft.ServiceBus/namespaces",
+                "field": "type"
+              },
+              {
+                "notEquals": "Disabled",
+                "field": "Microsoft.ServiceBus/namespaces/publicNetworkAccess"
+              }
+            ]
           }
         ]
       },

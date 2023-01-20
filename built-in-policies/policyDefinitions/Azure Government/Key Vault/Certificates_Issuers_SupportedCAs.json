@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Certificates should be issued by the specified integrated certificate authority",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Manage your organizational compliance requirements by specifying the Azure integrated certificate authorities that can issue certificates in your key vault such as Digicert or GlobalSign.",
+    "metadata": {
+      "version": "2.1.0",
+      "category": "Key Vault"
+    },
+    "version": "2.1.0",
+    "parameters": {
+      "allowedCAs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Azure Key Vault Supported CAs",
+          "description": "The list of allowed certificate authorities supported by Azure Key Vault."
+        },
+        "allowedValues": [
+          "DigiCert",
+          "GlobalSign"
+        ],
+        "defaultValue": [
+          "DigiCert",
+          "GlobalSign"
+        ]
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/issuer.name",
+            "notIn": "[parameters('allowedCAs')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8e826246-c976-48f6-b03e-619bb92b3d82",
+  "name": "8e826246-c976-48f6-b03e-619bb92b3d82"
+}

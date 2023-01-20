@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "Keys using elliptic curve cryptography should have the specified curve names",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Keys backed by elliptic curve cryptography can have different curve names. Some applications are only compatible with specific elliptic curve keys. Enforce the types of elliptic curve keys that are allowed to be created in your environment.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Key Vault"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "allowedECNames": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed elliptic curve names",
+          "description": "The list of allowed curve names for elliptic curve cryptography certificates."
+        },
+        "allowedValues": [
+          "P-256",
+          "P-256K",
+          "P-384",
+          "P-521"
+        ],
+        "defaultValue": [
+          "P-256",
+          "P-256K",
+          "P-384",
+          "P-521"
+        ]
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/keys"
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/keys/keyType",
+            "in": [
+              "EC",
+              "EC-HSM"
+            ]
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/keys/ellipticCurveName",
+            "notIn": "[parameters('allowedECNames')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ff25f3c8-b739-4538-9d07-3d6d25cfb255",
+  "name": "ff25f3c8-b739-4538-9d07-3d6d25cfb255"
+}
