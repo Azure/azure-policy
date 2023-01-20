@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Certificates should not expire within the specified number of days",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Manage certificates that will expire within a specified number of days to ensure your organization has sufficient time to rotate the certificate prior to expiration.",
+    "metadata": {
+      "version": "2.1.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "version": "2.1.0-preview",
+    "parameters": {
+      "daysToExpire": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Days to expire",
+          "description": "The number of days for a certificate to expire."
+        }
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
+          },
+          {
+            "field": "Microsoft.KeyVault.Data/vaults/certificates/attributes.expiresOn",
+            "lessOrEquals": "[addDays(utcNow(), parameters('daysToExpire'))]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f772fb64-8e40-40ad-87bc-7706e1949427",
+  "name": "f772fb64-8e40-40ad-87bc-7706e1949427"
+}

@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Clusters that are part of Azure Databricks Workspaces should disable public IP",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Clusters part of Azure Databricks Workspaces should have public IP disabled. Disabling public IP of clusters in Azure Databricks Workspaces improves security by ensuring that the resource isn't exposed on the public internet. Learn more at: https://learn.microsoft.com/azure/databricks/security/secure-cluster-connectivity",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Databricks"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Databricks/workspaces"
+          },
+          {
+            "field": "Microsoft.DataBricks/workspaces/parameters.enableNoPublicIp.value",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/51c1490f-3319-459c-bbbc-7f391bbed753",
+  "name": "51c1490f-3319-459c-bbbc-7f391bbed753"
+}

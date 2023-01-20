@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Keys should not be active for longer than the specified number of days",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Specify the number of days that a key should be active. Keys that are used for an extended period of time increase the probability that an attacker could compromise the key. As a good security practice, make sure that your keys have not been active longer than two years.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Key Vault"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "maximumValidityInDays": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "The maximum validity period in days",
+          "description": "Specify the maximum number of days a key can be valid for after activation."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/keys"
+          },
+          {
+            "value": "[utcNow()]",
+            "greater": "[addDays(if(empty(field('Microsoft.KeyVault.Data/vaults/keys/attributes.notBefore')), field('Microsoft.KeyVault.Data/vaults/keys/attributes.createdOn'), field('Microsoft.KeyVault.Data/vaults/keys/attributes.notBefore')), parameters('maximumValidityInDays'))]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c26e4b24-cf98-4c67-b48b-5a25c4c69eb9",
+  "name": "c26e4b24-cf98-4c67-b48b-5a25c4c69eb9"
+}
