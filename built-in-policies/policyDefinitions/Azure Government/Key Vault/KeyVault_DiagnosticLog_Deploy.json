@@ -5,11 +5,23 @@
     "mode": "Indexed",
     "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Event Hub when any Key Vault which is missing this diagnostic settings is created or updated.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "2.1.0",
       "category": "Key Vault"
     },
-    "version": "2.0.0",
+    "version": "2.1.0",
     "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
       "profileName": {
         "type": "String",
         "defaultValue": "setbypolicy",
@@ -83,19 +95,31 @@
         ]
       },
       "then": {
-        "effect": "deployIfNotExists",
+        "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Insights/diagnosticSettings",
           "name": "[parameters('profileName')]",
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
-                "equals": "[parameters('logsEnabled')]"
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                    "equals": "[parameters('logsEnabled')]"
+                  }
+                },
+                "greaterOrEquals": 1
               },
               {
-                "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
-                "equals": "[parameters('metricsEnabled')]"
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/metrics[*]",
+                  "where": {
+                    "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
+                    "equals": "[parameters('metricsEnabled')]"
+                  }
+                },
+                "greaterOrEquals": 1
               }
             ]
           },
@@ -150,6 +174,10 @@
                       "logs": [
                         {
                           "category": "AuditEvent",
+                          "enabled": "[parameters('logsEnabled')]"
+                        },
+                        {
+                          "category": "AzurePolicyEvaluationDetails",
                           "enabled": "[parameters('logsEnabled')]"
                         }
                       ]
