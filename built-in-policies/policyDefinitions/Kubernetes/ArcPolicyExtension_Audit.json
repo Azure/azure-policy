@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "The Azure Policy extension for Azure Arc provides at-scale enforcements and safeguards on your Arc enabled Kubernetes clusters in a centralized, consistent manner. Learn more at https://aka.ms/akspolicydoc.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -26,16 +26,33 @@
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.Kubernetes/connectedClusters"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kubernetes/connectedClusters"
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/distribution",
+            "notEquals": "aks"
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.KubernetesConfiguration/extensions",
+          "evaluationDelay": "AfterProvisioning",
           "existenceCondition": {
-            "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
-            "equals": "microsoft.policyinsights"
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
+                "equals": "microsoft.policyinsights"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
           }
         }
       }
