@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "displayName": "[Preview]: Automanage Configuration Profile Assignment is Conformant",
+    "description": "This policy audits the Conformance status of a Automanage managed resource.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Automanage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.HybridCompute/machines",
+          "Microsoft.AzureStackHci/clusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Automanage/configurationProfileAssignments",
+          "existenceCondition": {
+            "field": "Microsoft.Automanage/configurationProfileAssignments/status",
+            "in": [
+              "Conformant",
+              "ConformantCorrected"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
