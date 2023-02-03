@@ -1,0 +1,244 @@
+{
+  "properties": {
+    "displayName": "Configure CosmosDB accounts to use Private Endpoint with Private DNS zone registration",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Private endpoints connect your virtual network to Azure services without a public IP address at the source or destination. By mapping private endpoints to your CosmosDB account, you can reduce data leakage risks. To access the private endpoint(s) interfaces from a registered server, you need to configure your DNS to resolve the correct names to your private endpoint's private IP addresses. This policy creates the requisite Azure Private DNS Zone A records for the interfaces of your private endpoint(s).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cosmos DB"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "privateEndpointSubnetId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "privateEndpointSubnetId",
+          "description": "A subnet in the location",
+          "strongType": "Microsoft.Network/virtualNetworks/subnets"
+        }
+      },
+      "privateEndpointGroupId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "privateEndpointGroupId",
+          "description": "A group Id for the private endpoint"
+        },
+        "allowedValues": [
+          "SQL",
+          "Gremlin",
+          "MongoDB"
+        ]
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "privateDnsZoneId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private DNS Zone id",
+          "description": "The resource id that private endpoint DNS configuration should register to",
+          "strongType": "Microsoft.Network/privateDnsZones"
+        }
+      },
+      "defaultExperience": {
+        "type": "String",
+        "metadata": {
+          "displayName": "defaultExperience",
+          "description": null
+        },
+        "allowedValues": [
+          "Core (SQL)",
+          "Gremlin (graph)",
+          "Azure Cosmos DB for MongoDB API"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "AllOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "field": "[concat('tags[', 'defaultExperience', ']')]",
+            "equals": "[parameters('defaultExperience')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/5bd9cd88-fe45-4216-938b-f97437e15450",
+            "/providers/Microsoft.Authorization/roleDefinitions/b12aa53e-6015-4669-85d0-8515ebb3ae7f",
+            "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serviceId": {
+                  "value": "[field('id')]"
+                },
+                "privateEndpointSubnetId": {
+                  "value": "[parameters('privateEndpointSubnetId')]"
+                },
+                "privateEndpointGroupId": {
+                  "value": "[parameters('privateEndpointGroupId')]"
+                },
+                "privateDnsZoneId": {
+                  "value": "[parameters('privateDnsZoneId')]"
+                },
+                "name": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serviceId": {
+                    "type": "String"
+                  },
+                  "privateEndpointSubnetId": {
+                    "type": "String"
+                  },
+                  "privateEndpointGroupId": {
+                    "type": "String"
+                  },
+                  "privateDnsZoneId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "privateEndpointName": "[concat('pe-',substring(parameters('name'),0,min(length(parameters('name')),50)),'-',uniquestring(deployment().name))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[variables('privateEndpointName')]",
+                    "apiVersion": "2020-06-01",
+                    "properties": {
+                      "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "serviceId": {
+                            "type": "string"
+                          },
+                          "privateEndpointSubnetId": {
+                            "type": "string"
+                          },
+                          "privateEndpointGroupId": {
+                            "type": "String"
+                          },
+                          "subnetLocation": {
+                            "type": "string"
+                          },
+                          "privateDnsZoneId": {
+                            "type": "string"
+                          }
+                        },
+                        "variables": {
+                          "privateEndpointName": "[deployment().name]"
+                        },
+                        "resources": [
+                          {
+                            "name": "[variables('privateEndpointName')]",
+                            "type": "Microsoft.Network/privateEndpoints",
+                            "apiVersion": "2020-07-01",
+                            "location": "[parameters('subnetLocation')]",
+                            "tags": {},
+                            "properties": {
+                              "subnet": {
+                                "id": "[parameters('privateEndpointSubnetId')]"
+                              },
+                              "privateLinkServiceConnections": [
+                                {
+                                  "name": "[variables('privateEndpointName')]",
+                                  "properties": {
+                                    "privateLinkServiceId": "[parameters('serviceId')]",
+                                    "groupIds": [
+                                      "[parameters('privateEndpointGroupId')]"
+                                    ],
+                                    "requestMessage": "autoapprove"
+                                  }
+                                }
+                              ],
+                              "manualPrivateLinkServiceConnections": []
+                            }
+                          },
+                          {
+                            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                            "apiVersion": "2021-03-01",
+                            "location": "[parameters('subnetLocation')]",
+                            "name": "[concat(variables('privateEndpointName'), '/deployedByPolicy')]",
+                            "dependsOn": [
+                              "[resourceId('Microsoft.Network/privateEndpoints', variables('privateEndpointName'))]"
+                            ],
+                            "properties": {
+                              "privateDnsZoneConfigs": [
+                                {
+                                  "name": "[concat('sites','-privateDnsZone')]",
+                                  "properties": {
+                                    "privateDnsZoneId": "[parameters('privateDnsZoneId')]"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "parameters": {
+                        "serviceId": {
+                          "value": "[parameters('serviceId')]"
+                        },
+                        "privateEndpointSubnetId": {
+                          "value": "[parameters('privateEndpointSubnetId')]"
+                        },
+                        "privateEndpointGroupId": {
+                          "value": "[parameters('privateEndpointGroupId')]"
+                        },
+                        "subnetLocation": {
+                          "value": "[reference(first(take(split(parameters('privateEndpointSubnetId'),'/subnets'),1)),'2020-07-01','Full').location]"
+                        },
+                        "privateDnsZoneId": {
+                          "value": "[parameters('privateDnsZoneId')]"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Management/managementGroups/7908349a-dab7-4007-b4c2-0f2d238a8e87/providers/Microsoft.Authorization/policyDefinitions/dd08fcd0-f218-4372-b6f1-d9bad54e9424",
+  "name": "dd08fcd0-f218-4372-b6f1-d9bad54e9424"
+}
