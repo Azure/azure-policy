@@ -10,7 +10,7 @@ To contribute, please submit your policies to our Community repo! (https://githu
 
 ## Reporting Samples Issues
 
-If you discover a problem with any of the samples published here that isn't already reported in [**Issues**](https://github.com/Azure/azure-policy/issues), open a [**New issue**](https://github.com/Azure/azure-policy/issues/new/choose).
+Previously, this repository was the official channel to open issue for sample built-in definitions. Since this repo is a direct representation of built-in definitons published to Azure, support for addressing built-in definition issues is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe a definition has a bug or error.
 
 # Azure Policy Known Issues
 
@@ -27,8 +27,6 @@ Check here for a current list of [**known issues**](#known-issues) for Azure Pol
 - [Export and manage Azure Policy resources as code with GitHub](https://docs.microsoft.com/azure/governance/policy/tutorials/policy-as-code-github)
 - [Definition structure](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure)
 - [Understand Policy effects](https://docs.microsoft.com/azure/governance/policy/concepts/effects)
-- [Audit VMs with Guest Configuration](https://docs.microsoft.com/azure/governance/policy/concepts/guest-configuration)
-- [Programmatically create policies](https://docs.microsoft.com/azure/governance/policy/how-to/programmatically-create)
 - [Get compliance data](https://docs.microsoft.com/azure/governance/policy/how-to/get-compliance-data)
 - [Remediate non-compliant resources](https://docs.microsoft.com/azure/governance/policy/how-to/remediate-resources)
 
@@ -78,10 +76,6 @@ If your questions are more in-depth or involve information that is not public, o
 ### Documentation Corrections
 
 To report issues in the Azure Policy online documentation, look for a feedback area at the bottom of the page. If you don't see a place to enter feedback, you can also directly open a new issue at the [**Microsoft Docs GitHub**](https://github.com/MicrosoftDocs/feedback/issues).
-
-### New built-in Policy Proposals
-
-If you have ideas for new built-in policies you want to suggest to Microsoft, you can submit them to [**Ideas**](https://feedback.azure.com/d365community/forum/675ae472-f324-ec11-b6e6-000d3a4f0da0) with Category: "Azure Policy". These suggestions are actively reviewed and prioritized for implementation.
 
 ### Other Support for Azure Policy
 
@@ -221,6 +215,8 @@ All Databricks resources bypass policy enforcement at creation time. Databricks 
    - For example, `Microsoft.Resources/deployments` and `Microsoft.Resources/templateSpecs` are not evaluated by policy.
 - Microsoft.Billing/*
 - Microsoft.Capacity/reservationOrders/*
+- Microsoft.Help/*
+- Microsoft.Diagnostics/*
 
 ### Resource types that exceed current enforcement and compliance scale
 
