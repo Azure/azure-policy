@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled Windows/Linux Server, the latter should have SQL Server extension installed",
     "metadata": {
-      "version": "3.1.0",
+      "version": "3.2.0",
       "category": "SQL"
     },
-    "version": "3.1.0",
+    "version": "3.2.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -21,6 +21,19 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "licenseType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "License type",
+          "description": "Specify the SQL Server license type you are using on this machine."
+        },
+        "allowedValues": [
+          "Paid",
+          "PAYG",
+          "LicenseOnly"
+        ],
+        "defaultValue": "Paid"
       }
     },
     "policyRule": {
@@ -33,6 +46,14 @@
           {
             "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
             "equals": "true"
+          },
+          {
+            "value": "[parameters('licenseType')]",
+            "in": [
+              "PAYG",
+              "Paid",
+              "LicenseOnly"
+            ]
           }
         ]
       },
@@ -86,6 +107,9 @@
                   },
                   "agentName": {
                     "type": "string"
+                  },
+                  "licenseType": {
+                    "type": "string"
                   }
                 },
                 "variables": {
@@ -106,7 +130,8 @@
                         "SqlManagement": {
                           "IsEnabled": true
                         },
-                        "ExcludedInstances": []
+                        "ExcludedInstances": [],
+                        "LicenseType": "[parameters('licenseType')]"
                       }
                     }
                   }
@@ -127,6 +152,9 @@
                 },
                 "agentName": {
                   "value": "[if(startsWith(field('Microsoft.HybridCompute/machines/osName'),'windows'), 'WindowsAgent.SqlServer', 'LinuxAgent.SqlServer')]"
+                },
+                "licenseType": {
+                  "value": "[parameters('licenseType')]"
                 }
               }
             }

@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Azure Virtual Desktop hostpools should disable public network access only on session hosts",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access for your Azure Virtual Desktop hostpool session hosts, but allowing public access for end users improves security by limiting exposure to the public internet. Learn more at: https://aka.ms/avdprivatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Desktop Virtualization"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DesktopVirtualization/hostpools"
+          },
+          {
+            "field": "Microsoft.DesktopVirtualization/hostPools/publicNetworkAccess",
+            "notEquals": "EnabledForClientsOnly"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a22065a3-3b04-46ff-b84c-2d30e5c300d0",
+  "name": "a22065a3-3b04-46ff-b84c-2d30e5c300d0"
+}

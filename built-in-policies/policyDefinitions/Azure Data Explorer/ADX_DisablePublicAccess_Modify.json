@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Data Explorer to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling the public network access property shuts down public connectivity such that Azure Data Explorer can only be accessed from a private endpoint. This configuration disables the public network access for all Azure Data Explorer clusters .",
+    "metadata": {
+      "category": "Azure Data Explorer",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kusto/clusters"
+          },
+          {
+            "field": "Microsoft.Kusto/clusters/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/6d8ee4ec-f05a-4a1d-8b00-a9b17e38b437"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Kusto/clusters/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7b32f193-cb28-4e15-9a98-b9556db0bafa",
+  "name": "7b32f193-cb28-4e15-9a98-b9556db0bafa"
+}
