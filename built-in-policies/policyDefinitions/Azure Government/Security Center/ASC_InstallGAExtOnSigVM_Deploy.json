@@ -1,15 +1,15 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure VMSS created with Shared Image Gallery images to install the Guest Attestation extension",
+    "displayName": "[Preview]: Configure VMs created with Shared Image Gallery images to install the Guest Attestation extension",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure VMSS created with Shared Image Gallery images to automatically install the Guest Attestation extension to allow Azure Security Center to proactively attest and monitor the boot integrity. Boot integrity is attested via Remote Attestation.",
+    "description": "Configure virtual machines created with Shared Image Gallery images to automatically install the Guest Attestation extension to allow Azure Security Center to proactively attest and monitor the boot integrity. Boot integrity is attested via Remote Attestation.",
     "metadata": {
       "category": "Security Center",
-      "version": "2.1.0-preview",
+      "version": "2.0.0-preview",
       "preview": true
     },
-    "version": "2.1.0-preview",
+    "version": "2.0.0-preview",
     "parameters": {
       "effect": {
         "type": "string",
@@ -37,22 +37,22 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+            "equals": "Microsoft.Compute/virtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.securityType",
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.securityType",
             "equals": "TrustedLaunch"
           },
           {
-            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings",
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings",
             "exists": "true"
           },
           {
-            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled",
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings.vTpmEnabled",
             "equals": "true"
           },
           {
-            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled",
+            "field": "Microsoft.Compute/virtualMachines/securityProfile.uefiSettings.secureBootEnabled",
             "equals": "true"
           },
           {
@@ -64,19 +64,26 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
           "existenceCondition": {
             "allOf": [
               {
-                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
                 "in": [
                   "Microsoft.Azure.Security.LinuxAttestation",
                   "Microsoft.Azure.Security.WindowsAttestation"
                 ]
               },
               {
-                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
                 "equals": "GuestAttestation"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                "in": [
+                  "Succeeded",
+                  "Provisioning succeeded"
+                ]
               }
             ]
           },
@@ -128,7 +135,7 @@
                 },
                 "resources": [
                   {
-                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
                     "apiVersion": "2018-10-01",
                     "name": "[concat(parameters('vmName'), '/', variables('extensionName'))]",
                     "location": "[parameters('location')]",
@@ -161,6 +168,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/009259b0-12e8-42c9-94e7-7af86aa58d13",
-  "name": "009259b0-12e8-42c9-94e7-7af86aa58d13"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/496e010e-fa91-4c00-be4b-92b481f67b58",
+  "name": "496e010e-fa91-4c00-be4b-92b481f67b58"
 }
