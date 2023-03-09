@@ -1,0 +1,126 @@
+{
+  "properties": {
+    "displayName": "Azure Arc-enabled Kubernetes clusters should have the Strimzi Kafka extension installed",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Strimzi Kafka extension provides the operators to install Kafka for building real-time data pipelines and streaming applications with security and observability capabilities. Learn more here: https://aka.ms/arc-strimzikafka-doc.",
+    "metadata": {
+      "category": "Kubernetes",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "ExtensionVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Extension Version",
+          "description": "Provide the extension version of Arc enabled Strimzi Kafka. The extension version 0.1.0 supports Strimzi version 0.33.0 and kafka version 3.3.2. Refer to https://aka.ms/arc-strimzikafka-doc for available releases."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kubernetes/connectedClusters"
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/connectivityStatus",
+            "equals": "connected"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.KubernetesConfiguration/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
+                "equals": "microsoft.streamingforstrimzikafka"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "ExtensionVersion": {
+                  "value": "[parameters('ExtensionVersion')]"
+                },
+                "clusterRegion": {
+                  "value": "[field('location')]"
+                },
+                "clusterResourceId": {
+                  "value": "[field('id')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "ExtensionVersion": {
+                    "type": "string"
+                  },
+                  "clusterRegion": {
+                    "type": "string"
+                  },
+                  "clusterResourceId": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.KubernetesConfiguration/extensions",
+                    "apiVersion": "2021-09-01",
+                    "name": "strimzikafka",
+                    "location": "[parameters('clusterRegion')]",
+                    "version": "[parameters('ExtensionVersion')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "properties": {
+                      "extensionType": "microsoft.streamingforstrimzikafka",
+                      "autoUpgradeMinorVersion": true,
+                      "releaseTrain": "Stable",
+                      "scope": {
+                        "Cluster": {
+                          "releaseNamespace": "streamingforstrimzikafka"
+                        }
+                      }
+                    },
+                    "scope": "[concat('Microsoft.Kubernetes/connectedClusters/', split(parameters('clusterResourceId'),'/')[8])]"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a8e653d9-b5d4-48a0-afe6-14d881f9ee9a",
+  "name": "a8e653d9-b5d4-48a0-afe6-14d881f9ee9a"
+}
