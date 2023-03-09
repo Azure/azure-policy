@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled Windows/Linux Server, the latter should have SQL Server extension installed",
     "metadata": {
-      "version": "3.2.0",
+      "version": "3.3.0",
       "category": "SQL"
     },
-    "version": "3.2.0",
+    "version": "3.3.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -34,6 +34,14 @@
           "LicenseOnly"
         ],
         "defaultValue": "Paid"
+      },
+      "excludedSqlInstances": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded SQL Instance names",
+          "description": "Specify the names of SQL Server instances that you want to exclude from onboarding to Azure Arc."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -46,14 +54,6 @@
           {
             "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
             "equals": "true"
-          },
-          {
-            "value": "[parameters('licenseType')]",
-            "in": [
-              "PAYG",
-              "Paid",
-              "LicenseOnly"
-            ]
           }
         ]
       },
@@ -110,6 +110,9 @@
                   },
                   "licenseType": {
                     "type": "string"
+                  },
+                  "excludedSqlInstances": {
+                    "type": "array"
                   }
                 },
                 "variables": {
@@ -130,7 +133,7 @@
                         "SqlManagement": {
                           "IsEnabled": true
                         },
-                        "ExcludedInstances": [],
+                        "ExcludedSqlInstances": "[parameters('excludedSqlInstances')]",
                         "LicenseType": "[parameters('licenseType')]"
                       }
                     }
@@ -155,6 +158,9 @@
                 },
                 "licenseType": {
                   "value": "[parameters('licenseType')]"
+                },
+                "excludedSqlInstances": {
+                  "value": "[parameters('excludedSqlInstances')]"
                 }
               }
             }

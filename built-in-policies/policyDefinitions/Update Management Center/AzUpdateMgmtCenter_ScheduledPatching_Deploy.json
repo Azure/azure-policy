@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "You can use update management center (private preview) in Azure to save recurring deployment schedules to install operating system updates for your Windows Server and Linux machines in Azure, in on-premises environments, and in other cloud environments connected using Azure Arc-enabled servers. This policy will also change the patch mode for the Azure Virtual Machine to 'AutomaticByPlatform'. See more: https://aka.ms/umc-scheduled-patching",
     "metadata": {
-      "version": "3.1.0-preview",
+      "version": "3.2.0-preview",
       "category": "Update Management Center",
       "preview": true
     },
-    "version": "3.1.0-preview",
+    "version": "3.2.0-preview",
     "parameters": {
       "maintenanceConfigurationResourceId": {
         "type": "String",
@@ -123,8 +123,51 @@
                     ]
                   },
                   {
-                    "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-                    "in": "[parameters('operatingSystemTypes')]"
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "in": "[parameters('operatingSystemTypes')]"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "value": "Linux",
+                            "in": "[parameters('operatingSystemTypes')]"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "sles-12-sp5",
+                              "sles-15-sp2",
+                              "centos-lvm",
+                              "Centos",
+                              "RHEL-RAW",
+                              "RHEL",
+                              "aks",
+                              "cbl-mariner",
+                              "0001-com-ubuntu-pro-focal",
+                              "0001-com-ubuntu-server-focal",
+                              "0001-com-ubuntu-pro-bionic",
+                              "UbuntuServer"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "value": "Windows",
+                            "in": "[parameters('operatingSystemTypes')]"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "WindowsServer"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
