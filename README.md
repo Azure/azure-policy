@@ -187,6 +187,8 @@ Since custom policies use aliases directly, it is usually not possible to update
 
 - Microsoft.Sql/servers/databases/requestedServiceObjectiveName.v2
 
+To enforce around SQL databases transparentDataEncryption, please use both the legacy alias (api versions between 2014-04-01 and 2022-05-01-preview) Microsoft.Sql/transparentDataEncryption.status and the new alias (post api version 2022-05-01-preview) Microsoft.Sql/servers/databases/transparentDataEncryption/state.  
+
 ### Optional or auto-generated resource property that bypasses policy evaluation
 
 In a few instances, when creating a resource from Azure Portal, the property is not set in the PUT request payload. When the request reaches the resource provider, the resource provider generates the property and sets the value. Because the property is not in the request payload, the policy cannot evaluate the property. Known resource fields that exhibit this class of behavior:
