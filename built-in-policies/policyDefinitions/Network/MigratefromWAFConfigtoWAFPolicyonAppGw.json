@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "Migrate WAF from WAF Config to WAF Policy on Application Gateway",
+    "policyType": "BuiltIn",
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "description": "If you have WAF Config instead of WAF Policy, then you may want to move to the new WAF Policy. Going forward, the firewall policy will support WAF policy settings, managed rulesets, exclusions, and disabled rule-groups.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/applicationGateways"
+          },
+          {
+            "field": "Microsoft.Network/applicationGateways/sku.tier",
+            "equals": "WAF_v2"
+          },
+          {
+            "field": "Microsoft.Network/applicationGateways/webApplicationFirewallConfiguration",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.Network/applicationGateways/firewallPolicy",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/882e19a6-996f-400e-a30f-c090887254f4",
+  "name": "882e19a6-996f-400e-a30f-c090887254f4"
+}
