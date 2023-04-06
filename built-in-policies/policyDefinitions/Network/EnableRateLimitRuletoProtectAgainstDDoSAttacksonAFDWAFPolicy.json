@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Enable Rate Limit rule to protect against DDoS attacks on Azure Front Door WAF",
+    "policyType": "BuiltIn",
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "description": "The Azure Web Application Firewall (WAF) rate limit rule for Azure Front Door controls the number of requests allowed from a particular client IP address to the application during a rate limit duration.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/customRules.rules[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/customRules.rules[*].rateLimitThreshold",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/customRules.rules[*].rateLimitDurationInMinutes",
+                    "exists": "false"
+                  }
+                ]
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e52e8487-4a97-48ac-b3e6-1c3cef45d298",
+  "name": "e52e8487-4a97-48ac-b3e6-1c3cef45d298"
+}
