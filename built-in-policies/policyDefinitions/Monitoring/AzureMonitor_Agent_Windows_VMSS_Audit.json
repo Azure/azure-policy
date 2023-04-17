@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Windows virtual machine scale sets should be monitored and secured through the deployed Azure Monitor Agent. The Azure Monitor Agent collects telemetry data from the guest OS. Virtual machine scale sets with supported OS and in supported regions are monitored for Azure Monitor Agent deployment. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "3.0.0",
+      "version": "3.1.0",
       "category": "Monitoring"
     },
-    "version": "3.0.0",
+    "version": "3.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -21,6 +21,18 @@
           "Disabled"
         ],
         "defaultValue": "AuditIfNotExists"
+      },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to Azure Monitor Agent-Supported Operating Systems",
+          "description": "If set to true, the policy will apply only to virtual machine scale sets with supported operating systems. Otherwise, the policy will apply to all virtual machine scale set resources in the assignment scope. For supported operating systems, see https://aka.ms/AMAOverview."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       },
       "listOfWindowsImageIdToInclude": {
         "type": "Array",
@@ -80,6 +92,18 @@
           },
           {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('scopeToSupportedImages')]",
+                    "equals": false
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
+                    "like": "Windows*"
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Compute/imageId",
                 "in": "[parameters('listOfWindowsImageIdToInclude')]"
