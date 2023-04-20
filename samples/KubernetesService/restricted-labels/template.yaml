@@ -1,0 +1,66 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1restrictedlabels
+  annotations:
+    description: Prevents customers from applying AKS specific labels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1RestrictedLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+            allowedUsers:
+              type: array
+              items:
+                type: string
+            allowedGroups:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1restrictedlabels
+
+        is_system_account(userinfo) {
+          user := input.parameters.allowedUsers[_]
+          userinfo.username == user
+        }
+
+        is_system_account(userinfo) {
+          userGroups := {x | x = userinfo.groups[_]}
+          allowedGroups := {x | x = input.parameters.allowedGroups[_]}
+          diffList := userGroups - allowedGroups
+          count(diffList) < count(userGroups)
+        }
+
+        to_set(arr) = newSet {
+          newSet = {x | x := arr[_]}
+        }
+
+        is_reserved_label(x, k) {
+          _ = x[k]
+        }
+
+        flatten_map(obj) = labels {
+          keyVals := [s | s = key; val = obj[key]]
+          keysStr := concat(",", keyVals)
+          labels := split(keysStr, ",")
+        }
+
+        violation[{"msg": msg}] {
+          providedLabel := flatten_map(input.review.object.metadata.labels)[_]
+          reservedLabel := to_set(input.parameters.labels)
+          is_reserved_label(reservedLabel, providedLabel)
+          not is_system_account(input.review.userInfo)
+          msg := sprintf("Label <%s> is reserved for AKS use only", [reservedLabel])
+        }
+                

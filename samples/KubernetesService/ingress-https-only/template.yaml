@@ -19,9 +19,10 @@ spec:
         ### Different from nginx ingress controller, when annotation ssl-redirect is false or missing, http will be blocked
 
         ## Nginx Ingress Controller
-        ## [ enforce-ssl-redirect=true ] + [ tls spec ]
-        ## [ enforce-ssl-redirect=true ] + [ annotation auth-tls-secret exist ]
-        ## [ enforce-ssl-redirect=true ] + [ ssl-passthrough=true ]
+        ## [ force-ssl-redirect=true ] + [ tls spec ]
+        ## [ force-ssl-redirect=true ] + [ annotation auth-tls-secret exist ]
+        ## [ force-ssl-redirect=true ] + [ ssl-passthrough=true ]
+        ## [ ssl-redirect=true ] + [ declare host for rules ] can also view as [ force-ssl-redirect=true ]
         ### If the cert provided is not valid, ssl-redirect will apply cert created by nginx and allow both http (not redirect) and https access. Thus enforce-ssl-redirect is requisite for nginx ingress controller
 
         ## Unknown Ingress Controller
@@ -68,16 +69,27 @@ spec:
         }
 
         complaint_nginx_cases(ingress) {
-          ingress.metadata.annotations["nginx.ingress.kubernetes.io/force-ssl-redirect"] == "true"
+          valid_nginx_ssl(ingress)
           count(ingress.spec.tls) > 0
         }
 
         complaint_nginx_cases(ingress) {
-          ingress.metadata.annotations["nginx.ingress.kubernetes.io/force-ssl-redirect"] == "true"
+          valid_nginx_ssl(ingress)
           ingress.metadata.annotations["nginx.ingress.kubernetes.io/auth-tls-secret"]
         }
 
         complaint_nginx_cases(ingress) {
-          ingress.metadata.annotations["nginx.ingress.kubernetes.io/force-ssl-redirect"] == "true"
+          valid_nginx_ssl(ingress)
           ingress.metadata.annotations["nginx.ingress.kubernetes.io/ssl-passthrough"] == "true"
+        }
+
+        valid_nginx_ssl(ingress) {
+          ingress.metadata.annotations["nginx.ingress.kubernetes.io/force-ssl-redirect"] == "true"
+        }
+
+        valid_nginx_ssl(ingress) {
+          not ingress.metadata.annotations["nginx.ingress.kubernetes.io/ssl-redirect"] == "false"
+          
+          with_host := [good | rule := ingress.spec.rules[_]; good := rule.host]
+          count(with_host) == count(ingress.spec.rules)
         }

@@ -1,0 +1,25 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1antiaffinityrules
+  annotations:
+    description: Requires deployments with multiple replicas have pod anti affinity rules
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1AntiAffinityRules
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1antiaffinityrules
+
+        missing_affinity(obj) {
+          not obj.affinity.podAntiAffinity
+        }
+
+        violation[{"msg": msg}] {
+          input.review.object.spec.replicas > 1
+          missing_affinity(input.review.object.spec.template.spec)
+          msg := sprintf("%s with %d replicas should have pod anti-affinity rules set to avoid disruptions due to nodes crashing", [input.review.kind.kind, input.review.object.spec.replicas])
+        }
