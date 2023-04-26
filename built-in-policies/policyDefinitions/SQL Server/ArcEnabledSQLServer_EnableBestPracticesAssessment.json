@@ -1,0 +1,378 @@
+{
+  "properties": {
+    "displayName": "Configure Arc-enabled Servers with SQL Server extension installed to enable or disable SQL best practices assessment.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable or disable SQL best practices assessment on the SQL server instances on your Arc-enabled servers to evaluate best practices. Learn more at https://aka.ms/azureArcBestPracticesAssessment.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL Server"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "laWorkspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace ID",
+          "description": "The complete resource ID of the LA workspace that needs to be linked to collect the results of the assessment.",
+          "strongType": "Microsoft.OperationalInsights/workspaces"
+        }
+      },
+      "laWorkspaceLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace location",
+          "description": "The location of the Log Analytics workspace. E.g eastus, westus.",
+          "strongType": "location"
+        }
+      },
+      "isEnabled": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enablement",
+          "description": "Should be true to enable the assessment for the selected scope, false otherwise."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines/extensions"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/extensions/type",
+            "equals": "WindowsAgent.SqlServer"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[if (empty(field('Microsoft.HybridCompute/machines/extensions/settings')), 0, length(intersection(field('Microsoft.HybridCompute/machines/extensions/settings'), createObject('LicenseType', 'PAYG'))))]",
+                "equals": 1
+              },
+              {
+                "value": "[if (empty(field('Microsoft.HybridCompute/machines/extensions/settings')), 0, length(intersection(field('Microsoft.HybridCompute/machines/extensions/settings'), createObject('LicenseType', 'Paid'))))]",
+                "equals": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
+            "/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa"
+          ],
+          "name": "[field('fullName')]",
+          "existenceCondition": {
+            "value": "[if (empty(field('Microsoft.HybridCompute/machines/extensions/settings')), false(), contains(intersection(union(field('Microsoft.HybridCompute/machines/extensions/settings'), createObject('AssessmentSettings', createObject('Enable', parameters('isEnabled')))), field('Microsoft.HybridCompute/machines/extensions/settings')), 'AssessmentSettings')) ]",
+            "equals": true
+          },
+          "evaluationDelay": "AfterProvisioningSuccess",
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "laWorkspaceLocation": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "The location of the LA workspace."
+                    }
+                  },
+                  "extensionName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "The Resource name of the Arc server extension."
+                    }
+                  },
+                  "laWorkspaceId": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "The Log Analytics workspace Resource ID."
+                    }
+                  },
+                  "isEnabled": {
+                    "type": "bool",
+                    "metadata": {
+                      "description": "Indicates the enablement/disablement of assessment."
+                    }
+                  },
+                  "currentEpoch": {
+                    "type": "int",
+                    "metadata": {
+                      "description": "The current epoch."
+                    },
+                    "defaultValue": "[dateTimeToEpoch(utcNow())]"
+                  },
+                  "vmLocation": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "The location of the Arc server."
+                    }
+                  },
+                  "agentName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Name of the agent, i.e. WindowsAgent.SQLServer."
+                    }
+                  },
+                  "existingSettings": {
+                    "type": "object",
+                    "metadata": {
+                      "description": "The Existing settings on the extension."
+                    }
+                  }
+                },
+                "functions": [],
+                "variables": {
+                  "laWorkspaceRg": "[split(parameters('laWorkspaceId'), '/')[4]]",
+                  "laWorkspaceName": "[split(parameters('laWorkspaceId'), '/')[8]]",
+                  "arcServerName": "[split(parameters('extensionName'), '/')[0]]",
+                  "arcLaWorkspaceHash": "[uniqueString(toLower(parameters('extensionName')), toLower(parameters('laWorkspaceId')))]",
+                  "dataCollectionEndpointName": "[concat('sql-bpa-dce-', toLower(variables('arcServerName')), '-', variables('arcLaWorkspaceHash'))]",
+                  "dataCollectionEndpointResourceId": "[concat(resourceGroup().id,  '/providers/Microsoft.Insights/dataCollectionEndpoints/', variables('dataCollectionEndpointName'))]",
+                  "dataCollectionRuleName": "[concat('sql-bpa-dcr-', toLower(variables('arcServerName')), '-',  variables('arcLaWorkspaceHash'))]",
+                  "dataCollectionRuleResourceId": "[concat(resourceGroup().id,  '/providers/Microsoft.Insights/dataCollectionRules/', variables('dataCollectionRuleName'))]",
+                  "tableName": "SqlAssessment_CL",
+                  "customTableFullName": "[concat(variables('laWorkspaceName'), '/',  variables('tableName'))]",
+                  "customTableName": "[concat('Custom-', variables('tableName'))]",
+                  "filePattern": "C:\\Windows\\System32\\config\\systemprofile\\AppData\\Local\\Microsoft SQL Server Extension Agent\\Assessment\\*.csv",
+                  "vmExtensionPublisher": "Microsoft.AzureData",
+                  "assessmentSettings": {
+                    "AssessmentSettings": {
+                      "Enable": "[parameters('isEnabled')]",
+                      "RunImmediately": false,
+                      "schedule": {
+                        "dayOfWeek": "Sunday",
+                        "Enable": true,
+                        "monthlyOccurrence": null,
+                        "StartDate": null,
+                        "startTime": "[concat('00:', padLeft(mod(parameters('currentEpoch'), 60), 2, '0'))]",
+                        "WeeklyInterval": 1
+                      },
+                      "WorkspaceResourceId": "[parameters('laWorkspaceId')]",
+                      "WorkspaceLocation": "[parameters('laWorkspaceLocation')]",
+                      "ResourceNamePrefix": "[variables('arcServerName')]",
+                      "settingsSaveTime": "[parameters('currentEpoch')]"
+                    }
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[concat('LogAnalyticsWorkspaceTableCreation-', uniqueString(deployment().name))]",
+                    "type": "Microsoft.Resources/deployments",
+                    "condition": "[parameters('isEnabled')]",
+                    "apiVersion": "2021-04-01",
+                    "subscriptionId": "[subscription().subscriptionId]",
+                    "resourceGroup": "[variables('laWorkspaceRg')]",
+                    "properties": {
+                      "expressionEvaluationOptions": {
+                        "scope": "outer"
+                      },
+                      "mode": "Incremental",
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "resources": [
+                          {
+                            "type": "Microsoft.OperationalInsights/workspaces/tables",
+                            "apiVersion": "2022-10-01",
+                            "name": "[variables('customTableFullName')]",
+                            "properties": {
+                              "schema": {
+                                "name": "[variables('tableName')]",
+                                "columns": [
+                                  {
+                                    "name": "TimeGenerated",
+                                    "type": "DateTime"
+                                  },
+                                  {
+                                    "name": "RawData",
+                                    "type": "String"
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Insights/dataCollectionEndpoints",
+                    "name": "[variables('dataCollectionEndpointName')]",
+                    "condition": "[parameters('isEnabled')]",
+                    "location": "[parameters('laWorkspaceLocation')]",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "networkAcls": {
+                        "publicNetworkAccess": "Enabled"
+                      }
+                    },
+                    "dependsOn": [
+                      "[concat('Microsoft.Resources/deployments/', concat('LogAnalyticsWorkspaceTableCreation-', uniqueString(deployment().name)))]"
+                    ]
+                  },
+                  {
+                    "type": "Microsoft.Insights/dataCollectionRules",
+                    "name": "[variables('dataCollectionRuleName')]",
+                    "condition": "[parameters('isEnabled')]",
+                    "location": "[parameters('laWorkspaceLocation')]",
+                    "apiVersion": "2021-09-01-preview",
+                    "dependsOn": [
+                      "[concat('Microsoft.Insights/dataCollectionEndpoints/', variables('dataCollectionEndpointName'))]"
+                    ],
+                    "properties": {
+                      "dataCollectionEndpointId": "[variables('dataCollectionEndpointResourceId')]",
+                      "streamDeclarations": {
+                        "[variables('customTableName')]": {
+                          "columns": [
+                            {
+                              "name": "TimeGenerated",
+                              "type": "datetime"
+                            },
+                            {
+                              "name": "RawData",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "dataSources": {
+                        "logFiles": [
+                          {
+                            "streams": [
+                              "[variables('customTableName')]"
+                            ],
+                            "filePatterns": [
+                              "[variables('filePattern')]"
+                            ],
+                            "format": "text",
+                            "settings": {
+                              "text": {
+                                "recordStartTimestampFormat": "ISO 8601"
+                              }
+                            },
+                            "name": "[variables('customTableName')]"
+                          }
+                        ]
+                      },
+                      "destinations": {
+                        "logAnalytics": [
+                          {
+                            "workspaceResourceId": "[parameters('laWorkspaceId')]",
+                            "name": "[variables('laWorkspaceName')]"
+                          }
+                        ]
+                      },
+                      "dataFlows": [
+                        {
+                          "streams": [
+                            "[variables('customTableName')]"
+                          ],
+                          "destinations": [
+                            "[variables('laWorkspaceName')]"
+                          ],
+                          "transformKql": "source",
+                          "outputStream": "[variables('customTableName')]"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Microsoft.HybridCompute/machines/extensions",
+                    "condition": "[parameters('isEnabled')]",
+                    "apiVersion": "2021-12-10-preview",
+                    "name": "[format('{0}/AzureMonitorWindowsAgent', variables('arcServerName'))]",
+                    "location": "[parameters('vmLocation')]",
+                    "dependsOn": [
+                      "[concat('Microsoft.Insights/dataCollectionRules/', variables('dataCollectionRuleName'))]"
+                    ],
+                    "properties": {
+                      "publisher": "Microsoft.Azure.Monitor",
+                      "type": "AzureMonitorWindowsAgent",
+                      "autoUpgradeMinorVersion": true
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "condition": "[parameters('isEnabled')]",
+                    "apiVersion": "2021-09-01-preview",
+                    "scope": "[format('Microsoft.HybridCompute/machines/{0}', variables('arcServerName'))]",
+                    "dependsOn": [
+                      "[concat('Microsoft.Insights/dataCollectionRules/', variables('dataCollectionRuleName'))]"
+                    ],
+                    "name": "[concat(variables('arcServerName'), variables('arcLaWorkspaceHash'), '-linkage')]",
+                    "properties": {
+                      "description": "Association of data collection rule. Deleting this association will break the data collection for this Arc server.",
+                      "dataCollectionRuleId": "[variables('dataCollectionRuleResourceId')]"
+                    }
+                  },
+                  {
+                    "name": "[parameters('extensionName')]",
+                    "type": "Microsoft.HybridCompute/machines/extensions",
+                    "location": "[parameters('vmLocation')]",
+                    "apiVersion": "2019-12-12",
+                    "properties": {
+                      "publisher": "[variables('vmExtensionPublisher')]",
+                      "type": "[parameters('agentName')]",
+                      "settings": "[union(parameters('existingSettings'), variables('assessmentSettings'))]"
+                    },
+                    "dependsOn": [
+                      "[resourceId('Microsoft.HybridCompute/machines/extensions', variables('arcServerName'), 'AzureMonitorWindowsAgent')]"
+                    ]
+                  }
+                ],
+                "outputs": {}
+              },
+              "parameters": {
+                "laWorkspaceLocation": {
+                  "value": "[parameters('laWorkspaceLocation')]"
+                },
+                "extensionName": {
+                  "value": "[field('fullName')]"
+                },
+                "laWorkspaceId": {
+                  "value": "[parameters('laWorkspaceId')]"
+                },
+                "vmLocation": {
+                  "value": "[field('location')]"
+                },
+                "agentName": {
+                  "value": "[field('name')]"
+                },
+                "existingSettings": {
+                  "value": "[field('Microsoft.HybridCompute/machines/extensions/settings')]"
+                },
+                "isEnabled": {
+                  "value": "[parameters('isEnabled')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f36de009-cacb-47b3-b936-9c4c9120d064",
+  "name": "f36de009-cacb-47b3-b936-9c4c9120d064"
+}

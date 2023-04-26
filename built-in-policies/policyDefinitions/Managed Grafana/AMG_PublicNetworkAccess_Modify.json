@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Managed Grafana workspaces to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for your Azure Managed Grafana workspace so that it's not accessible over the public internet. This can reduce data leakage risks.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Managed Grafana"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Dashboard/grafana"
+          },
+          {
+            "field": "Microsoft.Dashboard/grafana/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-10-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Dashboard/grafana/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/67529aa1-5285-4b1c-8e6f-5ccd861ac98e",
+  "name": "67529aa1-5285-4b1c-8e6f-5ccd861ac98e"
+}
