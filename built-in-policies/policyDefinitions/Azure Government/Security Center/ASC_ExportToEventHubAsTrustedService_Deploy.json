@@ -1,15 +1,27 @@
 {
   "properties": {
-    "displayName": "Deploy export to Event Hub for Microsoft Defender for Cloud data",
+    "displayName": "Deploy export to Event Hub as a trusted service for Microsoft Defender for Cloud data",
     "policyType": "BuiltIn",
     "mode": "All",
-    "description": "Enable export to Event Hub of Microsoft Defender for Cloud data. This policy deploys an export to Event Hub configuration with your conditions and target Event Hub on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
+    "description": "Enable export to Event Hub as a trusted service of Microsoft Defender for Cloud data. This policy deploys an export to Event Hub as a trusted service configuration with your conditions and target Event Hub on the assigned scope. To deploy this policy on newly created subscriptions, open the Compliance tab, select the relevant non-compliant assignment and create a remediation task.",
     "metadata": {
-      "version": "4.2.0",
+      "version": "1.0.0",
       "category": "Security Center"
     },
-    "version": "4.2.0",
+    "version": "1.0.0",
     "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
       "resourceGroupName": {
         "type": "String",
         "metadata": {
@@ -142,8 +154,8 @@
         "type": "String",
         "metadata": {
           "displayName": "Event Hub details",
-          "description": "The Event Hub details of where the data should be exported to: Subscription, Event Hub Namespace, Event Hub, and Authorizations rules with 'Send' claim.",
-          "strongType": "Microsoft.EventHub/namespaces/eventhubs/authorizationrules",
+          "description": "The Event Hub details of where the data should be exported to: Subscription, Event Hub Namespace, Event Hub.",
+          "strongType": "Microsoft.EventHub/namespaces/eventhubs",
           "assignPermissions": true
         }
       }
@@ -154,7 +166,7 @@
         "equals": "Microsoft.Resources/subscriptions"
       },
       "then": {
-        "effect": "deployIfNotExists",
+        "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Security/automations",
           "name": "exportToEventHub",
@@ -316,13 +328,16 @@
             ]
           },
           "deployment": {
-            "location": "westeurope",
+            "location": "usgovvirginia",
             "properties": {
               "mode": "incremental",
               "template": {
                 "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "parameters": {
+                  "effect": {
+                    "type": "string"
+                  },
                   "resourceGroupName": {
                     "type": "string"
                   },
@@ -571,9 +586,9 @@
                               "sources": "[variables('sources')]",
                               "actions": [
                                 {
+                                  "isTrustedServiceEnabled": true,
                                   "actionType": "EventHub",
-                                  "eventHubResourceId": "[concat('/', variables('SeperatedEventHubDetails')[1], '/', variables('SeperatedEventHubDetails')[2], '/', variables('SeperatedEventHubDetails')[3], '/', variables('SeperatedEventHubDetails')[4], '/', variables('SeperatedEventHubDetails')[5], '/', variables('SeperatedEventHubDetails')[6], '/', variables('SeperatedEventHubDetails')[7], '/', variables('SeperatedEventHubDetails')[8], '/', variables('SeperatedEventHubDetails')[9], '/', variables('SeperatedEventHubDetails')[10])]",
-                                  "connectionString": "[listkeys(parameters('eventHubDetails'),'2017-04-01').primaryConnectionString]"
+                                  "eventHubResourceId": "[concat('/', variables('SeperatedEventHubDetails')[1], '/', variables('SeperatedEventHubDetails')[2], '/', variables('SeperatedEventHubDetails')[3], '/', variables('SeperatedEventHubDetails')[4], '/', variables('SeperatedEventHubDetails')[5], '/', variables('SeperatedEventHubDetails')[6], '/', variables('SeperatedEventHubDetails')[7], '/', variables('SeperatedEventHubDetails')[8], '/', variables('SeperatedEventHubDetails')[9], '/', variables('SeperatedEventHubDetails')[10])]"
                                 }
                               ]
                             }
@@ -585,6 +600,9 @@
                 ]
               },
               "parameters": {
+                "effect": {
+                  "value": "[parameters('effect')]"
+                },
                 "resourceGroupName": {
                   "value": "[parameters('resourceGroupName')]"
                 },
@@ -625,6 +643,7 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/cdfcce10-4578-4ecd-9703-530938e4abcb",
-  "name": "cdfcce10-4578-4ecd-9703-530938e4abcb"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/af9f6c70-eb74-4189-8d15-e4f11a7ebfd4",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "af9f6c70-eb74-4189-8d15-e4f11a7ebfd4"
 }
