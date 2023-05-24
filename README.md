@@ -116,7 +116,7 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 - Microsoft.Network/virtualNetworks/subnets
   - The routeTable property of this type is populated differently when queried than when created or updated unless non-standard parameters are provided. This means deny policies will work, but compliance audits will generally not be correct.
 - Microsoft.Insights/workbooks
-  - The collection GET API call doesn't return all workbooks. Instead, a filter needs to be added to specify which workbooks are to be returned.
+  - The collection GET API call for this type doesn't return all workbooks, which could result in some or all workbook resources being incorrectly flagged as non-compliant.
 
 
 ### Resource Type not correctly published by resource provider
