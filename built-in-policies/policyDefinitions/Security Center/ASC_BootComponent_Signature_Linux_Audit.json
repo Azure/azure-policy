@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Linux virtual machines should use only signed and trusted boot components",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "All OS boot components (boot loader, kernel, kernel drivers) must be signed by trusted publishers. Defender for Cloud has identified untrusted OS boot components on one or more of your Linux machines. To protect your machines from potentially malicious components, add them to your allow list or remove the identified components.",
+    "metadata": {
+      "category": "Security Center",
+      "preview": true,
+      "version": "1.0.0-preview"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+            "like": "Linux*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/assessments",
+          "name": "ad50b498-f90c-451f-886f-d0a169cc5002",
+          "existenceCondition": {
+            "field": "Microsoft.Security/assessments/status.code",
+            "in": [
+              "NotApplicable",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/13a6c84f-49a5-410a-b5df-5b880c3fe009",
+  "name": "13a6c84f-49a5-410a-b5df-5b880c3fe009"
+}

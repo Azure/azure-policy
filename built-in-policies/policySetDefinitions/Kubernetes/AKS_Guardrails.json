@@ -4,44 +4,69 @@
     "policyType": "BuiltIn",
     "description": "A collection of Kubernetes best practices that are recommended by Azure Kubernetes Service",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "[AKS Guardrails] Effect",
+          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "[AKS Guardrails] Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ]
+      },
       "allowedUsers": {
         "type": "Array",
         "metadata": {
           "displayName": "[AKS Guardrails] Allowed Users",
-          "description": "Users that are allowed by AKS Guardrails to modify node labels on individual nodes."
+          "description": "Users that are allowed by AKS Guardrails to make changes on kubernetes object."
         }
       },
       "allowedGroups": {
         "type": "Array",
         "metadata": {
           "displayName": "[AKS Guardrails] Allowed Groups",
-          "description": "Groups that are allowed by AKS Guardrails to modify node labels on individual nodes."
+          "description": "Groups that are allowed by AKS Guardrails to make changes on kubernetes object."
         }
       },
       "cpuLimit": {
         "type": "String",
         "metadata": {
-          "displayName": "Max allowed CPU units",
+          "displayName": "[AKS Guardrails] Max allowed CPU units",
           "description": "The maximum CPU units allowed for a container. E.g. 200m. For more information, please refer https://aka.ms/k8s-policy-pod-limits"
         }
       },
       "memoryLimit": {
         "type": "String",
         "metadata": {
-          "displayName": "Max allowed memory bytes",
+          "displayName": "[AKS Guardrails] Max allowed memory bytes",
           "description": "The maximum memory bytes allowed for a container. E.g. 1Gi. For more information, please refer https://aka.ms/k8s-policy-pod-limits"
         }
       },
       "excludedContainers": {
         "type": "Array",
         "metadata": {
-          "displayName": "Containers exclusions",
+          "displayName": "[AKS Guardrails] Containers exclusions",
           "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
         },
         "defaultValue": []
@@ -49,7 +74,7 @@
       "excludedImages": {
         "type": "Array",
         "metadata": {
-          "displayName": "Image exclusions",
+          "displayName": "[AKS Guardrails] Image exclusions",
           "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
         },
         "defaultValue": []
@@ -58,13 +83,13 @@
         "type": "Array",
         "metadata": {
           "displayName": "[AKS Guardrails] AKS Specific Labels",
-          "description": "Labels specific to AKS."
+          "description": "Reserved labels specific to AKS."
         }
       },
       "allowedContainerImagesRegex": {
         "type": "String",
         "metadata": {
-          "displayName": "Allowed registry or registries regex",
+          "displayName": "[AKS Guardrails] Allowed registry or registries regex",
           "description": "The RegEx rule used to match allowed container image field in a Kubernetes cluster. For example, to allow any Azure Container Registry image by matching partial path: ^[^\\/]+\\.azurecr\\.io\\/.+$ and for multiple registries: ^([^\\/]+\\.azurecr\\.io|registry\\.io)\\/.+$"
         }
       },
@@ -72,13 +97,13 @@
         "type": "Array",
         "metadata": {
           "displayName": "[AKS Guardrails] Reserved Taints",
-          "description": "Reserved taints."
+          "description": "Reserved taints specific to AKS"
         }
       },
       "requiredProbes": {
         "type": "Array",
         "metadata": {
-          "displayName": "Required probes list",
+          "displayName": "[AKS Guardrails] Required probes list",
           "description": "The list of probes that are required to be defined on a container. Kubernetes currently supports 'livenessProbe', 'readinessProbe', and 'startupProbe'.",
           "portalReview": true
         },
@@ -94,6 +119,12 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/53a4a537-990c-495a-92e0-7c21a465442c",
         "definitionVersion": "1.*.*-preview",
         "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
           "allowedUsers": {
             "value": "[parameters('allowedUsers')]"
           },
@@ -107,6 +138,12 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e345eecc-fa47-480f-9e88-67dcc122b164",
         "definitionVersion": "9.*.*",
         "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
           "cpuLimit": {
             "value": "[parameters('cpuLimit')]"
           },
@@ -124,13 +161,27 @@
       {
         "policyDefinitionReferenceId": "podEnforceAntiaffinityInKubernetesCluster",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/34c88cd4-5d72-4dbb-bf77-12c3cafe8791",
-        "definitionVersion": "1.*.*-preview"
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          }
+        }
       },
       {
         "policyDefinitionReferenceId": "restrictedLabelsInKubernetesCluster",
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a22123bd-b9da-4c86-9424-24903e91fd55",
         "definitionVersion": "1.*.*-preview",
         "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
           "allowedUsers": {
             "value": "[parameters('allowedUsers')]"
           },
@@ -147,6 +198,12 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/febd0533-8e55-448f-b837-bd0e06f16469",
         "definitionVersion": "9.*.*",
         "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
           "allowedContainerImagesRegex": {
             "value": "[parameters('allowedContainerImagesRegex')]"
           },
@@ -160,6 +217,12 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/48940d92-ff05-449e-9111-e742d9280451",
         "definitionVersion": "1.*.*-preview",
         "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
           "reservedTaints": {
             "value": "[parameters('reservedTaints')]"
           }
@@ -170,6 +233,12 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b1a9997f-2883-4f12-bdff-2280f99b5915",
         "definitionVersion": "3.*.*",
         "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
           "requiredProbes": {
             "value": "[parameters('requiredProbes')]"
           },
