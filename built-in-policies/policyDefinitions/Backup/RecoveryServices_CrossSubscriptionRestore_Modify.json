@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Disable Cross Subscription Restore for Azure Recovery Services vaults",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable or PermanentlyDisable Cross Subscription Restore for your Recovery Services vault so that restore targets cannot be in different subscription from the vault subscription. Learn more at: https://aka.ms/csrenhancements.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Backup",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      },
+      "crossSubscriptionRestoreState": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Cross Subscription Restore State",
+          "description": "Settings to disable or permanently disable Cross Subscription Restore. Please note that Cross Subscription Restore once permanently disabled on a vault cannot be re-enabled."
+        },
+        "allowedValues": [
+          "Disable",
+          "PermanentlyDisable"
+        ],
+        "defaultValue": "Disable"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/vaults"
+          },
+          {
+            "field": "Microsoft.RecoveryServices/vaults/restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState",
+            "notEquals": "[parameters('crossSubscriptionRestoreState')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "deny",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2023-02-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.RecoveryServices/vaults/restoreSettings.crossSubscriptionRestoreSettings.crossSubscriptionRestoreState",
+              "value": "[parameters('crossSubscriptionRestoreState')]"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f19b0c83-716f-4b81-85e3-2dbf057c35d6",
+  "name": "f19b0c83-716f-4b81-85e3-2dbf057c35d6"
+}
