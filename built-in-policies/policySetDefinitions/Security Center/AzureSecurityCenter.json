@@ -4,10 +4,10 @@
     "policyType": "BuiltIn",
     "description": "The Microsoft cloud security benchmark initiative represents the policies and controls implementing security recommendations defined in Microsoft cloud security benchmark, see https://aka.ms/azsecbm. This also serves as the Microsoft Defender for Cloud default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Microsoft Defender for Cloud.",
     "metadata": {
-      "version": "57.14.0",
+      "version": "57.16.0",
       "category": "Security Center"
     },
-    "version": "57.14.0",
+    "version": "57.16.0",
     "policyDefinitionGroups": [
       {
         "name": "Azure_Security_Benchmark_v3.0_NS-1",
@@ -3102,7 +3102,8 @@
         ],
         "metadata": {
           "displayName": "Kubernetes clusters should gate deployment of vulnerable images",
-          "description": "Enable or disable gating containers' with vulnerable images in Kubernetes clusters"
+          "description": "Enable or disable gating containers' with vulnerable images in Kubernetes clusters",
+          "deprecated": true
         }
       },
       "BlockVulnerableImagesInKubernetesClusterNamespaceExclusion": {
@@ -3115,7 +3116,8 @@
         ],
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of containers with vulnerable images",
-          "description": "List of Kubernetes namespaces to exclude from evaluation of block vulnerable images in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+          "description": "List of Kubernetes namespaces to exclude from evaluation of block vulnerable images in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design.",
+          "deprecated": true
         }
       },
       "BlockVulnerableImagesNamespaces": {
@@ -3131,7 +3133,8 @@
         "type": "Array",
         "metadata": {
           "displayName": "Excluded images regex for gating vulnerable images in Kubernetes cluster",
-          "description": "A list of RegEx rules used to exclude container images from policy evaluation. For example: exclude all images from the repo microsoft-defender-in-cluster-defense-repo in the blockreg ACR -  [\"(blockreg.azurecr.io/microsoft-defender-in-cluster-defense-repo).*\"]. Use an empty list to apply this policy to all container images."
+          "description": "A list of RegEx rules used to exclude container images from policy evaluation. For example: exclude all images from the repo microsoft-defender-in-cluster-defense-repo in the blockreg ACR -  [\"(blockreg.azurecr.io/microsoft-defender-in-cluster-defense-repo).*\"]. Use an empty list to apply this policy to all container images.",
+          "deprecated": true
         },
         "defaultValue": []
       },
@@ -3139,7 +3142,8 @@
         "type": "string",
         "metadata": {
           "displayName": "Severity threshold for excluding gating of image vulnerabilities without a patch in Kubernetes cluster",
-          "description": "Specify the maximum severity for exempting vulnerabilities without a patch. For example, specify Medium to ignore Low and Medium vulnerabilities without a patch."
+          "description": "Specify the maximum severity for exempting vulnerabilities without a patch. For example, specify Medium to ignore Low and Medium vulnerabilities without a patch.",
+          "deprecated": true
         },
         "allowedValues": [
           "None",
@@ -3153,7 +3157,8 @@
         "type": "Array",
         "metadata": {
           "displayName": "Exclude finding IDs for gating vulnerable images scan results in Kubernetes cluster",
-          "description": "A list of finding IDs that the policy should exempt."
+          "description": "A list of finding IDs that the policy should exempt.",
+          "deprecated": true
         },
         "defaultValue": []
       },
@@ -3161,7 +3166,8 @@
         "type": "Object",
         "metadata": {
           "displayName": "Severity threshold for excluding gating of image vulnerabilities in Kubernetes cluster",
-          "description": "The number of allowed findings per severity for an image. e.g. \"{\"High\":0,\"Medium\":3,\"Low\":10}\""
+          "description": "The number of allowed findings per severity for an image. e.g. \"{\"High\":0,\"Medium\":3,\"Low\":10}\"",
+          "deprecated": true
         },
         "defaultValue": {
           "High": 0,
@@ -3254,6 +3260,18 @@
         "metadata": {
           "displayName": "Vulnerabilities in Azure Container Registry images should be remediated",
           "description": "Enable or disable monitoring of Azure container registries by Microsoft Defender for Cloud vulnerability assessment (powered by Qualys)"
+        }
+      },
+      "azureContainerRegistryVulnerabilityAssessmentEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities in Azure Container Registry images should be remediated",
+          "description": "Enable or disable monitoring of Azure container registries by Microsoft Defender for Cloud vulnerability assessment (powered by Microsoft Defender Vulnerability Management)"
         }
       },
       "kubernetesRunningImagesVulnerabilityAssessmentEffect": {
@@ -5975,34 +5993,6 @@
         ]
       },
       {
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/13cd7ae3-5bc0-4ac4-a62d-4f7c120b9759",
-        "definitionVersion": "2.*.*-preview",
-        "policyDefinitionReferenceId": "BlockVulnerableImagesInKubernetesCluster",
-        "parameters": {
-          "effect": {
-            "value": "[parameters('BlockVulnerableImagesInKubernetesClusterEffect')]"
-          },
-          "excludedNamespaces": {
-            "value": "[parameters('BlockVulnerableImagesInKubernetesClusterNamespaceExclusion')]"
-          },
-          "excludedImages": {
-            "value": "[parameters('BlockVulnerableImagesExcludedImages')]"
-          },
-          "severityThresholdForExcludingNotPatchableFindings": {
-            "value": "[parameters('BlockVulnerableImagesSeverityThresholdForExcludingNotPatchableFindings')]"
-          },
-          "excludeFindingIDs": {
-            "value": "[parameters('BlockVulnerableImagesExcludeFindingIDs')]"
-          },
-          "severity": {
-            "value": "[parameters('severity')]"
-          }
-        },
-        "groupNames": [
-          "Azure_Security_Benchmark_v3.0_PV-2"
-        ]
-      },
-      {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e345eecc-fa47-480f-9e88-67dcc122b164",
         "definitionVersion": "9.*.*",
         "policyDefinitionReferenceId": "memoryAndCPULimitsInKubernetesCluster",
@@ -6139,6 +6129,11 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/090c7b07-b4ed-4561-ad20-e9075f3ccaff",
         "definitionVersion": "1.*.*",
         "policyDefinitionReferenceId": "azureContainerRegistryVulnerabilityAssessment",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('azureContainerRegistryVulnerabilityAssessmentEffect')]"
+          }
+        },
         "groupNames": [
           "Azure_Security_Benchmark_v3.0_PV-6",
           "Azure_Security_Benchmark_v3.0_DS-6"
@@ -7395,6 +7390,14 @@
             "value": "[parameters('GuestAttestationExtensionShouldBeInstalledOnSupportedWindowsVirtualMachinesScaleSetsMonitoringEffect')]"
           }
         },
+        "groupNames": [
+          "Azure_Security_Benchmark_v3.0_PV-4"
+        ]
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/13a6c84f-49a5-410a-b5df-5b880c3fe009",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "LinuxVirtualMachineShouldUseSignedAndTrustedBootComponent",
         "groupNames": [
           "Azure_Security_Benchmark_v3.0_PV-4"
         ]
