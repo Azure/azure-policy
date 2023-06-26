@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "You can use update management center (private preview) in Azure to save recurring deployment schedules to install operating system updates for your Windows Server and Linux machines in Azure, in on-premises environments, and in other cloud environments connected using Azure Arc-enabled servers. This policy will also change the patch mode for the Azure Virtual Machine to 'AutomaticByPlatform'. See more: https://aka.ms/umc-scheduled-patching",
     "metadata": {
-      "version": "3.3.0-preview",
+      "version": "3.4.0-preview",
       "category": "Update Management Center",
       "preview": true
     },
-    "version": "3.3.0-preview",
+    "version": "3.4.0-preview",
     "parameters": {
       "maintenanceConfigurationResourceId": {
         "type": "String",
@@ -576,8 +576,14 @@
                 "osType": {
                   "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType'), field('Microsoft.HybridCompute/machines/osName'))]"
                 },
+                "osTypeFromPublisher": {
+                  "value": "[if(contains(tolower(field('Microsoft.Compute/imagePublisher')), 'window'), 'windows', 'linux')]"
+                },
                 "patchMode": {
                   "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.patchMode'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.patchMode')), 'NA')]"
+                },
+                "bypassCheckValue": {
+                  "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(or(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), contains(tolower(field('Microsoft.Compute/imagePublisher')), 'window')), if(empty(field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings')), bool('false'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule')), if(empty(field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings')), bool('false'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule'))), bool('false'))]"
                 },
                 "location": {
                   "value": "[field('location')]"
@@ -596,15 +602,21 @@
                   "osType": {
                     "type": "String"
                   },
+                  "osTypeFromPublisher": {
+                    "type": "String"
+                  },
                   "patchMode": {
                     "type": "string"
+                  },
+                  "bypassCheckValue": {
+                    "type": "bool"
                   },
                   "location": {
                     "type": "string"
                   }
                 },
                 "variables": {
-                  "osType": "[toLower(parameters('osType'))]",
+                  "osType": "[toLower(if(empty(parameters('osType')), parameters('osTypeFromPublisher'), parameters('osType')))]",
                   "automaticByPlatformPatchMode": "AutomaticByPlatform",
                   "configAssignmentName": "[concat(uniqueString(tolower(parameters('maintenanceConfigurationResourceId'))), '-AzPolicy')]",
                   "isAzureMachine": "[contains(tolower(parameters('machineResourceId')), tolower('/providers/microsoft.compute/virtualmachines/'))]",
@@ -612,18 +624,24 @@
                   "linuxOSProfile": {
                     "linuxConfiguration": {
                       "patchSettings": {
-                        "patchMode": "[variables('automaticByPlatformPatchMode')]"
+                        "patchMode": "[variables('automaticByPlatformPatchMode')]",
+                        "automaticByPlatformSettings": {
+                          "bypassPlatformSafetyChecksOnUserSchedule": true
+                        }
                       }
                     }
                   },
                   "windowsOSProfile": {
                     "windowsConfiguration": {
                       "patchSettings": {
-                        "patchMode": "[variables('automaticByPlatformPatchMode')]"
+                        "patchMode": "[variables('automaticByPlatformPatchMode')]",
+                        "automaticByPlatformSettings": {
+                          "bypassPlatformSafetyChecksOnUserSchedule": true
+                        }
                       }
                     }
                   },
-                  "patchModeShouldBeChanged": "[and(variables('isAzureMachine'), not(equals(parameters('patchMode'), variables('automaticByPlatformPatchMode'))))]",
+                  "patchModeShouldBeChanged": "[and(variables('isAzureMachine'), or(not(equals(parameters('patchMode'), variables('automaticByPlatformPatchMode'))), not(equals(parameters('bypassCheckValue'), bool('true')))))]",
                   "machineName": "[last(split(parameters('machineResourceId'), '/'))]",
                   "updatedOSProfile": "[if(equals(variables('osType'), 'windows'), variables('windowsOSProfile'), variables('linuxOSProfile'))]"
                 },
@@ -631,7 +649,7 @@
                   {
                     "condition": "[variables('patchModeShouldBeChanged')]",
                     "type": "Microsoft.Compute/virtualMachines",
-                    "apiVersion": "2021-07-01",
+                    "apiVersion": "2023-03-01",
                     "name": "[variables('machineName')]",
                     "location": "[parameters('location')]",
                     "properties": {
