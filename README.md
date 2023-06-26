@@ -1,6 +1,6 @@
 # Azure Policy Samples
 
-This repository contains built-in samples of Azure Policies that can be used as reference for creating and assigning policies to your subscriptions and resource groups. For easy search of all built-in  with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
+This repository contains the direct representation of built-in definitions published to Azure. For easy search of all built-in  with descriptions, see [Policy samples](https://docs.microsoft.com/azure/governance/policy/samples/) on docs.microsoft.com.
 
 For custom policy samples, check out our Community repo! (https://github.com/Azure/Community-Policy)
 
@@ -8,9 +8,9 @@ For custom policy samples, check out our Community repo! (https://github.com/Azu
 
 To contribute, please submit your policies to our Community repo! (https://github.com/Azure/Community-Policy)
 
-## Reporting Samples Issues
+## Reporting Issues
 
-Previously, this repository was the official channel to open issue for sample built-in definitions. Since this repo is a direct representation of built-in definitons published to Azure, support for addressing built-in definition issues is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe a definition has a bug or error.
+The support for addressing built-in definition issues is handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe a definition has a bug or error.
 
 # Azure Policy Known Issues
 
@@ -57,7 +57,7 @@ The general Azure Policy support role of this repository has transitioned to sta
 An alias enables you to restrict what values or conditions are permitted for a *property* on a resource. Each alias maps to the paths in different API versions for a given resource type. During policy evaluation, the policy engine gets the property path for that API version.
 See the documentation page on aliases [**here**](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure#aliases). For additional information about Azure Policy and aliases, visit this [**blog post**](https://azure.microsoft.com/blog/more-resource-policy-aliases/).
 
-Previously, this repository was the official channel to open requests for new aliases. Since the full set of aliases for most namespaces have now been published, support for requesting aliases is now handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe you need new aliases to be published.
+Support for requesting aliases is handled by Azure Customer Support. Open a new [**Azure Customer Support ticket**](https://azure.microsoft.com/support/create-ticket/) if you believe you need new aliases to be published.
 
 [**This page**](https://docs.microsoft.com/azure/governance/policy/concepts/definition-structure#aliases) documents the commands for discovering existing aliases.
 
@@ -123,11 +123,6 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 
 In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. Currently, all resource types known to have this behavior have been corrected.
 
-These resource types previously exhibited this behavior, but are now removed:
-
-- Microsoft.EventHub/namespaces/networkRuleSet (replaced by Microsoft.EventHub/namespaces/networkruleset**s**)
-- Microsoft.ServiceBus/namespaces/networkRuleSet (replaced by Microsoft.ServiceBus/namespaces/networkruleset**s**)
-
 In some cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to a parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource.
 
 These resource types previously exhibited this behavior but have been fixed:
@@ -140,13 +135,13 @@ These resource types previously exhibited this behavior but have been fixed:
 
 ### Resource management that bypasses Azure Resource Manager
 
-Resource providers are free to implement their own resource management operations outside of Azure Resource Manager ("dataplane" operations). In almost every Azure resource type, the distinction between resource management and dataplane operations is clear and the resource provider only implements resource management one way. Occasionally, a resource provider may choose to implement a type that can be managed both ways. In this case, Azure Policy controls the standard Azure Resource Manager API normally, but operations on the direct resource provider API to create, modify and delete resources of that type bypass Azure Resource Manager so they are invisible to Azure Policy. Since policy enforcement is incomplete, we recommend that customers do not implement policies targeting such a resource type. This is the list of known such resource types:
+Resource providers are free to implement their own resource management operations outside of Azure Resource Manager ("dataplane" operations). In almost every Azure resource type, the distinction between resource management and dataplane operations is clear and the resource provider only implements resource management one way. Occasionally, a resource provider may choose to implement a type that can be managed both ways. In this case, Azure Policy controls the standard Azure Resource Manager API normally, but operations on the direct resource provider API to create, modify and delete resources of that type bypass Azure Resource Manager so they are invisible to Azure Policy. Since policy enforcement is incomplete, we recommend that customers do not implement policies targeting such a resource type.
+This is the list of known such resource types:
 
 - Microsoft.Storage/storageAccounts/blobServices/containers
 
 The storage team has implemented blob public access control on storage accounts to address this scenario. Per-account public access control of blobs can be controlled by Azure Policy using the new alias ```Microsoft.Storage/storageAccounts/allowBlobPublicAccess```.
 
-Note that Azure policies for dataplane operations of certain targeted resource providers is also supported or under active development.
 
  - Microsoft.Sql/servers/firewallRules
 
@@ -156,6 +151,8 @@ Firewall rules can be created/deleted/modified via T-SQL commands, which bypasse
 
 Service Fabric applications created via direct requests to the Service Fabric cluster (i.e. via New-ServiceFabricApplication) will not appear in the Azure Resource Manager representation of the Service Fabric cluster. Policy will not be able to audit/enforce these applications.
 
+Note that Azure policies for dataplane operations of certain targeted resource providers is also supported or under active development. Please see the [Resource Provider modes.](https://learn.microsoft.com/azure/governance/policy/concepts/definition-structure#resource-provider-modes)
+
 ### Nonstandard creation pattern
 
 In a few instances, the creation pattern of a resource type doesn't follow normal REST patterns. In these cases, deny policies may not work or may only work for some properties. For example, certain resource types may PUT only a subset of the properties of the resource type to create the entire resource. With such types the resource provider selects the values for properties not provided in the payload. Such a resource might be created with a non-compliant value even though a deny policy exists to prevent it. A similar result may occur if a set of resource types can be created using a collection PUT. Known resource types that exhibit this class of behavior:
@@ -164,6 +161,7 @@ In a few instances, the creation pattern of a resource type doesn't follow norma
 - Microsoft.Security/securityContacts
 
 There is currently no plan to change this behavior for these types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL or Automation team.
+
 
 ### Nonstandard update pattern through Azure Portal
 In some cases, a resource provider can choose not to follow normal REST patterns when a resource is updated via the portal. In these cases, a partial PUT request is done instead of a PATCH request causing the policy engine to evaluate as if some properties do not have values. 
@@ -190,6 +188,8 @@ Since custom policies use aliases directly, it is usually not possible to update
 - Microsoft.Sql/servers/databases/requestedServiceObjectiveName.v2
 
 To enforce around SQL databases transparentDataEncryption, please use both the legacy alias (api versions between 2014-04-01 and 2022-05-01-preview) Microsoft.Sql/transparentDataEncryption.status and the new alias (post api version 2022-05-01-preview) Microsoft.Sql/servers/databases/transparentDataEncryption/state.  
+
+Resource property names that include symbols or numbers such as dashings '-' or slashes '/' are a nonstandard creation pattern and alias for those properities are not generated. 
 
 ### Optional or auto-generated resource property that bypasses policy evaluation
 
@@ -235,24 +235,10 @@ These are resource types that have significant policy scenarios, but are not sup
 
 Work to increase the scale that policy can be performantly applied to resource types is in progress. Planned availability date is not yet determined.
 
-### Azure Policy Add-on not compatible on AKS Kubernetes 1.19 (preview) version
-This issue has been resolved. 
-
-### Indexed Resource types always non-complaint to tagging policies 
-As of February 2021, index resources that don't support tags aren't applicable to polices that inspect tags.
-
 ### Alias changes  
 
 May 2020: Microsoft.DocumentDB/databaseAccounts/ipRangeFilter updated from a string property to an array.  Please re-author your custom definitions to support the property as an array.  
 July 2020: The alias Microsoft.Sql/servers/securityAlertPolicies/emailAddresses[] and related policies were deprecated. 
-
-### Resources that exceed current Azure policy assignment delete latencies
-The issue related to mode = Microsoft.KeyVault.Data has been resolved. 
-
-### Microsoft.Kubernetes.Data policies that evaluate containers do not currently support container exclusions.  
-This issue has been resolved. 
-
-*This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
 
 ### Resource types that do not display non-compliance messages in the portal during preflight validation   
 
@@ -285,4 +271,7 @@ For support involving these compliance message issues, please first follow up wi
 ### Resource types that do not support creation of Policy exemptions
 These resource types do not allow Policy exemptions on resources due to [deny assignments](https://docs.microsoft.com/azure/role-based-access-control/deny-assignments). Workaround is to use [exclusions](https://docs.microsoft.com/azure/governance/policy/concepts/assignment-structure#excluded-scopes) at the assignment level. 
 
-- Microsoft.Databricks/* 
+- Microsoft.Databricks/*
+
+  
+*This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
