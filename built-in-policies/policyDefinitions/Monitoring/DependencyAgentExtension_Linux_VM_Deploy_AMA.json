@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "Deploy Dependency agent for Linux virtual machines with Azure Monitoring Agent settings if the VM Image (OS) is in the list defined and the agent is not installed.",
     "metadata": {
-      "version": "3.0.0-preview",
+      "version": "3.1.0-preview",
       "category": "Monitoring",
       "preview": true
     },
-    "version": "3.0.0-preview",
+    "version": "3.1.0-preview",
     "parameters": {
       "listOfImageIdToInclude": {
         "type": "Array",
@@ -42,6 +42,18 @@
           false
         ],
         "defaultValue": true
+      },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to Dependency Agent-Supported Operating Systems",
+          "description": "If set to true, the policy will apply only to virtual machines with supported operating systems. Otherwise, the policy will apply to all virtual machine resources in the assignment scope. For supported operating systems, see https://learn.microsoft.com/en-us/azure/azure-monitor/vm/vminsights-dependency-agent-maintenance"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       }
     },
     "policyRule": {
@@ -57,6 +69,18 @@
           },
           {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('scopeToSupportedImages')]",
+                    "equals": false
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                    "like": "Linux*"
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Compute/imageId",
                 "in": "[parameters('listOfImageIdToInclude')]"

@@ -4,10 +4,10 @@
     "policyType": "BuiltIn",
     "description": "The Microsoft cloud security benchmark initiative represents the policies and controls implementing security recommendations defined in Microsoft cloud security benchmark, see https://aka.ms/azsecbm. This also serves as the Microsoft Defender for Cloud default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Microsoft Defender for Cloud.",
     "metadata": {
-      "version": "57.16.0",
+      "version": "57.18.0",
       "category": "Security Center"
     },
-    "version": "57.16.0",
+    "version": "57.18.0",
     "policyDefinitionGroups": [
       {
         "name": "Azure_Security_Benchmark_v3.0_NS-1",
@@ -3286,6 +3286,18 @@
           "description": "Enable or disable monitoring of Kubernetes Service clusters by Defender for Containers running images vulnerability assessment"
         }
       },
+      "kubernetesRunningImagesVulnerabilityMDVMAssessmentEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Vulnerabilities in running images should be remediated",
+          "description": "Enable or disable monitoring of Kubernetes Service clusters by Defender for Containers running images vulnerability assessment"
+        }
+      },
       "disallowPublicBlobAccessEffect": {
         "type": "string",
         "defaultValue": "audit",
@@ -4538,6 +4550,18 @@
         "metadata": {
           "displayName": "Guest Attestation extension should be installed on supported Windows virtual machines scale sets",
           "description": "Install Guest Attestation extension on supported virtual machines scale sets to allow Microsoft Defender for Cloud to proactively attest and monitor the boot integrity. Once installed, boot integrity will be attested via Remote Attestation. This assessment only applies to trusted launch enabled virtual machine scale sets."
+        }
+      },
+      "LinuxVirtualMachineShouldUseSignedAndTrustedBootComponentEffect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Linux virtual machines should use only signed and trusted boot components",
+          "description": "All OS boot components (boot loader, kernel, kernel drivers) must be signed by trusted publishers. Defender for Cloud has identified untrusted OS boot components on one or more of your Linux machines. To protect your machines from potentially malicious components, add them to your allow list or remove the identified components."
         }
       },
       "installEndpointProtectionMonitoringEffect": {
@@ -6154,6 +6178,20 @@
         ]
       },
       {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/17f4b1cc-c55c-4d94-b1f9-2978f6ac2957",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "kubernetesRunningImagesVulnerabilityMDVMAssessment",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('kubernetesRunningImagesVulnerabilityMDVMAssessmentEffect')]"
+          }
+        },
+        "groupNames": [
+          "Azure_Security_Benchmark_v3.0_PV-6",
+          "Azure_Security_Benchmark_v3.0_DS-6"
+        ]
+      },
+      {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1c6e92c9-99f0-4e55-9cf2-0c234dc48f99",
         "definitionVersion": "7.*.*",
         "policyDefinitionReferenceId": "NoPrivilegeEscalationInKubernetesCluster",
@@ -7397,7 +7435,12 @@
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/13a6c84f-49a5-410a-b5df-5b880c3fe009",
         "definitionVersion": "1.*.*-preview",
-        "policyDefinitionReferenceId": "LinuxVirtualMachineShouldUseSignedAndTrustedBootComponent",
+        "policyDefinitionReferenceId": "LinuxVirtualMachineShouldUseSignedAndTrustedBootComponentEffect",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('LinuxVirtualMachineShouldUseSignedAndTrustedBootComponentEffect')]"
+          }
+        },
         "groupNames": [
           "Azure_Security_Benchmark_v3.0_PV-4"
         ]

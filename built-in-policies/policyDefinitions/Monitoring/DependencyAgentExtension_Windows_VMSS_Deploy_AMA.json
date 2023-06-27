@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "Deploy Dependency agent for Windows virtual machine scale sets with Azure Monitoring Agent settings if the virtual machine image is in the list defined and the agent is not installed. If your scale set upgradePolicy is set to Manual, you need to apply the extension to all the virtual machines in the set by updating them.",
     "metadata": {
-      "version": "1.1.1-preview",
+      "version": "1.2.1-preview",
       "category": "Monitoring",
       "preview": true
     },
-    "version": "1.1.1-preview",
+    "version": "1.2.1-preview",
     "parameters": {
       "listOfImageIdToInclude": {
         "type": "Array",
@@ -42,6 +42,18 @@
           false
         ],
         "defaultValue": true
+      },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to Dependency Agent-Supported Operating Systems",
+          "description": "If set to true, the policy will apply only to virtual machine scale sets with supported operating systems. Otherwise, the policy will apply to all virtual machine scale sets resources in the assignment scope. For supported operating systems, see https://learn.microsoft.com/en-us/azure/azure-monitor/vm/vminsights-dependency-agent-maintenance"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       }
     },
     "policyRule": {
@@ -57,6 +69,18 @@
           },
           {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('scopeToSupportedImages')]",
+                    "equals": false
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
+                    "like": "Windows*"
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Compute/imageId",
                 "in": "[parameters('listOfImageIdToInclude')]"
