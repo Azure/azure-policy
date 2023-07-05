@@ -5,20 +5,19 @@
     "displayName": "[Deprecated]: Configure virtual machines to be onboarded to Azure Automanage",
     "description": "Azure Automanage enrolls, configures, and monitors virtual machines with best practice as defined in the Microsoft Cloud Adoption Framework for Azure. Use this policy to apply Automanage to your selected scope.",
     "metadata": {
-      "version": "4.1.1-deprecated",
+      "version": "4.2.1-deprecated",
       "category": "Automanage",
       "deprecated": true
     },
-    "version": "4.1.1",
+    "version": "4.2.1",
     "parameters": {
       "automanageAccount": {
         "type": "String",
         "metadata": {
           "displayName": "Automanage account",
-          "description": "The Automanage account is an Azure managed identity under which virtual machine operations are performed. If this account is outside of the scope of the assignment you must manually grant 'Contributor' permissions (or similar) on the account to the policy assignment's principal ID.",
-          "strongType": "Microsoft.Automanage/accounts",
-          "assignPermissions": true
-        }
+          "description": "The Automanage account is an Azure managed identity under which virtual machine operations are performed. If this account is outside of the scope of the assignment you must manually grant 'Contributor' permissions (or similar) on the account to the policy assignment's principal ID."
+        },
+        "defaultValue": ""
       },
       "configurationProfileAssignment": {
         "type": "String",
@@ -491,11 +490,7 @@
             "allOf": [
               {
                 "field": "Microsoft.Automanage/configurationProfileAssignments/configurationProfile",
-                "equals": "[parameters('configurationProfileAssignment')]"
-              },
-              {
-                "field": "Microsoft.Automanage/configurationProfileAssignments/accountId",
-                "equals": "[parameters('automanageAccount')]"
+                "equals": "[if(equals(parameters('configurationProfileAssignment'),'Azure virtual machine best practices – Dev/test'), '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesDevTest', '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesProduction')]"
               }
             ]
           },
@@ -530,11 +525,10 @@
                 "resources": [
                   {
                     "type": "Microsoft.Compute/virtualMachines/providers/configurationProfileAssignments",
-                    "apiVersion": "2020-06-30-preview",
+                    "apiVersion": "[if(equals(parameters('automanageAccount'),''), '2022-05-04', '2022-05-04')]",
                     "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/', 'default')]",
                     "properties": {
-                      "configurationProfile": "[parameters('configurationProfileAssignment')]",
-                      "accountId": "[parameters('automanageAccount')]"
+                      "configurationProfile": "[if(equals(parameters('configurationProfileAssignment'),'Azure virtual machine best practices – Dev/test'), '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesDevTest', '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesProduction')]"
                     }
                   }
                 ]

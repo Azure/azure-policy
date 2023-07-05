@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Keys should have a rotation policy ensuring that their rotation is scheduled within the specified number of days after creation.",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Manage your organizational compliance requirements by specifying the maximum number of days after key creation until it must be rotated.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Key Vault"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "maximumDaysToRotate": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "The maximum days to rotate",
+          "description": "The maximum number of days after key creation until it must be rotated."
+        }
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant.  'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/keys"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault.Data/vaults/keys/scheduledRotationDate",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.KeyVault.Data/vaults/keys/scheduledRotationDate",
+                "greater": "[addDays(field('Microsoft.KeyVault.Data/vaults/keys/attributes.createdOn'), parameters('maximumDaysToRotate'))]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d8cf8476-a2ec-4916-896e-992351803c44",
+  "name": "d8cf8476-a2ec-4916-896e-992351803c44"
+}
