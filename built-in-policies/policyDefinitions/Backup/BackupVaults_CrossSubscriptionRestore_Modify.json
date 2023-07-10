@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "Disable or PermanentlyDisable Cross Subscription Restore for your Backup vault so that restore targets cannot be in different subscription from the vault subscription. Learn more at: https://aka.ms/csrstatechange.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Backup",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -27,13 +27,26 @@
         "type": "String",
         "metadata": {
           "displayName": "Cross Subscription Restore State",
-          "description": "Settings to disable or permanently disable Cross Subscription Restore. Please note that Cross Subscription Restore once permanently disabled on a vault cannot be re-enabled."
+          "description": "Settings to disable or permanently disable Cross Subscription Restore. Please note that Cross Subscription Restore once permanently disabled on a vault cannot be re-enabled.",
+          "deprecated": true
         },
         "allowedValues": [
           "Disable",
           "PermanentlyDisable"
         ],
         "defaultValue": "Disable"
+      },
+      "crossSubscriptionRestoreStateParameter": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Cross Subscription Restore State",
+          "description": "Settings to disable or permanently disable Cross Subscription Restore. Please note that Cross Subscription Restore once permanently disabled on a vault cannot be re-enabled."
+        },
+        "allowedValues": [
+          "Disabled",
+          "PermanentlyDisabled"
+        ],
+        "defaultValue": "Disabled"
       }
     },
     "policyRule": {
@@ -45,7 +58,7 @@
           },
           {
             "field": "Microsoft.DataProtection/backupVaults/featureSettings.crossSubscriptionRestoreSettings.state",
-            "notEquals": "[parameters('crossSubscriptionRestoreState')]"
+            "notEquals": "[parameters('crossSubscriptionRestoreStateParameter')]"
           }
         ]
       },
@@ -61,7 +74,7 @@
               "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-12-01')]",
               "operation": "addOrReplace",
               "field": "Microsoft.DataProtection/backupVaults/featureSettings.crossSubscriptionRestoreSettings.state",
-              "value": "[parameters('crossSubscriptionRestoreState')]"
+              "value": "[parameters('crossSubscriptionRestoreStateParameter')]"
             }
           ]
         }
