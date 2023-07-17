@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "All",
     "description": "Microsoft Defender for Storage is an Azure-native layer of security intelligence that detects potential threats to your storage accounts.\nThis policy will enable all Defender for Storage capabilities; Activity Monitoring, Malware Scanning and Sensitive Data Threat Detection. To learn more about Defender for Storage capabilities and benefits, visit aka.ms/DefenderForStorage.",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "metadata": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "Security Center"
     },
     "parameters": {
@@ -47,6 +47,27 @@
               {
                 "field": "Microsoft.Security/pricings/subPlan",
                 "equals": "DefenderForStorageV2"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "in": [
+                          "OnUploadMalwareScanning",
+                          "SensitiveDataDiscovery"
+                        ]
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "true"
+                      }
+                    ]
+                  }
+                },
+                "equals": 2
               }
             ]
           },
@@ -71,11 +92,11 @@
                       "extensions": [
                         {
                           "name": "OnUploadMalwareScanning",
-                          "isEnabled": "True"
+                          "isEnabled": "true"
                         },
                         {
                           "name": "SensitiveDataDiscovery",
-                          "isEnabled": "True"
+                          "isEnabled": "true"
                         }
                       ]
                     }
