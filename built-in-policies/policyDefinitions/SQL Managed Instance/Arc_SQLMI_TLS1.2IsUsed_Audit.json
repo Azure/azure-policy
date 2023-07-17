@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "TLS protocol 1.2 must be used for Arc SQL managed instances.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "As a part of network settings, Microsoft recommends allowing only TLS 1.2 for TLS protocols in SQL Servers. Learn more on network settings for SQL Server at https://aka.ms/TlsSettingsSQLServer.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL Managed Instance"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureArcData/sqlmanagedinstances"
+          },
+          {
+            "field": "Microsoft.AzureArcData/sqlManagedInstances/k8sRaw.spec.settings.network.tlsprotocols",
+            "notContains": "1.2"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bb3c7464-033e-41ee-81dc-480fde675b20",
+  "name": "bb3c7464-033e-41ee-81dc-480fde675b20"
+}

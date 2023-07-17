@@ -1,0 +1,76 @@
+{
+  "properties": {
+    "displayName": "Modify - Configure your Storage account to enable blob versioning",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "You can enable Blob storage versioning to automatically maintain previous versions of an object. When blob versioning is enabled, you can access earlier versions of a blob to recover your data if it's modified or deleted.  Please note existing storage accounts will not be modified to enable Blob storage versioning. Only newly created storage accounts will have Blob storage versioning enabled",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/blobServices"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "less": "2019-10-10"
+                  },
+                  {
+                    "field": "Microsoft.Storage/storageAccounts/blobServices/isVersioningEnabled",
+                    "exists": "true"
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/isVersioningEnabled",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2019-10-10')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Storage/storageAccounts/blobServices/isVersioningEnabled",
+              "value": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/978deb5d-c9a7-41f8-b4b2-b76880d0de1f",
+  "name": "978deb5d-c9a7-41f8-b4b2-b76880d0de1f"
+}
