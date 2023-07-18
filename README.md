@@ -162,7 +162,6 @@ In a few instances, the creation pattern of a resource type doesn't follow norma
 
 There is currently no plan to change this behavior for these types. If this scenario is important to you, please [open a support ticket](https://azure.microsoft.com/support/create-ticket/) with the Azure SQL or Automation team.
 
-
 ### Nonstandard update pattern through Azure Portal
 In some cases, a resource provider can choose not to follow normal REST patterns when a resource is updated via the portal. In these cases, a partial PUT request is done instead of a PATCH request causing the policy engine to evaluate as if some properties do not have values. 
 
