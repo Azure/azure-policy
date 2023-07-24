@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Protect your data with authentication requirements when exporting or uploading to a disk or snapshot.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "When export/upload URL is used, the system checks if the user has an identity in Azure Active Directory and has necessary permissions to export/upload the data. Please refer to aka.ms/DisksAzureADAuth.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/disks"
+          },
+          {
+            "field": "Microsoft.Compute/disks/dataAccessAuthMode",
+            "notEquals": "AzureActiveDirectory"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Compute/disks/dataAccessAuthMode",
+              "value": "AzureActiveDirectory"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c3921d55-b741-4d16-8d56-7f16e99e6892",
+  "name": "c3921d55-b741-4d16-8d56-7f16e99e6892"
+}
