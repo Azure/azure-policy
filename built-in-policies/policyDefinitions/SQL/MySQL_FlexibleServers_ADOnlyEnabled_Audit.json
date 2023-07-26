@@ -1,0 +1,46 @@
+{
+  "properties": {
+    "displayName": "Azure MySQL flexible server should have Azure Active Directory Only Authentication enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling local authentication methods and allowing only Azure Active Directory Authentication improves security by ensuring that Azure MySQL flexible server can exclusively be accessed by Azure Active Directory identities.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBForMySql/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBForMySql/flexibleServers/configurations",
+          "name": "aad_auth_only",
+          "existenceCondition": {
+            "field": "Microsoft.DBForMySql/flexibleServers/configurations/value",
+            "equals": "ON"
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/40e85574-ef33-47e8-a854-7a65c7500560",
+  "name": "40e85574-ef33-47e8-a854-7a65c7500560"
+}

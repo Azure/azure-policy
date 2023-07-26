@@ -1,0 +1,112 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev4procmount
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV4ProcMount
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            procMount:
+              type: string
+            excludedContainers:
+              type: array
+              items:
+                type: string
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev4procmount
+
+        import data.lib.exclude_container_image.is_excluded
+
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            c := input_containers[_]
+            not input_container_excluded(c.name)
+            not is_excluded(c)
+            allowedProcMount := get_allowed_proc_mount(input)
+            not input_proc_mount_type_allowed(allowedProcMount, c)
+            msg := sprintf("ProcMount type is not allowed, container: %v. Allowed procMount types: %v", [c.name, allowedProcMount])
+        }
+
+        input_proc_mount_type_allowed(allowedProcMount, c) {
+            allowedProcMount == "default"
+            lower(c.securityContext.procMount) == "default"
+        }
+        input_proc_mount_type_allowed(allowedProcMount, c) {
+            allowedProcMount == "unmasked"
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+            c.securityContext.procMount
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+            c.securityContext.procMount
+        }
+        input_containers[c] {
+            c := input.review.object.spec.ephemeralContainers[_]
+            c.securityContext.procMount
+        }
+        input_container_excluded(field) {
+            field == input.parameters.excludedContainers[_]
+        }
+
+        get_allowed_proc_mount(arg) = out {
+            not arg.parameters
+            out = "default"
+        }
+        get_allowed_proc_mount(arg) = out {
+            not arg.parameters.procMount
+            out = "default"
+        }
+        get_allowed_proc_mount(arg) = out {
+            arg.parameters.procMount
+            not valid_proc_mount(arg.parameters.procMount)
+            out = "default"
+        }
+        get_allowed_proc_mount(arg) = out {
+            valid_proc_mount(arg.parameters.procMount)
+            out = lower(arg.parameters.procMount)
+        }
+
+        valid_proc_mount(str) {
+            lower(str) == "default"
+        }
+        valid_proc_mount(str) {
+            lower(str) == "unmasked"
+        }
+      libs:
+        - |
+            package lib.exclude_container_image
+
+            is_excluded(container) {
+                exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+                img := container.image
+                exclusion := exclude_images[_]
+                _matches_exclusion(img, exclusion)
+            }
+            _matches_exclusion(img, exclusion) {
+                not endswith(exclusion, "*")
+                exclusion == img
+            }
+            _matches_exclusion(img, exclusion) {
+                endswith(exclusion, "*")
+                prefix := trim_suffix(exclusion, "*")
+                startswith(img, prefix)
+            }

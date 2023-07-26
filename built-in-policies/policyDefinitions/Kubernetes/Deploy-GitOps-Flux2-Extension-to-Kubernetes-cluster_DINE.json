@@ -1,0 +1,258 @@
+{
+  "properties": {
+    "displayName": "Configure installation of Flux extension on Kubernetes cluster",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Install Flux extension on Kubernetes cluster to enable deployment of 'fluxconfigurations' in the cluster",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "helmControllerEnabled": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Flux Helm Controller",
+          "description": "Flag to enable or disable the Helm controller. Set to false if you don't need Helm support. Learn more: https://aka.ms/flux-extension-management"
+        },
+        "defaultValue": true
+      },
+      "notificationControllerEnabled": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Flux Notification Controller",
+          "description": "Flag to enable or disable the Notification controller. Set to false if you don't need to use the Notification controller. Learn more: https://aka.ms/flux-extension-management"
+        },
+        "defaultValue": true
+      },
+      "imageAutomationController": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Flux Image Automation Controller",
+          "description": "Flag to enable or disable the Image Automation controller. Set to true if you need Image Automation controller. Learn more: https://aka.ms/flux-extension-management"
+        },
+        "defaultValue": false
+      },
+      "imageReflectorController": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Flux Image Reflector Controller",
+          "description": "Flag to enable or disable the Image Reflector controller. Set to true if you need to use the Image Reflector controller. Learn more: https://aka.ms/flux-extension-management"
+        },
+        "defaultValue": false
+      },
+      "releaseTrain": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Release Train",
+          "description": "The release train this extension participates in for auto-upgrade if autoUpgradeMinorVersion is 'true'."
+        },
+        "allowedValues": [
+          "Stable"
+        ],
+        "defaultValue": "Stable"
+      },
+      "autoUpgradeMinorVersion": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Auto Upgrade Minor Version",
+          "description": "Flag to control if this extension participates in auto upgrade of minor version or not."
+        },
+        "defaultValue": true
+      },
+      "version": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Version",
+          "description": "Indicate a specific version you want to install, otherwise leave blank. autoUpgradeMinorVersion must be 'false'."
+        },
+        "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.KubernetesConfiguration/extensions",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
+                "equals": "microsoft.flux"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/releaseTrain",
+                "equals": "[parameters('releaseTrain')]"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/autoUpgradeMinorVersion",
+                "equals": "[parameters('autoUpgradeMinorVersion')]"
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.KubernetesConfiguration/extensions/autoUpgradeMinorVersion",
+                        "equals": "false"
+                      },
+                      {
+                        "field": "Microsoft.KubernetesConfiguration/extensions/version",
+                        "equals": "[parameters('version')]"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.KubernetesConfiguration/extensions/autoUpgradeMinorVersion",
+                    "equals": "true"
+                  }
+                ]
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "clusterName": {
+                    "type": "string"
+                  },
+                  "clusterResourceType": {
+                    "type": "string"
+                  },
+                  "helmControllerEnabled": {
+                    "type": "bool"
+                  },
+                  "notificationControllerEnabled": {
+                    "type": "bool"
+                  },
+                  "imageAutomationController": {
+                    "type": "bool"
+                  },
+                  "imageReflectorController": {
+                    "type": "bool"
+                  },
+                  "releaseTrain": {
+                    "type": "string"
+                  },
+                  "autoUpgradeMinorVersion": {
+                    "type": "bool"
+                  },
+                  "version": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "condition": "[contains(toLower(parameters('clusterResourceType')), toLower('connectedclusters'))]",
+                    "comments": "Install the Flux extension in the connected (ARC) cluster.",
+                    "type": "Microsoft.KubernetesConfiguration/extensions",
+                    "name": "flux",
+                    "apiVersion": "2022-03-01",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "properties": {
+                      "extensionType": "microsoft.flux",
+                      "releaseTrain": "[parameters('releaseTrain')]",
+                      "autoUpgradeMinorVersion": "[parameters('autoUpgradeMinorVersion')]",
+                      "version": "[if(and(not(empty(parameters('version'))), not(parameters('autoUpgradeMinorVersion'))), parameters('version'), json('null'))]",
+                      "configurationSettings": {
+                        "helm-controller.enabled": "[parameters('helmControllerEnabled')]",
+                        "notification-controller.enabled": "[parameters('notificationControllerEnabled')]",
+                        "image-automation-controller.enabled": "[parameters('imageAutomationController')]",
+                        "image-reflector-controller.enabled": "[parameters('imageReflectorController')]"
+                      }
+                    },
+                    "scope": "[concat('Microsoft.Kubernetes/connectedClusters/',parameters('clusterName'))]"
+                  },
+                  {
+                    "condition": "[contains(toLower(parameters('clusterResourceType')), toLower('managedclusters'))]",
+                    "comments": "Install the Flux extension in the managed (AKS) cluster.",
+                    "type": "Microsoft.KubernetesConfiguration/extensions",
+                    "name": "flux",
+                    "apiVersion": "2022-03-01",
+                    "properties": {
+                      "extensionType": "microsoft.flux",
+                      "releaseTrain": "[parameters('releaseTrain')]",
+                      "autoUpgradeMinorVersion": "[parameters('autoUpgradeMinorVersion')]",
+                      "version": "[if(and(not(empty( parameters('version'))), not(parameters('autoUpgradeMinorVersion'))), parameters('version'), json('null'))]",
+                      "configurationSettings": {
+                        "helm-controller.enabled": "[parameters('helmControllerEnabled')]",
+                        "notification-controller.enabled": "[parameters('notificationControllerEnabled')]",
+                        "image-automation-controller.enabled": "[parameters('imageAutomationController')]",
+                        "image-reflector-controller.enabled": "[parameters('imageReflectorController')]"
+                      }
+                    },
+                    "scope": "[concat('Microsoft.ContainerService/managedClusters/',parameters('clusterName'))]"
+                  }
+                ]
+              },
+              "parameters": {
+                "clusterName": {
+                  "value": "[field('name')]"
+                },
+                "clusterResourceType": {
+                  "value": "[field('type')]"
+                },
+                "helmControllerEnabled": {
+                  "value": "[parameters('helmControllerEnabled')]"
+                },
+                "notificationControllerEnabled": {
+                  "value": "[parameters('notificationControllerEnabled')]"
+                },
+                "imageAutomationController": {
+                  "value": "[parameters('imageAutomationController')]"
+                },
+                "imageReflectorController": {
+                  "value": "[parameters('imageReflectorController')]"
+                },
+                "releaseTrain": {
+                  "value": "[parameters('releaseTrain')]"
+                },
+                "autoUpgradeMinorVersion": {
+                  "value": "[parameters('autoUpgradeMinorVersion')]"
+                },
+                "version": {
+                  "value": "[parameters('version')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f9175d5f-abc8-1dc3-bd3c-5d7476ada3d1",
+  "name": "f9175d5f-abc8-1dc3-bd3c-5d7476ada3d1"
+}

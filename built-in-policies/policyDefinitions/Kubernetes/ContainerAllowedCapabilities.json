@@ -3,17 +3,19 @@
     "displayName": "Kubernetes cluster containers should only use allowed capabilities",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Restrict the capabilities to reduce the attack surface of containers in a Kubernetes cluster. This recommendation is part of CIS 5.2.8 and CIS 5.2.9 which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
+    "description": "Restrict the capabilities to reduce the attack surface of containers in a Kubernetes cluster. This recommendation is part of CIS 5.2.8 and CIS 5.2.9 which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "5.0.0",
+      "version": "6.1.0",
       "category": "Kubernetes"
     },
+    "version": "6.1.0",
     "parameters": {
       "effect": {
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy.",
+          "portalReview": true
         },
         "allowedValues": [
           "audit",
@@ -29,12 +31,13 @@
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design. \"azure-extensions-usage-system\" is optional to remove."
         },
         "defaultValue": [
           "kube-system",
           "gatekeeper-system",
-          "azure-arc"
+          "azure-arc",
+          "azure-extensions-usage-system"
         ]
       },
       "namespaces": {
@@ -108,7 +111,8 @@
         "type": "Array",
         "metadata": {
           "displayName": "Allowed capabilities",
-          "description": "The list of capabilities that are allowed to be added to a container. Provide empty list as input to block everything."
+          "description": "The list of capabilities that are allowed to be added to a container. Provide empty list as input to block everything.",
+          "portalReview": true
         },
         "defaultValue": []
       },
@@ -116,7 +120,8 @@
         "type": "Array",
         "metadata": {
           "displayName": "Required drop capabilities",
-          "description": "The list of capabilities that must be dropped by a container."
+          "description": "The list of capabilities that must be dropped by a container.",
+          "portalReview": true
         },
         "defaultValue": []
       },
@@ -132,7 +137,8 @@
         "type": "Array",
         "metadata": {
           "displayName": "Image exclusions",
-          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository.",
+          "portalReview": true
         },
         "defaultValue": []
       }
@@ -141,7 +147,6 @@
       "if": {
         "field": "type",
         "in": [
-          "AKS Engine",
           "Microsoft.Kubernetes/connectedClusters",
           "Microsoft.ContainerService/managedClusters"
         ]

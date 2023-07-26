@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "displayName": "Configure diagnostics for container group to log analytics workspace",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Appends the specified log analytics workspaceId and workspaceKey when any container group which is missing these fields is created or updated. Does not modify the fields of container groups created before this policy was applied until those resource groups are changed.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Container Instances"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Append",
+          "Disabled"
+        ],
+        "defaultValue": "Append"
+      },
+      "workspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace ID",
+          "description": "Log Analytics workspace GUID"
+        }
+      },
+      "workspaceKey": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace Key",
+          "description": "Log Analytics workspace key"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerInstance/containerGroups"
+          },
+          {
+            "field": "Microsoft.ContainerInstance/containerGroups/diagnostics.logAnalytics.workspaceId",
+            "exists": "false"
+          },
+          {
+            "field": "Microsoft.ContainerInstance/containerGroups/diagnostics.logAnalytics.workspaceKey",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": [
+          {
+            "field": "Microsoft.ContainerInstance/containerGroups/diagnostics.logAnalytics.workspaceId",
+            "value": "[parameters('workspaceId')]"
+          },
+          {
+            "field": "Microsoft.ContainerInstance/containerGroups/diagnostics.logAnalytics.workspaceKey",
+            "value": "[parameters('workspaceKey')]"
+          }
+        ]
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/21c469fa-a887-4363-88a9-60bfd6911a15",
+  "name": "21c469fa-a887-4363-88a9-60bfd6911a15"
+}

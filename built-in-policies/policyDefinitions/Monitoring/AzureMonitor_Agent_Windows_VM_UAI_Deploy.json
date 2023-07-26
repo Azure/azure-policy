@@ -5,9 +5,10 @@
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Windows virtual machines for collecting telemetry data from the guest OS. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.4.0",
       "category": "Monitoring"
     },
+    "version": "1.4.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -47,6 +48,18 @@
           "description": "The resource group of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
         },
         "defaultValue": ""
+      },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to Azure Monitor Agent-Supported Operating Systems",
+          "description": "If set to true, the policy will apply only to virtual machines with supported operating systems. Otherwise, the policy will apply to all virtual machine resources in the assignment scope. For supported operating systems, see https://aka.ms/AMAOverview."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       },
       "listOfWindowsImageIdToInclude": {
         "type": "Array",
@@ -101,11 +114,34 @@
               "westeurope",
               "westindia",
               "westus",
-              "westus2"
+              "westus2",
+              "chinaeast",
+              "chinaeast2",
+              "chinaeast3",
+              "chinanorth",
+              "chinanorth2",
+              "chinanorth3",
+              "usgovarizona",
+              "usgovtexas",
+              "usgovvirginia",
+              "usdodeast",
+              "usdodcentral"
             ]
           },
           {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('scopeToSupportedImages')]",
+                    "equals": false
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                    "like": "Windows*"
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Compute/imageId",
                 "in": "[parameters('listOfWindowsImageIdToInclude')]"
@@ -285,7 +321,7 @@
                   },
                   {
                     "field": "Microsoft.Compute/imageOffer",
-                    "equals": "Windows-10"
+                    "like": "Windows-1*"
                   }
                 ]
               }
@@ -350,6 +386,7 @@
                       "type": "[variables('extensionType')]",
                       "typeHandlerVersion": "[variables('extensionTypeHandlerVersion')]",
                       "autoUpgradeMinorVersion": true,
+                      "enableAutomaticUpgrade": true,
                       "settings": {
                         "authentication": {
                           "managedIdentity": {

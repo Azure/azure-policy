@@ -5,9 +5,10 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.1",
+      "version": "2.0.1",
       "category": "Key Vault"
     },
+    "version": "2.0.1",
     "parameters": {
       "effect": {
         "type": "string",
@@ -72,6 +73,7 @@
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Insights/diagnosticSettings",
+          "evaluationDelay": "AfterProvisioning",
           "roleDefinitionIds": [
             "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
             "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
@@ -82,11 +84,25 @@
                 "anyof": [
                   {
                     "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
-                    "equals": "True"
+                    "equals": "[parameters('AllMetricsEnabled')]"
                   },
                   {
-                    "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
-                    "equals": "True"
+                    "count": {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                      "where": {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "true"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "AuditEvent"
+                          }
+                        ]
+                      }
+                    },
+                    "greaterOrEquals": 1
                   }
                 ]
               },

@@ -1,0 +1,229 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev3allowedseccomp
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV3AllowedSeccomp
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedProfiles:
+              type: array
+              description: >-
+                An array of allowed profile values for seccomp on Pods/Containers.
+                Can use the annotation naming scheme: `localhost/some-profile.json`. The item `localhost/*` will allow any localhost based profile.
+                Can also use the securityContext naming scheme: `RuntimeDefault`, `Unconfined` and/or `Localhost`.
+              items:
+                type: string
+            excludedContainers:
+              type: array
+              items:
+                type: string
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev3allowedseccomp
+
+        import data.lib.exclude_container_image.is_excluded
+
+        container_annotation_key_prefix = "container.seccomp.security.alpha.kubernetes.io/"
+        pod_annotation_key = "seccomp.security.alpha.kubernetes.io/pod"
+        naming_translation = {
+            # securityContext -> annotation
+            "RuntimeDefault": ["runtime/default", "docker/default"],
+            "Unconfined": ["unconfined"],
+            "Localhost": ["localhost"],
+            # annotation -> securityContext
+            "runtime/default": ["RuntimeDefault"],
+            "docker/default": ["RuntimeDefault"],
+            "unconfined": ["Unconfined"],
+            "localhost": ["Localhost"],
+        }
+
+        violation[{"msg": msg}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            not input_wildcard_allowed_profiles
+            allowed_profiles := get_allowed_profiles
+            container := input_containers[_]
+            not input_container_excluded(container.name)
+            not is_excluded(container)
+            result := get_profile(container)
+            not allowed_profile(result.profile, result.file, allowed_profiles)
+            msg := get_message(result.profile, result.file, container.name, result.location, allowed_profiles)
+        }
+
+        get_message(profile, file, name, location, allowed_profiles) = message {
+            not profile == "Localhost"
+            message := sprintf("Seccomp profile '%v' is not allowed for container '%v'. Found at: %v. Allowed profiles: %v", [profile, name, location, allowed_profiles])
+        }
+
+        get_message(profile, file, name, location, allowed_profiles) = message {
+            profile == "Localhost"
+            message := sprintf("Seccomp profile '%v' with file '%v' is not allowed for container '%v'. Found at: %v. Allowed profiles: %v", [profile, file, name, location, allowed_profiles])
+        }
+
+        input_wildcard_allowed_profiles {
+            input.parameters.allowedProfiles[_] == "*"
+        }
+
+        input_wildcard_allowed_files {
+            "localhost/*" == input.parameters.allowedProfiles[_]
+        }
+
+        # Simple allowed Profiles
+        allowed_profile(profile, file, allowed) {
+            not startswith(lower(profile), "localhost")
+            profile == allowed[_]
+        }
+
+        # seccomp Localhost without wildcard
+        allowed_profile(profile, file, allowed) {
+            profile == "Localhost"
+            not input_wildcard_allowed_files
+            profile == allowed[_]
+            allowed_files := get_annotation_localhost_files
+            file == allowed_files[_]
+        }
+
+        # seccomp Localhost with wildcard
+        allowed_profile(profile, file, allowed) {
+            profile == "Localhost"
+            input_wildcard_allowed_files
+            profile == allowed[_]
+        }
+
+        # annotation localhost with wildcard
+        allowed_profile(profile, file, allowed) {
+            "localhost/*" == allowed[_]
+            startswith(profile, "localhost/")
+        }
+
+        # annotation localhost without wildcard
+        allowed_profile(profile, file, allowed) {
+            startswith(profile, "localhost/")
+            profile == allowed[_]
+        }
+
+        # Localhost files from annotation scheme
+        get_annotation_localhost_files[file] {
+            profile := input.parameters.allowedProfiles[_]
+            startswith(profile, "localhost/")
+            file := replace(profile, "localhost/", "")
+        }
+
+        # The profiles explicitly in the list
+        get_allowed_profiles[allowed] {
+            allowed := input.parameters.allowedProfiles[_]
+        }
+
+        # The simply translated profiles
+        get_allowed_profiles[allowed] {
+            profile := input.parameters.allowedProfiles[_]
+            not startswith(lower(profile), "localhost")
+            allowed := naming_translation[profile][_]
+        }
+
+        # Annotation localhost to Seccomp translation
+        get_allowed_profiles[allowed] {
+            profile := input.parameters.allowedProfiles[_]
+            startswith(profile, "localhost")
+            allowed := naming_translation.localhost[_]
+        }
+
+        # Container profile as defined in pod annotation
+        get_profile(container) = {"profile": profile, "file": "", "location": location} {
+            not has_securitycontext_container(container)
+            not has_annotation(get_container_annotation_key(container.name))
+            not has_securitycontext_pod
+            profile := input.review.object.metadata.annotations[pod_annotation_key]
+            location := sprintf("annotation %v", [pod_annotation_key])
+        }
+
+        # Container profile as defined in container annotation
+        get_profile(container) = {"profile": profile, "file": "", "location": location} {
+            not has_securitycontext_container(container)
+            not has_securitycontext_pod
+            container_annotation := get_container_annotation_key(container.name)
+            has_annotation(container_annotation)
+            profile := input.review.object.metadata.annotations[container_annotation]
+            location := sprintf("annotation %v", [container_annotation])
+        }
+
+        # Container profile as defined in pods securityContext
+        get_profile(container) = {"profile": profile, "file": file, "location": location} {
+            not has_securitycontext_container(container)
+            profile := input.review.object.spec.securityContext.seccompProfile.type
+            file := object.get(input.review.object.spec.securityContext.seccompProfile, "localhostProfile", "")
+            location := "pod securityContext"
+        }
+
+        # Container profile as defined in containers securityContext
+        get_profile(container) = {"profile": profile, "file": file, "location": location} {
+            has_securitycontext_container(container)
+            profile := container.securityContext.seccompProfile.type
+            file := object.get(container.securityContext.seccompProfile, "localhostProfile", "")
+            location := "container securityContext"
+        }
+
+        # Container profile missing
+        get_profile(container) = {"profile": "not configured", "file": "", "location": "no explicit profile found"} {
+            not has_annotation(get_container_annotation_key(container.name))
+            not has_annotation(pod_annotation_key)
+            not has_securitycontext_pod
+            not has_securitycontext_container(container)
+        }
+
+        has_annotation(annotation) {
+            input.review.object.metadata.annotations[annotation]
+        }
+        has_securitycontext_pod {
+            input.review.object.spec.securityContext.seccompProfile
+        }
+        has_securitycontext_container(container) {
+            container.securityContext.seccompProfile
+        }
+
+        get_container_annotation_key(name) = annotation {
+            annotation := concat("", [container_annotation_key_prefix, name])
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.ephemeralContainers[_]
+        }
+        input_container_excluded(field) {
+            field == input.parameters.excludedContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }

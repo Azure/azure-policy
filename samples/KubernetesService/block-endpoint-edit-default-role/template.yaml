@@ -1,0 +1,38 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1blockendpointeditdefaultrole
+  annotations:
+    description: "ClusterRole/system:aggregate-to-edit should not allow endpoint edit permissions due to CVE-2021-25740, Endpoint & EndpointSlice permissions allow cross-Namespace forwarding, https://github.com/kubernetes/kubernetes/issues/103675"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1BlockEndpointEditDefaultRole
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1blockendpointeditdefaultrole
+
+        violation[{"msg": msg}] {
+          input.review.object.metadata.name == "system:aggregate-to-edit"
+          endpointRule(input.review.object.rules[_])
+          msg := "ClusterRole system:aggregate-to-edit should not allow endpoint edit permissions. For k8s version < 1.22, the Cluster Role should be annotated with rbac.authorization.kubernetes.io/autoupdate=false to prevent autoreconciliation back to default permissions for this role."
+        }
+
+        endpointRule(rule) {
+          "endpoints" == rule.resources[_]
+          hasEditVerb(rule.verbs)
+        }
+
+        hasEditVerb(verbs) {
+          "create" == verbs[_]
+        }
+
+        hasEditVerb(verbs) {
+          "patch" == verbs[_]
+        }
+
+        hasEditVerb(verbs) {
+          "update" == verbs[_]
+        }

@@ -1,0 +1,103 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1windowscontainerresources
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1WindowsContainerResources
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1windowscontainerresources
+
+        import data.lib.exclude_container_image.is_excluded
+
+        violation[{"msg":msg}] {
+            is_windows_pod
+            container := input_containers[_]
+            not is_excluded(container)
+            not has_limits(container)
+            msg := sprintf("Container <%v> has missing resource limits", [container.name])
+        }
+        violation[{"msg":msg}] {
+            is_windows_pod
+            container := input_containers[_]
+            not is_excluded(container)
+            requests_do_not_match_limits(container)
+            msg := sprintf("Container <%v> sets resource requests that do not match limits", [container.name])
+        }
+        is_windows_pod {
+            ns := input.review.object.spec.nodeSelector
+            ns["kubernetes.io/os"] == "windows"
+        }
+        has_limits(c) {
+            get_cpu_limit(c)
+            get_mem_limit(c)
+        }
+        requests_do_not_match_limits(c) {
+            # Tests that cpu requests match limits if specified
+            r := get_cpu_request(c)
+            l := get_cpu_limit(c)
+            r != null
+            l != null
+            r != l
+        }
+        requests_do_not_match_limits(c) {
+            # Tests that mem requests match limits if specified
+            r := get_mem_request(c)
+            l := get_mem_limit(c)
+            r != null
+            l != null
+            r != l
+        }
+        get_cpu_limit(c) = out {
+            out := c.resources.limits.cpu
+        }
+        get_cpu_request(c) = out {
+            out := c.resources.requests.cpu
+        }
+        get_mem_limit(c) = out {
+            out := c.resources.limits.memory
+        }
+        get_mem_request(c) = out {
+            out := c.resources.requests.memory
+        }
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }

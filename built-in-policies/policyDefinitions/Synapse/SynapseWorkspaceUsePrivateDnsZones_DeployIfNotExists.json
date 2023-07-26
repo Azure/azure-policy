@@ -5,9 +5,10 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Synapse"
     },
+    "version": "2.0.0",
     "parameters": {
       "privateDnsZoneId": {
         "type": "String",
@@ -52,10 +53,18 @@
           },
           {
             "count": {
-              "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
+              "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*]",
               "where": {
-                "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
-                "equals": "[parameters('targetSubResource')]"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].privateLinkServiceId",
+                    "contains": "Microsoft.Synapse/workspaces"
+                  },
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
+                    "equals": "[parameters('targetSubResource')]"
+                  }
+                ]
               }
             },
             "greaterOrEquals": 1

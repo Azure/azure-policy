@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pass-exclusion
+  labels:
+    app: scenario-allowed-host-path
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: container-exclude # bypassed by the container exclusion parameter
+    image: mcr.microsoft.com/aks/policy/example:v1.0.0
+    volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+      readOnly: false
+  - name: image-exclude
+    image: exception.azurecr.io/exception:v1.0 # bypassed by the image exclusion parameter
+    volumeMounts:
+    - mountPath: /tmp
+      name: disallowed-volume
+  volumes:
+  - name: cache-volume
+    hostPath:
+      path: /etc
+  - name: disallowed-volume
+    hostPath:
+      path: /tmp

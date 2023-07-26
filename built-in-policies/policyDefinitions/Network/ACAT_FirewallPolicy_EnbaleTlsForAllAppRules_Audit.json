@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Azure firewall policy should enable TLS inspection within application rules",
+    "policyType": "BuiltIn",
+    "description": "Enabling TLS inspection is recommended for all application rules to detect, alert, and mitigate malicious activity in HTTPS. To learn more about TLS inspection with Azure Firewall, visit https://aka.ms/fw-tlsinspect",
+    "mode": "All",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/firewallPolicies/ruleCollectionGroups"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/firewallPolicies/ruleCollectionGroups/ruleCollections[*]",
+              "where": {
+                "count": {
+                  "field": "Microsoft.Network/firewallPolicies/ruleCollectionGroups/ruleCollections[*].FirewallPolicyFilterRuleCollection.rules[*]",
+                  "where": {
+                    "field": "Microsoft.Network/firewallPolicies/ruleCollectionGroups/ruleCollections[*].FirewallPolicyFilterRuleCollection.rules[*].ApplicationRule.terminateTLS",
+                    "equals": false
+                  }
+                },
+                "greaterOrEquals": 1
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a58ac66d-92cb-409c-94b8-8e48d7a96596",
+  "name": "a58ac66d-92cb-409c-94b8-8e48d7a96596"
+}

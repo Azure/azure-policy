@@ -1,13 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure network security groups to use specific workspace for traffic analytics",
+    "displayName": "Configure network security groups to use specific workspace, storage account and flowlog retention policy for traffic analytics",
     "description": "If it already has traffic analytics enabled, then policy will overwrite its existing settings with the ones provided during policy creation. Traffic analytics is a cloud-based solution that provides visibility into user and application activity in cloud networks.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.1",
+      "version": "1.2.0",
       "category": "Network"
     },
+    "version": "1.2.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -86,6 +87,14 @@
           "displayName": "Network Watcher name",
           "description": "The name of the network watcher under which the flow log resources are created. Make sure it belongs to the same region as the network security group."
         }
+      },
+      "retentionDays": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Number of days to retain flowlogs",
+          "description": "The number of days for which flowlog data will be retained in storage account. If you want to retain data forever and do not want to apply any retention policy, set retention (days) to 0."
+        },
+        "defaultValue": "30"
       }
     },
     "policyRule": {
@@ -137,6 +146,50 @@
                   {
                     "field": "Microsoft.Network/networkWatchers/flowLogs/flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceId",
                     "equals": "[parameters('workspaceId')]"
+                  },
+                  {
+                    "anyof": [
+                      {
+                        "allof": [
+                          {
+                            "value": "[parameters('retentionDays')]",
+                            "equals": "0"
+                          },
+                          {
+                            "anyof": [
+                              {
+                                "field": "Microsoft.Network/networkWatchers/flowLogs/retentionPolicy.days",
+                                "equals": "0"
+                              },
+                              {
+                                "field": "Microsoft.Network/networkWatchers/flowLogs/retentionPolicy.enabled",
+                                "equals": "false"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allof": [
+                          {
+                            "value": "[parameters('retentionDays')]",
+                            "notequals": "0"
+                          },
+                          {
+                            "allof": [
+                              {
+                                "field": "Microsoft.Network/networkWatchers/flowLogs/retentionPolicy.days",
+                                "notequals": "0"
+                              },
+                              {
+                                "field": "Microsoft.Network/networkWatchers/flowLogs/retentionPolicy.enabled",
+                                "equals": "true"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -181,6 +234,9 @@
                   },
                   "targetResource": {
                     "type": "string"
+                  },
+                  "retentionDays": {
+                    "type": "string"
                   }
                 },
                 "resources": [
@@ -216,8 +272,8 @@
                                 }
                               },
                               "retentionPolicy": {
-                                "days": "0",
-                                "enabled": "false"
+                                "days": "[parameters('retentionDays')]",
+                                "enabled": "true"
                               },
                               "format": {
                                 "type": "JSON",
@@ -254,13 +310,16 @@
                   "value": "[if(empty(coalesce(field('Microsoft.Network/networkSecurityGroups/flowLogs'))), parameters('networkWatcherName'), split(first(field('Microsoft.Network/networkSecurityGroups/flowLogs[*].id')), '/')[8])]"
                 },
                 "flowlogName": {
-                  "value": "[if(empty(coalesce(field('Microsoft.Network/networkSecurityGroups/flowLogs'))), concat(field('name'), '-', resourceGroup().name, '-', 'flowlog'), split(first(field('Microsoft.Network/networkSecurityGroups/flowLogs[*].id')), '/')[10])]"
+                  "value": "[if(empty(coalesce(field('Microsoft.Network/networkSecurityGroups/flowLogs'))), concat(take(concat(field('name'), '-', resourceGroup().name), 72), '-', 'flowlog'), split(first(field('Microsoft.Network/networkSecurityGroups/flowLogs[*].id')), '/')[10])]"
                 },
                 "location": {
                   "value": "[field('location')]"
                 },
                 "targetResource": {
                   "value": "[concat(resourceGroup().id, '/providers/Microsoft.Network/networkSecurityGroups/', field('name'))]"
+                },
+                "retentionDays": {
+                  "value": "[parameters('retentionDays')]"
                 }
               }
             }

@@ -1,13 +1,14 @@
 {
   "properties": {
-    "displayName": "Ensure that 'PHP version' is the latest, if used as a part of the WEB app",
+    "displayName": "App Service apps that use PHP should use a specified 'PHP version'",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Periodically, newer versions are released for PHP software either due to security flaws or to include additional functionality. Using the latest PHP version for web apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. Currently, this policy only applies to Linux web apps.",
+    "description": "Periodically, newer versions are released for PHP software either due to security flaws or to include additional functionality. Using the latest PHP version for App Service apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. This policy only applies to Linux apps. This policy requires you to specify a PHP version that meets your requirements.",
     "metadata": {
-      "version": "2.2.0",
+      "version": "3.2.0",
       "category": "App Service"
     },
+    "version": "3.2.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -23,10 +24,19 @@
       },
       "PHPLatestVersion": {
         "type": "String",
-        "defaultValue": "8.0",
+        "defaultValue": "8.1",
         "metadata": {
           "displayName": "Latest PHP version",
-          "description": "Latest supported PHP version for App Services"
+          "description": "Latest supported PHP version for App Services",
+          "deprecated": true
+        }
+      },
+      "LinuxPHPVersion": {
+        "type": "String",
+        "defaultValue": "",
+        "metadata": {
+          "displayName": "Linux PHP version",
+          "description": "Specify a supported PHP version for App Service"
         }
       }
     },
@@ -39,7 +49,7 @@
           },
           {
             "field": "kind",
-            "like": "app*"
+            "notContains": "functionapp"
           },
           {
             "field": "kind",
@@ -60,7 +70,7 @@
               },
               {
                 "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                "equals": "[concat('PHP|', parameters('PHPLatestVersion'))]"
+                "equals": "[concat('PHP|', parameters('LinuxPHPVersion'))]"
               }
             ]
           }

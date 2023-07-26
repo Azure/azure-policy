@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Modify - Configure IoT Central to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling the public network access property improves security by ensuring your IoT Central can only be accessed from a private endpoint. This policy disables public network access on IoT Hub resources.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Internet of Things"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.IoTCentral/iotApps"
+          },
+          {
+            "field": "Microsoft.IoTCentral/iotApps/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greater(requestContext().apiVersion, '2021-06-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.IoTCentral/iotApps/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d02e48d5-28d9-40d3-8ab8-301932a6f9cb",
+  "name": "d02e48d5-28d9-40d3-8ab8-301932a6f9cb"
+}

@@ -1,0 +1,422 @@
+{
+  "properties": {
+    "displayName": "Configure Kubernetes clusters with Flux v2 configuration using Git repository and HTTPS CA Certificate",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploy a 'fluxConfiguration' to Kubernetes clusters to assure that the clusters get their source of truth for workloads and configurations from the defined Git repository. This definition requires a HTTPS CA Certificate. For instructions, visit https://aka.ms/GitOpsFlux2Policy.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "configurationName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Configuration Instance Name",
+          "description": "The name for the fluxConfigurations resource in Azure. Maximum of 30 lowercase alphanumeric characters or hyphens. Must start and end with an alphanumeric character. Learn more about setting up GitOps configuration: https://aka.ms/doc-use-flux2."
+        }
+      },
+      "configurationNamespace": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Configuration Namespace",
+          "description": "The namespace in the cluster within which the Flux custom resources will be installed for this configuration. This can be an existing namespace or a new one that will be created when the configuration is deployed. Maximum of 63 lowercase alphanumeric characters or hyphens. Must start and end with an alphanumeric character."
+        },
+        "defaultValue": "default"
+      },
+      "configurationScope": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Configuration Scope",
+          "description": "The permission scope for the Flux configuration. Possible values are 'cluster' (create resources throughout cluster) or 'namespace' (create resources only in namespace)."
+        },
+        "allowedValues": [
+          "cluster",
+          "namespace"
+        ],
+        "defaultValue": "cluster"
+      },
+      "repositoryUrl": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Repository Url",
+          "description": "The URL for the Git repository. Formats supported: http://, https://, ssh://."
+        }
+      },
+      "repositoryTimeout": {
+        "type": "integer",
+        "metadata": {
+          "displayName": "Repository Timeout (seconds)",
+          "description": "The maximum allowed time, in seconds, for syncing the Git repository to the cluster, after which the sync fails and tries again in the next sync interval."
+        },
+        "defaultValue": 600
+      },
+      "repositorySyncInterval": {
+        "type": "integer",
+        "metadata": {
+          "displayName": "Repository Sync Interval (seconds)",
+          "description": "The time period, in seconds, between attempted syncs of the Git repository to the cluster."
+        },
+        "defaultValue": 600
+      },
+      "repositoryRefBranch": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Repository Reference Branch",
+          "description": "The branch within the GitRepository source to sync to the cluster."
+        },
+        "defaultValue": ""
+      },
+      "repositoryRefTag": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Repository Tag",
+          "description": "The tag within the GitRepository source to sync to the cluster. Takes precedence over branch."
+        },
+        "defaultValue": ""
+      },
+      "repositoryRefSemver": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Repository Semver Range",
+          "description": "The tag semver range within the GitRepository source to reconcile with the cluster. Takes precedence over tag and branch."
+        },
+        "defaultValue": ""
+      },
+      "repositoryRefCommit": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Repository Commit SHA",
+          "description": "The commit SHA within the GitRepository source to sync to the cluster. Takes precedence over semver and tag. May be used with branch."
+        },
+        "defaultValue": ""
+      },
+      "repositoryHttpsCACert": {
+        "type": "string",
+        "metadata": {
+          "displayName": "HTTPS CA Cert",
+          "description": "The base64-encoded HTTPS certificate authority contents used to access private git repositories over HTTPS."
+        }
+      },
+      "kustomizationName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Kustomization Name",
+          "description": "The name of the Kustomization. Maximum of 30 lowercase alphanumeric characters or hyphen. Must start and end with an alphanumeric character."
+        },
+        "defaultValue": "kustomization-1"
+      },
+      "kustomizationPath": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Kustomization Path",
+          "description": "The path within the source where the Kustomization will begin looking for manifests to reconcile. If left blank, the root path of the repository will be used."
+        },
+        "defaultValue": "./"
+      },
+      "kustomizationTimeout": {
+        "type": "integer",
+        "metadata": {
+          "displayName": "Kustomization Timeout (seconds)",
+          "description": "The sync timeout, in seconds, defines how long a Kustomization reconciliation will be allowed to continue before timing out."
+        },
+        "defaultValue": 600
+      },
+      "kustomizationSyncInterval": {
+        "type": "integer",
+        "metadata": {
+          "displayName": "Kustomization Sync Interval (seconds)",
+          "description": "The sync interval, in seconds, defines how often the Kustomization reconciles the cluster with the manifests to ensure that the cluster remains in sync with the GitRepository or Bucket source. A Kustomization sync interval more frequent than the source sync interval can be used to catch and reconcile any cluster drift."
+        },
+        "defaultValue": 600
+      },
+      "kustomizationRetryInterval": {
+        "type": "integer",
+        "metadata": {
+          "displayName": "Kustomization Retry Interval (seconds)",
+          "description": "The retry interval, in seconds, specifies how often the Kustomization will retry a previously failed reconciliation. If left blank, the value of the sync interval will be used."
+        },
+        "defaultValue": 600
+      },
+      "kustomizationPrune": {
+        "type": "boolean",
+        "metadata": {
+          "displayName": "Kustomization Prune",
+          "description": "Enable prune to assure that objects are removed from the cluster if they are removed from the GitRepository or Bucket source or when this Kustomization or GitOps configuration is removed from the cluster."
+        },
+        "defaultValue": false
+      },
+      "kustomizationForce": {
+        "type": "boolean",
+        "metadata": {
+          "displayName": "Kustomization Force",
+          "description": "Enable force to instruct the controller to recreate resources if they can't be changed due to an immutable field change."
+        },
+        "defaultValue": false
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.ContainerService/managedClusters"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.KubernetesConfiguration/fluxConfigurations",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/scope",
+                "equals": "[parameters('configurationScope')]"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/namespace",
+                "equals": "[parameters('configurationNamespace')]"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.url",
+                "equals": "[parameters('repositoryUrl')]"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.timeoutInSeconds",
+                "equals": "[parameters('repositoryTimeout')]"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.syncIntervalInSeconds",
+                "equals": "[parameters('repositorySyncInterval')]"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.repositoryRef.branch",
+                    "equals": "[parameters('repositoryRefBranch')]"
+                  },
+                  {
+                    "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.repositoryRef.tag",
+                    "equals": "[parameters('repositoryRefTag')]"
+                  },
+                  {
+                    "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.repositoryRef.semver",
+                    "equals": "[parameters('repositoryRefSemver')]"
+                  },
+                  {
+                    "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.repositoryRef.commit",
+                    "equals": "[parameters('repositoryRefCommit')]"
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/fluxConfigurations/gitRepository.httpsCAFile",
+                "equals": "[parameters('repositoryhttpsCACert')]"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "clusterResourceType": {
+                    "type": "string"
+                  },
+                  "clusterName": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "configurationNamespace": {
+                    "type": "string"
+                  },
+                  "configurationScope": {
+                    "type": "string"
+                  },
+                  "sourceKind": {
+                    "type": "string"
+                  },
+                  "repositoryUrl": {
+                    "type": "string"
+                  },
+                  "repositoryTimeout": {
+                    "type": "int"
+                  },
+                  "repositorySyncInterval": {
+                    "type": "int"
+                  },
+                  "repositoryRefBranch": {
+                    "type": "string"
+                  },
+                  "repositoryRefTag": {
+                    "type": "string"
+                  },
+                  "repositoryRefSemver": {
+                    "type": "string"
+                  },
+                  "repositoryRefCommit": {
+                    "type": "string"
+                  },
+                  "repositoryhttpsCACert": {
+                    "type": "string"
+                  },
+                  "kustomizationName": {
+                    "type": "string"
+                  },
+                  "kustomizationPath": {
+                    "type": "string"
+                  },
+                  "kustomizationTimeout": {
+                    "type": "int"
+                  },
+                  "kustomizationSyncInterval": {
+                    "type": "int"
+                  },
+                  "kustomizationRetryInterval": {
+                    "type": "int"
+                  },
+                  "kustomizationPrune": {
+                    "type": "bool"
+                  },
+                  "kustomizationForce": {
+                    "type": "bool"
+                  },
+                  "suspend": {
+                    "type": "bool"
+                  }
+                },
+                "resources": [
+                  {
+                    "comments": "Create a Flux configuration with GitRepository source in the connected (ARC) or managed (AKS) cluster and authenticating with an HTTPs CA certificate.",
+                    "type": "Microsoft.KubernetesConfiguration/fluxConfigurations",
+                    "name": "[parameters('configurationName')]",
+                    "apiVersion": "2022-03-01",
+                    "properties": {
+                      "scope": "[parameters('configurationScope')]",
+                      "namespace": "[parameters('configurationNamespace')]",
+                      "sourceKind": "[parameters('sourceKind')]",
+                      "gitRepository": {
+                        "url": "[parameters('repositoryUrl')]",
+                        "timeoutInSeconds": "[parameters('repositoryTimeout')]",
+                        "syncIntervalInSeconds": "[parameters('repositorySyncInterval')]",
+                        "repositoryRef": {
+                          "branch": "[if(not(empty(parameters('repositoryRefBranch'))), parameters('repositoryRefBranch'), json('null'))]",
+                          "tag": "[if(not(empty(parameters('repositoryRefTag'))), parameters('repositoryRefTag'), json('null'))]",
+                          "semver": "[if(not(empty(parameters('repositoryRefSemver'))), parameters('repositoryRefSemver'), json('null'))]",
+                          "commit": "[if(not(empty(parameters('repositoryRefCommit'))), parameters('repositoryRefCommit'), json('null'))]"
+                        },
+                        "httpsCACert": "[if(not(empty(parameters('repositoryhttpsCACert'))), parameters('repositoryhttpsCACert'), json('null'))]"
+                      },
+                      "kustomizations": {
+                        "[parameters('kustomizationName')]": {
+                          "path": "[parameters('kustomizationPath')]",
+                          "timeoutInSeconds": "[parameters('kustomizationTimeout')]",
+                          "syncIntervalInSeconds": "[parameters('kustomizationSyncInterval')]",
+                          "retryIntervalInSeconds": "[parameters('kustomizationRetryInterval')]",
+                          "prune": "[parameters('kustomizationPrune')]",
+                          "force": "[parameters('kustomizationForce')]"
+                        }
+                      },
+                      "suspend": "[parameters('suspend')]"
+                    },
+                    "scope": "[concat(if(contains(toLower(parameters('clusterResourceType')), toLower('connectedclusters')),'Microsoft.Kubernetes/connectedClusters/','Microsoft.ContainerService/managedClusters/'),parameters('clusterName'))]"
+                  }
+                ]
+              },
+              "parameters": {
+                "clusterName": {
+                  "value": "[field('name')]"
+                },
+                "clusterResourceType": {
+                  "value": "[field('type')]"
+                },
+                "configurationName": {
+                  "value": "[parameters('configurationName')]"
+                },
+                "configurationNamespace": {
+                  "value": "[parameters('configurationNamespace')]"
+                },
+                "configurationScope": {
+                  "value": "[parameters('configurationScope')]"
+                },
+                "sourceKind": {
+                  "value": "GitRepository"
+                },
+                "repositoryUrl": {
+                  "value": "[parameters('repositoryUrl')]"
+                },
+                "repositoryTimeout": {
+                  "value": "[parameters('repositoryTimeout')]"
+                },
+                "repositorySyncInterval": {
+                  "value": "[parameters('repositorySyncInterval')]"
+                },
+                "repositoryRefBranch": {
+                  "value": "[parameters('repositoryRefBranch')]"
+                },
+                "repositoryRefTag": {
+                  "value": "[parameters('repositoryRefTag')]"
+                },
+                "repositoryRefSemver": {
+                  "value": "[parameters('repositoryRefSemver')]"
+                },
+                "repositoryRefCommit": {
+                  "value": "[parameters('repositoryRefCommit')]"
+                },
+                "repositoryhttpsCACert": {
+                  "value": "[parameters('repositoryhttpsCACert')]"
+                },
+                "kustomizationName": {
+                  "value": "[parameters('kustomizationName')]"
+                },
+                "kustomizationPath": {
+                  "value": "[parameters('kustomizationPath')]"
+                },
+                "kustomizationTimeout": {
+                  "value": "[parameters('kustomizationTimeout')]"
+                },
+                "kustomizationSyncInterval": {
+                  "value": "[parameters('kustomizationSyncInterval')]"
+                },
+                "kustomizationRetryInterval": {
+                  "value": "[parameters('kustomizationRetryInterval')]"
+                },
+                "kustomizationPrune": {
+                  "value": "[parameters('kustomizationPrune')]"
+                },
+                "kustomizationForce": {
+                  "value": "[parameters('kustomizationForce')]"
+                },
+                "suspend": {
+                  "value": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2630c91f-8a20-8f43-14a2-2485b648e2a9",
+  "name": "2630c91f-8a20-8f43-14a2-2485b648e2a9"
+}

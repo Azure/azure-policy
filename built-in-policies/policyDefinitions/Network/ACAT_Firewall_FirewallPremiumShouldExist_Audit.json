@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "Subscription should configure the Azure Firewall Premium to provide additional layer of protection",
+    "policyType": "BuiltIn",
+    "description": "Azure Firewall Premium provides advanced threat protection that meets the needs of highly sensitive and regulated environments. Deploy Azure Firewall Premium to your subscription and make sure all the service traffic are protected by Azure Firewall Premium. To learn more about Azure Firewall Premium, visit https://aka.ms/fw-premium",
+    "mode": "All",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Network/azureFirewalls",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Network/azureFirewalls/sku.name",
+                "exists": true
+              },
+              {
+                "field": "Microsoft.Network/azureFirewalls/sku.tier",
+                "equals": "Premium"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f2c2d0a6-e183-4fc8-bd8f-363c65d3bbbf",
+  "name": "f2c2d0a6-e183-4fc8-bd8f-363c65d3bbbf"
+}

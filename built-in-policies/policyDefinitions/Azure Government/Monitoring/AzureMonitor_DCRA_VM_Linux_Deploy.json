@@ -1,13 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure Linux Virtual Machines to be associated with a Data Collection Rule",
+    "displayName": "Configure Linux Virtual Machines to be associated with a Data Collection Rule or a Data Collection Endpoint",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Association to link Linux virtual machines to the specified Data Collection Rule. The list of locations and OS images are updated over time as support is increased.",
+    "description": "Deploy Association to link Linux virtual machines to the specified Data Collection Rule or the specified Data Collection Endpoint. The list of locations and OS images are updated over time as support is increased.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Monitoring"
     },
+    "version": "2.0.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -32,9 +33,23 @@
       "dcrResourceId": {
         "type": "String",
         "metadata": {
-          "displayName": "Data Collection Rule Resource Id",
-          "description": "Resource Id of the Data Collection Rule to be applied on the Linux machines in scope."
+          "displayName": "Data Collection Rule Resource Id or Data Collection Endpoint Resource Id",
+          "description": "Resource Id of the Data Collection Rule or the Data Collection Endpoint to be applied on the Linux machines in scope.",
+          "portalReview": "true"
         }
+      },
+      "resourceType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Resource Type",
+          "description": "Either a Data Collection Rule (DCR) or a Data Collection Endpoint (DCE)",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "Microsoft.Insights/dataCollectionRules",
+          "Microsoft.Insights/dataCollectionEndpoints"
+        ],
+        "defaultValue": "Microsoft.Insights/dataCollectionRules"
       }
     },
     "policyRule": {
@@ -303,9 +318,18 @@
             "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
             "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
           ],
+          "evaluationDelay": "AfterProvisioning",
           "existenceCondition": {
-            "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
-            "equals": "[parameters('dcrResourceId')]"
+            "anyOf": [
+              {
+                "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+                "equals": "[parameters('dcrResourceId')]"
+              },
+              {
+                "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionEndpointId",
+                "equals": "[parameters('dcrResourceId')]"
+              }
+            ]
           },
           "deployment": {
             "properties": {
@@ -322,18 +346,35 @@
                   },
                   "dcrResourceId": {
                     "type": "string"
+                  },
+                  "resourceType": {
+                    "type": "string"
                   }
                 },
                 "variables": {
-                  "associationName": "[concat('assoc-', uniqueString(parameters('dcrResourceId')))]"
+                  "dcrAssociationName": "[concat('assoc-', uniqueString(concat(parameters('resourceName'), parameters('dcrResourceId'))))]",
+                  "dceAssociationName": "configurationAccessEndpoint",
+                  "dcrResourceType": "Microsoft.Insights/dataCollectionRules",
+                  "dceResourceType": "Microsoft.Insights/dataCollectionEndpoints"
                 },
                 "resources": [
                   {
-                    "name": "[variables('associationName')]",
+                    "condition": "[equals(parameters('resourceType'), variables('dcrResourceType'))]",
+                    "name": "[variables('dcrAssociationName')]",
                     "type": "Microsoft.Insights/dataCollectionRuleAssociations",
                     "apiVersion": "2021-04-01",
                     "properties": {
                       "dataCollectionRuleId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.Compute/virtualMachines/', parameters('resourceName'))]"
+                  },
+                  {
+                    "condition": "[equals(parameters('resourceType'), variables('dceResourceType'))]",
+                    "name": "[variables('dceAssociationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionEndpointId": "[parameters('dcrResourceId')]"
                     },
                     "scope": "[concat('Microsoft.Compute/virtualMachines/', parameters('resourceName'))]"
                   }
@@ -348,6 +389,9 @@
                 },
                 "dcrResourceId": {
                   "value": "[parameters('dcrResourceId')]"
+                },
+                "resourceType": {
+                  "value": "[parameters('resourceType')]"
                 }
               }
             }

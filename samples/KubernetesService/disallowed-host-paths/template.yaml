@@ -1,0 +1,95 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1disallowhostfilesystem
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1DisallowHostFilesystem
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            disallowedHostPaths:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1disallowhostfilesystem
+
+        # Disallow Rule:
+        ## parent or child path will be judged as violation. e.g. parameter disallowedHostPath.path is set as "/a/b", then mounting "/a" or "/a/b/c" will be both viewed as violation.
+        ## does not support windows
+
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            volume := input_hostpath_volumes[_]
+            disallowedPaths := get_disallowed_paths(input)
+            not input_hostpath_violation(disallowedPaths, volume)
+            msg := sprintf("HostPath volume %v is not disallowed, pod: %v. Disallowed path: %v", [volume, input.review.object.metadata.name, disallowedPaths])
+        }
+
+        input_hostpath_violation(disallowedPaths, volume) {
+            # An empty list means all host paths are allowed
+            disallowedPaths == []
+        }
+        input_hostpath_violation(disallowedPaths, volume) {
+            not input_hostpath_disallowed(disallowedPaths, volume)
+        }
+
+        get_disallowed_paths(arg) = out {
+            not arg.parameters
+            out = []
+        }
+        get_disallowed_paths(arg) = out {
+            not arg.parameters.disallowedHostPaths
+            out = []
+        }
+        get_disallowed_paths(arg) = out {
+            out = arg.parameters.disallowedHostPaths
+        }
+
+        input_hostpath_disallowed(disallowedPaths, volume) {
+            disallowedHostPath := disallowedPaths[_]
+            path_matches(disallowedHostPath, volume.hostPath.path)
+        }
+
+        input_hostpath_disallowed(disallowedPaths, volume) {
+            disallowedHostPath := disallowedPaths[_]
+            path_matches(volume.hostPath.path, disallowedHostPath)
+        }
+
+        # with prefix /foo, path_matches disallows "/foo", "/foo/", "/foo/bar" etc., but
+        # allows "/fool", "/etc/foo" etc.
+        path_matches(prefix, path) {
+            prefix != "/"
+            a := split(trim(prefix, "/"), "/")
+            b := split(trim(path, "/"), "/")
+            prefix_matches(a, b)
+        }
+        path_matches(prefix, path) {
+            # linux only policy
+            prefix == "/"
+        }
+        prefix_matches(a, b) {
+            count(a) <= count(b)
+            not any_not_equal_upto(a, b, count(a))
+        }
+
+        any_not_equal_upto(a, b, n) {
+            a[i] != b[i]
+            i < n
+        }
+
+        input_hostpath_volumes[v] {
+            v := input.review.object.spec.volumes[_]
+            has_field(v, "hostPath")
+        }
+
+        # has_field returns whether an object has a field
+        has_field(object, field) = true {
+            object[field]
+        }

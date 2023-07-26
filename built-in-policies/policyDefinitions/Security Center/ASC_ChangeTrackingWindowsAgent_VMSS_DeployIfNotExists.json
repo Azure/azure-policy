@@ -5,10 +5,11 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "2.0.0-preview",
       "category": "Security Center",
       "preview": true
     },
+    "version": "2.0.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -109,29 +110,27 @@
                     "equals": "WindowsServer"
                   },
                   {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "in": [
-                      "2008-R2-SP1",
-                      "2008-R2-SP1-smalldisk",
-                      "2012-Datacenter",
-                      "2012-Datacenter-smalldisk",
-                      "2012-R2-Datacenter",
-                      "2012-R2-Datacenter-smalldisk",
-                      "2016-Datacenter",
-                      "2016-Datacenter-Server-Core",
-                      "2016-Datacenter-Server-Core-smalldisk",
-                      "2016-Datacenter-smalldisk",
-                      "2016-Datacenter-with-Containers",
-                      "2016-Datacenter-with-RDSH",
-                      "2019-Datacenter",
-                      "2019-Datacenter-Core",
-                      "2019-Datacenter-Core-smalldisk",
-                      "2019-Datacenter-Core-with-Containers",
-                      "2019-Datacenter-Core-with-Containers-smalldisk",
-                      "2019-Datacenter-smalldisk",
-                      "2019-Datacenter-with-Containers",
-                      "2019-Datacenter-with-Containers-smalldisk",
-                      "2019-Datacenter-zhcn"
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2008-R2-SP1*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2012-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2016-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2019-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "2022-*"
+                      }
                     ]
                   }
                 ]
@@ -176,6 +175,14 @@
                   },
                   {
                     "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2022"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "*-WS2022-BYOL"
+                      },
                       {
                         "field": "Microsoft.Compute/imageOffer",
                         "like": "*-WS2019"
@@ -316,7 +323,7 @@
                   "vmExtensionName": "ChangeTracking-Windows",
                   "vmExtensionPublisher": "Microsoft.Azure.ChangeTrackingAndInventory",
                   "vmExtensionType": "ChangeTracking-Windows",
-                  "vmExtensionTypeHandlerVersion": "1.0"
+                  "vmExtensionTypeHandlerVersion": "2.0"
                 },
                 "resources": [
                   {
@@ -329,6 +336,7 @@
                       "type": "[variables('vmExtensionType')]",
                       "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
                       "autoUpgradeMinorVersion": true,
+                      "enableAutomaticUpgrade": true,
                       "settings": {},
                       "protectedSettings": {}
                     }

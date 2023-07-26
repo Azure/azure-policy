@@ -3,9 +3,10 @@
     "displayName": "Configure Azure Machine Learning workspace to use private DNS zones",
     "description": "Use private DNS zones to override the DNS resolution for a private endpoint. A private DNS zone links to your virtual network to resolve to Azure Machine Learning workspaces. Learn more at: https://docs.microsoft.com/azure/machine-learning/how-to-network-security-overview.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Machine Learning"
     },
+    "version": "1.1.0",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "parameters": {
@@ -16,6 +17,15 @@
           "description": "A private DNS zone id to connect to the private endpoint.",
           "strongType": "Microsoft.Network/privateDnsZones"
         }
+      },
+      "secondPrivateDnsZoneId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Second Private DNS Zone id",
+          "description": "A private DNS zone id to connect to the private endpoint.",
+          "strongType": "Microsoft.Network/privateDnsZones"
+        },
+        "defaultValue": ""
       },
       "effect": {
         "type": "String",
@@ -66,12 +76,39 @@
                   "privateDnsZoneId": {
                     "type": "string"
                   },
+                  "secondPrivateDnsZoneId": {
+                    "type": "string"
+                  },
                   "privateEndpointName": {
                     "type": "string"
                   },
                   "location": {
                     "type": "string"
                   }
+                },
+                "variables": {
+                  "bothPrivateDnsZoneConfigs": [
+                    {
+                      "name": "amlworkspace-privateDnsZone",
+                      "properties": {
+                        "privateDnsZoneId": "[parameters('privateDnsZoneId')]"
+                      }
+                    },
+                    {
+                      "name": "amlworkspace-secondPrivateDnsZone",
+                      "properties": {
+                        "privateDnsZoneId": "[parameters('secondPrivateDnsZoneId')]"
+                      }
+                    }
+                  ],
+                  "singlePrivateDnsZoneConfigs": [
+                    {
+                      "name": "amlworkspace-privateDnsZone",
+                      "properties": {
+                        "privateDnsZoneId": "[parameters('privateDnsZoneId')]"
+                      }
+                    }
+                  ]
                 },
                 "resources": [
                   {
@@ -80,14 +117,7 @@
                     "apiVersion": "2020-03-01",
                     "location": "[parameters('location')]",
                     "properties": {
-                      "privateDnsZoneConfigs": [
-                        {
-                          "name": "amlworkspace-privateDnsZone",
-                          "properties": {
-                            "privateDnsZoneId": "[parameters('privateDnsZoneId')]"
-                          }
-                        }
-                      ]
+                      "privateDnsZoneConfigs": "[if(not(empty(parameters('secondPrivateDnsZoneId'))), variables('bothPrivateDnsZoneConfigs'), variables('singlePrivateDnsZoneConfigs') )]"
                     }
                   }
                 ]
@@ -95,6 +125,9 @@
               "parameters": {
                 "privateDnsZoneId": {
                   "value": "[parameters('privateDnsZoneId')]"
+                },
+                "secondPrivateDnsZoneId": {
+                  "value": "[parameters('secondPrivateDnsZoneId')]"
                 },
                 "privateEndpointName": {
                   "value": "[field('name')]"

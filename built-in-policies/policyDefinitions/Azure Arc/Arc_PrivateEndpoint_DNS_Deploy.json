@@ -5,9 +5,10 @@
     "mode": "Indexed",
     "description": "Use private DNS zones to override the DNS resolution for a private endpoint. A private DNS zone links to your virtual network to resolve to Azure Arc Private Link Scopes. Learn more at: https://aka.ms/arc/privatelink.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.2.0",
       "category": "Azure Arc"
     },
+    "version": "1.2.0",
     "parameters": {
       "privateDnsZoneIDForGuestConfiguration": {
         "type": "String",
@@ -26,6 +27,16 @@
           "strongType": "Microsoft.Network/privateDnsZones",
           "assignPermissions": true
         }
+      },
+      "privateDnsZoneIDForKubernetesConfiguration": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private DNS Zone ID for privatelink.dp.kubernetesconfiguration.azure.com",
+          "description": "The private DNS zone ID used to resolve a private DNS Zone to the Kubernetes Configuration service.",
+          "strongType": "Microsoft.Network/privateDnsZones",
+          "assignPermissions": true
+        },
+        "defaultValue": ""
       },
       "effect": {
         "type": "String",
@@ -87,6 +98,9 @@
                   "privateDnsZoneIDForHybridResourceProvider": {
                     "type": "string"
                   },
+                  "privateDnsZoneIDForKubernetesConfiguration": {
+                    "type": "string"
+                  },
                   "privateEndpointName": {
                     "type": "string"
                   },
@@ -113,6 +127,12 @@
                           "properties": {
                             "privateDnsZoneId": "[parameters('privateDnsZoneIDForHybridResourceProvider')]"
                           }
+                        },
+                        {
+                          "name": "privatelink-dp-kubernetesconfiguration-azure-com",
+                          "properties": {
+                            "privateDnsZoneId": "[parameters('privateDnsZoneIDForKubernetesConfiguration')]"
+                          }
                         }
                       ]
                     }
@@ -125,6 +145,9 @@
                 },
                 "privateDnsZoneIDForHybridResourceProvider": {
                   "value": "[parameters('privateDnsZoneIDForHybridResourceProvider')]"
+                },
+                "privateDnsZoneIDForKubernetesConfiguration": {
+                  "value": "[parameters('privateDnsZoneIDForKubernetesConfiguration')]"
                 },
                 "privateEndpointName": {
                   "value": "[field('name')]"

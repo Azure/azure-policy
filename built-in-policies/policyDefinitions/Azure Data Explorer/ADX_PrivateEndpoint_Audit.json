@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Data Explorer cluster should use private link",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your Azure Data Explorer cluster, data leakage risks are reduced. Learn more about private links at: https://learn.microsoft.com/en-us/azure/data-explorer/security-network-private-endpoint.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Data Explorer"
+    },
+    "version": "1.0.0",
+    "mode": "indexed",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kusto/Clusters"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Kusto/Clusters/PrivateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.Kusto/Clusters/PrivateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f7735886-8927-431f-b201-c953922512b8",
+  "name": "f7735886-8927-431f-b201-c953922512b8"
+}

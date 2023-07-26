@@ -1,0 +1,124 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Enable Azure Monitor for Hybrid VMs with AMA",
+    "policyType": "BuiltIn",
+    "description": "Enable Azure Monitor for the hybrid virtual machines with AMA. Takes Log Analytics workspace as parameter and asks for an option to enable Processes and Dependencies.",
+    "metadata": {
+      "version": "2.1.1-preview",
+      "category": "Monitoring",
+      "preview": true
+    },
+    "version": "2.1.1-preview",
+    "parameters": {
+      "logAnalyticsWorkspace": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace"
+        }
+      },
+      "dataCollectionRuleName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Name of the Data Collection Rule(DCR)",
+          "description": "This is the name of the AMA-VMI Data Collection Rule(DCR)"
+        },
+        "defaultValue": "ama-vmi-default"
+      },
+      "enableProcessesAndDependencies": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Processes and Dependencies",
+          "description": "This is the flag for enabling processes and dependencies data collection in VMInsights"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for all constituent policies",
+          "description": "Enable or disable the execution of each of the constituent policies in the initiative."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "AzureMonitorAgent_Windows_HybridVM_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/94f686d6-9a24-4e19-91f1-de937dc171a4",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "AzureMonitorAgent_Linux_HybridVM_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/845857af-0333-4c5d-bbbc-6076697da122",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DependencyAgentExtension_AMA_Windows_HybridVM_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/84cfed75-dfd4-421b-93df-725b479d356a",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "enableProcessesAndDependencies": {
+            "value": "[parameters('enableProcessesAndDependencies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DependencyAgentExtension_Linux_HybridVM_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/08a4470f-b26d-428d-97f4-7e3e9c92b366",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "enableProcessesAndDependencies": {
+            "value": "[parameters('enableProcessesAndDependencies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "VMInsightsDCR_DCRA_HybridVM_Deploy",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7c4214e9-ea57-487a-b38e-310ec09bc21d",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "workspaceResourceId": {
+            "value": "[parameters('logAnalyticsWorkspace')]"
+          },
+          "userGivenDcrName": {
+            "value": "[parameters('dataCollectionRuleName')]"
+          },
+          "enableProcessesAndDependencies": {
+            "value": "[parameters('enableProcessesAndDependencies')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/59e9c3eb-d8df-473b-8059-23fd38ddd0f0",
+  "name": "59e9c3eb-d8df-473b-8059-23fd38ddd0f0"
+}

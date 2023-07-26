@@ -1,0 +1,79 @@
+{
+  "properties": {
+    "displayName": "Synapse Workspaces should use only Azure Active Directory identities for authentication",
+    "description": "Azure Active Directory (AAD) only authentication methods improves security by ensuring that Synapse Workspaces exclusively require AAD identities for authentication. Learn more at: https://aka.ms/Synapse.",
+    "policyType": "BuiltIn",
+    "mode": "indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Synapse"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Synapse/workspaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Synapse/workspaces/extraProperties",
+                "exists": false
+              },
+              {
+                "value": "[if(empty(field('Microsoft.Synapse/workspaces/extraProperties')), 0, length(intersection(field('Microsoft.Synapse/workspaces/extraProperties'), createObject('WorkspaceType', 'Normal'))))]",
+                "equals": 1
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentication",
+                "exists": "false"
+              },
+              {
+                "value": "[field('Microsoft.Synapse/workspaces/azureADOnlyAuthentication')]",
+                "notEquals": "true"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Synapse/workspaces/settings",
+                    "exists": "true"
+                  },
+                  {
+                    "value": "[if(empty(field('Microsoft.Synapse/workspaces/settings')), 0, length(intersection(field('Microsoft.Synapse/workspaces/settings'), createObject('azureADOnlyAuthentication', createObject('value', 'true', 'state', 'Inconsistent')))))]",
+                    "equals": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2158ddbe-fefa-408e-b43f-d4faef8ff3b8",
+  "name": "2158ddbe-fefa-408e-b43f-d4faef8ff3b8"
+}

@@ -3,11 +3,12 @@
     "displayName": "Configure Arc-enabled machines running SQL Server to have SQL Server extension installed.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled Windows Server, the latter should have SQL Server extension installed and the server's managed identity should be configured with Azure Connected SQL Server Onboarding role",
+    "description": "To ensure that SQL Server - Azure Arc resources are created by default when SQL Server instance is found on Azure Arc enabled Windows/Linux Server, the latter should have SQL Server extension installed",
     "metadata": {
-      "version": "2.1.0",
+      "version": "3.4.0",
       "category": "SQL"
     },
+    "version": "3.4.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -20,6 +21,27 @@
           "displayName": "Effect",
           "description": "Enable or disable the execution of the policy"
         }
+      },
+      "licenseType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "License type",
+          "description": "Specify the SQL Server license type you are using on this machine."
+        },
+        "allowedValues": [
+          "Paid",
+          "PAYG",
+          "LicenseOnly"
+        ],
+        "defaultValue": "Paid"
+      },
+      "excludedSqlInstances": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded SQL Instance names",
+          "description": "Specify the names of SQL Server instances that you want to exclude from onboarding to Azure Arc."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -28,10 +50,6 @@
           {
             "field": "type",
             "equals": "Microsoft.HybridCompute/machines"
-          },
-          {
-            "field": "Microsoft.HybridCompute/imageOffer",
-            "like": "windows*"
           },
           {
             "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
@@ -44,22 +62,32 @@
         "details": {
           "type": "Microsoft.HybridCompute/machines/extensions",
           "roleDefinitionIds": [
-            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
-            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+            "/providers/Microsoft.Authorization/roleDefinitions/7392c568-9289-4bde-aaaa-b7131215889d"
           ],
           "existenceCondition": {
             "allOf": [
-              {
-                "field": "Microsoft.HybridCompute/machines/extensions/type",
-                "equals": "WindowsAgent.SqlServer"
-              },
               {
                 "field": "Microsoft.HybridCompute/machines/extensions/publisher",
                 "equals": "Microsoft.AzureData"
               },
               {
                 "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
-                "equals": "Succeeded"
+                "in": [
+                  "Creating",
+                  "Succeeded"
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/type",
+                    "equals": "WindowsAgent.SqlServer"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/machines/extensions/type",
+                    "equals": "LinuxAgent.SqlServer"
+                  }
+                ]
               }
             ]
           },
@@ -75,23 +103,23 @@
                   },
                   "location": {
                     "type": "string"
+                  },
+                  "agentName": {
+                    "type": "string"
+                  },
+                  "licenseType": {
+                    "type": "string"
+                  },
+                  "excludedSqlInstances": {
+                    "type": "array"
                   }
                 },
                 "variables": {
-                  "vmExtensionName": "WindowsAgent.SqlServer",
+                  "vmExtensionName": "[parameters('agentName')]",
                   "vmExtensionPublisher": "Microsoft.AzureData",
-                  "vmExtensionType": "WindowsAgent.SqlServer"
+                  "vmExtensionType": "[parameters('agentName')]"
                 },
                 "resources": [
-                  {
-                    "type": "Microsoft.Authorization/roleAssignments",
-                    "apiVersion": "2021-04-01-preview",
-                    "name": "[guid(resourceGroup().id, parameters('vmName'), deployment().name)]",
-                    "properties": {
-                      "roleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/e8113dcec5294d3391fae9b972617508",
-                      "principalId": "[reference(resourceId('Microsoft.HybridCompute/machines', parameters('vmName')), '2021-05-20', 'Full').identity.principalId]"
-                    }
-                  },
                   {
                     "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
                     "type": "Microsoft.HybridCompute/machines/extensions",
@@ -104,7 +132,8 @@
                         "SqlManagement": {
                           "IsEnabled": true
                         },
-                        "ExcludedInstances": []
+                        "ExcludedSqlInstances": "[parameters('excludedSqlInstances')]",
+                        "LicenseType": "[parameters('licenseType')]"
                       }
                     }
                   }
@@ -122,6 +151,15 @@
                 },
                 "location": {
                   "value": "[field('location')]"
+                },
+                "agentName": {
+                  "value": "[if(startsWith(field('Microsoft.HybridCompute/machines/osName'),'windows'), 'WindowsAgent.SqlServer', 'LinuxAgent.SqlServer')]"
+                },
+                "licenseType": {
+                  "value": "[parameters('licenseType')]"
+                },
+                "excludedSqlInstances": {
+                  "value": "[parameters('excludedSqlInstances')]"
                 }
               }
             }

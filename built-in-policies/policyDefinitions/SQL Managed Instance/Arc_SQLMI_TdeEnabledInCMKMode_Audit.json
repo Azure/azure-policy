@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Customer managed key encryption must be used as part of CMK Encryption for Arc SQL managed instances.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "As a part of CMK encryption, Customer managed key encryption must be used. Learn more at https://aka.ms/EnableTDEArcSQLMI.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL Managed Instance"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureArcData/sqlmanagedinstances"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.AzureArcData/sqlManagedInstances/k8sRaw.spec.security.transparentDataEncryption",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.AzureArcData/sqlManagedInstances/k8sRaw.spec.security.transparentDataEncryption.mode",
+                "notEquals": "CustomerManaged"
+              },
+              {
+                "field": "Microsoft.AzureArcData/sqlManagedInstances/k8sRaw.spec.security.transparentDataEncryption.mode",
+                "equals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/413923f0-ff16-41ae-8583-90c5c5d9fa8f",
+  "name": "413923f0-ff16-41ae-8583-90c5c5d9fa8f"
+}

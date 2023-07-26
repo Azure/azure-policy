@@ -1,0 +1,71 @@
+{
+  "properties": {
+    "displayName": "Configure container registries to disable ARM audience token authentication.",
+    "description": "Disable Azure Active Directory ARM audience tokens for authentication to your registry. Only Azure Container Registry (ACR) audience tokens will be used for authentication. This will ensure only tokens meant for usage on the registry can be used for authentication. Disabling ARM audience tokens does not affect admin user's or scoped access tokens' authentication. Learn more at: https://aka.ms/acr/authentication.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Container Registry"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy.status",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy.status",
+                "equals": "enabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy.status",
+              "value": "disabled"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/785596ed-054f-41bc-aaec-7f3d0ba05725",
+  "name": "785596ed-054f-41bc-aaec-7f3d0ba05725"
+}

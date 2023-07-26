@@ -5,9 +5,10 @@
     "mode": "Indexed",
     "description": "Audit requirement of Azure Active Directory (Azure AD) to authorize requests for your storage account. By default, requests can be authorized with either Azure Active Directory credentials, or by using the account access key for Shared Key authorization. Of these two types of authorization, Azure AD provides superior security and ease of use over Shared Key, and is recommended by Microsoft.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "category": "Storage"
     },
+    "version": "2.0.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -31,8 +32,24 @@
             "equals": "Microsoft.Storage/storageAccounts"
           },
           {
-            "field": "Microsoft.Storage/storageAccounts/allowSharedKeyAccess",
-            "equals": "true"
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Storage/storageAccounts/allowSharedKeyAccess",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Storage/storageAccounts/allowSharedKeyAccess",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/allowSharedKeyAccess",
+                "equals": "true"
+              }
+            ]
           }
         ]
       },

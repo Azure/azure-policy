@@ -1,0 +1,43 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev2containerallowedimages
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV2ContainerAllowedImages
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            imageRegex:
+              type: string
+            excludedContainers:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev2containerallowedimages
+
+        violation[{"msg": msg}] {
+          container := input_containers[_]
+          not input_container_excluded(container.name)
+          not re_match(input.parameters.imageRegex, container.image)
+          msg := sprintf("Container image %v for container %v has not been allowed.", [container.image, container.name])
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }
+        input_container_excluded(field) {
+            field == input.parameters.excludedContainers[_]
+        }

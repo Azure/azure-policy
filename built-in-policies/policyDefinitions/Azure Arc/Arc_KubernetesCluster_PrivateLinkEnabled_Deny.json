@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Azure Arc-enabled kubernetes clusters should be configured with an Azure Arc Private Link Scope",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping Azure Arc-enabled servers to an Azure Arc Private Link Scope that is configured with a private endpoint, data leakage risks are reduced. Learn more about private links at: https://aka.ms/arc/privatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Arc"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kubernetes/connectedClusters"
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/privateLinkScopeResourceId",
+            "exists": false
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/12e7176a-4919-47ef-922b-34eda4c7f0ce",
+  "name": "12e7176a-4919-47ef-922b-34eda4c7f0ce"
+}

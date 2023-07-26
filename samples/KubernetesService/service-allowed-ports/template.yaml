@@ -1,0 +1,50 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1serviceallowedports
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1ServiceAllowedPorts
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedPorts:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1serviceallowedports
+
+        default VALID_PORT_RANGE = "[0-9]+-[0-9]+"
+
+        violation[{"msg": msg}] {
+          service := input.review.object
+          not service_is_kubernetes(service)
+          port = service.spec.ports[_]
+          format_int(port.port, 10, portstr)
+          satisfied := [good | allowedPort := input.parameters.allowedPorts[_]; good := within_port_range(portstr, allowedPort)]
+          not any(satisfied)
+          msg := sprintf("Port %v for service %v has not been allowed.", [portstr, service.metadata.name])
+        }
+
+        service_is_kubernetes(service) = true {
+          service.metadata.namespace == "default"
+          service.metadata.name == "kubernetes"
+        }
+
+        within_port_range(portstr, allowedPort) {
+          re_match(VALID_PORT_RANGE, allowedPort)
+          allowedPortRange := split(allowedPort, "-")
+          to_number(portstr) >= to_number(allowedPortRange[0])
+          to_number(portstr) <= to_number(allowedPortRange[1])
+        }
+
+        within_port_range(portstr, allowedPort) {
+          not re_match(VALID_PORT_RANGE, allowedPort)
+          portstr == allowedPort
+        }

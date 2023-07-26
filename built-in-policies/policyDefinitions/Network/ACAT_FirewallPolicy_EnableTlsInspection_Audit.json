@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "displayName": "Azure Firewall Premium should configure a valid intermediate certificate to enable TLS inspection",
+    "policyType": "BuiltIn",
+    "description": "Configure a valid intermediate certificate and enable Azure Firewall Premium TLS inspection to detect, alert, and mitigate malicious activity in HTTPS. To learn more about TLS inspection with Azure Firewall, visit https://aka.ms/fw-tlsinspect",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/firewallPolicies"
+          },
+          {
+            "field": "Microsoft.Network/firewallPolicies/sku.tier",
+            "equals": "Premium"
+          },
+          {
+            "field": "Microsoft.Network/firewallPolicies/transportSecurity.certificateAuthority",
+            "exists": false
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/711c24bb-7f18-4578-b192-81a6161e1f17",
+  "name": "711c24bb-7f18-4578-b192-81a6161e1f17"
+}

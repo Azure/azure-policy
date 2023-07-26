@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Arc-enabled Kubernetes clusters to use an Azure Arc Private Link Scope",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping Azure Arc-enabled servers to an Azure Arc Private Link Scope that is configured with a private endpoint, data leakage risks are reduced. Learn more about private links at: https://aka.ms/arc/privatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Arc"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "privateLinkScopeId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Azure Arc Private Link Scope ID",
+          "description": "The Azure Arc Private Link Scope to associate with the Azure Arc-enabled kubernetes cluster.",
+          "strongType": "Microsoft.HybridCompute/privateLinkScopes"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Kubernetes/connectedClusters"
+          },
+          {
+            "field": "Microsoft.Kubernetes/connectedClusters/privateLinkScopeResourceId",
+            "notEquals": "[parameters('privateLinkScopeId')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/34e09817-6cbe-4d01-b1a2-e0eac5743d41"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-05-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Kubernetes/connectedClusters/privateLinkScopeResourceId",
+              "value": "[parameters('privateLinkScopeId')]"
+            },
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-05-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Kubernetes/connectedClusters/privateLinkState",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4002015b-1272-4dfb-8943-fed4aeec39b6",
+  "name": "4002015b-1272-4dfb-8943-fed4aeec39b6"
+}

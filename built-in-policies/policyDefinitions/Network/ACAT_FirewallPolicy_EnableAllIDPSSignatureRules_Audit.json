@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Firewall Policy Premium should enable all IDPS signature rules to monitor all inbound and outbound traffic flows",
+    "policyType": "BuiltIn",
+    "description": "Enabling all Intrusion Detection and Prevention System (IDPS) signature rules is recommanded to better identify known threats in the traffic flows. To learn more about the Intrusion Detection and Prevention System (IDPS) signatures with Azure Firewall Premium, visit https://aka.ms/fw-idps-signature",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/firewallPolicies"
+          },
+          {
+            "field": "Microsoft.Network/firewallPolicies/sku.tier",
+            "equals": "Premium"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/firewallPolicies/intrusionDetection.configuration.signatureOverrides[*]",
+              "where": {
+                "field": "Microsoft.Network/firewallPolicies/intrusionDetection.configuration.signatureOverrides[*].mode",
+                "equals": "Off"
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/610b6183-5f00-4d68-86d2-4ab4cb3a67a5",
+  "name": "610b6183-5f00-4d68-86d2-4ab4cb3a67a5"
+}

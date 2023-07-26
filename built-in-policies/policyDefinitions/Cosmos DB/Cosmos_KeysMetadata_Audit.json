@@ -1,0 +1,86 @@
+{
+  "properties": {
+    "displayName": "Azure Cosmos DB accounts should not exceed the maximum number of days allowed since last account key regeneration.",
+    "description": "Regenerate your keys in the specified time to keep your data more protected.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cosmos DB"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "maxDaysSinceLastRegeneration": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Maximum number of days allowed since last account key regeneration.",
+          "description": "Maximum number of days allowed since last account key regeneration."
+        },
+        "defaultValue": "60"
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Policy Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.primaryMasterKey.generationTime",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.secondaryMasterKey.generationTime",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.primaryReadonlyMasterKey.generationTime",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.secondaryReadonlyMasterKey.generationTime",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.primaryMasterKey.generationTime",
+                "lessOrEquals": "[addDays(utcNow(), mul(int(parameters('maxDaysSinceLastRegeneration')), -1))]"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.secondaryMasterKey.generationTime",
+                "lessOrEquals": "[addDays(utcNow(), mul(int(parameters('maxDaysSinceLastRegeneration')), -1))]"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.primaryReadonlyMasterKey.generationTime",
+                "lessOrEquals": "[addDays(utcNow(), mul(int(parameters('maxDaysSinceLastRegeneration')), -1))]"
+              },
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/keysMetadata.secondaryReadonlyMasterKey.generationTime",
+                "lessOrEquals": "[addDays(utcNow(), mul(int(parameters('maxDaysSinceLastRegeneration')), -1))]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9d83ccb1-f313-46ce-9d39-a198bfdb51a0",
+  "name": "9d83ccb1-f313-46ce-9d39-a198bfdb51a0"
+}

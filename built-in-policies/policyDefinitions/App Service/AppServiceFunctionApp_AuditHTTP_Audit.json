@@ -5,16 +5,18 @@
     "mode": "Indexed",
     "description": "Use of HTTPS ensures server/service authentication and protects data in transit from network layer eavesdropping attacks.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "5.0.0",
       "category": "App Service"
     },
+    "version": "5.0.0",
     "parameters": {
       "effect": {
         "type": "string",
         "defaultValue": "Audit",
         "allowedValues": [
           "Audit",
-          "Disabled"
+          "Disabled",
+          "Deny"
         ],
         "metadata": {
           "displayName": "Effect",
@@ -26,50 +28,26 @@
       "if": {
         "allOf": [
           {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
             "field": "kind",
             "contains": "functionapp"
           },
           {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
             "anyOf": [
               {
-                "allOf": [
-                  {
-                    "field": "type",
-                    "equals": "Microsoft.Web/sites"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Web/sites/httpsOnly",
-                        "exists": "false"
-                      },
-                      {
-                        "field": "Microsoft.Web/sites/httpsOnly",
-                        "equals": "false"
-                      }
-                    ]
-                  }
-                ]
+                "field": "Microsoft.Web/sites/httpsOnly",
+                "exists": "false"
               },
               {
-                "allOf": [
-                  {
-                    "field": "type",
-                    "equals": "Microsoft.Web/sites/slots"
-                  },
-                  {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Web/sites/slots/httpsOnly",
-                        "exists": "false"
-                      },
-                      {
-                        "field": "Microsoft.Web/sites/slots/httpsOnly",
-                        "equals": "false"
-                      }
-                    ]
-                  }
-                ]
+                "field": "Microsoft.Web/sites/httpsOnly",
+                "equals": "false"
               }
             ]
           }

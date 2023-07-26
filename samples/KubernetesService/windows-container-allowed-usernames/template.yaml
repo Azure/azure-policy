@@ -1,0 +1,129 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1windowscontainerallowedusernames
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1WindowsContainerAllowedUsernames
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedUserNames:
+              type: array
+              items:
+                type: string
+              description: >-
+                The list of windows users and domain user groups to be allowed. To allow domain user group, use `DOMAIN\*`. Windows container by default run as ContainerUser. If the array is empty, the policy will block all windows container.
+            excludedImages:
+              type: array
+              items:
+                type: string
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1windowscontainerallowedusernames
+
+        import data.lib.exclude_container_image.is_excluded
+
+        violation[{"msg": msg}] {
+            isWindowsPod
+            container := input_containers[_]
+            not is_excluded(container)
+            not has_allowed_username(container)
+            not has_allowed_userdomain(container)
+            msg := sprintf("Container <%v> has disallowed runAsUsername. Disallowed users are %v", [container.name, input.parameters.allowedUserNames])
+        }
+
+        has_allowed_username(c) {
+            username := get_username(c)
+            input.parameters.allowedUserNames[_] == username
+        }
+
+        has_allowed_userdomain(c) {
+            username := get_username(c)
+            domainUserNameRegex := ".+\\\\.+"
+            re_match(domainUserNameRegex, username)
+
+            allowedUserName := input.parameters.allowedUserNames[_]
+            endswith(allowedUserName, "\\*")
+            startswith(username, trim_suffix(allowedUserName, "\\*"))
+        }
+
+        # returns runAsUserName if set for container
+        get_username(c) = out {
+            username := c.securityContext.windowsOptions.runAsUserName
+            out = username
+        }
+
+        # returns runAsUserName if NOT set for container but IS set for pod
+        get_username(c) = out {
+            not c.securityContext.windowsOptions.runAsUserName
+            username := input.review.object.spec.securityContext.windowsOptions.runAsUserName
+            out = username
+        }
+
+        # for nano based images, returns runAsUserName as ContainerUser if NOT set for both container and pod
+        get_username(c) = out {
+            not c.securityContext.windowsOptions.runAsUserName
+            not input.review.object.spec.securityContext.windowsOptions.runAsUserName
+            nano_server_image(c)
+            out = "ContainerUser"
+        }
+
+        # for other images, returns runAsUserName as ContainerAdministrator if NOT set for both container and pod
+        get_username(c) = out {
+            not c.securityContext.windowsOptions.runAsUserName
+            not input.review.object.spec.securityContext.windowsOptions.runAsUserName
+            not nano_server_image(c)
+            out = "ContainerAdministrator"
+        }
+
+        nano_server_image(c) {
+          not is_null(c.image)
+          regex.match("mcr.microsoft.com/windows/nanoserver:*", c.image)
+        }
+
+        nano_server_image(c) {
+          not is_null(c.image)
+          regex.match("mcr.microsoft.com/windows/nanoserver", c.image)
+        }
+
+        isWindowsPod {
+            ns := input.review.object.spec.nodeSelector
+            ns["kubernetes.io/os"] == "windows"
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }
+

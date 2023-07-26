@@ -1,0 +1,27 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1loadbalancernopublicips
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1LoadBalancerNoPublicIPs
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1loadbalancernopublicips
+
+        violation[{"msg": msg}] {
+          not loadbalancer_no_pip(input.review.object)
+          msg := sprintf("Load Balancers should not have public IPs. azure-load-balancer-internal annotation is required for %v", [input.review.object.metadata.name])
+        }
+
+        loadbalancer_no_pip(service) = true {
+          service.spec.type == "LoadBalancer"
+          service.metadata.annotations["service.beta.kubernetes.io/azure-load-balancer-internal"] == "true"
+        }
+
+        loadbalancer_no_pip(service) = true {
+          service.spec.type != "LoadBalancer"
+        }

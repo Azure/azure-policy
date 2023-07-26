@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "Azure Managed Grafana should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Managed Grafana, you can reduce data leakage risks.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Managed Grafana"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Dashboard/grafana"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Dashboard/grafana/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.Dashboard/grafana/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3a97e513-f75e-4230-8137-1efad4eadbbc",
+  "name": "3a97e513-f75e-4230-8137-1efad4eadbbc"
+}

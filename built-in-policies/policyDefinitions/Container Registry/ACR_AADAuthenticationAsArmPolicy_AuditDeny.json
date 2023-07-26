@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "Container registries should have ARM audience token authentication disabled.",
+    "description": "Disable Azure Active Directory ARM audience tokens for authentication to your registry. Only Azure Container Registry (ACR) audience tokens will be used for authentication. This will ensure only tokens meant for usage on the registry can be used for authentication. Disabling ARM audience tokens does not affect admin user's or scoped access tokens' authentication. Learn more at: https://aka.ms/acr/authentication.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Container Registry"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy.status",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/policies.azureADAuthenticationAsArmPolicy.status",
+                "equals": "enabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/42781ec6-6127-4c30-bdfa-fb423a0047d3",
+  "name": "42781ec6-6127-4c30-bdfa-fb423a0047d3"
+}

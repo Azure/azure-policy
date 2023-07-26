@@ -1,0 +1,49 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1blockdefault
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1BlockDefault
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1blockdefault
+
+        violation[{"msg": msg}] {
+          obj := input.review.object
+          is_default_namespace(obj.metadata)
+          not is_allowed(obj)
+          msg := sprintf("Usage of the default namespace is not allowed, name: %v, kind: %v", [obj.metadata.name, obj.kind])
+        }
+
+        is_default_namespace(metadata) {
+          not metadata.namespace
+        }
+
+        is_default_namespace(metadata) {
+          metadata.namespace == "default"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "ServiceAccount"
+          obj.metadata.name == "default"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "Secret"
+          obj.type == "kubernetes.io/service-account-token"
+          obj.metadata.annotations["kubernetes.io/service-account.name"] == "default"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "Service"
+          obj.metadata.name == "kubernetes"
+        }
+
+        is_allowed(obj) {
+          obj.kind == "ConfigMap"
+          obj.metadata.name == "kube-root-ca.crt"
+        }

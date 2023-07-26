@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Azure Managed Grafana workspaces should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access improves security by ensuring that your Azure Managed Grafana workspace isn't exposed on the public internet. Creating private endpoints can limit exposure of your workspaces.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Managed Grafana"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Dashboard/grafana"
+          },
+          {
+            "field": "Microsoft.Dashboard/grafana/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e8775d5a-73b7-4977-a39b-833ef0114628",
+  "name": "e8775d5a-73b7-4977-a39b-833ef0114628"
+}

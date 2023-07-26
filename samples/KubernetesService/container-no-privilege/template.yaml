@@ -1,0 +1,75 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev2noprivilege
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV2NoPrivilege
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            excludedContainers:
+              type: array
+              items:
+                type: string
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev2noprivilege
+
+        import data.lib.exclude_container_image.is_excluded
+
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            c := input_containers[_]
+            not input_container_excluded(c.name)
+            not is_excluded(c)
+            c.securityContext.privileged
+            msg := sprintf("Privileged container is not allowed: %v, securityContext: %v", [c.name, c.securityContext])
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }
+
+        input_container_excluded(field) {
+            field == input.parameters.excludedContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }

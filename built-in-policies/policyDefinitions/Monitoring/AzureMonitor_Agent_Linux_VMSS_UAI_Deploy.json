@@ -5,9 +5,10 @@
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Linux virtual machine scale sets for collecting telemetry data from the guest OS. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.2.0",
       "category": "Monitoring"
     },
+    "version": "3.2.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -48,6 +49,18 @@
         },
         "defaultValue": ""
       },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to Azure Monitor Agent-Supported Operating Systems",
+          "description": "If set to true, the policy will apply only to virtual machine scale sets with supported operating systems. Otherwise, the policy will apply to all virtual machine scale set resources in the assignment scope. For supported operating systems, see https://aka.ms/AMAOverview."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
       "listOfLinuxImageIdToInclude": {
         "type": "Array",
         "metadata": {
@@ -75,10 +88,11 @@
               "canadaeast",
               "centralindia",
               "centralus",
+              "centraluseuap",
               "eastasia",
-              "eastus2euap",
               "eastus",
               "eastus2",
+              "eastus2euap",
               "francecentral",
               "germanywestcentral",
               "japaneast",
@@ -89,10 +103,12 @@
               "northcentralus",
               "northeurope",
               "norwayeast",
+              "qatarcentral",
               "southafricanorth",
               "southcentralus",
               "southeastasia",
               "southindia",
+              "swedencentral",
               "switzerlandnorth",
               "uaenorth",
               "uksouth",
@@ -101,11 +117,35 @@
               "westeurope",
               "westindia",
               "westus",
-              "westus2"
+              "westus2",
+              "westus3",
+              "chinaeast",
+              "chinaeast2",
+              "chinaeast3",
+              "chinanorth",
+              "chinanorth2",
+              "chinanorth3",
+              "usgovarizona",
+              "usgovtexas",
+              "usgovvirginia",
+              "usdodeast",
+              "usdodcentral"
             ]
           },
           {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('scopeToSupportedImages')]",
+                    "equals": false
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
+                    "like": "Linux*"
+                  }
+                ]
+              },
               {
                 "field": "Microsoft.Compute/imageId",
                 "in": "[parameters('listOfLinuxImageIdToInclude')]"
@@ -120,6 +160,7 @@
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
                       "RHEL",
+                      "RHEL-ARM64",
                       "RHEL-BYOS",
                       "RHEL-HA",
                       "RHEL-SAP",
@@ -221,50 +262,11 @@
                     "equals": "Canonical"
                   },
                   {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "UbuntuServer"
-                  },
-                  {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSku",
-                        "in": [
-                          "14.04.0-lts",
-                          "14.04.1-lts",
-                          "14.04.2-lts",
-                          "14.04.3-lts",
-                          "14.04.4-lts",
-                          "14.04.5-lts"
-                        ]
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "UbuntuServer"
                       },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "in": [
-                          "16.04-lts",
-                          "16.04.0-lts",
-                          "16_04-lts-gen2",
-                          "16_04_0-lts-gen2"
-                        ]
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "in": [
-                          "18.04-lts",
-                          "18_04-lts-gen2"
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "allOf": [
-                  {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "Canonical"
-                  },
-                  {
-                    "anyOf": [
                       {
                         "field": "Microsoft.Compute/imageOffer",
                         "like": "0001-com-ubuntu-server-*"
@@ -276,20 +278,34 @@
                     ]
                   },
                   {
-                    "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "in": [
-                          "pro-16_04-lts",
-                          "pro-16_04-lts-gen2",
-                          "pro-18_04-lts",
-                          "pro-18_04-lts-gen2",
-                          "20_04-lts",
-                          "20_04-lts-gen2",
-                          "pro-20_04-lts",
-                          "pro-20_04-lts-gen2"
-                        ]
-                      }
+                    "field": "Microsoft.Compute/imageSku",
+                    "in": [
+                      "14.04.0-lts",
+                      "14.04.1-lts",
+                      "14.04.2-lts",
+                      "14.04.3-lts",
+                      "14.04.4-lts",
+                      "14.04.5-lts",
+                      "16_04_0-lts-gen2",
+                      "16_04-lts-gen2",
+                      "16.04-lts",
+                      "16.04.0-lts",
+                      "18_04-lts-arm64",
+                      "18_04-lts-gen2",
+                      "18.04-lts",
+                      "20_04-lts-arm64",
+                      "20_04-lts-gen2",
+                      "20_04-lts",
+                      "22_04-lts-gen2",
+                      "22_04-lts",
+                      "pro-16_04-lts-gen2",
+                      "pro-16_04-lts",
+                      "pro-18_04-lts-gen2",
+                      "pro-18_04-lts",
+                      "pro-20_04-lts-gen2",
+                      "pro-20_04-lts",
+                      "pro-22_04-lts-gen2",
+                      "pro-22_04-lts"
                     ]
                   }
                 ]
@@ -370,6 +386,38 @@
                 "allOf": [
                   {
                     "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "almalinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "almalinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "ctrliqinc1648673227698"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "rocky-8*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "rocky-8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
                     "equals": "credativ"
                   },
                   {
@@ -393,14 +441,39 @@
                   {
                     "field": "Microsoft.Compute/imageOffer",
                     "in": [
-                      "debian-10"
+                      "debian-10",
+                      "debian-11"
                     ]
                   },
                   {
                     "field": "Microsoft.Compute/imageSku",
                     "in": [
                       "10",
-                      "10-gen2"
+                      "10-gen2",
+                      "11",
+                      "11-gen2"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoftcblmariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cbl-mariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "in": [
+                      "1-gen2",
+                      "cbl-mariner-1",
+                      "cbl-mariner-2",
+                      "cbl-mariner-2-arm64",
+                      "cbl-mariner-2-gen2"
                     ]
                   }
                 ]
@@ -466,6 +539,7 @@
                       "type": "[variables('extensionType')]",
                       "typeHandlerVersion": "[variables('extensionTypeHandlerVersion')]",
                       "autoUpgradeMinorVersion": true,
+                      "enableAutomaticUpgrade": true,
                       "settings": {
                         "authentication": {
                           "managedIdentity": {

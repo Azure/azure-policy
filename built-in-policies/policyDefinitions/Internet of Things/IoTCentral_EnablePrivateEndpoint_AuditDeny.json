@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "IoT Central should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The private link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your IoT Central application instead of the entire service, you'll reduce your data leakage risks. Learn more about private links at: https://aka.ms/iotcentral-network-security-using-pe.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Internet of Things"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.IoTCentral/iotApps"
+          },
+          {
+            "count": {
+              "field": "Microsoft.IoTCentral/iotApps/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.IoTCentral/iotApps/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9ace2dbc-4b71-48b6-b2a7-428b0b2e3944",
+  "name": "9ace2dbc-4b71-48b6-b2a7-428b0b2e3944"
+}

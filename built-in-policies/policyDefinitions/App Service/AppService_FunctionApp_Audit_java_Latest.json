@@ -1,13 +1,14 @@
 {
   "properties": {
-    "displayName": "Ensure that 'Java version' is the latest, if used as a part of the Function app",
+    "displayName": "Function apps that use Java should use a specified 'Java version'",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Periodically, newer versions are released for Java software either due to security flaws or to include additional functionality. Using the latest Java version for Function apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. Currently, this policy only applies to Linux web apps.",
+    "description": "Periodically, newer versions are released for Java software either due to security flaws or to include additional functionality. Using the latest Java version for Function apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. This policy only applies to Linux apps. This policy requires you to specify a Java version that meets your requirements.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.1.0",
       "category": "App Service"
     },
+    "version": "3.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -26,7 +27,16 @@
         "defaultValue": "11",
         "metadata": {
           "displayName": "Latest Java version",
-          "description": "Latest supported Java version for App Services"
+          "description": "Latest supported Java version for App Services",
+          "deprecated": true
+        }
+      },
+      "LinuxJavaVersion": {
+        "type": "String",
+        "defaultValue": "",
+        "metadata": {
+          "displayName": "Linux Java version",
+          "description": "Specify a supported Java version for Function apps"
         }
       }
     },
@@ -39,7 +49,11 @@
           },
           {
             "field": "kind",
-            "like": "functionapp*"
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
           },
           {
             "field": "kind",
@@ -60,7 +74,7 @@
               },
               {
                 "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
-                "like": "[concat('*', parameters('JavaLatestVersion'))]"
+                "equals": "[concat('JAVA|', parameters('LinuxJavaVersion'))]"
               }
             ]
           }

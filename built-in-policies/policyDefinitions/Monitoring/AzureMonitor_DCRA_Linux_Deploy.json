@@ -1,13 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure Linux Machines to be associated with a Data Collection Rule",
+    "displayName": "Configure Linux Machines to be associated with a Data Collection Rule or a Data Collection Endpoint",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Association to link Linux virtual machines, virtual machine scale sets, and Arc machines to the specified Data Collection Rule. The list of locations and OS images are updated over time as support is increased.",
+    "description": "Deploy Association to link Linux virtual machines, virtual machine scale sets, and Arc machines to the specified Data Collection Rule or the specified Data Collection Endpoint. The list of locations and OS images are updated over time as support is increased.",
     "metadata": {
-      "version": "4.0.0",
+      "version": "6.1.0",
       "category": "Monitoring"
     },
+    "version": "6.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -32,9 +33,23 @@
       "dcrResourceId": {
         "type": "String",
         "metadata": {
-          "displayName": "Data Collection Rule Resource Id",
-          "description": "Resource Id of the Data Collection Rule to be applied on the Linux machines in scope."
+          "displayName": "Data Collection Rule Resource Id or Data Collection Endpoint Resource Id",
+          "description": "Resource Id of the Data Collection Rule or the Data Collection Endpoint to be applied on the Linux machines in scope.",
+          "portalReview": "true"
         }
+      },
+      "resourceType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Resource Type",
+          "description": "Either a Data Collection Rule (DCR) or a Data Collection Endpoint (DCE)",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "Microsoft.Insights/dataCollectionRules",
+          "Microsoft.Insights/dataCollectionEndpoints"
+        ],
+        "defaultValue": "Microsoft.Insights/dataCollectionRules"
       }
     },
     "policyRule": {
@@ -54,9 +69,9 @@
               "centralindia",
               "centralus",
               "eastasia",
-              "eastus2euap",
               "eastus",
               "eastus2",
+              "eastus2euap",
               "francecentral",
               "francesouth",
               "germanywestcentral",
@@ -73,6 +88,7 @@
               "southcentralus",
               "southeastasia",
               "southindia",
+              "swedencentral",
               "switzerlandnorth",
               "switzerlandwest",
               "uaenorth",
@@ -82,7 +98,8 @@
               "westeurope",
               "westindia",
               "westus",
-              "westus2"
+              "westus2",
+              "westus3"
             ]
           },
           {
@@ -129,6 +146,7 @@
                             "field": "Microsoft.Compute/imageOffer",
                             "in": [
                               "RHEL",
+                              "RHEL-ARM64",
                               "RHEL-BYOS",
                               "RHEL-HA",
                               "RHEL-SAP",
@@ -230,50 +248,11 @@
                             "equals": "Canonical"
                           },
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "equals": "UbuntuServer"
-                          },
-                          {
                             "anyOf": [
                               {
-                                "field": "Microsoft.Compute/imageSku",
-                                "in": [
-                                  "14.04.0-lts",
-                                  "14.04.1-lts",
-                                  "14.04.2-lts",
-                                  "14.04.3-lts",
-                                  "14.04.4-lts",
-                                  "14.04.5-lts"
-                                ]
+                                "field": "Microsoft.Compute/imageOffer",
+                                "equals": "UbuntuServer"
                               },
-                              {
-                                "field": "Microsoft.Compute/imageSku",
-                                "in": [
-                                  "16.04-lts",
-                                  "16.04.0-lts",
-                                  "16_04-lts-gen2",
-                                  "16_04_0-lts-gen2"
-                                ]
-                              },
-                              {
-                                "field": "Microsoft.Compute/imageSku",
-                                "in": [
-                                  "18.04-lts",
-                                  "18_04-lts-gen2"
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "allOf": [
-                          {
-                            "field": "Microsoft.Compute/imagePublisher",
-                            "equals": "Canonical"
-                          },
-                          {
-                            "anyOf": [
                               {
                                 "field": "Microsoft.Compute/imageOffer",
                                 "like": "0001-com-ubuntu-server-*"
@@ -285,20 +264,34 @@
                             ]
                           },
                           {
-                            "anyOf": [
-                              {
-                                "field": "Microsoft.Compute/imageSku",
-                                "in": [
-                                  "pro-16_04-lts",
-                                  "pro-16_04-lts-gen2",
-                                  "pro-18_04-lts",
-                                  "pro-18_04-lts-gen2",
-                                  "20_04-lts",
-                                  "20_04-lts-gen2",
-                                  "pro-20_04-lts",
-                                  "pro-20_04-lts-gen2"
-                                ]
-                              }
+                            "field": "Microsoft.Compute/imageSku",
+                            "in": [
+                              "14.04.0-lts",
+                              "14.04.1-lts",
+                              "14.04.2-lts",
+                              "14.04.3-lts",
+                              "14.04.4-lts",
+                              "14.04.5-lts",
+                              "16_04_0-lts-gen2",
+                              "16_04-lts-gen2",
+                              "16.04-lts",
+                              "16.04.0-lts",
+                              "18_04-lts-arm64",
+                              "18_04-lts-gen2",
+                              "18.04-lts",
+                              "20_04-lts-arm64",
+                              "20_04-lts-gen2",
+                              "20_04-lts",
+                              "22_04-lts-gen2",
+                              "22_04-lts",
+                              "pro-16_04-lts-gen2",
+                              "pro-16_04-lts",
+                              "pro-18_04-lts-gen2",
+                              "pro-18_04-lts",
+                              "pro-20_04-lts-gen2",
+                              "pro-20_04-lts",
+                              "pro-22_04-lts-gen2",
+                              "pro-22_04-lts"
                             ]
                           }
                         ]
@@ -379,6 +372,38 @@
                         "allOf": [
                           {
                             "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "almalinux"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "almalinux"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "like": "8*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "ctrliqinc1648673227698"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "rocky-8*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "like": "rocky-8*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
                             "equals": "credativ"
                           },
                           {
@@ -402,14 +427,39 @@
                           {
                             "field": "Microsoft.Compute/imageOffer",
                             "in": [
-                              "debian-10"
+                              "debian-10",
+                              "debian-11"
                             ]
                           },
                           {
                             "field": "Microsoft.Compute/imageSku",
                             "in": [
                               "10",
-                              "10-gen2"
+                              "10-gen2",
+                              "11",
+                              "11-gen2"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoftcblmariner"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "cbl-mariner"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "in": [
+                              "1-gen2",
+                              "cbl-mariner-1",
+                              "cbl-mariner-2",
+                              "cbl-mariner-2-arm64",
+                              "cbl-mariner-2-gen2"
                             ]
                           }
                         ]
@@ -430,9 +480,18 @@
             "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
             "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
           ],
+          "evaluationDelay": "AfterProvisioning",
           "existenceCondition": {
-            "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
-            "equals": "[parameters('dcrResourceId')]"
+            "anyOf": [
+              {
+                "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+                "equals": "[parameters('dcrResourceId')]"
+              },
+              {
+                "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionEndpointId",
+                "equals": "[parameters('dcrResourceId')]"
+              }
+            ]
           },
           "deployment": {
             "properties": {
@@ -452,15 +511,21 @@
                   },
                   "type": {
                     "type": "string"
+                  },
+                  "resourceType": {
+                    "type": "string"
                   }
                 },
                 "variables": {
-                  "associationName": "[concat('assoc-', uniqueString(parameters('dcrResourceId')))]"
+                  "dcrAssociationName": "[concat('assoc-', uniqueString(concat(parameters('resourceName'), parameters('dcrResourceId'))))]",
+                  "dceAssociationName": "configurationAccessEndpoint",
+                  "dcrResourceType": "Microsoft.Insights/dataCollectionRules",
+                  "dceResourceType": "Microsoft.Insights/dataCollectionEndpoints"
                 },
                 "resources": [
                   {
-                    "condition": "[equals(toLower(parameters('type')), 'microsoft.compute/virtualmachines')]",
-                    "name": "[variables('associationName')]",
+                    "condition": "[and(equals(toLower(parameters('type')), 'microsoft.compute/virtualmachines'), equals(parameters('resourceType'), variables('dcrResourceType')))]",
+                    "name": "[variables('dcrAssociationName')]",
                     "type": "Microsoft.Insights/dataCollectionRuleAssociations",
                     "apiVersion": "2021-04-01",
                     "properties": {
@@ -469,8 +534,18 @@
                     "scope": "[concat('Microsoft.Compute/virtualMachines/', parameters('resourceName'))]"
                   },
                   {
-                    "condition": "[equals(toLower(parameters('type')), 'microsoft.compute/virtualmachinescalesets')]",
-                    "name": "[variables('associationName')]",
+                    "condition": "[and(equals(toLower(parameters('type')), 'microsoft.compute/virtualmachines'), equals(parameters('resourceType'), variables('dceResourceType')))]",
+                    "name": "[variables('dceAssociationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionEndpointId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.Compute/virtualMachines/', parameters('resourceName'))]"
+                  },
+                  {
+                    "condition": "[and(equals(toLower(parameters('type')), 'microsoft.compute/virtualmachinescalesets'), equals(parameters('resourceType'), variables('dcrResourceType')))]",
+                    "name": "[variables('dcrAssociationName')]",
                     "type": "Microsoft.Insights/dataCollectionRuleAssociations",
                     "apiVersion": "2021-04-01",
                     "properties": {
@@ -479,12 +554,32 @@
                     "scope": "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('resourceName'))]"
                   },
                   {
-                    "condition": "[equals(toLower(parameters('type')), 'microsoft.hybridcompute/machines')]",
-                    "name": "[variables('associationName')]",
+                    "condition": "[and(equals(toLower(parameters('type')), 'microsoft.compute/virtualmachinescalesets'), equals(parameters('resourceType'), variables('dceResourceType')))]",
+                    "name": "[variables('dceAssociationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionEndpointId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('resourceName'))]"
+                  },
+                  {
+                    "condition": "[and(equals(toLower(parameters('type')), 'microsoft.hybridcompute/machines'), equals(parameters('resourceType'), variables('dcrResourceType')))]",
+                    "name": "[variables('dcrAssociationName')]",
                     "type": "Microsoft.Insights/dataCollectionRuleAssociations",
                     "apiVersion": "2021-04-01",
                     "properties": {
                       "dataCollectionRuleId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.HybridCompute/machines/', parameters('resourceName'))]"
+                  },
+                  {
+                    "condition": "[and(equals(toLower(parameters('type')), 'microsoft.hybridcompute/machines'), equals(parameters('resourceType'), variables('dceResourceType')))]",
+                    "name": "[variables('dceAssociationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionEndpointId": "[parameters('dcrResourceId')]"
                     },
                     "scope": "[concat('Microsoft.HybridCompute/machines/', parameters('resourceName'))]"
                   }
@@ -502,6 +597,9 @@
                 },
                 "type": {
                   "value": "[field('type')]"
+                },
+                "resourceType": {
+                  "value": "[parameters('resourceType')]"
                 }
               }
             }

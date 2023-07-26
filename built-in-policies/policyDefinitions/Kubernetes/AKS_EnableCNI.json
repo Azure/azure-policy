@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Azure Kubernetes Clusters should use Azure CNI",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure CNI is a prerequisite for some Azure Kubernetes Service features, including Azure network policies, Windows node pools and virtual nodes add-on. Learn more at: https://aka.ms/aks-azure-cni",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy",
+          "portalReview": true
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "Microsoft.ContainerService/managedClusters/networkProfile.networkPlugin",
+            "notEquals": "azure"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/46238e2f-3f6f-4589-9f3f-77bed4116e67",
+  "name": "46238e2f-3f6f-4589-9f3f-77bed4116e67"
+}

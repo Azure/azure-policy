@@ -5,9 +5,10 @@
     "mode": "Indexed",
     "description": "Deploy Dependency agent for Linux virtual machines if the VM Image (OS) is in the list defined and the agent is not installed.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "5.0.0",
       "category": "Monitoring"
     },
+    "version": "5.0.0",
     "parameters": {
       "listOfImageIdToInclude": {
         "type": "Array",
@@ -122,30 +123,74 @@
                     "equals": "SUSE"
                   },
                   {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "in": [
-                      "SLES",
-                      "SLES-HPC",
-                      "SLES-HPC-Priority",
-                      "SLES-SAP",
-                      "SLES-SAP-BYOS",
-                      "SLES-Priority",
-                      "SLES-BYOS",
-                      "SLES-SAPCAL",
-                      "SLES-Standard"
-                    ]
-                  },
-                  {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "in": [
-                          "12-SP2",
-                          "12-SP3",
-                          "12-SP4",
-                          "12-SP5",
-                          "15",
-                          "15-SP1"
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "SLES",
+                              "SLES-HPC",
+                              "SLES-HPC-Priority",
+                              "SLES-SAP",
+                              "SLES-SAP-BYOS",
+                              "SLES-Priority",
+                              "SLES-BYOS",
+                              "SLES-SAPCAL",
+                              "SLES-Standard"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "in": [
+                                  "12-SP2",
+                                  "12-SP3",
+                                  "12-SP4",
+                                  "12-sp4-gen2",
+                                  "12-SP5",
+                                  "15",
+                                  "15-SP1"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-12-sp5*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-15-sp1*"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "sles-sap-15-sp1*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "equals": "gen1"
+                          }
                         ]
                       }
                     ]
@@ -245,13 +290,13 @@
                   "vmExtensionName": "DependencyAgentLinux",
                   "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
                   "vmExtensionType": "DependencyAgentLinux",
-                  "vmExtensionTypeHandlerVersion": "9.6"
+                  "vmExtensionTypeHandlerVersion": "9.10"
                 },
                 "resources": [
                   {
                     "type": "Microsoft.Compute/virtualMachines/extensions",
                     "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
-                    "apiVersion": "2018-06-01",
+                    "apiVersion": "2021-04-01",
                     "location": "[parameters('location')]",
                     "properties": {
                       "publisher": "[variables('vmExtensionPublisher')]",

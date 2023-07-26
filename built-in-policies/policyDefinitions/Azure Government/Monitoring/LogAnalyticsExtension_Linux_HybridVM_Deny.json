@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "displayName": "The legacy Log Analytics extension should not be installed on Azure Arc enabled Linux servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Automatically prevent installation of the legacy Log Analytics Agent as the final step of migrating from legacy agents to Azure Monitor Agent. After you have uninstalled existing legacy extensions, this policy will deny all future installations of the legacy agent extension on Azure Arc enabled Linux servers. Learn more: https://aka.ms/migratetoAMA",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Deny",
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines/extensions"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+            "equals": "Microsoft.EnterpriseCloud.Monitoring"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/extensions/type",
+            "equals": "OmsAgentForLinux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bd58d393-162c-4134-bcd6-a6a5484a37a1",
+  "name": "bd58d393-162c-4134-bcd6-a6a5484a37a1"
+}

@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "Web Application Firewall (WAF) should enable all firewall rules for Application Gateway",
+    "policyType": "BuiltIn",
+    "description": "Enabling all Web Application Firewall (WAF) rules strengthens your application security and protects your web applications against common vulnerabilities. To learn more about Web Application Firewall (WAF) with Application Gateway, visit https://aka.ms/waf-ag",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Network"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/applicationGateways"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/applicationGateways/webApplicationFirewallConfiguration.disabledRuleGroups[*]"
+            },
+            "notEquals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/632d3993-e2c0-44ea-a7db-2eca131f356d",
+  "name": "632d3993-e2c0-44ea-a7db-2eca131f356d"
+}

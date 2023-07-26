@@ -5,9 +5,10 @@
     "mode": "Indexed",
     "description": "Deploys the diagnostic settings for Key Vault to stream to a regional Log Analytics workspace when any Key Vault which is missing this diagnostic settings is created or updated.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "3.0.0",
       "category": "Monitoring"
     },
+    "version": "3.0.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -61,6 +62,18 @@
           "displayName": "Enable logs",
           "description": "Whether to enable logs stream to the Log Analytics workspace - True or False"
         }
+      },
+      "matchWorkspace": {
+        "type": "boolean",
+        "defaultValue": false,
+        "allowedValues": [
+          true,
+          false
+        ],
+        "metadata": {
+          "displayName": "Workspace id must match",
+          "description": "Whether to require that the workspace of the diagnostic settings matches the workspace deployed by this policy"
+        }
       }
     },
     "policyRule": {
@@ -73,14 +86,23 @@
         "details": {
           "type": "Microsoft.Insights/diagnosticSettings",
           "name": "[parameters('profileName')]",
+          "evaluationDelay": "AfterProvisioning",
           "existenceCondition": {
             "allOf": [
               {
                 "count": {
                   "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
                   "where": {
-                    "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
-                    "equals": "[parameters('logsEnabled')]"
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                        "equals": "[parameters('logsEnabled')]"
+                      },
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                        "equals": "AuditEvent"
+                      }
+                    ]
                   }
                 },
                 "greaterOrEquals": 1
@@ -94,6 +116,18 @@
                   }
                 },
                 "greaterOrEquals": 1
+              },
+              {
+                "anyOf": [
+                  {
+                    "value": "[parameters('matchWorkspace')]",
+                    "equals": false
+                  },
+                  {
+                    "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                    "equals": "[parameters('logAnalytics')]"
+                  }
+                ]
               }
             ]
           },

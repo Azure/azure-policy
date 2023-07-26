@@ -1,0 +1,41 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1flexvolumes
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1FlexVolumes
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            allowedFlexVolumeDrivers:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1flexvolumes
+
+        violation[{"msg": msg, "details": {}}] {
+            volume := input_flexvolumes[_]
+            not input_flexvolumes_allowed(volume)
+            msg := sprintf("FlexVolume %v is not allowed, pod: %v. Allowed drivers: %v", [volume, input.review.object.metadata.name, input.parameters.allowedFlexVolumeDrivers])
+        }
+
+        input_flexvolumes_allowed(volume) {
+            input.parameters.allowedFlexVolumeDrivers[_] == volume.flexVolume.driver
+        }
+
+        input_flexvolumes[v] {
+            v := input.review.object.spec.volumes[_]
+            has_field(v, "flexVolume")
+        }
+
+        # has_field returns whether an object has a field
+        has_field(object, field) = true {
+            object[field]
+        }

@@ -1,0 +1,110 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev2selinux
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV2SELinux
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+            allowedSELinuxOptions:
+              type: array
+              items:
+                type: object
+                properties:
+                  level:
+                      type: string
+                  role:
+                      type: string
+                  type:
+                      type: string
+                  user:
+                      type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev2selinux
+
+        import data.lib.exclude_container_image.is_excluded
+
+        # Disallow top level custom SELinux options
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            has_field(input.review.object.spec.securityContext, "seLinuxOptions")
+            not input_seLinuxOptions_allowed(input.review.object.spec.securityContext.seLinuxOptions)
+            msg := sprintf("SELinux options is not allowed, pod: %v. Allowed options: %v", [input.review.object.metadata.name, input.parameters.allowedSELinuxOptions])
+        }
+        # Disallow container level custom SELinux options
+        violation[{"msg": msg, "details": {}}] {
+            not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+            c := input_security_context[_]
+            not is_excluded(c)
+            has_field(c.securityContext, "seLinuxOptions")
+            not input_seLinuxOptions_allowed(c.securityContext.seLinuxOptions)
+            msg := sprintf("SELinux options is not allowed, pod: %v, container %v. Allowed options: %v", [input.review.object.metadata.name, c.name, input.parameters.allowedSELinuxOptions])
+        }
+
+        input_seLinuxOptions_allowed(options) {
+            params := input.parameters.allowedSELinuxOptions[_]
+            field_allowed("level", options, params)
+            field_allowed("role", options, params)
+            field_allowed("type", options, params)
+            field_allowed("user", options, params)
+        }
+
+        field_allowed(field, options, params) {
+            params[field] == options[field]
+        }
+        field_allowed(field, options, params) {
+            not has_field(options, field)
+        }
+
+        input_security_context[c] {
+            c := input.review.object.spec.containers[_]
+            has_field(c.securityContext, "seLinuxOptions")
+        }
+        input_security_context[c] {
+            c := input.review.object.spec.initContainers[_]
+            has_field(c.securityContext, "seLinuxOptions")
+        }
+        input_security_context[c] {
+            c := input.review.object.spec.ephemeralContainers[_]
+            has_field(c.securityContext, "seLinuxOptions")
+        }
+
+        # has_field returns whether an object has a field
+        has_field(object, field) = true {
+            object[field]
+        }
+
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }

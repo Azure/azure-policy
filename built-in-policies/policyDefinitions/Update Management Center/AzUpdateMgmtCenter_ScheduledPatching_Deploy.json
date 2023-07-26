@@ -5,16 +5,18 @@
     "mode": "Indexed",
     "description": "You can use update management center (private preview) in Azure to save recurring deployment schedules to install operating system updates for your Windows Server and Linux machines in Azure, in on-premises environments, and in other cloud environments connected using Azure Arc-enabled servers. This policy will also change the patch mode for the Azure Virtual Machine to 'AutomaticByPlatform'. See more: https://aka.ms/umc-scheduled-patching",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "3.5.0-preview",
       "category": "Update Management Center",
       "preview": true
     },
+    "version": "3.5.0-preview",
     "parameters": {
       "maintenanceConfigurationResourceId": {
         "type": "String",
         "metadata": {
           "displayName": "Maintenance Configuration ARM ID",
-          "description": "ARM ID of Maintenance Configuration which will be used for scheduling."
+          "description": "ARM ID of Maintenance Configuration which will be used for scheduling.",
+          "assignPermissions": true
         }
       },
       "resourceGroups": {
@@ -121,8 +123,51 @@
                     ]
                   },
                   {
-                    "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-                    "in": "[parameters('operatingSystemTypes')]"
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "in": "[parameters('operatingSystemTypes')]"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "value": "Linux",
+                            "in": "[parameters('operatingSystemTypes')]"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "sles-12-sp5",
+                              "sles-15-sp2",
+                              "centos-lvm",
+                              "Centos",
+                              "RHEL-RAW",
+                              "RHEL",
+                              "aks",
+                              "cbl-mariner",
+                              "0001-com-ubuntu-pro-focal",
+                              "0001-com-ubuntu-server-focal",
+                              "0001-com-ubuntu-pro-bionic",
+                              "UbuntuServer"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "value": "Windows",
+                            "in": "[parameters('operatingSystemTypes')]"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "WindowsServer"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -225,6 +270,18 @@
                   {
                     "anyOf": [
                       {
+                        "value": "[field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption')]",
+                        "Equals": "Attach"
+                      },
+                      {
+                        "value": "[field('Microsoft.Compute/imageId')]",
+                        "contains": "Microsoft.Compute/galleries"
+                      },
+                      {
+                        "value": "[field('Microsoft.Compute/imageId')]",
+                        "contains": "Microsoft.Compute/images"
+                      },
+                      {
                         "allOf": [
                           {
                             "field": "Microsoft.Compute/imagePublisher",
@@ -240,7 +297,11 @@
                                   },
                                   {
                                     "field": "Microsoft.Compute/imageSKU",
-                                    "equals": "18.04-LTS"
+                                    "in": [
+                                      "16.04-LTS",
+                                      "18.04-LTS",
+                                      "18_04-LTS-Gen2"
+                                    ]
                                   }
                                 ]
                               },
@@ -264,7 +325,10 @@
                                   },
                                   {
                                     "field": "Microsoft.Compute/imageSKU",
-                                    "equals": "20_04-lts"
+                                    "in": [
+                                      "20_04-lts",
+                                      "20_04-lts-gen2"
+                                    ]
                                   }
                                 ]
                               },
@@ -281,6 +345,43 @@
                                 ]
                               }
                             ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoftcblmariner"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "cbl-mariner"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "cbl-mariner-1",
+                              "1-gen2",
+                              "cbl-mariner-2",
+                              "cbl-mariner-2-gen2"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-aks"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "aks"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "equals": "aks-engine-ubuntu-1804-202112"
                           }
                         ]
                       },
@@ -316,6 +417,7 @@
                                       "8.2",
                                       "8_3",
                                       "8_4",
+                                      "8_5",
                                       "8-LVM"
                                     ]
                                   }
@@ -344,26 +446,50 @@
                             "equals": "OpenLogic"
                           },
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "equals": "Centos"
-                          },
-                          {
-                            "field": "Microsoft.Compute/imageSKU",
-                            "in": [
-                              "7.2",
-                              "7.3",
-                              "7.4",
-                              "7.5",
-                              "7.6",
-                              "7.7",
-                              "7_8",
-                              "7_9",
-                              "7-LVM",
-                              "8.0",
-                              "8_1",
-                              "8_2",
-                              "8_3",
-                              "8-lvm"
+                            "anyOf": [
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "Centos"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "in": [
+                                      "7.2",
+                                      "7.3",
+                                      "7.4",
+                                      "7.5",
+                                      "7.6",
+                                      "7.7",
+                                      "7_8",
+                                      "7_9",
+                                      "7_9-gen2",
+                                      "8.0",
+                                      "8_1",
+                                      "8_2",
+                                      "8_3",
+                                      "8_4",
+                                      "8_5"
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "centos-lvm"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "in": [
+                                      "7-lvm",
+                                      "8-lvm"
+                                    ]
+                                  }
+                                ]
+                              }
                             ]
                           }
                         ]
@@ -406,9 +532,25 @@
                               "2008-R2-SP1",
                               "2012-R2-Datacenter",
                               "2016-Datacenter",
+                              "2016-datacenter-gensecond",
                               "2016-Datacenter-Server-Core",
+                              "2016-datacenter-smalldisk",
+                              "2016-datacenter-with-containers",
                               "2019-Datacenter",
-                              "2019-Datacenter-Core"
+                              "2019-Datacenter-Core",
+                              "2019-datacenter-gensecond",
+                              "2019-datacenter-smalldisk",
+                              "2019-datacenter-smalldisk-g2",
+                              "2019-datacenter-with-containers",
+                              "2022-datacenter",
+                              "2022-datacenter-g2",
+                              "2022-datacenter-core",
+                              "2022-datacenter-core-g2",
+                              "2022-datacenter-azure-edition",
+                              "2022-datacenter-azure-edition-core",
+                              "2022-datacenter-azure-edition-core-smalldisk",
+                              "2022-datacenter-azure-edition-smalldisk",
+                              "2022-datacenter-smalldisk-g2"
                             ]
                           }
                         ]
@@ -430,8 +572,8 @@
           "type": "Microsoft.Maintenance/configurationAssignments",
           "evaluationDelay": "AfterProvisioningSuccess",
           "existenceCondition": {
-            "value": "true",
-            "equals": "false"
+            "field": "Microsoft.Maintenance/configurationAssignments/maintenanceConfigurationId",
+            "equals": "[parameters('maintenanceConfigurationResourceId')]"
           },
           "deployment": {
             "properties": {
@@ -446,8 +588,14 @@
                 "osType": {
                   "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType'), field('Microsoft.HybridCompute/machines/osName'))]"
                 },
+                "osTypeFromPublisher": {
+                  "value": "[if(contains(tolower(field('Microsoft.Compute/imagePublisher')), 'window'), 'windows', 'linux')]"
+                },
                 "patchMode": {
                   "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.patchMode'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.patchMode')), 'NA')]"
+                },
+                "bypassCheckValue": {
+                  "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(or(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), contains(tolower(field('Microsoft.Compute/imagePublisher')), 'window')), if(empty(field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings')), bool('false'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule')), if(empty(field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings')), bool('false'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule'))), bool('false'))]"
                 },
                 "location": {
                   "value": "[field('location')]"
@@ -466,15 +614,21 @@
                   "osType": {
                     "type": "String"
                   },
+                  "osTypeFromPublisher": {
+                    "type": "String"
+                  },
                   "patchMode": {
                     "type": "string"
+                  },
+                  "bypassCheckValue": {
+                    "type": "bool"
                   },
                   "location": {
                     "type": "string"
                   }
                 },
                 "variables": {
-                  "osType": "[toLower(parameters('osType'))]",
+                  "osType": "[toLower(if(empty(parameters('osType')), parameters('osTypeFromPublisher'), parameters('osType')))]",
                   "automaticByPlatformPatchMode": "AutomaticByPlatform",
                   "configAssignmentName": "[concat(uniqueString(tolower(parameters('maintenanceConfigurationResourceId'))), '-AzPolicy')]",
                   "isAzureMachine": "[contains(tolower(parameters('machineResourceId')), tolower('/providers/microsoft.compute/virtualmachines/'))]",
@@ -482,18 +636,24 @@
                   "linuxOSProfile": {
                     "linuxConfiguration": {
                       "patchSettings": {
-                        "patchMode": "[variables('automaticByPlatformPatchMode')]"
+                        "patchMode": "[variables('automaticByPlatformPatchMode')]",
+                        "automaticByPlatformSettings": {
+                          "bypassPlatformSafetyChecksOnUserSchedule": true
+                        }
                       }
                     }
                   },
                   "windowsOSProfile": {
                     "windowsConfiguration": {
                       "patchSettings": {
-                        "patchMode": "[variables('automaticByPlatformPatchMode')]"
+                        "patchMode": "[variables('automaticByPlatformPatchMode')]",
+                        "automaticByPlatformSettings": {
+                          "bypassPlatformSafetyChecksOnUserSchedule": true
+                        }
                       }
                     }
                   },
-                  "patchModeShouldBeChanged": "[and(variables('isAzureMachine'), not(equals(parameters('patchMode'), variables('automaticByPlatformPatchMode'))))]",
+                  "patchModeShouldBeChanged": "[and(variables('isAzureMachine'), or(not(equals(parameters('patchMode'), variables('automaticByPlatformPatchMode'))), not(equals(parameters('bypassCheckValue'), bool('true')))))]",
                   "machineName": "[last(split(parameters('machineResourceId'), '/'))]",
                   "updatedOSProfile": "[if(equals(variables('osType'), 'windows'), variables('windowsOSProfile'), variables('linuxOSProfile'))]"
                 },
@@ -501,7 +661,7 @@
                   {
                     "condition": "[variables('patchModeShouldBeChanged')]",
                     "type": "Microsoft.Compute/virtualMachines",
-                    "apiVersion": "2021-07-01",
+                    "apiVersion": "2023-03-01",
                     "name": "[variables('machineName')]",
                     "location": "[parameters('location')]",
                     "properties": {

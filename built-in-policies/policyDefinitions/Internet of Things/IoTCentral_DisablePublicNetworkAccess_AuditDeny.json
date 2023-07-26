@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Public network access should be disabled for IoT Central",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To improve the security of IoT Central, ensure that it isn't exposed to the public internet and can only be accessed from a private endpoint. Disable the public network access property as described in https://aka.ms/iotcentral-restrict-public-access. This option disables access from any public address space outside the Azure IP range, and denies all logins that match IP or virtual network-based firewall rules. This reduces data leakage risks.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Internet of Things"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.IoTCentral/iotApps"
+          },
+          {
+            "field": "Microsoft.IoTCentral/iotApps/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cd870362-211d-4cad-9ad9-11e5ea4ebbc1",
+  "name": "cd870362-211d-4cad-9ad9-11e5ea4ebbc1"
+}

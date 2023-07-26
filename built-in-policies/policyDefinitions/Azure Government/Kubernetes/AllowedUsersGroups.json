@@ -3,17 +3,19 @@
     "displayName": "Kubernetes cluster pods and containers should only run with approved user and group IDs",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Control the user, primary group, supplemental group and file system group IDs that pods and containers can use to run in a Kubernetes Cluster. This recommendation is part of Pod Security Policies which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for AKS Engine and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
+    "description": "Control the user, primary group, supplemental group and file system group IDs that pods and containers can use to run in a Kubernetes Cluster. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "5.0.0",
+      "version": "7.1.1",
       "category": "Kubernetes"
     },
+    "version": "7.1.1",
     "parameters": {
       "effect": {
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'deny' blocks the non-compliant resource creation or update. 'disabled' turns off the policy."
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy.",
+          "portalReview": true
         },
         "allowedValues": [
           "audit",
@@ -29,12 +31,13 @@
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design. \"azure-extensions-usage-system\" is optional to remove."
         },
         "defaultValue": [
           "kube-system",
           "gatekeeper-system",
-          "azure-arc"
+          "azure-arc",
+          "azure-extensions-usage-system"
         ]
       },
       "namespaces": {
@@ -108,7 +111,8 @@
         "type": "String",
         "metadata": {
           "displayName": "Run as user rule",
-          "description": "The 'RunAsUser' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MustRunAsNonRoot requires the pod be submitted with non-zero runAsUser or have USER directive defined (using a numeric UID) in the image. RunAsAny allows any runAsUser to be specified"
+          "description": "The 'RunAsUser' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MustRunAsNonRoot requires the pod be submitted with non-zero runAsUser or have USER directive defined (using a numeric UID) in the image. RunAsAny allows any runAsUser to be specified",
+          "portalReview": true
         },
         "allowedValues": [
           "MustRunAs",
@@ -121,7 +125,8 @@
         "type": "Object",
         "metadata": {
           "displayName": "Allowed user ID ranges",
-          "description": "The user ID ranges that are allowed for containers to use."
+          "description": "The user ID ranges that are allowed for containers to use. Set 'max' as '-1' to skip max limit evaluation. Empty array blocks every defined value for 'MustRunAs'.",
+          "portalReview": true
         },
         "defaultValue": {
           "ranges": []
@@ -159,7 +164,8 @@
         "type": "String",
         "metadata": {
           "displayName": "Run as group rule",
-          "description": "The 'RunAsGroup' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MayRunAs does not require that 'RunAsGroup' be specified. RunAsAny allows any"
+          "description": "The 'RunAsGroup' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MayRunAs does not require that 'RunAsGroup' be specified. RunAsAny allows any",
+          "portalReview": true
         },
         "allowedValues": [
           "MustRunAs",
@@ -172,7 +178,8 @@
         "type": "Object",
         "metadata": {
           "displayName": "Allowed group ID ranges",
-          "description": "The group ID ranges that are allowed for containers to use."
+          "description": "The group ID ranges that are allowed for containers to use. Set 'max' as '-1' to skip max limit evaluation. Empty array blocks every defined value for 'MustRunAs' and 'MayRunAs'.",
+          "portalReview": true
         },
         "defaultValue": {
           "ranges": []
@@ -210,7 +217,8 @@
         "type": "String",
         "metadata": {
           "displayName": "Supplemental group rule",
-          "description": "The 'SupplementalGroups' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MayRunAs does not require that 'SupplementalGroups' be specified. RunAsAny allows any"
+          "description": "The 'SupplementalGroups' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MayRunAs does not require that 'SupplementalGroups' be specified. RunAsAny allows any",
+          "portalReview": true
         },
         "allowedValues": [
           "MustRunAs",
@@ -223,7 +231,8 @@
         "type": "Object",
         "metadata": {
           "displayName": "Allowed supplemental group ID ranges",
-          "description": "The supplemental group ID ranges that are allowed for containers to use."
+          "description": "The supplemental group ID ranges that are allowed for containers to use. Set 'max' as '-1' to skip max limit evaluation. Empty array blocks every defined value for 'MustRunAs' and 'MayRunAs'.",
+          "portalReview": true
         },
         "defaultValue": {
           "ranges": []
@@ -261,7 +270,8 @@
         "type": "String",
         "metadata": {
           "displayName": "File system group rule",
-          "description": "The 'FSGroup' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MayRunAs does not require that 'FSGroup' be specified. RunAsAny allows any"
+          "description": "The 'FSGroup' rule that containers are allowed to run with. MustRunAs requires at least one range to be specified. MayRunAs does not require that 'FSGroup' be specified. RunAsAny allows any",
+          "portalReview": true
         },
         "allowedValues": [
           "MustRunAs",
@@ -274,7 +284,8 @@
         "type": "Object",
         "metadata": {
           "displayName": "Allowed file system group ID ranges",
-          "description": "The file system group ranges that are allowed for pods to use."
+          "description": "The file system group ranges that are allowed for pods to use. Set 'max' as '-1' to skip max limit evaluation. Empty array blocks every defined value for 'MustRunAs' and 'MayRunAs'.",
+          "portalReview": true
         },
         "defaultValue": {
           "ranges": []
@@ -320,7 +331,8 @@
         "type": "Array",
         "metadata": {
           "displayName": "Image exclusions",
-          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository.",
+          "portalReview": true
         },
         "defaultValue": []
       }
@@ -329,6 +341,7 @@
       "if": {
         "field": "type",
         "in": [
+          "Microsoft.Kubernetes/connectedClusters",
           "Microsoft.ContainerService/managedClusters"
         ]
       },

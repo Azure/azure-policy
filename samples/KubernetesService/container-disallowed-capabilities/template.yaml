@@ -1,0 +1,92 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev3disallowedcapabilities
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV3DisallowedCapabilities
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            disallowedCapabilities:
+              type: array
+              items:
+                type: string
+            excludedContainers:
+              type: array
+              items:
+                type: string
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev3disallowedcapabilities
+
+        import data.lib.exclude_container_image.is_excluded
+
+        violation[{"msg": msg}] {
+          not input.review.object.spec.nodeSelector["kubernetes.io/os"] == "windows"
+          container := input_containers[_]
+          not input_container_excluded(container.name)
+          not is_excluded(container)
+          has_disallowed_capabilities(container)
+          msg := sprintf("container <%v> has a disallowed capability. Disallowed capabilities are %v", [container.name, get_default(input.parameters, "disallowedCapabilities", [])])
+        }
+
+        has_disallowed_capabilities(container) {
+          input.parameters.disallowedCapabilities[_] == container.securityContext.capabilities.add[_]
+        }
+        has_disallowed_capabilities(container) {
+          input.parameters.disallowedCapabilities[_] == "*"
+        }
+
+        get_default(obj, param, _default) = out {
+          out = obj[param]
+        }
+
+        get_default(obj, param, _default) = out {
+          not obj[param]
+          not obj[param] == false
+          out = _default
+        }
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }
+        input_container_excluded(field) {
+            field == input.parameters.excludedContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }

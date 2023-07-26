@@ -5,16 +5,18 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Given Kubernetes resource type should not be deployed in certain namespace.",
     "metadata": {
-      "version": "1.1.0-preview",
+      "version": "3.2.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
+    "version": "3.2.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy.",
+          "portalReview": true
         },
         "allowedValues": [
           "Audit",
@@ -27,12 +29,13 @@
         "type": "Array",
         "metadata": {
           "displayName": "Namespace exclusions",
-          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design. \"azure-extensions-usage-system\" is optional to remove."
         },
         "defaultValue": [
           "kube-system",
           "gatekeeper-system",
-          "azure-arc"
+          "azure-arc",
+          "azure-extensions-usage-system"
         ]
       },
       "namespaces": {
@@ -105,14 +108,16 @@
         "type": "String",
         "metadata": {
           "displayName": "Resource Kind",
-          "description": "Kubernetes resource kind to to reject. One assignment can only restrict single resource kind. It is case-sensitive, please start with upper case. For example \"Pod\""
+          "description": "Kubernetes resource kind to to reject. One assignment can only restrict single resource kind. It is case-sensitive, please start with upper case. For example \"Pod\"",
+          "portalReview": true
         }
       },
       "apiGroups": {
         "type": "Array",
         "metadata": {
           "displayName": "Resource api group",
-          "description": "Kubernetes resource api group to reject. Empty string includes the core apiGroup"
+          "description": "Kubernetes resource api group to reject. Empty string includes the core apiGroup",
+          "portalReview": true
         },
         "defaultValue": [
           ""
@@ -123,6 +128,7 @@
       "if": {
         "field": "type",
         "in": [
+          "Microsoft.Kubernetes/connectedClusters",
           "Microsoft.ContainerService/managedClusters"
         ]
       },

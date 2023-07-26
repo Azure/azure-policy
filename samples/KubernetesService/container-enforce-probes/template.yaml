@@ -1,0 +1,90 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev2containerenforceprobes
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV2ContainerEnforceProbes
+      validation:
+        openAPIV3Schema:
+          properties:
+            enforceProbes:
+              type: array
+              items:
+                type: string
+            excludedContainers:
+              type: array
+              items:
+                type: string
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded
+                from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+                It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name)
+                in order to avoid unexpectedly excluding images from an untrusted repository.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev2containerenforceprobes
+
+        import data.lib.exclude_container_image.is_excluded
+        
+        # Rule:
+        ## Parameter enforceProbes is one string array that will define which kinds of probes to be enforced for all the containers (init container excludes). The allowed values could be livenessProbes and readinessProbes for now
+        ## Once certain probe is enforces, e.g. livenessProbes, the policy will check on all containers(except init) if they have livenessProbes field. Besides, the probes should at least have defined one of the probe_types, "tcpSocket", "httpGet" or "exec"
+        
+        probe_type_set = probe_types {
+          probe_types := {type | type := ["tcpSocket", "httpGet", "exec"][_]}
+        }
+        violation[{"msg": msg}] {
+          container := input_containers[_]
+          not input_container_excluded(container.name)
+          not is_excluded(container)
+          probe := input.parameters.enforceProbes[_]
+          probe_is_missing(container, probe)
+          msg := get_violation_message(container, input.review, probe)
+        }
+        probe_is_missing(ctr, probe) = true {
+          not ctr[probe]
+        }
+        probe_is_missing(ctr, probe) = true {
+          probe_field_empty(ctr, probe)
+        }
+        probe_field_empty(ctr, probe) = true {
+          probe_fields := {field | ctr[probe][field]}
+          diff_fields := probe_type_set - probe_fields
+          count(diff_fields) == count(probe_type_set)
+        }
+        get_violation_message(container, review, probe) = msg {
+          msg := sprintf("Container <%v> in your Pod <%v> has no <%v>. Required probes: %v", [container.name, review.object.metadata.name, probe, input.parameters.enforceProbes])
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.containers[_]
+        }
+        input_container_excluded(field) {
+          field == input.parameters.excludedContainers[_]
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }
