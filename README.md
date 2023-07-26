@@ -272,5 +272,23 @@ These resource types do not allow Policy exemptions on resources due to [deny as
 
 - Microsoft.Databricks/*
 
-  
+### Resource types with unsupported property names
+Currently Azure Policy supports only alphanumeric characters for property and alias names. There are a handful of resource types with property names containing non-alphanumeric characters. These properties cannot currently be onboarded to Azure Policy:
+
+Microsoft.Cache/Redis/
+  - redisConfiguration.rdb-backup-enabled
+  - redisConfiguration.rdb-backup-frequency
+  - redisConfiguration.rdb-backup-max-snapshot-count
+  - redisConfiguration.rdb-storage-connection-string
+  - redisConfiguration.aof-storage-connection-string-0
+  - redisConfiguration.aof-storage-connection-string-1
+  - redisConfiguration.maxfragmentationmemory-reserved
+  - redisConfiguration.maxmemory-policy
+  - redisConfiguration.maxmemory-reserved
+  - redisConfiguration.maxmemory-delta
+  - redisConfiguration.aof-backup-enabled
+  - redisConfiguration.zonal-configuration
+  - redisConfiguration.preferred-data-archive-auth-method
+  - redisConfiguration.preferred-data-persistence-auth-method
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
