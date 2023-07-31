@@ -1,0 +1,64 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1containerrestrictedimagepulls
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1ContainerRestrictedImagePulls
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            excludedImages:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1containerrestrictedimagepulls
+
+        has_key(object, key) {
+          _ = object[key]
+        }        
+
+        violation[{"msg": msg}] {
+          container := input_containers[_]
+          not is_excluded(container)
+          not has_key(input.review.object.spec, "imagePullSecrets")
+          namespace := input.review.namespace
+          pod := input.review.object.metadata.name
+          msg := sprintf("%s in %s does not have imagePullSecrets. Unauthenticated image pulls are not recommended.", [pod, namespace])
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.containers[_]
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.initContainers[_]
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }
+
+        is_excluded(container) {
+            exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+            img := container.image
+            exclusion := exclude_images[_]
+            matches_exclusion(img, exclusion)
+        }
+
+        matches_exclusion(img, exclusion) {
+            not endswith(exclusion, "*")
+            exclusion == img
+        }
+        
+        matches_exclusion(img, exclusion) {
+            endswith(exclusion, "*")
+            prefix := trim_suffix(exclusion, "*")
+            startswith(img, prefix)
+        }        

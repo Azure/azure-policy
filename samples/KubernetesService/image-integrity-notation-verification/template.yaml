@@ -1,0 +1,139 @@
+apiVersion: templates.gatekeeper.sh/v1beta1
+kind: ConstraintTemplate
+metadata:
+  name: k8sazurev1notationverification
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAzureV1NotationVerification
+      validation:
+        # Schema for the `parameters` field
+        openAPIV3Schema:
+          properties:
+            excludedImages:
+              description: >-
+                Any container that uses an image that matches an entry in this list will be excluded from enforcement. Prefix-matching can be signified with `*`. For example: `my-image-*`.
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sazurev1notationverification
+
+        import data.lib.exclude_container_image.is_excluded
+
+        # Get data from Ratify external data source
+        remote_data := response{
+            digests := [ digest | container = input_containers[_]; not is_excluded(container); digest = get_image_digest(container)]
+            response := external_data({"provider": "ratify-provider", "keys": digests})
+        }
+
+        # Base Gatekeeper violation
+        violation[{"msg": msg}] {
+            general_violation[{"result": msg}]
+        }
+
+        # Check if there are any system errors
+        general_violation[{"result": result}] {
+            remote_data.system_error != ""
+            result := sprintf("System error calling external data provider: %s", [remote_data.system_error])
+        }
+        
+        # Check if there are errors for any of the images
+        general_violation[{"result": result}] {
+            remote_data.system_error == ""
+            count(remote_data.errors) > 0
+            result := sprintf("Error validating one or more images: %s", [remote_data.errors])
+        }
+
+        # Check if the success criteria is true
+        general_violation[{"result": result}] {
+            remote_data.system_error == ""
+            subject_validation := remote_data.responses[_]
+            verifierReport := subject_validation[1].verifierReports[_]
+            verifierReport.name == "notaryv2"
+            not verifierReport.isSuccess
+            result := sprintf("Subject %s failed notation verification, please check ratify verifier configuration. Error: %s", [verifierReport.subject, verifierReport.message])
+        }
+
+        # Check if the success criteria is true
+        general_violation[{"result": result}] {
+            remote_data.system_error == ""
+            subject_validation := remote_data.responses[_]
+            verifierReport := subject_validation[1].verifierReports[_]
+            not verifierReport.name # oras error
+            not verifierReport.isSuccess
+            reword_msg := reword_oras_error_msg(verifierReport.message)
+            result := sprintf("%s; Subject: %s; Error: %s", [reword_msg, verifierReport.subject, verifierReport.message])
+        }
+
+        reword_oras_error_msg(message) = res {
+            contains(message, "no referrers found")
+            res := "signature artifact not found"
+        }
+
+        reword_oras_error_msg(message) = res {
+            contains(message, "resolving descriptor")
+            res := "oras failed to access registry, please make sure configuration in ratify has permission to access registry"
+        }
+
+        reword_oras_error_msg(message) = res {
+            not contains(message, "resolving descriptor")
+            not contains(message, "no referrers found")
+            res := "oras fails to download signature artifact from registry"
+        }
+
+        input_containers[c] {
+            c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+            c := input.review.object.spec.ephemeralContainers[_]
+        }
+
+        # fetch the image digest as possible
+        default DIGEST_REGEX = "^[^:]+@sha256:.+$"
+        
+        get_image_digest(c) = digest {
+            regex.match(DIGEST_REGEX, c.image)
+            digest := c.image
+        }
+        get_image_digest(c) = digest {
+            not regex.match(DIGEST_REGEX, c.image)
+            hasContainerStatus(c.name)
+            containerStatus := input.review.object.status.containerStatuses[_]
+            containerStatus.name == c.name
+            digest := containerStatus.imageID
+        }
+        get_image_digest(c) = digest {
+            # fail to fetch digest
+            not regex.match(DIGEST_REGEX, c.image)
+            not hasContainerStatus(c.name)
+            digest := c.image
+        }
+        hasContainerStatus(name) {
+            existed := {1 | name == input.review.object.status.containerStatuses[j].name}
+            count(existed) > 0
+        }
+      libs:
+        - |
+          package lib.exclude_container_image
+          is_excluded(container) {
+              exclude_images := object.get(object.get(input, "parameters", {}), "excludedImages", [])
+              img := container.image
+              exclusion := exclude_images[_]
+              _matches_exclusion(img, exclusion)
+          }
+          _matches_exclusion(img, exclusion) {
+              not endswith(exclusion, "*")
+              exclusion == img
+          }
+          _matches_exclusion(img, exclusion) {
+              endswith(exclusion, "*")
+              prefix := trim_suffix(exclusion, "*")
+              startswith(img, prefix)
+          }
