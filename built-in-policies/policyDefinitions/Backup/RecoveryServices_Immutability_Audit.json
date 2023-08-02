@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Immutability must be enabled for Recovery Services vaults",
+    "description": "This policy audits if the immutable vaults property is enabled for Recovery Services vaults in the scope. This helps protect your backup data from being deleted before its intended expiry. Learn more at https://aka.ms/AB-ImmutableVaults.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "checkLockedImmutabilityOnly": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "CheckLockedImmutabilityOnly",
+          "description": "This parameter checks if Immutability is locked for Recovery Services Vaults in scope. Selecting 'true' will mark only vaults with Immutability 'Locked' as compliant. Selecting 'false' will mark vaults that have Immutability either 'Enabled' or 'Locked' as compliant."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.RecoveryServices/vaults/securitySettings.immutabilitySettings.state",
+                "notIn": [
+                  "Locked",
+                  "UnLocked"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('checkLockedImmutabilityOnly')]",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.RecoveryServices/vaults/securitySettings.immutabilitySettings.state",
+                    "notEquals": "Locked"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d6f6f560-14b7-49a4-9fc8-d2c3a9807868",
+  "name": "d6f6f560-14b7-49a4-9fc8-d2c3a9807868"
+}
