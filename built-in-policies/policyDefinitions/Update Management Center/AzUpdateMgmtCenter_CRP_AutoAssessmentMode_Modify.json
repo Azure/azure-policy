@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "Configure auto-assessment (every 24 hours) for OS updates on native Azure virtual machines. You can control the scope of assignment according to machine subscription, resource group, location or tag. Learn more about this for Windows: https://aka.ms/computevm-windowspatchassessmentmode, for Linux: https://aka.ms/computevm-linuxpatchassessmentmode.",
     "metadata": {
-      "version": "4.0.0-preview",
+      "version": "4.1.0-preview",
       "category": "Update Management Center",
       "preview": true
     },
-    "version": "4.0.0-preview",
+    "version": "4.1.0-preview",
     "parameters": {
       "assessmentMode": {
         "type": "String",
@@ -130,6 +130,18 @@
                   },
                   {
                     "anyOf": [
+                      {
+                        "value": "[field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption')]",
+                        "equals": "Attach"
+                      },
+                      {
+                        "value": "[field('Microsoft.Compute/imageId')]",
+                        "contains": "Microsoft.Compute/galleries"
+                      },
+                      {
+                        "value": "[field('Microsoft.Compute/imageId')]",
+                        "contains": "Microsoft.Compute/images"
+                      },
                       {
                         "allOf": [
                           {
@@ -376,38 +388,58 @@
                     "equals": "Windows"
                   },
                   {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "equals": "MicrosoftWindowsServer"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageOffer",
-                    "equals": "WindowsServer"
-                  },
-                  {
-                    "field": "Microsoft.Compute/imageSKU",
-                    "in": [
-                      "2008-R2-SP1",
-                      "2012-R2-Datacenter",
-                      "2016-Datacenter",
-                      "2016-datacenter-gensecond",
-                      "2016-Datacenter-Server-Core",
-                      "2016-datacenter-smalldisk",
-                      "2016-datacenter-with-containers",
-                      "2019-Datacenter",
-                      "2019-Datacenter-Core",
-                      "2019-datacenter-gensecond",
-                      "2019-datacenter-smalldisk",
-                      "2019-datacenter-smalldisk-g2",
-                      "2019-datacenter-with-containers",
-                      "2022-datacenter",
-                      "2022-datacenter-g2",
-                      "2022-datacenter-core",
-                      "2022-datacenter-core-g2",
-                      "2022-datacenter-azure-edition",
-                      "2022-datacenter-azure-edition-core",
-                      "2022-datacenter-azure-edition-core-smalldisk",
-                      "2022-datacenter-azure-edition-smalldisk",
-                      "2022-datacenter-smalldisk-g2"
+                    "anyOf": [
+                      {
+                        "value": "[field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption')]",
+                        "equals": "Attach"
+                      },
+                      {
+                        "value": "[field('Microsoft.Compute/imageId')]",
+                        "contains": "Microsoft.Compute/galleries"
+                      },
+                      {
+                        "value": "[field('Microsoft.Compute/imageId')]",
+                        "contains": "Microsoft.Compute/images"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "WindowsServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "2008-R2-SP1",
+                              "2012-R2-Datacenter",
+                              "2016-Datacenter",
+                              "2016-datacenter-gensecond",
+                              "2016-Datacenter-Server-Core",
+                              "2016-datacenter-smalldisk",
+                              "2016-datacenter-with-containers",
+                              "2019-Datacenter",
+                              "2019-Datacenter-Core",
+                              "2019-datacenter-gensecond",
+                              "2019-datacenter-smalldisk",
+                              "2019-datacenter-smalldisk-g2",
+                              "2019-datacenter-with-containers",
+                              "2022-datacenter",
+                              "2022-datacenter-g2",
+                              "2022-datacenter-core",
+                              "2022-datacenter-core-g2",
+                              "2022-datacenter-azure-edition",
+                              "2022-datacenter-azure-edition-core",
+                              "2022-datacenter-azure-edition-core-smalldisk",
+                              "2022-datacenter-azure-edition-smalldisk",
+                              "2022-datacenter-smalldisk-g2"
+                            ]
+                          }
+                        ]
+                      }
                     ]
                   }
                 ]
