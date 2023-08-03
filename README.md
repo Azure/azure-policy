@@ -179,6 +179,9 @@ There are examples where a resource provider publishes a resource type to Azure 
 - Microsoft.Web/sites/slots/functions
 - Microsoft.Web/sites/slots/instances/deployments
 - Microsoft.Web/sites/slots/siteextensions
+- Microsoft.Web/sites/sourcecontrols
+- Microsoft.Web/sites/slots/sourcecontrols
+- Microsoft.Web/sites/privateaccess
 
 ### Legacy or incorrect aliases
 
@@ -196,6 +199,7 @@ In a few instances, when creating a resource from Azure Portal, the property is 
 
 - Microsoft.Storage/storageAccounts/networkAcls.defaultAction
 - Microsoft.Authorization/roleAssignments/principalType
+- Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType
 - Microsoft.Compute/virtualMachines/storageProfile.osDisk.diskSizeGB
 - Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.diskSizeGB
 - Microsoft.Compute/virtualMachineScaleSets/virtualMachines/storageProfile.osDisk.diskSizeGB
