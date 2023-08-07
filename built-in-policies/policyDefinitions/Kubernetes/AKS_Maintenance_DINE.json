@@ -1,0 +1,309 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Deploy Planned Maintenance to schedule and control upgrades for your Azure Kubernetes Service (AKS) cluster",
+    "description": "Planned Maintenance allows you to schedule weekly maintenance windows to perform updates and minimize workload impact. Once scheduled, upgrades occur only during the window you selected. Learn more at: https://aka.ms/aks/planned-maintenance",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy",
+          "portalReview": true
+        }
+      },
+      "configurationType": {
+        "type": "String",
+        "allowedValues": [
+          "aksManagedAutoUpgradeSchedule",
+          "aksManagedNodeOSUpgradeSchedule"
+        ],
+        "metadata": {
+          "displayName": "Planned Maintenance Configuration Type",
+          "description": "The planned maintenance configuration type for the policy. Only aksManagedAutoUpgradeSchedule and aksManagedNodeOSUpgradeSchedule are allowed. Each assignment can only assign one type"
+        }
+      },
+      "maintenanceWindow": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Maintenance Window Configuration",
+          "description": "Use a JSON file create a maintenance configuration. Learn more at https://aka.ms/aks/planned-maintenance#add-a-maintenance-window-configuration-with-a-json-file"
+        },
+        "schema": {
+          "type": "object",
+          "required": [
+            "properties"
+          ],
+          "properties": {
+            "properties": {
+              "type": "object",
+              "required": [
+                "maintenanceWindow"
+              ],
+              "properties": {
+                "maintenanceWindow": {
+                  "type": "object",
+                  "properties": {
+                    "schedule": {
+                      "type": "object",
+                      "properties": {
+                        "daily": {
+                          "type": "object",
+                          "properties": {
+                            "intervalDays": {
+                              "type": "integer",
+                              "format": "int32",
+                              "minimum": 1,
+                              "maximum": 7,
+                              "description": "Specifies the number of days between each set of occurrences."
+                            }
+                          },
+                          "description": "For schedules like: 'recur every day' or 'recur every 3 days'.",
+                          "required": [
+                            "intervalDays"
+                          ]
+                        },
+                        "weekly": {
+                          "type": "object",
+                          "properties": {
+                            "intervalWeeks": {
+                              "type": "integer",
+                              "format": "int32",
+                              "minimum": 1,
+                              "maximum": 4,
+                              "description": "Specifies the number of weeks between each set of occurrences."
+                            },
+                            "dayOfWeek": {
+                              "type": "string",
+                              "enum": [
+                                "Sunday",
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday"
+                              ],
+                              "x-ms-enum": {
+                                "name": "WeekDay",
+                                "modelAsString": true
+                              },
+                              "description": "Specifies on which day of the week the maintenance occurs."
+                            }
+                          },
+                          "description": "For schedules like: 'recur every Monday' or 'recur every 3 weeks on Wednesday'.",
+                          "required": [
+                            "intervalWeeks",
+                            "dayOfWeek"
+                          ]
+                        },
+                        "absoluteMonthly": {
+                          "type": "object",
+                          "properties": {
+                            "intervalMonths": {
+                              "type": "integer",
+                              "format": "int32",
+                              "minimum": 1,
+                              "maximum": 6,
+                              "description": "Specifies the number of months between each set of occurrences."
+                            },
+                            "dayOfMonth": {
+                              "type": "integer",
+                              "format": "int32",
+                              "minimum": 1,
+                              "maximum": 31,
+                              "description": "The date of the month."
+                            }
+                          },
+                          "description": "For schedules like: 'recur every month on the 15th' or 'recur every 3 months on the 20th'.",
+                          "required": [
+                            "intervalMonths",
+                            "dayOfMonth"
+                          ]
+                        },
+                        "relativeMonthly": {
+                          "type": "object",
+                          "properties": {
+                            "intervalMonths": {
+                              "type": "integer",
+                              "format": "int32",
+                              "minimum": 1,
+                              "maximum": 6,
+                              "description": "Specifies the number of months between each set of occurrences."
+                            },
+                            "weekIndex": {
+                              "type": "string",
+                              "enum": [
+                                "First",
+                                "Second",
+                                "Third",
+                                "Fourth",
+                                "Last"
+                              ],
+                              "x-ms-enum": {
+                                "name": "type",
+                                "modelAsString": true
+                              },
+                              "description": "Specifies on which instance of the allowed days specified in daysOfWeek the maintenance occurs."
+                            },
+                            "dayOfWeek": {
+                              "type": "string",
+                              "enum": [
+                                "Sunday",
+                                "Monday",
+                                "Tuesday",
+                                "Wednesday",
+                                "Thursday",
+                                "Friday",
+                                "Saturday"
+                              ],
+                              "x-ms-enum": {
+                                "name": "WeekDay",
+                                "modelAsString": true
+                              },
+                              "description": "Specifies on which day of the week the maintenance occurs."
+                            }
+                          },
+                          "description": "For schedules like: 'recur every month on the first Monday' or 'recur every 3 months on last Friday'.",
+                          "required": [
+                            "intervalMonths",
+                            "weekIndex",
+                            "dayOfWeek"
+                          ]
+                        }
+                      }
+                    },
+                    "durationHours": {
+                      "type": "integer",
+                      "format": "int32",
+                      "minimum": 4,
+                      "maximum": 24,
+                      "default": 24,
+                      "description": "Length of maintenance window range from 4 to 24 hours."
+                    },
+                    "utcOffset": {
+                      "type": "string",
+                      "pattern": "^(-|\\+)[0-9]{2}:[0-9]{2}$",
+                      "description": "The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'."
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "The date the maintenance window activates. If the current date is before this date, the maintenance window is inactive and will not be used for upgrades. If not specified, the maintenance window will be active right away."
+                    },
+                    "startTime": {
+                      "type": "string",
+                      "pattern": "^\\d{2}:\\d{2}$",
+                      "description": "The start time of the maintenance window. Accepted values are from '00:00' to '23:59'. 'utcOffset' applies to this field. For example: '02:00' with 'utcOffset: +02:00' means UTC time '00:00'."
+                    },
+                    "notAllowedDates": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "start": {
+                            "type": "string",
+                            "format": "date"
+                          },
+                          "end": {
+                            "type": "string",
+                            "format": "date"
+                          }
+                        },
+                        "description": "For example, between '2022-12-23' and '2023-01-05'.",
+                        "required": [
+                          "start",
+                          "end"
+                        ]
+                      },
+                      "x-ms-identifiers": []
+                    }
+                  },
+                  "description": "Maintenance window used to configure scheduled auto-upgrade for a Managed Cluster.",
+                  "required": [
+                    "schedule",
+                    "durationHours",
+                    "startTime"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.ContainerService/managedClusters/maintenanceConfigurations",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "existenceCondition": {
+            "field": "name",
+            "equals": "[parameters('configurationType')]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "clusterName": {
+                    "type": "string"
+                  },
+                  "configurationType": {
+                    "type": "string"
+                  },
+                  "maintenanceWindow": {
+                    "type": "object"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.ContainerService/managedClusters/maintenanceConfigurations",
+                    "apiVersion": "2022-10-02-preview",
+                    "name": "[concat(parameters('clusterName'), '/', parameters('configurationType'))]",
+                    "properties": "[parameters('maintenanceWindow').properties]"
+                  }
+                ]
+              },
+              "parameters": {
+                "clusterName": {
+                  "value": "[field('name')]"
+                },
+                "configurationType": {
+                  "value": "[parameters('configurationType')]"
+                },
+                "maintenanceWindow": {
+                  "value": "[parameters('maintenanceWindow')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e1352e44-d34d-4e4d-a22e-451a15f759a1",
+  "name": "e1352e44-d34d-4e4d-a22e-451a15f759a1"
+}
