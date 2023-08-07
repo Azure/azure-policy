@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Exclude Usage Costs Resources",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy enables you to exlcude Usage Costs Resources. Usage costs include things like metered storage and Azure resources which are billed based on usage.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "General"
+    },
+    "Version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "not": {
+          "anyOf": [
+            {
+              "field": "type",
+              "like": "Microsoft.SaaSHub/*"
+            },
+            {
+              "field": "type",
+              "in": [
+                "Microsoft.CloudPartnerProgram/memberships",
+                "Microsoft.Resources/subscriptions/resourcegroups",
+                "Microsoft.Resources/tags",
+                "Microsoft.Authorization/policyAssignments",
+                "Microsoft.Authorization/policyDefinitions",
+                "Microsoft.Authorization/policySetDefinitions",
+                "Microsoft.Authorization/denyAssignments"
+              ]
+            }
+          ]
+        }
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/16fabb5c-7379-4433-8009-042066fa3a16",
+  "name": "16fabb5c-7379-4433-8009-042066fa3a16"
+}
