@@ -1,31 +1,14 @@
 {
   "properties": {
-    "displayName": "[Deprecated]: Enable Azure Monitor for Hybrid VMs with AMA",
+    "displayName": "Enable Azure Monitor for Hybrid VMs with AMA",
     "policyType": "BuiltIn",
-    "description": "Enable Azure Monitor for the hybrid virtual machines with AMA. Takes Log Analytics workspace as parameter and asks for an option to enable Processes and Dependencies.",
+    "description": "Enable Azure Monitor for the hybrid virtual machines with AMA.",
     "metadata": {
-      "version": "2.1.2-preview",
-      "category": "Monitoring",
-      "deprecated": true
+      "version": "1.0.0",
+      "category": "Monitoring"
     },
-    "version": "2.1.2-preview",
+    "version": "1.0.0",
     "parameters": {
-      "logAnalyticsWorkspace": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Log Analytics workspace",
-          "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
-          "strongType": "omsWorkspace"
-        }
-      },
-      "dataCollectionRuleName": {
-        "type": "String",
-        "metadata": {
-          "displayName": "Name of the Data Collection Rule(DCR)",
-          "description": "This is the name of the AMA-VMI Data Collection Rule(DCR)"
-        },
-        "defaultValue": "ama-vmi-default"
-      },
       "enableProcessesAndDependencies": {
         "type": "Boolean",
         "metadata": {
@@ -49,6 +32,14 @@
           "Disabled"
         ],
         "defaultValue": "DeployIfNotExists"
+      },
+      "dcrResourceId": {
+        "type": "string",
+        "metadata": {
+          "displayName": "VMI Data Collection Rule Resource Id",
+          "description": "VMI Data Collection Rule Resource Id. Please refer to this link for newer experience migration: https://aka.ms/vminsights-dcrOnboarding",
+          "portalReview": "true"
+        }
       }
     },
     "policyDefinitions": [
@@ -99,26 +90,27 @@
         }
       },
       {
-        "policyDefinitionReferenceId": "VMInsightsDCR_DCRA_HybridVM_Deploy",
-        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7c4214e9-ea57-487a-b38e-310ec09bc21d",
-        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "DataCollectionRuleAssociation_Linux",
+        "definitionVersion": "6.*.*",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2ea82cdd-f2e8-4500-af75-67a2e084ca74",
         "parameters": {
-          "effect": {
-            "value": "[parameters('effect')]"
-          },
-          "workspaceResourceId": {
-            "value": "[parameters('logAnalyticsWorkspace')]"
-          },
-          "userGivenDcrName": {
-            "value": "[parameters('dataCollectionRuleName')]"
-          },
-          "enableProcessesAndDependencies": {
-            "value": "[parameters('enableProcessesAndDependencies')]"
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DataCollectionRuleAssociation_Windows",
+        "definitionVersion": "4.*.*",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/eab1f514-22e3-42e3-9a1f-e1dc9199355c",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
           }
         }
       }
     ]
   },
-  "id": "/providers/Microsoft.Authorization/policySetDefinitions/59e9c3eb-d8df-473b-8059-23fd38ddd0f0",
-  "name": "59e9c3eb-d8df-473b-8059-23fd38ddd0f0"
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/2b00397d-c309-49c4-aa5a-f0b2c5bc6321",
+  "name": "2b00397d-c309-49c4-aa5a-f0b2c5bc6321"
 }
