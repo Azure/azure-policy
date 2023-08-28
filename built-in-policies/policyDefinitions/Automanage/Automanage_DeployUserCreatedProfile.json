@@ -5,10 +5,10 @@
     "displayName": "Configure virtual machines to be onboarded to Azure Automanage with Custom Configuration Profile",
     "description": "Azure Automanage enrolls, configures, and monitors virtual machines with best practice as defined in the Microsoft Cloud Adoption Framework for Azure. Use this policy to apply Automanage with your own customized Configuration Profile to your selected scope.",
     "metadata": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "Automanage"
     },
-    "version": "1.3.0",
+    "version": "1.4.0",
     "parameters": {
       "configurationProfile": {
         "type": "String",
@@ -574,6 +574,9 @@
                 "machineName": {
                   "value": "[field('Name')]"
                 },
+                "resourceType": {
+                  "value": "[field('Type')]"
+                },
                 "configurationProfile": {
                   "value": "[parameters('configurationProfile')]"
                 }
@@ -585,13 +588,26 @@
                   "machineName": {
                     "type": "String"
                   },
+                  "resourceType": {
+                    "type": "String"
+                  },
                   "configurationProfile": {
                     "type": "string"
                   }
                 },
                 "resources": [
                   {
+                    "condition": "[equals(toLower(parameters('resourceType')), 'microsoft.compute/virtualmachines')]",
                     "type": "Microsoft.Compute/virtualMachines/providers/configurationProfileAssignments",
+                    "apiVersion": "2022-05-04",
+                    "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/', 'default')]",
+                    "properties": {
+                      "configurationProfile": "[parameters('configurationProfile')]"
+                    }
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('resourceType')), 'microsoft.hybridcompute/machines')]",
+                    "type": "Microsoft.HybridCompute/machines/providers/configurationProfileAssignments",
                     "apiVersion": "2022-05-04",
                     "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/', 'default')]",
                     "properties": {

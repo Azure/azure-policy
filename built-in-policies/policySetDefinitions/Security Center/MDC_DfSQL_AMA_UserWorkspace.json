@@ -1,0 +1,132 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure machines to create the user-defined Microsoft Defender for SQL pipeline using Azure Monitor Agent",
+    "policyType": "BuiltIn",
+    "description": "Configure machines to automatically install the Azure Monitor and Azure Security agents. Microsoft Defender for SQL collects events from the agents and uses them to provide security alerts and tailored hardening tasks (recommendations). Use the user-provided Log Analytics workspace to store audit records. Creates a resource group and a Data Collection Rule in the same region as the user-provided Log Analytics workspace.",
+    "version": "1.0.0-preview",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "parameters": {
+      "userWorkspaceResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace Resource Id",
+          "description": "Select the Log Analytics workspace to which the virtual machines in scope will send their logs. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace"
+        }
+      },
+      "workspaceRegion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace region",
+          "description": "Region of the Workspace to which the virtual machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
+          "strongType": "location"
+        },
+        "defaultValue": ""
+      },
+      "enableCollectionOfSqlQueriesForSecurityResearch": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable collection of SQL queries for security research",
+          "description": "Enable or disable the collection of SQL queries for security research."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "builtInIdentityResourceGroupLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource Group",
+          "description": "The location of the resource group 'Built-In-Identity-RG' created by the policy."
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/09963c90-6ee7-4215-8d26-1cc660a1682f",
+        "policyDefinitionReferenceId": "MDC_DfSQL_AddUserAssignedIdentity_VM",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "builtInIdentityResourceGroupLocation": {
+            "value": "[parameters('builtInIdentityResourceGroupLocation')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f91991d1-5383-4c95-8ee5-5ac423dd8bb1",
+        "policyDefinitionReferenceId": "MDC_DfSQL_DeployWindowsAMA_VM",
+        "definitionVersion": "1.*.*-preview"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ddca0ddc-4e9d-4bbb-92a1-f7c4dd7ef7ce",
+        "policyDefinitionReferenceId": "MDC_DfSQL_DeployMicrosoftDefenderForSQLWindowsAgent_VM",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "workspaceRegion": {
+            "value": "[parameters('workspaceRegion')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/04754ef9-9ae3-4477-bf17-86ef50026304",
+        "policyDefinitionReferenceId": "MDC_DfSQL_AMA_UserWorkspacePipeline_VM",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "userWorkspaceResourceId": {
+            "value": "[parameters('userWorkspaceResourceId')]"
+          },
+          "workspaceRegion": {
+            "value": "[parameters('workspaceRegion')]"
+          },
+          "enableCollectionOfSqlQueriesForSecurityResearch": {
+            "value": "[parameters('enableCollectionOfSqlQueriesForSecurityResearch')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3592ff98-9787-443a-af59-4505d0fe0786",
+        "policyDefinitionReferenceId": "MDC_DfSQL_DeployWindowsAMA_Arc",
+        "definitionVersion": "1.*.*-preview"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/65503269-6a54-4553-8a28-0065a8e6d929",
+        "policyDefinitionReferenceId": "MDC_DfSQL_DeployMicrosoftDefenderForSQLWindowsAgent_Arc",
+        "definitionVersion": "1.*.*-preview"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/63d03cbd-47fd-4ee1-8a1c-9ddf07303de0",
+        "policyDefinitionReferenceId": "MDC_DfSQL_AMA_UserWorkspacePipeline_Arc",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "userWorkspaceResourceId": {
+            "value": "[parameters('userWorkspaceResourceId')]"
+          },
+          "workspaceRegion": {
+            "value": "[parameters('workspaceRegion')]"
+          },
+          "enableCollectionOfSqlQueriesForSecurityResearch": {
+            "value": "[parameters('enableCollectionOfSqlQueriesForSecurityResearch')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2227e1f1-23dd-4c3a-85a9-7024a401d8b2",
+        "policyDefinitionReferenceId": "MDC_DfSQL_AMA_UserWorkspacePipeline_DCRA_Arc",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "workspaceRegion": {
+            "value": "[parameters('workspaceRegion')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/de01d381-bae9-4670-8870-786f89f49e26",
+  "name": "de01d381-bae9-4670-8870-786f89f49e26"
+}
