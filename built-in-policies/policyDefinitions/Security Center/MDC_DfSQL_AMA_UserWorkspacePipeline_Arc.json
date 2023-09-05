@@ -4,10 +4,10 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Configure Windows Arc machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Use the user-provided Log Analytics workspace to store audit records. Create a resource group and a Data Collection Rule in the same region as the user-provided Log Analytics workspace.",
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "metadata": {
       "category": "Security Center",
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "preview": true
     },
     "parameters": {
@@ -75,7 +75,8 @@
           "type": "Microsoft.Insights/dataCollectionRules",
           "deploymentScope": "subscription",
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
           ],
           "existenceScope": "subscription",
           "existenceCondition": {
@@ -193,6 +194,9 @@
                     "name": "[variables('deployDataCollectionRules')]",
                     "apiVersion": "2022-09-01",
                     "resourceGroup": "[variables('defaultRGName')]",
+                    "dependsOn": [
+                      "[variables('defaultRGName')]"
+                    ],
                     "properties": {
                       "mode": "Incremental",
                       "expressionEvaluationOptions": {
@@ -285,13 +289,22 @@
                                 }
                               ]
                             }
+                          },
+                          {
+                            "type": "Microsoft.Insights/dataCollectionRules/providers/locks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[concat(parameters('dcrName'), '/Microsoft.Authorization/', 'CanNotDeleteLock-', parameters('dcrName'))]",
+                            "dependsOn": [
+                              "[parameters('dcrName')]"
+                            ],
+                            "properties": {
+                              "level": "CanNotDelete",
+                              "notes": "Please do not delete this data collection rule since Defender for SQL extension enabled by Azure Policy is relying on its existence."
+                            }
                           }
                         ]
                       }
-                    },
-                    "dependsOn": [
-                      "[resourceId('Microsoft.Resources/resourceGroups', variables('defaultRGName'))]"
-                    ]
+                    }
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -307,9 +320,6 @@
                         "scope": "inner"
                       },
                       "parameters": {
-                        "vmName": {
-                          "value": "[parameters('vmName')]"
-                        },
                         "dcrId": {
                           "value": "[variables('dcrId')]"
                         },
@@ -321,9 +331,6 @@
                         "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
                         "parameters": {
-                          "vmName": {
-                            "type": "string"
-                          },
                           "dcrId": {
                             "type": "string"
                           },
@@ -331,7 +338,6 @@
                             "type": "string"
                           }
                         },
-                        "variables": {},
                         "resources": [
                           {
                             "type": "Microsoft.HybridCompute/machines/providers/dataCollectionRuleAssociations",

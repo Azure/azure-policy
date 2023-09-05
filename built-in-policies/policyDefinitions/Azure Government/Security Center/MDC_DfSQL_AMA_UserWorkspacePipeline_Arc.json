@@ -1,13 +1,13 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure Windows SQL machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent",
+    "displayName": "[Preview]: Configure Windows Arc machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure Windows SQL machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Use the user-provided Log Analytics workspace to store audit records. Create a resource group and a Data Collection Rule in the same region as the user-provided Log Analytics workspace.",
-    "version": "1.1.0-preview",
+    "description": "Configure Windows Arc machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Use the user-provided Log Analytics workspace to store audit records. Create a resource group and a Data Collection Rule in the same region as the user-provided Log Analytics workspace.",
+    "version": "1.0.0-preview",
     "metadata": {
-      "version": "1.1.0-preview",
       "category": "Security Center",
+      "version": "1.0.0-preview",
       "preview": true
     },
     "parameters": {
@@ -35,7 +35,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Workspace region",
-          "description": "Region of the Workspace to which the Windows SQL machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
+          "description": "Region of the Workspace to which the Arc machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
           "strongType": "location"
         }
       },
@@ -57,15 +57,15 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines/extensions"
+            "equals": "Microsoft.HybridCompute/machines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/extensions/type",
-            "equals": "SqlIaaSAgent"
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "equals": "Windows"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-            "equals": "Microsoft.SqlServer.Management"
+            "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
+            "equals": "true"
           }
         ]
       },
@@ -92,7 +92,7 @@
             ]
           },
           "deployment": {
-            "location": "eastus",
+            "location": "usgovvirginia",
             "properties": {
               "mode": "incremental",
               "parameters": {
@@ -100,7 +100,7 @@
                   "value": "[resourceGroup().name]"
                 },
                 "vmName": {
-                  "value": "[first(split(field('fullName'), '/'))]"
+                  "value": "[field('name')]"
                 },
                 "userWorkspaceResourceId": {
                   "value": "[parameters('userWorkspaceResourceId')]"
@@ -133,48 +133,8 @@
                   }
                 },
                 "variables": {
-                  "locationLongNameToShortMap": {
-                    "australiacentral": "CAU",
-                    "australiaeast": "EAU",
-                    "australiasoutheast": "SEAU",
-                    "brazilsouth": "CQ",
-                    "canadacentral": "CCA",
-                    "canadaeast": "CCA",
-                    "centralindia": "CIN",
-                    "centralus": "CUS",
-                    "eastasia": "EA",
-                    "eastus2euap": "eus2p",
-                    "eastus": "EUS",
-                    "eastus2": "EUS2",
-                    "francecentral": "PAR",
-                    "germanywestcentral": "DEWC",
-                    "japaneast": "EJP",
-                    "japanwest": "EJP",
-                    "jioindiawest": "CIN",
-                    "koreacentral": "SE",
-                    "koreasouth": "SE",
-                    "northcentralus": "NCUS",
-                    "northeurope": "NEU",
-                    "norwayeast": "NOE",
-                    "southafricanorth": "JNB",
-                    "southcentralus": "SCUS",
-                    "southeastasia": "SEA",
-                    "southindia": "CIN",
-                    "swedencentral": "SEC",
-                    "switzerlandnorth": "CHN",
-                    "switzerlandwest": "CHW",
-                    "uaenorth": "DXB",
-                    "uksouth": "SUK",
-                    "ukwest": "WUK",
-                    "westcentralus": "WCUS",
-                    "westeurope": "WEU",
-                    "westindia": "CIN",
-                    "westus": "WUS",
-                    "westus2": "WUS2"
-                  },
-                  "locationCode": "[if(contains(variables('locationLongNameToShortMap'), parameters('workspaceRegion')), variables('locationLongNameToShortMap')[parameters('workspaceRegion')], parameters('workspaceRegion'))]",
                   "subscriptionId": "[subscription().subscriptionId]",
-                  "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
+                  "defaultRGName": "[concat('DefaultResourceGroup-', parameters('workspaceRegion'))]",
                   "defaultRGLocation": "[parameters('workspaceRegion')]",
                   "dcrName": "[concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr')]",
                   "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
@@ -340,11 +300,11 @@
                         },
                         "resources": [
                           {
-                            "type": "Microsoft.Compute/virtualMachines/providers/dataCollectionRuleAssociations",
+                            "type": "Microsoft.HybridCompute/machines/providers/dataCollectionRuleAssociations",
                             "name": "[parameters('dcraName')]",
                             "apiVersion": "2021-04-01",
                             "properties": {
-                              "description": "Association of data collection rule for Microsoft Defender for SQL. Deleting this association will break the detection of security vulnerabilities for this virtual machine.",
+                              "description": "Association of data collection rule for Microsoft Defender for SQL. Deleting this association will break the detection of security vulnerabilities for this Arc machine.",
                               "dataCollectionRuleId": "[parameters('dcrId')]"
                             }
                           }
@@ -360,6 +320,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/04754ef9-9ae3-4477-bf17-86ef50026304",
-  "name": "04754ef9-9ae3-4477-bf17-86ef50026304"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/63d03cbd-47fd-4ee1-8a1c-9ddf07303de0",
+  "name": "63d03cbd-47fd-4ee1-8a1c-9ddf07303de0"
 }

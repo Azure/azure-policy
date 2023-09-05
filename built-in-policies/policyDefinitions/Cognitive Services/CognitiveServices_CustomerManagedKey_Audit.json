@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data stored in Cognitive Services to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more about customer-managed keys at https://go.microsoft.com/fwlink/?linkid=2121321.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "2.1.0",
       "category": "Cognitive Services"
     },
-    "version": "2.0.0",
+    "version": "2.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -22,6 +22,23 @@
           "displayName": "Effect",
           "description": "The effect determines what happens when the policy rule is evaluated to match"
         }
+      },
+      "excludedKinds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded Kinds",
+          "description": "The list of excluded API kinds for customer-managed key, default is the list of API kinds that don't have data stored in Cognitive Services"
+        },
+        "defaultValue": [
+          "CognitiveServices",
+          "Knowledge",
+          "LUIS",
+          "QnAMaker",
+          "TextAnalytics",
+          "ComputerVision",
+          "HealthDecisionSupport",
+          "ImmersiveReader"
+        ]
       }
     },
     "policyRule": {
@@ -36,14 +53,8 @@
             "notEquals": "Microsoft.KeyVault"
           },
           {
-            "count": {
-              "field": "Microsoft.CognitiveServices/accounts/capabilities[*]",
-              "where": {
-                "field": "Microsoft.CognitiveServices/accounts/capabilities[*].name",
-                "equals": "CustomerManagedKey"
-              }
-            },
-            "greater": 0
+            "field": "kind",
+            "notIn": "[parameters('excludedKinds')]"
           }
         ]
       },

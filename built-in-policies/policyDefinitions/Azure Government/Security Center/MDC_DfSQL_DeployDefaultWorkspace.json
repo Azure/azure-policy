@@ -1,0 +1,194 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure Windows machines to create the default Microsoft Defender for SQL workspace",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and Log Analytics workspace in the same region as the machine to store audit records.",
+    "version": "1.0.0-preview",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Security Center",
+      "preview": true
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines/extensions"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "equals": "SqlIaaSAgent"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.SqlServer.Management"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/osName",
+                "equals": "Windows"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/mssqlDiscovered",
+                "equals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "deploymentScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+          ],
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "location",
+                "equals": "[field('location')]"
+              },
+              {
+                "field": "name",
+                "equals": "[concat('D4SQL-', replace(subscription().subscriptionId, '-', ''),'-', field('location'))]"
+              }
+            ]
+          },
+          "deployment": {
+            "location": "usgovvirginia",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "resourceGroup": {
+                  "value": "[resourceGroup().name]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceGroup": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "subscriptionId": "[subscription().subscriptionId]",
+                  "defaultRGName": "[concat('DefaultResourceGroup-', parameters('location'))]",
+                  "defaultRGLocation": "[parameters('location')]",
+                  "workspaceName": "[concat('D4SQL-', replace(subscription().subscriptionId, '-', ''),'-', parameters('location'))]",
+                  "deployWorkspace": "[concat('deployWorkspace-', variables('workspaceName'))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/resourceGroups",
+                    "name": "[variables('defaultRGName')]",
+                    "apiVersion": "2022-09-01",
+                    "location": "[variables('defaultRGLocation')]"
+                  },
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[variables('deployWorkspace')]",
+                    "apiVersion": "2022-09-01",
+                    "resourceGroup": "[variables('defaultRGName')]",
+                    "dependsOn": [
+                      "[variables('defaultRGName')]"
+                    ],
+                    "properties": {
+                      "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "parameters": {
+                        "defaultRGLocation": {
+                          "value": "[variables('defaultRGLocation')]"
+                        },
+                        "workspaceName": {
+                          "value": "[variables('workspaceName')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "defaultRGLocation": {
+                            "type": "string"
+                          },
+                          "workspaceName": {
+                            "type": "string"
+                          }
+                        },
+                        "resources": [
+                          {
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "name": "[parameters('workspaceName')]",
+                            "apiVersion": "2022-10-01",
+                            "location": "[parameters('defaultRGLocation')]",
+                            "properties": {
+                              "sku": {
+                                "name": "pergb2018"
+                              },
+                              "retentionInDays": 30
+                            }
+                          },
+                          {
+                            "type": "Microsoft.OperationalInsights/workspaces/providers/locks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[concat(parameters('workspaceName'), '/Microsoft.Authorization/', 'CanNotDeleteLock-', parameters('workspaceName'))]",
+                            "dependsOn": [
+                              "[parameters('workspaceName')]"
+                            ],
+                            "properties": {
+                              "level": "CanNotDelete",
+                              "notes": "Please do not delete this workspace since Defender for SQL extension enabled by Azure Policy is relying on its existence."
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/242300d6-1bfc-4d64-8d01-cee583709ebd",
+  "name": "242300d6-1bfc-4d64-8d01-cee583709ebd"
+}
