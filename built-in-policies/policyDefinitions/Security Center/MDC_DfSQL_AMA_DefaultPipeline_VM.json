@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Configure Windows SQL virtual machines to create the default Microsoft Defender for SQL pipeline using Azure Monitor Agent. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group, a Data Collection Rule and Log Analytics workspace in the same region as the machine to store audit records.",
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Security Center",
       "preview": true
     },
@@ -59,7 +59,8 @@
           "type": "Microsoft.Insights/dataCollectionRules",
           "deploymentScope": "subscription",
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
           ],
           "existenceScope": "subscription",
           "existenceCondition": {
@@ -153,7 +154,7 @@
                   "subscriptionId": "[subscription().subscriptionId]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                   "defaultRGLocation": "[parameters('location')]",
-                  "workspaceName": "[if(contains(variables('locationLongNameToShortMap'), parameters('location')), concat('defaultWorkspace-', variables('subscriptionId'),'-', variables('locationCode')), concat(variables('subscriptionId'),'-', parameters('location')))]",
+                  "workspaceName": "[concat('D4SQL-', replace(subscription().subscriptionId, '-', ''), '-', parameters('location'))]",
                   "dcrName": "[concat('MicrosoftDefenderForSQL-', parameters('location'), '-dcr')]",
                   "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
                   "dcraName": "[concat(parameters('vmName'),'/Microsoft.Insights/MicrosoftDefenderForSQL-RulesAssociation')]",
@@ -172,6 +173,9 @@
                     "name": "[variables('deployDataCollectionRules')]",
                     "apiVersion": "2022-09-01",
                     "resourceGroup": "[variables('defaultRGName')]",
+                    "dependsOn": [
+                      "[variables('defaultRGName')]"
+                    ],
                     "properties": {
                       "mode": "Incremental",
                       "expressionEvaluationOptions": {
@@ -208,7 +212,6 @@
                             "type": "bool"
                           }
                         },
-                        "variables": {},
                         "resources": [
                           {
                             "type": "Microsoft.OperationalInsights/workspaces",
@@ -219,10 +222,19 @@
                               "sku": {
                                 "name": "pergb2018"
                               },
-                              "retentionInDays": 30,
-                              "features": {
-                                "searchVersion": 1
-                              }
+                              "retentionInDays": 30
+                            }
+                          },
+                          {
+                            "type": "Microsoft.OperationalInsights/workspaces/providers/locks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[concat(parameters('workspaceName'), '/Microsoft.Authorization/', 'CanNotDeleteLock-', parameters('workspaceName'))]",
+                            "dependsOn": [
+                              "[parameters('workspaceName')]"
+                            ],
+                            "properties": {
+                              "level": "CanNotDelete",
+                              "notes": "Please do not delete this workspace since Defender for SQL extension enabled by Azure Policy is relying on its existence."
                             }
                           },
                           {
@@ -276,13 +288,22 @@
                                 }
                               ]
                             }
+                          },
+                          {
+                            "type": "Microsoft.Insights/dataCollectionRules/providers/locks",
+                            "apiVersion": "2020-05-01",
+                            "name": "[concat(parameters('dcrName'), '/Microsoft.Authorization/', 'CanNotDeleteLock-', parameters('dcrName'))]",
+                            "dependsOn": [
+                              "[parameters('dcrName')]"
+                            ],
+                            "properties": {
+                              "level": "CanNotDelete",
+                              "notes": "Please do not delete this data collection rule since Defender for SQL extension enabled by Azure Policy is relying on its existence."
+                            }
                           }
                         ]
                       }
-                    },
-                    "dependsOn": [
-                      "[resourceId('Microsoft.Resources/resourceGroups', variables('defaultRGName'))]"
-                    ]
+                    }
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -298,12 +319,6 @@
                         "scope": "inner"
                       },
                       "parameters": {
-                        "location": {
-                          "value": "[parameters('location')]"
-                        },
-                        "vmName": {
-                          "value": "[parameters('vmName')]"
-                        },
                         "dcrId": {
                           "value": "[variables('dcrId')]"
                         },
@@ -315,12 +330,6 @@
                         "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
                         "parameters": {
-                          "location": {
-                            "type": "string"
-                          },
-                          "vmName": {
-                            "type": "string"
-                          },
                           "dcrId": {
                             "type": "string"
                           },
