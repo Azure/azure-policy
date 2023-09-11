@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Virtual machines without disaster recovery configurations are vulnerable to outages and other disruptions. If the virtual machine does not already have disaster recovery configured, this would initiate the same by enabling replication using preset configurations to facilitate business continuity.  You can optionally include/exclude virtual machines containing a specified tag to control the scope of assignment. To learn more about disaster recovery, visit https://aka.ms/asr-doc.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "2.1.0",
       "category": "Compute"
     },
-    "version": "2.0.0",
+    "version": "2.1.0",
     "parameters": {
       "sourceRegion": {
         "type": "String",
@@ -225,6 +225,9 @@
                   "dataDiskIds": {
                     "type": "object"
                   },
+                  "dataDisks": {
+                    "type": "object"
+                  },
                   "osDiskId": {
                     "type": "String"
                   },
@@ -299,7 +302,7 @@
                   "replicationProtectedIntentTemplateName": "[concat('ASR-', parameters('sourceResourceGroupName'), '-', last(split(parameters('vmId'), '/')))]",
                   "replicationProtectedIntentTemplateName64": "[if(greater(length(variables('replicationProtectedIntentTemplateName')), 64), substring(variables('replicationProtectedIntentTemplateName'), 0, 64), variables('replicationProtectedIntentTemplateName'))]",
                   "vmDataDiskIds": "[array(parameters('dataDiskIds').rawValue)]",
-                  "vmDiskCount": "[add(length(variables('vmDataDiskIds')), int(1))]",
+                  "vmDiskCount": "[add(length(array(parameters('dataDisks').rawValue)), int(1))]",
                   "diskIds": "[concat(array(parameters('osDiskId')), array(parameters('dataDiskIds').rawValue))]",
                   "vaultId": "[resourceId(parameters('vaultResourceGroupName'), variables('vaultType'), parameters('vaultName'))]",
                   "eligibilityResultsId": "[extensionResourceId(parameters('vmId'), variables('replicationEligibilityResultsType'), variables('eligibilityResultsDefault'))]",
@@ -454,7 +457,7 @@
                                     "name": "vmManagedDisks",
                                     "count": "[variables('vmDiskCount')]",
                                     "input": {
-                                      "diskId": "[if(equals(copyIndex('vmManagedDisks'), int(0)), reference(parameters('vmId'), variables('vmApiVersion')).storageProfile.osDisk.managedDisk.Id, variables('vmDataDiskIds')[sub(copyIndex('vmManagedDisks'), int(1))])]",
+                                      "diskId": "[if(equals(copyIndex('vmManagedDisks'), int(0)), reference(parameters('vmId'), variables('vmApiVersion')).storageProfile.osDisk.managedDisk.Id, reference(parameters('vmId'), variables('vmApiVersion')).storageProfile.dataDisks[sub(copyIndex('vmManagedDisks'), int(1))].managedDisk.id)]",
                                       "recoveryResourceGroupCustomInput": {
                                         "resourceType": "Existing",
                                         "recoveryResourceGroupId": "[variables('targetResourceGroupId')]"
@@ -507,6 +510,11 @@
                   "value": {
                     "rawValue": "[field('Microsoft.Compute/virtualMachines/storageProfile.dataDisks[*].managedDisk.id')]",
                     "emptyArray": []
+                  }
+                },
+                "dataDisks": {
+                  "value": {
+                    "rawValue": "[field('Microsoft.Compute/virtualMachines/storageProfile.dataDisks[*]')]"
                   }
                 },
                 "osDiskId": {
