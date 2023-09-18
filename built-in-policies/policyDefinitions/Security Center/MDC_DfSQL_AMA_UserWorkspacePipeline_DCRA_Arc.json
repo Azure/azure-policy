@@ -1,13 +1,13 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure Association to link Windows Arc machines to user-defined Microsoft Defender for SQL Data Collection Rule",
+    "displayName": "[Preview]: Configure Arc-enabled SQL Servers with Data Collection Rule Association to Microsoft Defender for SQL user-defined DCR",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure Windows Arc machines to automatically create an association with the user-defined data collection rule for Microsoft Defender for SQL. Deleting this association will break the detection of security vulnerabilities for this Arc machine.",
-    "version": "1.0.0-preview",
+    "description": "Configure association between Arc-enabled SQL Servers and the Microsoft Defender for SQL user-defined DCR. Deleting this association will break the detection of security vulnerabilities for this Arc-enabled SQL Servers.",
+    "version": "1.1.0-preview",
     "metadata": {
       "category": "Security Center",
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "preview": true
     },
     "parameters": {
@@ -27,9 +27,17 @@
         "type": "String",
         "metadata": {
           "displayName": "Workspace region",
-          "description": "Region of the Workspace to which the virtual machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
+          "description": "Region of the Log Analytics workspace destination for the Data Collection Rule.",
           "strongType": "location"
         }
+      },
+      "userWorkspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace Id",
+          "description": "Workspace Id of the Log Analytics workspace destination for the Data Collection Rule."
+        },
+        "defaultValue": ""
       }
     },
     "policyRule": {
@@ -70,6 +78,9 @@
                 },
                 "workspaceRegion": {
                   "value": "[parameters('workspaceRegion')]"
+                },
+                "userWorkspaceId": {
+                  "value": "[parameters('userWorkspaceId')]"
                 }
               },
               "template": {
@@ -83,6 +94,9 @@
                     "type": "string"
                   },
                   "workspaceRegion": {
+                    "type": "string"
+                  },
+                  "userWorkspaceId": {
                     "type": "string"
                   }
                 },
@@ -129,7 +143,7 @@
                   "locationCode": "[if(contains(variables('locationLongNameToShortMap'), parameters('workspaceRegion')), variables('locationLongNameToShortMap')[parameters('workspaceRegion')], parameters('workspaceRegion'))]",
                   "subscriptionId": "[subscription().subscriptionId]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
-                  "dcrName": "[concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr')]",
+                  "dcrName": "[if(empty(parameters('userWorkspaceId')), concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr'), concat('D4SQL-', replace(parameters('userWorkspaceId'), '-', ''), '-dcr'))]",
                   "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
                   "dcraName": "[concat(parameters('vmName'),'/Microsoft.Insights/MicrosoftDefenderForSQL-RulesAssociation')]"
                 },
@@ -139,7 +153,7 @@
                     "name": "[variables('dcraName')]",
                     "apiVersion": "2021-04-01",
                     "properties": {
-                      "description": "Association of data collection rule for Microsoft Defender for SQL. Deleting this association will break the detection of security vulnerabilities for this Arc machine.",
+                      "description": "Configure association between Arc-enabled SQL Server and the Microsoft Defender for SQL user-defined DCR. Deleting this association will break the detection of security vulnerabilities for this Arc-enabled SQL Server.",
                       "dataCollectionRuleId": "[variables('dcrId')]"
                     }
                   }

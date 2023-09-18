@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Microsoft Defender for Containers provides cloud-native Kubernetes security capabilities including environment hardening, workload protection, and run-time protection. When you enable the SecurityProfile.Defender on your Azure Kubernetes Service cluster, an agent is deployed to your cluster to collect security event data. Learn more about Microsoft Defender for Containers: https://docs.microsoft.com/azure/defender-for-cloud/defender-for-containers-introduction?tabs=defender-for-container-arch-aks.",
     "metadata": {
-      "version": "4.0.4",
+      "version": "4.1.0",
       "category": "Kubernetes"
     },
-    "version": "4.0.4",
+    "version": "4.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -90,56 +90,14 @@
                 },
                 "variables": {
                   "locationLongNameToShortMap": {
-                    "australiacentral": "CAU",
-                    "australiacentral2": "CBR2",
-                    "australiaeast": "EAU",
-                    "australiasoutheast": "SEAU",
-                    "brazilsouth": "CQ",
-                    "brazilsoutheast": "BRSE",
-                    "canadacentral": "CCA",
-                    "canadaeast": "YQ",
-                    "centralindia": "CIN",
-                    "centralus": "CUS",
-                    "eastasia": "EA",
-                    "eastus": "EUS",
-                    "eastus2": "EUS2",
-                    "eastus2euap": "eus2p",
-                    "germanywestcentral": "DEWC",
-                    "francecentral": "PAR",
-                    "francesouth": "MRS",
-                    "japaneast": "EJP",
-                    "japanwest": "OS",
-                    "jioindiacentral": "JINC",
-                    "jioindiawest": "JINW",
-                    "koreacentral": "SE",
-                    "koreasouth": "PS",
-                    "northcentralus": "NCUS",
-                    "northeurope": "NEU",
-                    "norwayeast": "NOE",
-                    "norwaywest": "NOW",
-                    "southafricanorth": "JNB",
-                    "southcentralus": "SCUS",
-                    "southeastasia": "SEA",
-                    "southindia": "MA",
-                    "swedencentral": "SEC",
-                    "switzerlandnorth": "CHN",
-                    "switzerlandwest": "CHW",
-                    "uaecentral": "AUH",
-                    "uaenorth": "DXB",
-                    "uksouth": "SUK",
-                    "ukwest": "WUK",
-                    "westcentralus": "WCUS",
-                    "westeurope": "WEU",
-                    "westus": "WUS",
-                    "westus2": "WUS2",
-                    "westus3": "USW3",
                     "usgovvirginia": "USGV",
-                    "usgovarizona": "USGA",
-                    "chinaeast3": "NE3",
-                    "chinanorth3": "NN3",
-                    "chinaeast2": "E2"
+                    "usgovarizona": "USGA"
                   },
-                  "locationCode": "[variables('locationLongNameToShortMap')[parameters('clusterRegion')]]",
+                  "alternativeLocation": {
+                    "usgovtexas": "usgovarizona"
+                  },
+                  "actualLogAResourceLocation": "[if(contains(variables('locationLongNameToShortMap'), parameters('clusterRegion')), parameters('clusterRegion'), variables('alternativeLocation')[parameters('clusterRegion')])]",
+                  "locationCode": "[variables('locationLongNameToShortMap')[variables('actualLogAResourceLocation')]]",
                   "subscriptionId": "[subscription().subscriptionId]",
                   "shouldProvisionDefaultWorkspace": "[empty(parameters('logAnalyticsWorkspaceResourceId'))]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
@@ -152,7 +110,7 @@
                     "type": "Microsoft.Resources/resourceGroups",
                     "name": "[variables('defaultRGName')]",
                     "apiVersion": "2019-05-01",
-                    "location": "[parameters('clusterRegion')]"
+                    "location": "[variables('actualLogAResourceLocation')]"
                   },
                   {
                     "condition": "[variables('shouldProvisionDefaultWorkspace')]",
@@ -166,8 +124,8 @@
                         "scope": "inner"
                       },
                       "parameters": {
-                        "clusterRegion": {
-                          "value": "[parameters('clusterRegion')]"
+                        "resourceLocation": {
+                          "value": "[variables('actualLogAResourceLocation')]"
                         },
                         "workspaceName": {
                           "value": "[variables('workspaceName')]"
@@ -177,7 +135,7 @@
                         "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
                         "parameters": {
-                          "clusterRegion": {
+                          "resourceLocation": {
                             "type": "string"
                           },
                           "workspaceName": {
@@ -190,7 +148,7 @@
                             "type": "Microsoft.OperationalInsights/workspaces",
                             "name": "[parameters('workspaceName')]",
                             "apiVersion": "2021-06-01",
-                            "location": "[parameters('clusterRegion')]",
+                            "location": "[parameters('resourceLocation')]",
                             "properties": {
                               "sku": {
                                 "name": "pernode"
@@ -230,7 +188,7 @@
                           "value": "[parameters('clusterRegion')]"
                         },
                         "aksClusterContent": {
-                          "value": "[reference(parameters('clusterResourceId'), '2022-06-01', 'Full')]"
+                          "value": "[reference(parameters('clusterResourceId'), '2023-05-01', 'Full')]"
                         }
                       },
                       "template": {
@@ -254,7 +212,7 @@
                           {
                             "type": "Microsoft.ContainerService/ManagedClusters",
                             "name": "[parameters('clusterName')]",
-                            "apiVersion": "2022-06-01",
+                            "apiVersion": "2023-05-01",
                             "location": "[parameters('clusterRegion')]",
                             "properties": {
                               "securityProfile": {

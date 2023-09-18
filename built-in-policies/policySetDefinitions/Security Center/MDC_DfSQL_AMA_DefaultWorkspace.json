@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure machines to create the default Microsoft Defender for SQL pipeline using Azure Monitor Agent",
+    "displayName": "[Preview]: Configure SQL VMs and Arc-enabled SQL Servers to install Microsoft Defender for SQL and AMA with a LA workspace",
     "policyType": "BuiltIn",
-    "description": "Configure machines to automatically install the Azure Monitor and Microsoft Defender for SQL agents. Microsoft Defender for SQL collects events from the agents and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group, a Data Collection Rule and Log Analytics workspace in the same region as the machine to store audit records.",
-    "version": "1.1.0-preview",
+    "description": "Microsoft Defender for SQL collects events from the agents and uses them to provide security alerts and tailored hardening tasks (recommendations). Creates a resource group and a Data Collection Rule and Log Analytics workspace in the same region as the machine.",
+    "version": "1.2.0-preview",
     "metadata": {
       "category": "Security Center",
-      "version": "1.1.0-preview",
+      "version": "1.2.0-preview",
       "preview": true
     },
     "parameters": {
@@ -14,8 +14,16 @@
         "type": "String",
         "metadata": {
           "displayName": "Workspace region",
-          "description": "Region of the Workspace to which the machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
+          "description": "Region of the Log Analytics workspace destination for the Data Collection Rule.",
           "strongType": "location"
+        },
+        "defaultValue": ""
+      },
+      "userWorkspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace Id",
+          "description": "Workspace Id of the Log Analytics workspace destination for the Data Collection Rule."
         },
         "defaultValue": ""
       },
@@ -34,9 +42,10 @@
       "builtInIdentityResourceGroupLocation": {
         "type": "String",
         "metadata": {
-          "displayName": "User-Assigned Managed Identity Resource Group",
+          "displayName": "User-Assigned Managed Identity Resource Group Location",
           "description": "The location of the resource group 'Built-In-Identity-RG' created by the policy."
-        }
+        },
+        "defaultValue": "eastus"
       }
     },
     "policyDefinitions": [
@@ -62,6 +71,9 @@
         "parameters": {
           "workspaceRegion": {
             "value": "[parameters('workspaceRegion')]"
+          },
+          "userWorkspaceId": {
+            "value": "[parameters('userWorkspaceId')]"
           }
         }
       },
