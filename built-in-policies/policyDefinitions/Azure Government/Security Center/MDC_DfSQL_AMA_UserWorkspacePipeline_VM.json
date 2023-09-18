@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure Windows SQL machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent",
+    "displayName": "[Preview]: Configure SQL Virtual Machines to automatically install Microsoft Defender for SQL and DCR with a user-defined LA workspace",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure Windows SQL machines to create the Microsoft Defender for SQL user-defined pipeline using Azure Monitor Agent. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Use the user-provided Log Analytics workspace to store audit records. Create a resource group and a Data Collection Rule in the same region as the user-provided Log Analytics workspace.",
-    "version": "1.0.0-preview",
+    "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and a Data Collection Rule in the same region as the user-defined Log Analytics workspace.",
+    "version": "1.1.0-preview",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Security Center",
       "preview": true
     },
@@ -27,7 +27,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Workspace Resource Id",
-          "description": "Select the Log Analytics workspace to which the virtual machines in scope will send their logs. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "description": "Workspace resource Id of the Log Analytics workspace destination for the Data Collection Rule.",
           "strongType": "omsWorkspace"
         }
       },
@@ -35,9 +35,17 @@
         "type": "String",
         "metadata": {
           "displayName": "Workspace region",
-          "description": "Region of the Workspace to which the Windows SQL machines in scope will send their logs. Needed to create the Data Collection Rule in the same region",
+          "description": "Region of the Log Analytics workspace destination for the Data Collection Rule.",
           "strongType": "location"
         }
+      },
+      "userWorkspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Workspace Id",
+          "description": "Workspace Id of the Log Analytics workspace destination for the Data Collection Rule."
+        },
+        "defaultValue": ""
       },
       "enableCollectionOfSqlQueriesForSecurityResearch": {
         "type": "Boolean",
@@ -87,7 +95,7 @@
               },
               {
                 "field": "name",
-                "equals": "[concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr')]"
+                "equals": "[if(empty(parameters('userWorkspaceId')), concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr'), concat('D4SQL-', replace(parameters('userWorkspaceId'), '-', ''), '-dcr'))]"
               }
             ]
           },
@@ -99,6 +107,9 @@
                 "resourceGroup": {
                   "value": "[resourceGroup().name]"
                 },
+                "location": {
+                  "value": "[field('location')]"
+                },
                 "vmName": {
                   "value": "[first(split(field('fullName'), '/'))]"
                 },
@@ -107,6 +118,9 @@
                 },
                 "workspaceRegion": {
                   "value": "[parameters('workspaceRegion')]"
+                },
+                "userWorkspaceId": {
+                  "value": "[parameters('userWorkspaceId')]"
                 },
                 "enableCollectionOfSqlQueriesForSecurityResearch": {
                   "value": "[parameters('enableCollectionOfSqlQueriesForSecurityResearch')]"
@@ -119,6 +133,9 @@
                   "resourceGroup": {
                     "type": "string"
                   },
+                  "location": {
+                    "type": "string"
+                  },
                   "vmName": {
                     "type": "string"
                   },
@@ -126,6 +143,9 @@
                     "type": "string"
                   },
                   "workspaceRegion": {
+                    "type": "string"
+                  },
+                  "userWorkspaceId": {
                     "type": "string"
                   },
                   "enableCollectionOfSqlQueriesForSecurityResearch": {
@@ -136,11 +156,12 @@
                   "subscriptionId": "[subscription().subscriptionId]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', parameters('workspaceRegion'))]",
                   "defaultRGLocation": "[parameters('workspaceRegion')]",
-                  "dcrName": "[concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr')]",
+                  "dcrName": "[if(empty(parameters('userWorkspaceId')), concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr'), concat('D4SQL-', replace(parameters('userWorkspaceId'), '-', ''), '-dcr'))]",
                   "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
                   "dcraName": "[concat(parameters('vmName'),'/Microsoft.Insights/MicrosoftDefenderForSQL-RulesAssociation')]",
                   "deployDataCollectionRules": "[concat('deployDataCollectionRules-', uniqueString(deployment().name))]",
-                  "deployDataCollectionRulesAssociation": "[concat('deployDataCollectionRulesAssociation-', uniqueString(deployment().name))]"
+                  "deployDataCollectionRulesAssociation": "[concat('deployDataCollectionRulesAssociation-', uniqueString(deployment().name))]",
+                  "deployDefenderForSQL": "[concat('deployDefenderForSQL-', uniqueString(deployment().name))]"
                 },
                 "resources": [
                   {
@@ -148,6 +169,54 @@
                     "name": "[variables('defaultRGName')]",
                     "apiVersion": "2022-09-01",
                     "location": "[variables('defaultRGLocation')]"
+                  },
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[variables('deployDefenderForSQL')]",
+                    "apiVersion": "2022-09-01",
+                    "resourceGroup": "[parameters('resourceGroup')]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "parameters": {
+                        "location": {
+                          "value": "[parameters('location')]"
+                        },
+                        "vmName": {
+                          "value": "[parameters('vmName')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "location": {
+                            "type": "string"
+                          },
+                          "vmName": {
+                            "type": "string"
+                          }
+                        },
+                        "variables": {},
+                        "resources": [
+                          {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(parameters('vmName'), '/', 'MicrosoftDefenderForSQL')]",
+                            "apiVersion": "2023-03-01",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                              "publisher": "Microsoft.Azure.AzureDefenderForSQL",
+                              "type": "AdvancedThreatProtection.Windows",
+                              "typeHandlerVersion": "2.0",
+                              "autoUpgradeMinorVersion": true,
+                              "enableAutomaticUpgrade": true
+                            }
+                          }
+                        ]
+                      }
+                    }
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -304,7 +373,7 @@
                             "name": "[parameters('dcraName')]",
                             "apiVersion": "2021-04-01",
                             "properties": {
-                              "description": "Association of data collection rule for Microsoft Defender for SQL. Deleting this association will break the detection of security vulnerabilities for this virtual machine.",
+                              "description": "Configure association between SQL Virtual Machine and the Microsoft Defender for SQL user-defined DCR. Deleting this association will break the detection of security vulnerabilities for this SQL Virtual Machine.",
                               "dataCollectionRuleId": "[parameters('dcrId')]"
                             }
                           }

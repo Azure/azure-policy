@@ -1,12 +1,12 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure Windows SQL virtual machines to create the default Microsoft Defender for SQL pipeline using Azure Monitor Agent",
+    "displayName": "[Preview]: Configure SQL Virtual Machines to automatically install Microsoft Defender for SQL and DCR with a Log Analytics workspace",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Configure Windows SQL virtual machines to create the default Microsoft Defender for SQL pipeline using Azure Monitor Agent. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group, a Data Collection Rule and Log Analytics workspace in the same region as the machine to store audit records.",
-    "version": "1.1.0-preview",
+    "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group, a Data Collection Rule and Log Analytics workspace in the same region as the machine.",
+    "version": "1.2.0-preview",
     "metadata": {
-      "version": "1.1.0-preview",
+      "version": "1.2.0-preview",
       "category": "Security Center",
       "preview": true
     },
@@ -159,7 +159,8 @@
                   "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
                   "dcraName": "[concat(parameters('vmName'),'/Microsoft.Insights/MicrosoftDefenderForSQL-RulesAssociation')]",
                   "deployDataCollectionRules": "[concat('deployDataCollectionRules-', uniqueString(deployment().name))]",
-                  "deployDataCollectionRulesAssociation": "[concat('deployDataCollectionRulesAssociation-', uniqueString(deployment().name))]"
+                  "deployDataCollectionRulesAssociation": "[concat('deployDataCollectionRulesAssociation-', uniqueString(deployment().name))]",
+                  "deployDefenderForSQL": "[concat('deployDefenderForSQL-', uniqueString(deployment().name))]"
                 },
                 "resources": [
                   {
@@ -167,6 +168,54 @@
                     "name": "[variables('defaultRGName')]",
                     "apiVersion": "2022-09-01",
                     "location": "[variables('defaultRGLocation')]"
+                  },
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[variables('deployDefenderForSQL')]",
+                    "apiVersion": "2022-09-01",
+                    "resourceGroup": "[parameters('resourceGroup')]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "parameters": {
+                        "location": {
+                          "value": "[parameters('location')]"
+                        },
+                        "vmName": {
+                          "value": "[parameters('vmName')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "location": {
+                            "type": "string"
+                          },
+                          "vmName": {
+                            "type": "string"
+                          }
+                        },
+                        "variables": {},
+                        "resources": [
+                          {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(parameters('vmName'), '/', 'MicrosoftDefenderForSQL')]",
+                            "apiVersion": "2023-03-01",
+                            "location": "[parameters('location')]",
+                            "properties": {
+                              "publisher": "Microsoft.Azure.AzureDefenderForSQL",
+                              "type": "AdvancedThreatProtection.Windows",
+                              "typeHandlerVersion": "2.0",
+                              "autoUpgradeMinorVersion": true,
+                              "enableAutomaticUpgrade": true
+                            }
+                          }
+                        ]
+                      }
+                    }
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -344,7 +393,7 @@
                             "name": "[parameters('dcraName')]",
                             "apiVersion": "2021-04-01",
                             "properties": {
-                              "description": "Association of data collection rule for Microsoft Defender for SQL. Deleting this association will break the detection of security vulnerabilities for this virtual machine.",
+                              "description": "Configure association between SQL Virtual Machine and the Microsoft Defender for SQL DCR. Deleting this association will break the detection of security vulnerabilities for this SQL Virtual Machine.",
                               "dataCollectionRuleId": "[parameters('dcrId')]"
                             }
                           }
