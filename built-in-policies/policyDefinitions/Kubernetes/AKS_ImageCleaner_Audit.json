@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Kubernetes Service Clusters should enable Image Cleaner",
+    "description": "Image Cleaner performs automatic vulnerable, unused image identification and removal, which mitigates the risk of stale images and reduces the time required to clean them up. Learn more at: https://aka.ms/aks/image-cleaner.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy.",
+          "portalReview": true
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerService/managedClusters/securityProfile.imageCleaner.enabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/securityProfile.imageCleaner.enabled",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/af3c26b2-6fad-493e-9236-9c68928516ab",
+  "name": "af3c26b2-6fad-493e-9236-9c68928516ab"
+}
