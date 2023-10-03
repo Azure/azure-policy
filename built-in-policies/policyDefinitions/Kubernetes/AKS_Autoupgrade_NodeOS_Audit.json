@@ -1,0 +1,88 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Kubernetes Service Clusters should enable node os auto-upgrade",
+    "description": "AKS node OS auto-upgrade controls node-level OS security updates. Learn more at: https://learn.microsoft.com/en-us/azure/aks/auto-upgrade-node-image.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "allowedNodeOsUpgradeChannels": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Node OS Upgrade Channels",
+          "description": "Enable or disable the execution of the policy.",
+          "portalReview": true
+        },
+        "allowedValues": [
+          "None",
+          "Unmanaged",
+          "NodeImage",
+          "SecurityPatch"
+        ],
+        "defaultValue": [
+          "NodeImage",
+          "SecurityPatch"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/autoUpgradeProfile.upgradeChannel",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/autoUpgradeProfile.upgradeChannel",
+                    "notEquals": "node-image"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/autoUpgradeProfile.nodeOSUpgradeChannel",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.ContainerService/managedClusters/autoUpgradeProfile.nodeOSUpgradeChannel",
+                    "notin": "[parameters('allowedNodeOsUpgradeChannels')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/04408ca5-aa10-42ce-8536-98955cdddd4c",
+  "name": "04408ca5-aa10-42ce-8536-98955cdddd4c"
+}
