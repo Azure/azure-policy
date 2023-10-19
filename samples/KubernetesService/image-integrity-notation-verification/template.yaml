@@ -53,9 +53,19 @@ spec:
             remote_data.system_error == ""
             subject_validation := remote_data.responses[_]
             verifierReport := subject_validation[1].verifierReports[_]
+            # for ratify < v1.0.0-rc.7
             verifierReport.name == "notaryv2"
             not verifierReport.isSuccess
-            result := sprintf("Subject %s failed notation verification, please check ratify verifier configuration. Error: %s", [verifierReport.subject, verifierReport.message])
+            result := sprintf("Subject %s failed notation verification, please check ratify verifier configuration. Error: %s", [subject_validation[0], verifierReport.message])
+        }
+        general_violation[{"result": result}] {
+            remote_data.system_error == ""
+            subject_validation := remote_data.responses[_]
+            verifierReport := subject_validation[1].verifierReports[_]
+            # for ratify >= v1.0.0-rc.7
+            verifierReport.name == "notation"
+            not verifierReport.isSuccess
+            result := sprintf("Subject %s failed notation verification, please check ratify verifier configuration. Error: %s", [subject_validation[0], verifierReport.message])
         }
 
         # Check if the success criteria is true
@@ -66,7 +76,7 @@ spec:
             not verifierReport.name # oras error
             not verifierReport.isSuccess
             reword_msg := reword_oras_error_msg(verifierReport.message)
-            result := sprintf("%s; Subject: %s; Error: %s", [reword_msg, verifierReport.subject, verifierReport.message])
+            result := sprintf("%s; Subject: %s; Error: %s", [reword_msg, subject_validation[0], verifierReport.message])
         }
 
         reword_oras_error_msg(message) = res {
@@ -107,7 +117,18 @@ spec:
             hasContainerStatus(c.name)
             containerStatus := input.review.object.status.containerStatuses[_]
             containerStatus.name == c.name
-            digest := containerStatus.imageID
+            digest_temp := containerStatus.imageID
+            digest_temp != "" # imageID will be empty string if the container is imagePullBackOff
+            digest := digest_temp
+        }
+        get_image_digest(c) = digest {
+            not regex.match(DIGEST_REGEX, c.image)
+            hasContainerStatus(c.name)
+            containerStatus := input.review.object.status.containerStatuses[_]
+            containerStatus.name == c.name
+            digest_temp := containerStatus.imageID
+            digest_temp == ""
+            digest := c.image
         }
         get_image_digest(c) = digest {
             # fail to fetch digest

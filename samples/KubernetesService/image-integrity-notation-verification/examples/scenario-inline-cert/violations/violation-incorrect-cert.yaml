@@ -1,0 +1,55 @@
+apiVersion: config.ratify.deislabs.io/v1beta1
+kind: CertificateStore
+metadata:
+  name: certstore-incorrect-cert
+spec:
+  provider: inline
+  parameters: # incorrect cert
+    value: |
+      -----BEGIN CERTIFICATE-----
+      aW5jb3JyZWN0Cg== 
+      -----END CERTIFICATE-----
+---
+apiVersion: config.ratify.deislabs.io/v1beta1
+kind: Store
+metadata:
+  name: store-oras-incorrect-cert
+spec:
+  name: oras
+---
+apiVersion: config.ratify.deislabs.io/v1beta1
+kind: Verifier
+metadata:
+  name: verifier-notary-inline-incorrect-cert
+spec:
+  name: notation
+  artifactTypes: application/vnd.cncf.notary.signature
+  parameters:
+    verificationCertStores:  # certificates for validating signatures
+      certs: # name of the trustStore
+        - certstore-incorrect-cert # name of the certificate store CRD to include in this trustStore
+    trustPolicyDoc: # policy language that indicates which identities are trusted to produce artifacts
+      version: "1.0"
+      trustPolicies:
+        - name: default
+          registryScopes:
+            - "*"
+          signatureVerification:
+            level: strict
+          trustStores:
+            - ca:certs
+          trustedIdentities:
+            - "*"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pass-incorrect-cert
+  labels:
+    app: scenario-inline-cert
+spec:
+  nodeSelector:
+    kubernetes.io/os: linux
+  containers:
+  - name: image-singed
+    image: ghcr.io/deislabs/ratify/notary-image:signed
