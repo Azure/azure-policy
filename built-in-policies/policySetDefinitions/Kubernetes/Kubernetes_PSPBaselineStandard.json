@@ -4,16 +4,17 @@
     "policyType": "BuiltIn",
     "description": "This initiative includes the policies for the Kubernetes cluster pod security baseline standards. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For instructions on using this policy, visit https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "Kubernetes"
     },
-    "version": "1.3.0",
+    "version": "1.4.0",
     "parameters": {
       "effect": {
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy.",
+          "portalReview": true
         },
         "allowedValues": [
           "audit",
@@ -45,6 +46,45 @@
           "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
         },
         "defaultValue": []
+      },
+      "allowedHostPaths": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed host paths",
+          "description": "The host paths allowed for pod hostPath volumes to use. Provide an empty paths list to block all host paths.",
+          "portalReview": true
+        },
+        "defaultValue": {
+          "paths": []
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pathPrefix": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "pathPrefix",
+                  "readOnly"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "paths"
+          ],
+          "additionalProperties": false
+        }
       }
     },
     "policyDefinitions": [
@@ -157,9 +197,7 @@
             "value": "[parameters('namespaces')]"
           },
           "allowedHostPaths": {
-            "value": {
-              "paths": []
-            }
+            "value": "[parameters('allowedHostPaths')]"
           }
         }
       }
