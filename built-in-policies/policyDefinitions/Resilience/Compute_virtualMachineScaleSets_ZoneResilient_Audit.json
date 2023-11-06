@@ -1,0 +1,125 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Virtual Machine Scale Sets should be Zone Resilient",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Virtual Machine Scale Sets can be configured to be either Zone Aligned, Zone Redundant, or neither. Virtual Machine Scale Sets that have exactly one entry in their zones array are considered Zone Aligned. In contrast, Virtual Machine Scale Sets with 3 or more entries in their zones array and a capacity of at least 3 are recognized as Zone Redundant. This policy helps identify and enforce these resilience configurations.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allow": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed Zone Configurations",
+          "description": "This parameter lets you choose what type of Zone Resilience you want to allow. Aligned will identify any resources that are not configured as Zone Aligned as non-compliant resources. Redundant will identify any resources that are not configured to be Zone Redundant as non-compliant resources. Both (default), will identify any resource configurations that are not Zone Aligned or Zone Redundant as non-compliant resources."
+        },
+        "allowedValues": [
+          "Both",
+          "Redundant",
+          "Aligned"
+        ],
+        "defaultValue": "Both"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('allow')]",
+                    "equals": "Both"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "count": {
+                          "field": "Microsoft.Compute/virtualMachineScaleSets/zones[*]"
+                        },
+                        "less": 3
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachineScaleSets/sku.capacity",
+                        "less": 3
+                      }
+                    ]
+                  },
+                  {
+                    "count": {
+                      "field": "Microsoft.Compute/virtualMachineScaleSets/zones[*]"
+                    },
+                    "notEquals": 1
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('allow')]",
+                    "equals": "Redundant"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "count": {
+                          "field": "Microsoft.Compute/virtualMachineScaleSets/zones[*]"
+                        },
+                        "less": 3
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachineScaleSets/sku.capacity",
+                        "less": 3
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('allow')]",
+                    "equals": "Aligned"
+                  },
+                  {
+                    "count": {
+                      "field": "Microsoft.Compute/virtualMachineScaleSets/zones[*]"
+                    },
+                    "notEquals": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d3903bdf-ab85-4cce-85d3-2934d77629d4",
+  "name": "d3903bdf-ab85-4cce-85d3-2934d77629d4"
+}

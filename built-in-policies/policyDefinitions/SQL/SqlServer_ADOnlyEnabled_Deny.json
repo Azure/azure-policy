@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Azure SQL Database should have Azure Active Directory Only Authentication enabled",
-    "description": "Disabling local authentication methods and allowing only Azure Active Directory Authentication improves security by ensuring that Azure SQL Databases can exclusively be accessed by Azure Active Directory identities. Learn more at: aka.ms/adonlycreate.",
+    "displayName": "Azure SQL Database should have Microsoft Entra-only authentication enabled",
+    "description": "Disabling local authentication methods and allowing only Microsoft Entra authentication improves security by ensuring that Azure SQL Databases can exclusively be accessed by Microsoft Entra identities. Learn more at: aka.ms/adonlycreate.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "SQL"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -26,24 +26,52 @@
     },
     "policyRule": {
       "if": {
-        "allOf": [
+        "anyOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Sql/servers"
-          },
-          {
-            "value": "[resourcegroup().managedBy]",
-            "notContains": "/providers/Microsoft.Synapse/"
-          },
-          {
-            "anyOf": [
+            "allOf": [
               {
-                "field": "Microsoft.Sql/servers/administrators.azureADOnlyAuthentication",
-                "exists": false
+                "field": "type",
+                "equals": "Microsoft.Sql/servers"
               },
               {
-                "field": "Microsoft.Sql/servers/administrators.azureADOnlyAuthentication",
-                "equals": "false"
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Synapse/"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Sql/servers/administrators.azureADOnlyAuthentication",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.Sql/servers/administrators.azureADOnlyAuthentication",
+                    "equals": "false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Sql/servers/azureADOnlyAuthentications"
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Synapse/"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Sql/servers/azureADOnlyAuthentications/azureADOnlyAuthentication",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.Sql/servers/azureADOnlyAuthentications/azureADOnlyAuthentication",
+                    "equals": "false"
+                  }
+                ]
               }
             ]
           }
