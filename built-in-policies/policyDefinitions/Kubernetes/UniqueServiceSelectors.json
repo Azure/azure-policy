@@ -1,0 +1,134 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Kubernetes cluster services should use unique selectors",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.Kubernetes.Data",
+    "description": "Ensure that Services in a namespace have unique selectors. This policy relies on Gatekeeper data replication and syncs all ingress resources into OPA. Prior to applying this policy, please confirm that syncing ingress resources won't exceed your memory capacity. The policy parameters apply to specific namespaces, but it syncs all resources of that type across all namespaces. This policy is currently in preview for Kubernetes Service (AKS)",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Deny' blocks the non-compliant resource creation or update. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "labelSelector": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Kubernetes label selector",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "templateInfo": {
+            "sourceType": "PublicURL",
+            "url": "https://store.policy.core.windows.net/kubernetes/unique-service-selectors/v1/template.yaml"
+          },
+          "apiGroups": [
+            ""
+          ],
+          "kinds": [
+            "Service"
+          ],
+          "namespaces": "[parameters('namespaces')]",
+          "excludedNamespaces": "[parameters('excludedNamespaces')]",
+          "labelSelector": "[parameters('labelSelector')]"
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b0fdedee-7b9e-4a17-9f5d-5e8e912d2f01",
+  "name": "b0fdedee-7b9e-4a17-9f5d-5e8e912d2f01"
+}

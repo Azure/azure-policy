@@ -1,0 +1,79 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Resources should be Zone Resilient",
+    "policyType": "BuiltIn",
+    "description": "Some resource types can be deployed Zone Redundant (e.g. SQL Databases); some can be deploy Zone Aligned (e.g. Virtual Machines); and some can be deployed either Zone Aligned or Zone Redundant (e.g. Virtual Machine Scale Sets). Being zone aligned does not guarantee resilience, but it is the foundation on which a resilient solution can be built (e.g. three Virtual Machine Scale Sets zone aligned to three different zones in the same region with a load balancer).",
+    "metadata": {
+      "version": "1.1.0-preview",
+      "category": "Resilience",
+      "preview": true
+    },
+    "version": "1.1.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allow": {
+        "metadata": {
+          "displayName": "Allowed Zone Configurations",
+          "description": "Some resources can be configured to be Zone Aligned, Zone Redundant, or netiher. This parameter lets you choose which of these three options you want to allow. Aligned will identify any resources that are not configured as Zone Aligned as non-compliant resources. Redundant will identify any resources that are not configured to be Zone Redundant as non-compliant resources. Both (default), will identify any resource configurations that are not Zone Aligned or Zone Redundant as non-compliant resources."
+        },
+        "allowedValues": [
+          "Both",
+          "Redundant",
+          "Aligned"
+        ],
+        "defaultValue": "Both",
+        "schema": null,
+        "type": "string"
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "Compute_virtualMachineScaleSets_ZoneResilient_Audit",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d3903bdf-ab85-4cce-85d3-2934d77629d4",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "allow": {
+            "value": "[parameters('allow')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "Compute_virtualMachines_ZoneAligned_Audit",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/42f4f3a2-7d20-4c13-a05d-01857a626c22",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DocumentDB_databaseAccounts_ZoneRedundant_Audit",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/44c5a1f9-7ef6-4c38-880c-273e8f7a3c24",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      }
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/130fb88f-0fc9-4678-bfe1-31022d71c7d5",
+  "name": "130fb88f-0fc9-4678-bfe1-31022d71c7d5"
+}

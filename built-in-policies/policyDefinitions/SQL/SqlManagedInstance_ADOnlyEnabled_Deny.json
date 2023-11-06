@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Azure SQL Managed Instance should have Azure Active Directory Only Authentication enabled",
-    "description": "Disabling local authentication methods and allowing only Azure Active Directory Authentication improves security by ensuring that Azure SQL Managed Instances can exclusively be accessed by Azure Active Directory identities. Learn more at: aka.ms/adonlycreate.",
+    "displayName": "Azure SQL Managed Instance should have Microsoft Entra-only authentication enabled",
+    "description": "Disabling local authentication methods and allowing only Microsoft Entra authentication improves security by ensuring that Azure SQL Managed Instances can exclusively be accessed by Microsoft Entra identities. Learn more at: aka.ms/adonlycreate.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "SQL"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -26,20 +26,44 @@
     },
     "policyRule": {
       "if": {
-        "allOf": [
+        "anyOf": [
           {
-            "field": "type",
-            "equals": "Microsoft.Sql/managedInstances"
-          },
-          {
-            "anyOf": [
+            "allOf": [
               {
-                "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
-                "exists": false
+                "field": "type",
+                "equals": "Microsoft.Sql/managedInstances"
               },
               {
-                "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
-                "equals": "false"
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
+                    "equals": "false"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Sql/managedInstances/azureADOnlyAuthentications"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Sql/managedInstances/azureADOnlyAuthentications/azureADOnlyAuthentication",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.Sql/managedInstances/azureADOnlyAuthentications/azureADOnlyAuthentication",
+                    "equals": "false"
+                  }
+                ]
               }
             ]
           }
