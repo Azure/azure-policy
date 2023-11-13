@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Kubernetes Service Clusters should enable cluster auto-upgrade",
+    "description": "AKS cluster auto-upgrade can ensure your clusters are up to date and don't miss the latest features or patches from AKS and upstream Kubernetes. Learn more at: https://learn.microsoft.com/en-us/azure/aks/auto-upgrade-cluster.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "allowedClusterAutoUpgradeChannels": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Cluster Auto-upgrade Channels",
+          "description": "Cluster auto-upgrade channels viewed as complaint. Lean more at https://learn.microsoft.com/en-us/azure/aks/auto-upgrade-cluster#use-cluster-auto-upgrade",
+          "portalReview": true
+        },
+        "allowedValues": [
+          "rapid",
+          "stable",
+          "patch",
+          "node-image",
+          "none"
+        ],
+        "defaultValue": [
+          "rapid",
+          "stable",
+          "patch"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerService/managedClusters/autoUpgradeProfile.upgradeChannel",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/autoUpgradeProfile.upgradeChannel",
+                "notin": "[parameters('allowedClusterAutoUpgradeChannels')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5c345cdf-2049-47e0-b8fe-b0e96bc2df35",
+  "name": "5c345cdf-2049-47e0-b8fe-b0e96bc2df35"
+}

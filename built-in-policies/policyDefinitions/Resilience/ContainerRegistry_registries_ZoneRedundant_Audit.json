@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Container Registry should be Zone Redundant",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Container Registry can be configured to be Zone Redundant or not. When the zoneRedundancy property for a Container Registry is set to 'Disabled', it means the registry is not Zone Redundant. Enforcing this policy helps ensure that your Container Registry is appropriately configured for zone resilience, reducing the risk of downtime during zone outages.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/zoneRedundancy",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.ContainerRegistry/registries/zoneRedundancy",
+                "equals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9d2b0a20-57d6-474c-9d12-44a4a20999c6",
+  "name": "9d2b0a20-57d6-474c-9d12-44a4a20999c6"
+}
