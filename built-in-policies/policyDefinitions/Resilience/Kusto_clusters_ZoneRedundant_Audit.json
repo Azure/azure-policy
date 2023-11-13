@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Data Explorer Clusters should be Zone Redundant",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Data Explorer Clusters can be configured to be Zone Redundant or not. An Azure Data Explorer Cluster is considered Zone Redundant if it has at least two entries in its zones array. This policy helps ensure the your Azure Data Explorer Clusters are Zone Redundant.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "equals": "Microsoft.Kusto/clusters",
+            "field": "type"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Kusto/clusters/zones[*]"
+            },
+            "less": 2
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cbe58ab0-07a8-43ea-9ccc-8ea33e4d6aa5",
+  "name": "cbe58ab0-07a8-43ea-9ccc-8ea33e4d6aa5"
+}
