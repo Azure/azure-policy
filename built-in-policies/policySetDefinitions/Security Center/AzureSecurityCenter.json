@@ -4,10 +4,10 @@
     "policyType": "BuiltIn",
     "description": "The Microsoft cloud security benchmark initiative represents the policies and controls implementing security recommendations defined in Microsoft cloud security benchmark, see https://aka.ms/azsecbm. This also serves as the Microsoft Defender for Cloud default policy initiative. You can directly assign this initiative, or manage its policies and compliance results within Microsoft Defender for Cloud.",
     "metadata": {
-      "version": "57.23.2",
+      "version": "57.24.0",
       "category": "Security Center"
     },
-    "version": "57.23.2",
+    "version": "57.24.0",
     "policyDefinitionGroups": [
       {
         "name": "Azure_Security_Benchmark_v3.0_NS-1",
@@ -2634,6 +2634,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation of allowed container images in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "allowedContainerImagesLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of allowed container images",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "privilegedContainersShouldBeAvoidedEffect": {
         "type": "string",
         "defaultValue": "Audit",
@@ -2665,9 +2724,68 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation of privileged containers in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "privilegedContainerLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of privileged containers",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "allowedContainerPortsInKubernetesClusterEffect": {
         "type": "string",
-        "defaultValue": "Audit",
+        "defaultValue": "Disabled",
         "allowedValues": [
           "audit",
           "Audit",
@@ -2746,6 +2864,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation of allowed service ports in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "allowedServicePortsInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of allowed service ports",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "NoPrivilegeEscalationInKubernetesClusterEffect": {
         "type": "string",
         "defaultValue": "Audit",
@@ -2775,6 +2952,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation of privileged escalation containers in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "NoPrivilegeEscalationInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of privileged escalation containers",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "NoSharingSensitiveHostNamespacesInKubernetesEffect": {
         "type": "string",
         "defaultValue": "Audit",
@@ -2802,6 +3038,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of sharing sensitive host namespaces in Kubernetes clusters",
           "description": "List of Kubernetes namespaces to exclude from evaluation of  sharing sensitive host namespaces in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "NoSharingSensitiveHostNamespacesInKubernetesLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of sharing sensitive host namespaces in Kubernetes clusters",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "ReadOnlyRootFileSystemInKubernetesClusterEffect": {
@@ -2835,6 +3130,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation to monitoring of containers running with a read only root file system in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "ReadOnlyRootFileSystemInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of containers running with a read only root file system",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "AllowedCapabilitiesInKubernetesClusterEffect": {
         "type": "string",
         "defaultValue": "Audit",
@@ -2864,6 +3218,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of containers use only allowed capabilities",
           "description": "List of Kubernetes namespaces to exclude from evaluation to monitoring of containers using only allowed capabilities in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "AllowedCapabilitiesInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of containers use only allowed capabilities",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "AllowedCapabilitiesInKubernetesClusterList": {
@@ -2913,6 +3326,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation to monitoring of containers modifying of AppArmor profile in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "AllowedAppArmorProfilesInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of containers modification of AppArmor profile",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "AllowedAppArmorProfilesInKubernetesClusterList": {
         "type": "Array",
         "defaultValue": [
@@ -2950,6 +3422,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of containers host networking and ports",
           "description": "List of Kubernetes namespaces to exclude from evaluation to monitoring of containers host networking and ports in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "AllowedHostNetworkingAndPortsInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of containers host networking and ports",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "AllowHostNetworkingInKubernetesCluster": {
@@ -3005,6 +3536,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of pod HostPath volume mounts",
           "description": "List of Kubernetes namespaces to exclude from evaluation to monitoring of pod HostPath volume mounts in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "AllowedHostPathVolumesInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of pod HostPath volume mounts",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "AllowedHostPathVolumesInKubernetesClusterList": {
@@ -3090,6 +3680,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of memory and CPU limits",
           "description": "List of Kubernetes namespaces to exclude from evaluation of memory and CPU limits in Kubernetes clusters. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "memoryAndCPULimitsInKubernetesClusterLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of memory and CPU limits",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "BlockVulnerableImagesInKubernetesClusterEffect": {
@@ -3208,6 +3857,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from monitoring of containers running as root user",
           "description": "List of Kubernetes namespaces to exclude from evaluation to monitoring of containers running as root users. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "MustRunAsNonRootLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of containers running as root user",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "MustRunAsNonRootNamespaceEffect": {
@@ -4182,6 +4890,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation of HTTPS only access. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "kubernetesClustersShouldBeAccessibleOnlyOverHTTPSLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select evaluation of HTTPS only access",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "kubernetesClustersShouldBeAccessibleOnlyOverHTTPSNamespaces": {
         "type": "Array",
         "defaultValue": [],
@@ -4418,6 +5185,65 @@
           "description": "Prevent usage of the default namespace in Kubernetes clusters to protect against unauthorized access for ConfigMap, Pod, Secret, Service, and ServiceAccount resource types. For more information, see https://aka.ms/kubepolicydoc."
         }
       },
+      "KubernetesClustersShouldNotUseTheDefaultNamespaceMonitoringLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of block default namespace",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringEffect": {
         "type": "string",
         "defaultValue": "Audit",
@@ -4449,6 +5275,65 @@
           "description": "List of Kubernetes namespaces to exclude from evaluation to restrict automounting API credentials. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
         }
       },
+      "KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of automounting API credentials",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringEffect": {
         "type": "string",
         "defaultValue": "Audit",
@@ -4478,6 +5363,65 @@
         "metadata": {
           "displayName": "Kubernetes namespaces to exclude from restricting CAP_SYS_ADMIN Linux capabilities",
           "description": "List of Kubernetes namespaces to exclude from evaluation to restrict CAP_SYS_ADMIN Linux capabilities. To list multiple namespaces, use semicolons (;) to separate them. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design."
+        }
+      },
+      "KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringLabelSelector": {
+        "type": "object",
+        "metadata": {
+          "displayName": "Kubernetes label selector to select monitoring of CAP_SYS_ADMIN Linux capabilities",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
         }
       },
       "VtpmShouldBeEnabledOnSupportedVirtualMachinesMonitoringEffect": {
@@ -5972,6 +6916,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('allowedContainerImagesNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('allowedContainerImagesLabelSelector')]"
           }
         },
         "groupNames": [
@@ -5988,6 +6935,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('privilegedContainerNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('privilegedContainerLabelSelector')]"
           },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
@@ -6010,6 +6960,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('allowedServicePortsInKubernetesClusterNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('allowedServicePortsInKubernetesClusterLabelSelector')]"
           }
         },
         "groupNames": [
@@ -6032,6 +6985,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('memoryAndCPULimitsInKubernetesClusterNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('memoryAndCPULimitsInKubernetesClusterLabelSelector')]"
           },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
@@ -6098,6 +7054,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('MustRunAsNonRootNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('MustRunAsNonRootLabelSelector')]"
           },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
@@ -6202,6 +7161,9 @@
           "excludedNamespaces": {
             "value": "[parameters('NoPrivilegeEscalationInKubernetesClusterNamespaceExclusion')]"
           },
+          "labelSelector": {
+            "value": "[parameters('NoPrivilegeEscalationInKubernetesClusterLabelSelector')]"
+          },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
@@ -6220,6 +7182,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('NoSharingSensitiveHostNamespacesInKubernetesNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('NoSharingSensitiveHostNamespacesInKubernetesLabelSelector')]"
           },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
@@ -6240,6 +7205,9 @@
           "excludedNamespaces": {
             "value": "[parameters('ReadOnlyRootFileSystemInKubernetesClusterNamespaceExclusion')]"
           },
+          "labelSelector": {
+            "value": "[parameters('ReadOnlyRootFileSystemInKubernetesClusterLabelSelector')]"
+          },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
           }
@@ -6258,6 +7226,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('AllowedCapabilitiesInKubernetesClusterNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('AllowedCapabilitiesInKubernetesClusterLabelSelector')]"
           },
           "allowedCapabilities": {
             "value": "[parameters('AllowedCapabilitiesInKubernetesClusterList')]"
@@ -6284,6 +7255,9 @@
           "excludedNamespaces": {
             "value": "[parameters('AllowedAppArmorProfilesInKubernetesClusterNamespaceExclusion')]"
           },
+          "labelSelector": {
+            "value": "[parameters('AllowedAppArmorProfilesInKubernetesClusterLabelSelector')]"
+          },
           "allowedProfiles": {
             "value": "[parameters('AllowedAppArmorProfilesInKubernetesClusterList')]"
           },
@@ -6305,6 +7279,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('AllowedHostNetworkingAndPortsInKubernetesClusterNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('AllowedHostNetworkingAndPortsInKubernetesClusterLabelSelector')]"
           },
           "allowHostNetwork": {
             "value": "[parameters('AllowHostNetworkingInKubernetesCluster')]"
@@ -6333,6 +7310,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('AllowedHostPathVolumesInKubernetesClusterNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('AllowedHostPathVolumesInKubernetesClusterLabelSelector')]"
           },
           "allowedHostPaths": {
             "value": "[parameters('AllowedHostPathVolumesInKubernetesClusterList')]"
@@ -7094,6 +8074,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('kubernetesClustersShouldBeAccessibleOnlyOverHTTPSExcludedNamespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('kubernetesClustersShouldBeAccessibleOnlyOverHTTPSLabelSelector')]"
           }
         },
         "groupNames": [
@@ -7310,6 +8293,9 @@
         "parameters": {
           "effect": {
             "value": "[parameters('KubernetesClustersShouldNotUseTheDefaultNamespaceMonitoringEffect')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('KubernetesClustersShouldNotUseTheDefaultNamespaceMonitoringLabelSelector')]"
           }
         },
         "groupNames": [
@@ -7326,6 +8312,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('KubernetesClustersShouldDisableAutomountingAPICredentialsMonitoringLabelSelector')]"
           },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
@@ -7345,6 +8334,9 @@
           },
           "excludedNamespaces": {
             "value": "[parameters('KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringNamespaceExclusion')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('KubernetesClustersShouldNotGrantCAPSYSADMINSecurityCapabilitiesMonitoringLabelSelector')]"
           },
           "excludedImages": {
             "value": "[parameters('excludedImagesInKubernetesCluster')]"
