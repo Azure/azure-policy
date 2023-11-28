@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Azure Event Grid namespace MQTT broker should use private link",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your Event Grid namespace instead of the entire service, you'll also be protected against data leakage risks. Learn more at: https://aka.ms/aeg-ns-privateendpoints.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Event Grid"
+    },
+    "version": "1.0.0",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventGrid/namespaces"
+          },
+          {
+            "field": "Microsoft.EventGrid/namespaces/topicSpacesConfiguration.state",
+            "equals": "Enabled"
+          },
+          {
+            "count": {
+              "field": "Microsoft.EventGrid/namespaces/privateEndpointConnections[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.EventGrid/namespaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                    "equals": "Approved"
+                  },
+                  {
+                    "field": "Microsoft.EventGrid/namespaces/privateEndpointConnections[*].groupIds[*]",
+                    "equals": "topicspace"
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cd8f7644-6fe8-4516-bded-0e465ead03ac",
+  "name": "cd8f7644-6fe8-4516-bded-0e465ead03ac"
+}
