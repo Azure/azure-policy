@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "Bot Protection should be enabled for Azure Application Gateway WAF",
+    "policyType": "BuiltIn",
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "description": "This policy ensures that bot protection is enabled in all Azure Application Gateway Web Application Firewall (WAF) policies",
+    "metadata": {
+      "category": "Network",
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/managedRules.managedRuleSets[*]",
+              "where": {
+                "field": "Microsoft.Network/applicationGatewayWebApplicationFirewallPolicies/managedRules.managedRuleSets[*].ruleSetType",
+                "equals": "Microsoft_BotManagerRuleSet"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ebea0d86-7fbd-42e3-8a46-27e7568c2525",
+  "name": "ebea0d86-7fbd-42e3-8a46-27e7568c2525"
+}

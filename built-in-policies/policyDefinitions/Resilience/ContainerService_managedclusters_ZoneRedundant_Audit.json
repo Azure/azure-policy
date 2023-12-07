@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Kubernetes Service Managed Clusters should be Zone Redundant",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Kubernetes Service Managed Clusters can be configured to be Zone Redundant or not. The policy checks the node pools in the cluster and ensures that avaialbilty zones are set for all the node pools.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedclusters"
+          },
+          {
+            "anyOf": [
+              {
+                "count": {
+                  "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
+                  "where": {
+                    "count": {
+                      "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].availabilityZones[*]"
+                    },
+                    "less": 3
+                  }
+                },
+                "greater": 0
+              },
+              {
+                "count": {
+                  "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
+                  "where": {
+                    "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].count",
+                    "less": 3
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2dec5f47-bc40-40d1-8c7d-a39d9d6808d1",
+  "name": "2dec5f47-bc40-40d1-8c7d-a39d9d6808d1"
+}

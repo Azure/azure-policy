@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "[Preview]: App Service Plans should be Zone Redundant",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "App Service Plans can be configured to be Zone Redundant or not. When the 'zoneRedundant' property is set to 'false' for an App Service Plan, it is not configured for Zone Redundancy. This policy identifies and enforces the Zone Redundancy configuration for App Service Plans.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "microsoft.web/serverfarms"
+          },
+          {
+            "field": "Microsoft.Web/serverfarms/zoneRedundant",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/22888755-d824-4e43-8e0b-42d481836554",
+  "name": "22888755-d824-4e43-8e0b-42d481836554"
+}
