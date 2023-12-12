@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "[Preview]: SQL Elastic database pools should be Zone Redundant",
+    "description": "SQL Elastic database pools can be configured to be Zone Redundant or not. SQL Elastic database pools are Zone Redundant if it's 'zoneRedundant' property is set to 'true'. Enforcing this policy helps ensure that Event Hubs are appropriately configured for zone resilience, reducing the risk of downtime during zone outages.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/elasticpools"
+          },
+          {
+            "field": "Microsoft.Sql/servers/elasticpools/zoneRedundant",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f16a3ca9-b57a-4392-b660-4c1f8442aa8d",
+  "name": "f16a3ca9-b57a-4392-b660-4c1f8442aa8d"
+}

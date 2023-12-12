@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Bot Protection should be enabled for Azure Front Door WAF",
+    "policyType": "BuiltIn",
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "description": "This policy ensures that bot protection is enabled in all Azure Front Door Web Application Firewall (WAF) policies",
+    "metadata": {
+      "category": "Network",
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/managedRules.managedRuleSets[*]",
+              "where": {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/managedRules.managedRuleSets[*].ruleSetType",
+                    "equals": "Microsoft_BotManagerRuleSet"
+                  },
+                  {
+                    "field": "Microsoft.Network/frontdoorWebApplicationFirewallPolicies/managedRules.managedRuleSets[*].ruleSetType",
+                    "equals": "BotProtection"
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/27f7fb01-5fdb-44ad-954c-d582f8659533",
+  "name": "27f7fb01-5fdb-44ad-954c-d582f8659533"
+}

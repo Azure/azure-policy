@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Azure Application Gateway should be deployed with Azure WAF",
+    "policyType": "BuiltIn",
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "description": "Requires Azure Application Gateway resources to be deployed with Azure WAF. ",
+    "metadata": {
+      "category": "Network",
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Action taken when WAF is not deployed with a given resource"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/applicationGateways"
+          },
+          {
+            "field": "Microsoft.Network/applicationGateways/firewallPolicy.id",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ff1f1879-a60d-4f23-9641-41e7391ec19a",
+  "name": "ff1f1879-a60d-4f23-9641-41e7391ec19a"
+}

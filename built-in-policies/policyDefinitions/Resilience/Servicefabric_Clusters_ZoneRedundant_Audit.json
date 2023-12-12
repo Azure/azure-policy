@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Service Fabric Clusters should be Zone Redundant",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Service Fabric Clusters can be configured to be Zone Redundant or not. Servicefabric Clusters whose nodeType do not have the multipleAvailabilityZones set to true are not Zone Redundant. This policy identifies Servicefabric Clusters lacking the redundancy needed to withstand a zone outage.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Servicefabric/Clusters"
+          },
+          {
+            "count": {
+              "field": "Microsoft.ServiceFabric/clusters/nodeTypes[*]",
+              "where": {
+                "field": "Microsoft.ServiceFabric/clusters/nodeTypes[*].multipleAvailabilityZones",
+                "notEquals": true
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/075896de-f4f8-465b-b6d8-9e73725bb62d",
+  "name": "075896de-f4f8-465b-b6d8-9e73725bb62d"
+}
