@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Do not allow creation of Recovery Services vaults of chosen storage redundancy.",
+    "description": "Recovery Services vaults can be created with any one of three storage redundancy options today, namely, Locally-redundant Storage, Zone-redundant storage and Geo-redundant storage. If the policies in your organization requires you to block the creation of vaults that belong to a certain redundancy type, you may achieve the same using this Azure policy.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      },
+      "BackupStorageRedundancy": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Backup Storage Redundancy",
+          "description": "Specify the storage redundancy for which creation of Recovery Services vaults should not be allowed by policy."
+        },
+        "allowedValues": [
+          "GeoRedundant",
+          "ZoneRedundant",
+          "LocallyRedundant"
+        ],
+        "defaultValue": "GeoRedundant"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/vaults"
+          },
+          {
+            "field": "Microsoft.RecoveryServices/vaults/redundancySettings.standardTierStorageRedundancy",
+            "equals": "[parameters('BackupStorageRedundancy')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8f09fda1-91a2-4e14-96a2-67c6281158f7",
+  "name": "8f09fda1-91a2-4e14-96a2-67c6281158f7"
+}
