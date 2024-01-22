@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and a Data Collection Rule in the same region as the user-defined Log Analytics workspace.",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "metadata": {
-      "version": "1.3.1",
+      "version": "1.4.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -64,15 +64,15 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines/extensions"
+            "equals": "Microsoft.Compute/virtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/extensions/type",
-            "equals": "SqlIaaSAgent"
+            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+            "like": "Windows*"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-            "equals": "Microsoft.SqlServer.Management"
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "microsoftsqlserver"
           }
         ]
       },
@@ -80,6 +80,7 @@
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Insights/dataCollectionRules",
+          "evaluationDelay": "AfterProvisioning",
           "deploymentScope": "subscription",
           "roleDefinitionIds": [
             "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
@@ -110,7 +111,7 @@
                   "value": "[field('location')]"
                 },
                 "vmName": {
-                  "value": "[first(split(field('fullName'), '/'))]"
+                  "value": "[field('fullName')]"
                 },
                 "userWorkspaceResourceId": {
                   "value": "[parameters('userWorkspaceResourceId')]"
@@ -168,7 +169,6 @@
                     "francecentral": "PAR",
                     "germanywestcentral": "DEWC",
                     "japaneast": "EJP",
-                    "japanwest": "EJP",
                     "jioindiawest": "CIN",
                     "koreacentral": "SE",
                     "koreasouth": "SE",

@@ -1,0 +1,47 @@
+{
+  "properties": {
+    "displayName": "Infrastructure encryption should be enabled for Azure Database for PostgreSQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable infrastructure encryption for Azure Database for PostgreSQL servers to have higher level of assurance that the data is secure. When infrastructure encryption is enabled, the data at rest is encrypted twice using FIPS 140-2 compliant Microsoft managed keys",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DBforPostgreSQL/servers"
+          },
+          {
+            "field": "Microsoft.DBforPostgreSQL/servers/infrastructureEncryption",
+            "notEquals": "Enabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/24fba194-95d6-48c0-aea7-f65bf859c598",
+  "name": "24fba194-95d6-48c0-aea7-f65bf859c598"
+}

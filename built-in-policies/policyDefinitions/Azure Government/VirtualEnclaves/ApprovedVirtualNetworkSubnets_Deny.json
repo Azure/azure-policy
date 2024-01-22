@@ -1,0 +1,104 @@
+{
+  "properties": {
+    "displayName": "Network interfaces should be connected to an approved subnet of the approved virtual network",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy blocks network interfaces from connecting to a virtual network or subnet that is not approved. https://aka.ms/VirtualEnclaves",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "VirtualEnclaves"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      },
+      "virtualNetworkId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Virtual network Id",
+          "description": "Resource Id of the approved virtual network. Example: /subscriptions/YourSubscriptionId/resourceGroups/YourResourceGroupName/providers/Microsoft.Network/virtualNetworks/Name",
+          "strongType": "Microsoft.Network/virtualNetworks"
+        }
+      },
+      "allowedSubnetList": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Subnet names",
+          "description": "List of string subnet names that the virtual machine can connect to. By default, all subnets are approved."
+        },
+        "defaultValue": []
+      },
+      "allowAllSubnets": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow all subnets",
+          "description": "Set this value to true to allow NICs to connect to all subnets within the virtual network."
+        },
+        "defaultValue": true
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/networkInterfaces"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('allowAllSubnets')]",
+                    "equals": true
+                  },
+                  {
+                    "not": {
+                      "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].subnet.id",
+                      "like": "[concat(parameters('virtualNetworkId'),'/*')]"
+                    }
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('allowAllSubnets')]",
+                    "equals": false
+                  },
+                  {
+                    "count": {
+                      "value": "[parameters('allowedSubnetList')]",
+                      "name": "subnetName",
+                      "where": {
+                        "field": "Microsoft.Network/networkInterfaces/ipconfigurations[*].subnet.id",
+                        "equals": "[concat(parameters('virtualNetworkId'),'/subnets/',current('subnetName'))]"
+                      }
+                    },
+                    "equals": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f3a7bbfd-a810-47a6-b5ba-8e17d8cffb96",
+  "name": "f3a7bbfd-a810-47a6-b5ba-8e17d8cffb96"
+}

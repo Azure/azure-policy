@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure virtual network to enable traffic analytics",
-    "description": "Traffic analytics can be enabled for all virtual networks hosted in a particular region with the settings provided during policy creation. If it already has Traffic analytics enabled, then policy does not overwrite its settings. Flow Logs are also enabled for the virtual network that do not have it. Traffic analytics is a cloud-based solution that provides visibility into user and application activity in cloud networks.",
+    "displayName": "Configure virtual network to enable Flow Log and Traffic Analytics",
+    "description": "Traffic analytics and Flow logs can be enabled for all virtual networks hosted in a particular region with the settings provided during policy creation. This policy does not overwrite current setting for virtual networks that already have these feature enabled. Traffic analytics is a cloud-based solution that provides visibility into user and application activity in cloud networks.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Network"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -33,9 +33,10 @@
       "storageId": {
         "type": "string",
         "metadata": {
-          "displayName": "Storage Resource ID",
-          "description": "Resource ID of the storage account where the flow logs are written. Make sure this storage account is located in the selected virtual network region. The format must be: '/subscriptions/{subscription id}/resourceGroups/{resourceGroup name}/providers/Microsoft.Storage/storageAccounts/{storage account name}",
-          "assignPermissions": true
+          "displayName": "Storage Account",
+          "description": "A string with the storage id for the flowlogs to be sent to. It will be used for deployment purposes only. Make sure this storage account is located in the same region as the Vnet. The format must be: '/subscriptions/{subscription id}/resourceGroups/{resourceGroup name}/providers/Microsoft.Storage/storageAccounts/{storage account name}",
+          "assignPermissions": true,
+          "strongType": "Microsoft.Storage/storageAccounts"
         }
       },
       "timeInterval": {
@@ -53,39 +54,44 @@
       "workspaceResourceId": {
         "type": "string",
         "metadata": {
-          "displayName": "Workspace resource ID",
+          "displayName": "Workspace Resource ID",
           "description": "Log Analytics workspace resource id",
-          "assignPermissions": true
+          "assignPermissions": true,
+          "strongType": "Microsoft.OperationalInsights/workspaces"
         }
       },
       "workspaceRegion": {
         "type": "string",
         "metadata": {
-          "displayName": "Workspace region",
+          "displayName": "Workspace Region",
           "description": "Log Analytics workspace region",
           "strongType": "location"
         }
       },
       "workspaceId": {
         "type": "string",
+        "defaultValue": "00000000-0000-0000-0000-000000000000",
         "metadata": {
-          "displayName": "Workspace ID",
-          "description": "Log Analytics workspace GUID"
+          "displayName": "Log Analytics Workspace",
+          "description": "Log Analytics workspace GUID - deprecated",
+          "deprecated": true
         }
       },
       "networkWatcherRG": {
         "type": "string",
+        "defaultValue": "NetworkWatcherRG",
         "metadata": {
-          "displayName": "Network Watcher resource group",
-          "description": "The Network Watcher regional instance is present in this resource group. The virtual network flow logs resources are also created. This will be used only if a deployment is required. By default, it is named 'NetworkWatcherRG'.",
+          "displayName": "Network Watchers RG",
+          "description": "The name of the resource group where the flowLog resources will be created. This will be used only if a deployment is required. This is the resource group where the Network Watchers are located.",
           "strongType": "existingResourceGroups"
         }
       },
       "networkWatcherName": {
         "type": "string",
         "metadata": {
-          "displayName": "Network Watcher name",
-          "description": "The name of the network watcher under which the flow log resources are created. Make sure it belongs to the same region as the virtual network."
+          "displayName": "Network Watcher",
+          "description": "The resource id of the network watcher under which the flowLog resources will be created. Make sure it belongs to the same region as the Vnet.",
+          "strongType": "Microsoft.Network/networkWatchers"
         }
       },
       "retentionDays": {
@@ -159,9 +165,6 @@
                   "timeInterval": {
                     "type": "string"
                   },
-                  "workspaceId": {
-                    "type": "string"
-                  },
                   "workspaceRegion": {
                     "type": "string"
                   },
@@ -213,7 +216,6 @@
                               "flowAnalyticsConfiguration": {
                                 "networkWatcherFlowAnalyticsConfiguration": {
                                   "enabled": true,
-                                  "workspaceId": "[parameters('workspaceId')]",
                                   "workspaceRegion": "[parameters('workspaceRegion')]",
                                   "workspaceResourceId": "[parameters('workspaceResourceId')]",
                                   "trafficAnalyticsInterval": "[parameters('timeInterval')]"
@@ -242,9 +244,6 @@
                 "timeInterval": {
                   "value": "[parameters('timeInterval')]"
                 },
-                "workspaceId": {
-                  "value": "[parameters('workspaceId')]"
-                },
                 "workspaceRegion": {
                   "value": "[parameters('workspaceRegion')]"
                 },
@@ -255,7 +254,7 @@
                   "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), parameters('networkWatcherRG'), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[4])]"
                 },
                 "networkWatcherName": {
-                  "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), parameters('networkWatcherName'), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[8])]"
+                  "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), last(split(parameters('networkWatcherName'), '/')), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[8])]"
                 },
                 "flowlogName": {
                   "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), concat(take(concat(field('name'), '-', resourceGroup().name), 72), '-', 'flowlog'), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[10])]"

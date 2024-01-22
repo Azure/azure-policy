@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "Do not allow creation of specified resource types or types under specific providers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "The resource providers and types specified via parameter list are not allowed to be created without explicit approval from the security team. If an exemption is granted to the policy assignment, the resource can be leveraged within the enclave. https://aka.ms/VirtualEnclaves",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "VirtualEnclaves"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      },
+      "disallowedResourceProviders": {
+        "metadata": {
+          "description": "List of disallowed resource providers or parent resource types as strings, such as microsoft.storage or microsoft.servicebus",
+          "displayName": "Denied resource providers"
+        },
+        "defaultValue": [],
+        "type": "Array"
+      },
+      "disallowedResourceTypes": {
+        "metadata": {
+          "description": "List of disallowed resource types as strings, such as microsoft.storage/storageaccounts",
+          "displayName": "Denied resource types"
+        },
+        "defaultValue": [],
+        "type": "Array"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "count": {
+              "value": "[parameters('disallowedResourceTypes')]",
+              "name": "resourceType",
+              "where": {
+                "field": "type",
+                "equals": "[current('resourceType')]"
+              }
+            },
+            "greater": 0
+          },
+          {
+            "count": {
+              "value": "[parameters('disallowedResourceProviders')]",
+              "name": "resourceProvider",
+              "where": {
+                "field": "type",
+                "like": "[concat(current('resourceProvider'), '/*')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/337ef0ec-0703-499e-a57c-b4155034e606",
+  "name": "337ef0ec-0703-499e-a57c-b4155034e606"
+}
