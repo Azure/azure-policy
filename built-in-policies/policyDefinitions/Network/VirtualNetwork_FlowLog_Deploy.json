@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Deploy a flow log resource with target virtual network",
+    "displayName": "Deploy a Flow Log resource with target virtual network",
     "description": "Configures flow log for specific virtual network. It will allow to log information about IP traffic flowing through an virtual network. Flow log helps to identify unknown or undesired traffic, verify network isolation and compliance with enterprise access rules, analyze network flows from compromised IPs and network interfaces.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Network"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -33,13 +33,15 @@
       "storageId": {
         "type": "string",
         "metadata": {
-          "displayName": "Storage id",
+          "displayName": "Storage Account",
           "description": "A string with the storage id for the flowlogs to be sent to. It will be used for deployment purposes only. Make sure this storage account is located in the same region as the Vnet. The format must be: '/subscriptions/{subscription id}/resourceGroups/{resourceGroup name}/providers/Microsoft.Storage/storageAccounts/{storage account name}",
-          "assignPermissions": true
+          "assignPermissions": true,
+          "strongType": "Microsoft.Storage/storageAccounts"
         }
       },
       "networkWatcherRG": {
         "type": "string",
+        "defaultValue": "NetworkWatcherRG",
         "metadata": {
           "displayName": "Network Watchers RG",
           "description": "The name of the resource group where the flowLog resources will be created. This will be used only if a deployment is required. This is the resource group where the Network Watchers are located.",
@@ -49,9 +51,18 @@
       "networkWatcherName": {
         "type": "string",
         "metadata": {
-          "displayName": "Network Watcher name",
-          "description": "The name of the network watcher under which the flowLog resources will be created. Make sure it belongs to the same region as the Vnet."
+          "displayName": "Network Watcher",
+          "description": "The resource id of the network watcher under which the flowLog resources will be created. Make sure it belongs to the same region as the Vnet.",
+          "strongType": "Microsoft.Network/networkWatchers"
         }
+      },
+      "retentionDays": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Number of days to retain flowlogs",
+          "description": "The number of days for which flowlog data will be retained in storage account. If you want to retain data forever and do not want to apply any retention policy, set retention (days) to 0."
+        },
+        "defaultValue": "30"
       }
     },
     "policyRule": {
@@ -112,6 +123,9 @@
                   },
                   "targetResource": {
                     "type": "string"
+                  },
+                  "retentionDays": {
+                    "type": "string"
                   }
                 },
                 "resources": [
@@ -138,8 +152,8 @@
                               "storageId": "[parameters('storageId')]",
                               "enabled": "true",
                               "retentionPolicy": {
-                                "days": "0",
-                                "enabled": "false"
+                                "days": "[parameters('retentionDays')]",
+                                "enabled": "true"
                               }
                             }
                           }
@@ -157,7 +171,7 @@
                   "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), parameters('networkWatcherRG'), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[4])]"
                 },
                 "networkWatcherName": {
-                  "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), parameters('networkWatcherName'), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[8])]"
+                  "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), last(split(parameters('networkWatcherName'), '/')), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[8])]"
                 },
                 "flowlogName": {
                   "value": "[if(empty(coalesce(field('Microsoft.Network/virtualNetworks/flowLogs'))), concat(take(concat(field('name'), '-', resourceGroup().name), 72), '-', 'flowlog'), split(first(field('Microsoft.Network/virtualNetworks/flowLogs[*].id')), '/')[10])]"
@@ -167,6 +181,9 @@
                 },
                 "targetResource": {
                   "value": "[concat(resourceGroup().id, '/providers/Microsoft.Network/virtualNetworks/', field('name'))]"
+                },
+                "retentionDays": {
+                  "value": "[parameters('retentionDays')]"
                 }
               }
             }

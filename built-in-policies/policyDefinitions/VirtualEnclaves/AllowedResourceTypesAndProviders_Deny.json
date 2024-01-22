@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "Do not allow creation of resource types outside of the allowlist",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy prevents deployment of resource types outside of the explicitly allowed types, in order to maintain security in a virtual enclave. https://aka.ms/VirtualEnclaves",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "VirtualEnclaves"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Deny",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      },
+      "allowedResourceProviders": {
+        "metadata": {
+          "description": "List of allowed resource providers or parent resource types as strings, such as microsoft.storage or microsoft.servicebus",
+          "displayName": "Allowed resource providers"
+        },
+        "defaultValue": [],
+        "type": "Array"
+      },
+      "allowedResourceTypes": {
+        "metadata": {
+          "description": "List of allowed resource types as strings, such as microsoft.storage/storageaccounts",
+          "displayName": "Allowed resource types"
+        },
+        "defaultValue": [],
+        "type": "Array"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "count": {
+              "value": "[parameters('allowedResourceTypes')]",
+              "name": "resourceType",
+              "where": {
+                "field": "type",
+                "equals": "[current('resourceType')]"
+              }
+            },
+            "equals": 0
+          },
+          {
+            "count": {
+              "value": "[parameters('allowedResourceProviders')]",
+              "name": "resourceProvider",
+              "where": {
+                "field": "type",
+                "like": "[concat(current('resourceProvider'), '/*')]"
+              }
+            },
+            "equals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ead33d15-8ff9-44d8-be85-24144ecc859e",
+  "name": "ead33d15-8ff9-44d8-be85-24144ecc859e"
+}

@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "SQL server-targeted autoprovisioning should be enabled for SQL servers on machines plan",
+    "description": "To ensure your SQL VMs and Arc-enabled SQL Servers are protected, ensure the SQL-targeted Azure Monitoring Agent is configured to automatically deploy. This is also necessary if you've previously configured autoprovisioning of the Microsoft Monitoring Agent, as that component is being deprecated. Learn more: https://aka.ms/SQLAMAMigration",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "version": "1.0.0",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Security/pricings"
+          },
+          {
+            "field": "name",
+            "equals": "sqlservervirtualmachines"
+          },
+          {
+            "field": "Microsoft.Security/pricings/pricingTier",
+            "equals": "standard"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Authorization/policyAssignments",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Authorization/policyAssignments/policyDefinitionId",
+                "equals": "/providers/Microsoft.Authorization/policySetDefinitions/de01d381-bae9-4670-8870-786f89f49e26"
+              },
+              {
+                "field": "Microsoft.Authorization/policyAssignments/policyDefinitionId",
+                "equals": "/providers/Microsoft.Authorization/policySetDefinitions/d7c3ea3a-edf3-4bd5-bd64-d5b635b05393"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c6283572-73bb-4deb-bf2c-7a2b8f7462cb",
+  "name": "c6283572-73bb-4deb-bf2c-7a2b8f7462cb"
+}

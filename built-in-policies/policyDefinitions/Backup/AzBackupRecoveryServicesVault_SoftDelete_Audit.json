@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Soft delete must be enabled for Recovery Services Vaults.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits if soft delete is enabled for Recovery Services Vaults in the scope. Soft delete can help you recover your data even after it has been deleted. Learn more at https://aka.ms/AB-SoftDelete.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "checkAlwaysOnSoftDeleteOnly": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "CheckAlwaysOnSoftDeleteOnly",
+          "description": "This parameter checks if Soft Delete status is 'Locked', making it irreversible for Recovery Services Vaults in scope. Selecting 'true' will mark only vaults with Soft Delete status 'AlwaysOn' as compliant. Selecting 'false' will mark vaults that have Soft Delete status either 'On' or 'AlwaysOn' as compliant."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/Vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.RecoveryServices/vaults/securitySettings.softDeleteSettings.softDeleteState",
+                "notIn": [
+                  "Enabled",
+                  "AlwaysOn"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('checkAlwaysOnSoftDeleteOnly')]",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.RecoveryServices/vaults/securitySettings.softDeleteSettings.softDeleteState",
+                    "notEquals": "AlwaysOn"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/31b8092a-36b8-434b-9af7-5ec844364148",
+  "name": "31b8092a-36b8-434b-9af7-5ec844364148"
+}
