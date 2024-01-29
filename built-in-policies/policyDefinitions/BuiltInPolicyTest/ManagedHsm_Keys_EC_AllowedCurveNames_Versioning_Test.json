@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "[Deprecated]: Key Vault Managed HSM keys using elliptic curve cryptography should have the specified curve names. Versioning Test BuiltIn.",
+    "description": "This is a test policy only for internal use by Policy team. Keys backed by elliptic curve cryptography can have different curve names. Some applications are only compatible with specific elliptic curve keys. Enforce the types of elliptic curve keys that are allowed to be created in your environment.",
+    "metadata": {
+      "category": "BuiltInPolicyTest",
+      "version": "1.0.0-deprecated",
+      "deprecated": true
+    },
+    "version": "1.0.0",
+    "mode": "Microsoft.ManagedHSM.Data",
+    "parameters": {
+      "allowedECNamesV1": {
+        "allowedValues": [
+          "P-256",
+          "P-256K",
+          "P-384",
+          "P-521"
+        ],
+        "defaultValue": [
+          "P-256",
+          "P-256K",
+          "P-384",
+          "P-521"
+        ],
+        "metadata": {
+          "description": "The list of allowed curve names for elliptic curve cryptography certificates.",
+          "displayName": "Allowed elliptic curve names"
+        },
+        "type": "Array"
+      },
+      "effect": {
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled",
+        "metadata": {
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy.",
+          "displayName": "Effect"
+        },
+        "type": "String"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ManagedHSM.Data/managedHsms/keys"
+          },
+          {
+            "field": "Microsoft.ManagedHSM.Data/managedHsms/keys/keyType",
+            "in": [
+              "EC",
+              "EC-HSM"
+            ]
+          },
+          {
+            "field": "Microsoft.ManagedHSM.Data/managedHsms/keys/ellipticCurveName",
+            "notIn": "[parameters('allowedECNamesV1')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/98cec160-6f57-4d11-86e2-0a03290a3a8a",
+  "name": "98cec160-6f57-4d11-86e2-0a03290a3a8a"
+}
