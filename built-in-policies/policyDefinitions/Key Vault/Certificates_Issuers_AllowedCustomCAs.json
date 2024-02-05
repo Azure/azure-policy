@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Certificates should be issued by one of the specified non-integrated certificate authorities",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.KeyVault.Data",
+    "description": "Manage your organizational compliance requirements by specifying custom or internal certificate authorities that can issue certificates in your key vault.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Key Vault",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "caCommonNames": {
+        "type": "array",
+        "metadata": {
+          "displayName": "The common names of the certificate authorities which are allowed",
+          "description": "The common names (CN) of the Certificate Authority (CA) provider which are allowed. For example, if certificate create with Certificate Authority CN = Contoso, OU = .., DC  and parameter caCommonNames is set as  ['Contoso', 'AnotherCA'] then the certificate create will be allowed because the certificate authority contains Contoso which is one of the parameter values"
+        }
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault.Data/vaults/certificates"
+          },
+          {
+            "count": {
+              "value": "[parameters('caCommonNames')]",
+              "name": "caCommonName",
+              "where": {
+                "field": "Microsoft.KeyVault.Data/vaults/certificates/issuer.commonName",
+                "contains": "[current('caCommonName')]"
+              }
+            },
+            "equals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d3e82b87-6673-410b-8501-1896b688b9a3",
+  "name": "d3e82b87-6673-410b-8501-1896b688b9a3"
+}

@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure Synapse Workspaces to use only Microsoft Entra identities for authentication",
-    "description": "Microsoft Entra-only authentication improves security by ensuring that Synapse Workspaces exclusively require Microsoft Entra identities for authentication. Learn more at: https://aka.ms/Synapse.",
+    "displayName": "Configure Synapse Workspaces to use only Microsoft Entra identities for authentication during workspace creation",
+    "description": "Require and reconfigure Synapse Workspaces to be created with Microsoft Entra-only authentication. This policy doesn't block local authentication from being re-enabled on resources after create. Consider using the 'Microsoft Entra-only authentication' initiative instead to require both. Learn more at: https://aka.ms/Synapse.",
     "policyType": "BuiltIn",
     "mode": "indexed",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "Synapse"
     },
-    "version": "1.1.0",
+    "version": "1.2.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -25,66 +25,42 @@
     },
     "policyRule": {
       "if": {
-        "anyOf": [
+        "allOf": [
           {
-            "allOf": [
+            "field": "type",
+            "equals": "Microsoft.Synapse/workspaces"
+          },
+          {
+            "anyOf": [
               {
-                "field": "type",
-                "equals": "Microsoft.Synapse/workspaces"
+                "field": "Microsoft.Synapse/workspaces/extraProperties",
+                "exists": false
               },
               {
-                "anyOf": [
-                  {
-                    "field": "Microsoft.Synapse/workspaces/extraProperties",
-                    "exists": false
-                  },
-                  {
-                    "value": "[if(empty(field('Microsoft.Synapse/workspaces/extraProperties')), 0, length(intersection(field('Microsoft.Synapse/workspaces/extraProperties'), createObject('WorkspaceType', 'Normal'))))]",
-                    "equals": 1
-                  }
-                ]
-              },
-              {
-                "anyOf": [
-                  {
-                    "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentication",
-                    "exists": false
-                  },
-                  {
-                    "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentication",
-                    "notEquals": true
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Synapse/workspaces/settings",
-                        "exists": "true"
-                      },
-                      {
-                        "value": "[if(empty(field('Microsoft.Synapse/workspaces/settings')), 0, length(intersection(field('Microsoft.Synapse/workspaces/settings'), createObject('azureADOnlyAuthentication', createObject('value', 'true', 'state', 'Inconsistent')))))]",
-                        "equals": 1
-                      }
-                    ]
-                  }
-                ]
+                "value": "[if(empty(field('Microsoft.Synapse/workspaces/extraProperties')), 0, length(intersection(field('Microsoft.Synapse/workspaces/extraProperties'), createObject('WorkspaceType', 'Normal'))))]",
+                "equals": 1
               }
             ]
           },
           {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "type",
-                "equals": "Microsoft.Synapse/workspaces/azureADOnlyAuthentications"
+                "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentication",
+                "exists": false
               },
               {
-                "anyOf": [
+                "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentication",
+                "notEquals": true
+              },
+              {
+                "allOf": [
                   {
-                    "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentications/azureADOnlyAuthentication",
-                    "exists": false
+                    "field": "Microsoft.Synapse/workspaces/settings",
+                    "exists": true
                   },
                   {
-                    "field": "Microsoft.Synapse/workspaces/azureADOnlyAuthentications/azureADOnlyAuthentication",
-                    "notEquals": true
+                    "value": "[if(empty(field('Microsoft.Synapse/workspaces/settings')), 0, length(intersection(field('Microsoft.Synapse/workspaces/settings'), createObject('azureADOnlyAuthentication', createObject('value', 'true', 'state', 'Inconsistent')))))]",
+                    "equals": 1
                   }
                 ]
               }

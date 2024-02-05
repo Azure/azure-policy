@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Azure SQL Managed Instance should have Microsoft Entra-only authentication enabled",
-    "description": "Disabling local authentication methods and allowing only Microsoft Entra authentication improves security by ensuring that Azure SQL Managed Instances can exclusively be accessed by Microsoft Entra identities. Learn more at: aka.ms/adonlycreate.",
+    "displayName": "Azure SQL Managed Instances should have Microsoft Entra-only authentication enabled during creation",
+    "description": "Require Azure SQL Managed Instance to be created with Microsoft Entra-only authentication. This policy doesn't block local authentication from being re-enabled on resources after create. Consider using the 'Microsoft Entra-only authentication' initiative instead to require both. Learn more at: https://aka.ms/adonlycreate.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "SQL"
     },
-    "version": "1.1.0",
+    "version": "1.2.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -26,44 +26,20 @@
     },
     "policyRule": {
       "if": {
-        "anyOf": [
+        "allOf": [
           {
-            "allOf": [
-              {
-                "field": "type",
-                "equals": "Microsoft.Sql/managedInstances"
-              },
-              {
-                "anyOf": [
-                  {
-                    "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
-                    "exists": false
-                  },
-                  {
-                    "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
-                    "equals": "false"
-                  }
-                ]
-              }
-            ]
+            "field": "type",
+            "equals": "Microsoft.Sql/managedInstances"
           },
           {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "type",
-                "equals": "Microsoft.Sql/managedInstances/azureADOnlyAuthentications"
+                "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
+                "exists": false
               },
               {
-                "anyOf": [
-                  {
-                    "field": "Microsoft.Sql/managedInstances/azureADOnlyAuthentications/azureADOnlyAuthentication",
-                    "exists": false
-                  },
-                  {
-                    "field": "Microsoft.Sql/managedInstances/azureADOnlyAuthentications/azureADOnlyAuthentication",
-                    "equals": "false"
-                  }
-                ]
+                "field": "Microsoft.Sql/managedInstances/administrators.azureADOnlyAuthentication",
+                "equals": false
               }
             ]
           }
