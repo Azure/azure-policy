@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Host and VM networking should be protected on Azure Stack HCI systems",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Protect data on the Azure Stack HCI hosts network and on virtual machine network connections.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Stack HCI",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureStackHCI/clusters/securitySettings"
+          },
+          {
+            "not": {
+              "field": "Microsoft.AzureStackHCI/clusters/securitySettings/securityComplianceStatus.dataInTransitProtected",
+              "in": [
+                "Compliant",
+                "Pending"
+              ]
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/aee306e7-80b0-46f3-814c-d3d3083ed034",
+  "name": "aee306e7-80b0-46f3-814c-d3d3083ed034"
+}

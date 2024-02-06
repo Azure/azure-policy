@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Stack HCI servers should have consistently enforced application control policies",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "At a minimum, apply the Microsoft WDAC base policy in enforced mode on all Azure Stack HCI servers. Applied Windows Defender Application Control (WDAC) policies must be consistent across servers in the same cluster.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Stack HCI",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureStackHCI/clusters/securitySettings"
+          },
+          {
+            "not": {
+              "field": "Microsoft.AzureStackHCI/clusters/securitySettings/securityComplianceStatus.wdacCompliance",
+              "in": [
+                "Compliant",
+                "Pending"
+              ]
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7384fde3-11b0-4047-acbd-b3cf3cc8ce07",
+  "name": "7384fde3-11b0-4047-acbd-b3cf3cc8ce07"
+}
