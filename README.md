@@ -124,6 +124,7 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
 In some cases, a resource provider may implement a resource type, but not correctly publish it to the Azure Resource Manager. The result of this is that Azure Policy is unable to discover the type in order to determine compliance. In some cases, this still allows deny policies to work, but compliance results will usually be incorrect. These are the resource types known to have this behavior:
 
 - Microsoft.DBforPostgreSQL/serverGroupsv2
+- Microsoft.AppConfiguration/ConfigurationStores
 
 In some cases the unpublished resource type is actually a subtype of a published type, which causes aliases to refer to a parent type instead of the unpublished type. Evaluation of such policies fails, causing the policy to never apply to any resource.
 
