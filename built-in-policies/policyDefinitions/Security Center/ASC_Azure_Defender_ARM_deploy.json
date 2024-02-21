@@ -5,10 +5,10 @@
     "mode": "All",
     "description": "Azure Defender for Resource Manager automatically monitors the resource management operations in your organization. Azure Defender detects threats and alerts you about suspicious activity. Learn more about the capabilities of Azure Defender for Resource Manager at https://aka.ms/defender-for-resource-manager . Enabling this Azure Defender plan results in charges. Learn about the pricing details per region on Security Center's pricing page: https://aka.ms/pricing-security-center .",
     "metadata": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "category": "Security Center"
     },
-    "version": "1.0.2",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -21,6 +21,18 @@
           "DeployIfNotExists",
           "Disabled"
         ]
+      },
+      "subPlan": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Defender for Resource Manager plans",
+          "description": "Select a Defender for Resource Manager plan"
+        },
+        "allowedValues": [
+          "PerSubscription",
+          "PerApiCall"
+        ],
+        "defaultValue": "PerApiCall"
       }
     },
     "policyRule": {
@@ -39,18 +51,34 @@
             "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
           ],
           "existenceCondition": {
-            "field": "Microsoft.Security/pricings/pricingTier",
-            "equals": "Standard"
+            "allOf": [
+              {
+                "field": "Microsoft.Security/pricings/pricingTier",
+                "equals": "Standard"
+              },
+              {
+                "field": "Microsoft.Security/pricings/subPlan",
+                "equals": "[parameters('subPlan')]"
+              }
+            ]
           },
           "deployment": {
             "location": "westeurope",
             "properties": {
               "mode": "incremental",
-              "parameters": {},
+              "parameters": {
+                "subPlan": {
+                  "value": "[parameters('subPlan')]"
+                }
+              },
               "template": {
                 "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
-                "parameters": {},
+                "parameters": {
+                  "subPlan": {
+                    "type": "String"
+                  }
+                },
                 "variables": {},
                 "resources": [
                   {
@@ -58,7 +86,8 @@
                     "apiVersion": "2023-01-01",
                     "name": "Arm",
                     "properties": {
-                      "pricingTier": "Standard"
+                      "pricingTier": "Standard",
+                      "subPlan": "[parameters('subPlan')]"
                     }
                   }
                 ],

@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Backup Extension should be installed in AKS clusters",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Ensure protection installation of backup extension in your AKS Clusters to leverage Azure Backup. Azure Backup for AKS is a secure and cloud native data protection solution for AKS clusters",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Backup",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ContainerService/managedClusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.KubernetesConfiguration/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/extensionType",
+                "equals": "microsoft.dataprotection.kubernetes"
+              },
+              {
+                "field": "Microsoft.KubernetesConfiguration/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fda9cd0b-094c-4cd5-ac2a-5e06e5277c45",
+  "name": "fda9cd0b-094c-4cd5-ac2a-5e06e5277c45"
+}
