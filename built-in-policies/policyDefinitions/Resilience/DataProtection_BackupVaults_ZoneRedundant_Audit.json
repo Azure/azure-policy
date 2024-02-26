@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Backup Vaults should be Zone Redundant",
+    "description": "Backup Vaults can be configured to be Zone Redundant or not. Backup Vaults are Zone Redundant if it's storage settings type is set to 'ZoneRedundant' and they are considered to be resilient. Geo Redundant or Locally Redundant Backup Vaults are not considered resilient. Enforcing this policy helps ensure that Backup Vaults are appropriately configured for zone resilience, reducing the risk of downtime during zone outages.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataProtection/BackupVaults"
+          },
+          {
+            "field": "Microsoft.DataProtection/backupVaults/storageSettings[*].type",
+            "notEquals": "ZoneRedundant"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4bd1f3c0-9443-49ad-b8bc-7c17a92b5924",
+  "name": "4bd1f3c0-9443-49ad-b8bc-7c17a92b5924"
+}

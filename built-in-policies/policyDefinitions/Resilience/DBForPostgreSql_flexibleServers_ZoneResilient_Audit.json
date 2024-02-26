@@ -1,15 +1,15 @@
 {
   "properties": {
-    "displayName": "[Preview]: Public IP addresses should be Zone Resilient",
+    "displayName": "[Preview]: Azure Database for PostgreSQL Flexible Server should be Zone Resilient",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Public IP addresses can be configured to be either Zone Aligned, Zone Redundant, or neither. Public IP addresses that are regional, with exactly one entry in their zones array are considered Zone Aligned. In contrast, Public IP addresses that are regional, with 3 or more entries in their zones array are recognized as Zone Redundant. This policy helps identify and enforce these resilience configurations.",
+    "description": "Azure Database for PostgreSQL Flexible Server can be configured to be either Zone Aligned, Zone Redundant, or neither. PostgreSQL Server that has a standby server selected in same zone for high availability is considered Zone Aligned. In contrast, PostgreSQL Server that has a standby server selected to be in a different zone for high availability is recognized as Zone Redundant. This policy helps identify and enforce these resilience configurations.",
     "metadata": {
       "category": "Resilience",
-      "version": "1.1.0-preview",
+      "version": "1.0.0-preview",
       "preview": true
     },
-    "version": "1.1.0-preview",
+    "version": "1.0.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -43,11 +43,7 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Network/publicipaddresses"
-          },
-          {
-            "field": "Microsoft.Network/publicIPAddresses/sku.tier",
-            "equals": "Regional"
+            "equals": "Microsoft.DBForPostgreSql/flexibleServers"
           },
           {
             "anyOf": [
@@ -58,16 +54,12 @@
                     "equals": "Both"
                   },
                   {
-                    "count": {
-                      "field": "Microsoft.Network/publicIPAddresses/zones[*]"
-                    },
-                    "less": 3
+                    "field": "Microsoft.DBForPostgreSql/flexibleServers/highAvailability.mode",
+                    "notEquals": "ZoneRedundant"
                   },
                   {
-                    "count": {
-                      "field": "Microsoft.Network/publicIPAddresses/zones[*]"
-                    },
-                    "notEquals": 1
+                    "field": "Microsoft.DBForPostgreSql/flexibleServers/highAvailability.mode",
+                    "notEquals": "SameZone"
                   }
                 ]
               },
@@ -78,10 +70,8 @@
                     "equals": "Redundant"
                   },
                   {
-                    "count": {
-                      "field": "Microsoft.Network/publicIPAddresses/zones[*]"
-                    },
-                    "less": 3
+                    "field": "Microsoft.DBForPostgreSql/flexibleServers/highAvailability.mode",
+                    "notEquals": "ZoneRedundant"
                   }
                 ]
               },
@@ -92,10 +82,8 @@
                     "equals": "Aligned"
                   },
                   {
-                    "count": {
-                      "field": "Microsoft.Network/publicIPAddresses/zones[*]"
-                    },
-                    "notEquals": 1
+                    "field": "Microsoft.DBForPostgreSql/flexibleServers/highAvailability.mode",
+                    "notEquals": "SameZone"
                   }
                 ]
               }
@@ -108,6 +96,6 @@
       }
     }
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/682e4ab9-59fe-4871-9839-265b54c568c4",
-  "name": "682e4ab9-59fe-4871-9839-265b54c568c4"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/493c215d-2553-4976-bc81-57d2c04fc8c1",
+  "name": "493c215d-2553-4976-bc81-57d2c04fc8c1"
 }
