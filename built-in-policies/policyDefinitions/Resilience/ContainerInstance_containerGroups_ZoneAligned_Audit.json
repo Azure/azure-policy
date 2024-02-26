@@ -1,0 +1,52 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Container Instances should be Zone Aligned",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Container Instances can be configured to be Zone Aligned or not. They are considered Zone Aligned if they have only one entry in their zones array. This policy ensures that they are configured to operate within a single availability zone.",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerInstance/containerGroups"
+          },
+          {
+            "not": {
+              "count": {
+                "field": "Microsoft.ContainerInstance/containerGroups/zones[*]"
+              },
+              "equals": 1
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f58e8c0a-3c79-431a-abf8-cd1b895478e8",
+  "name": "f58e8c0a-3c79-431a-abf8-cd1b895478e8"
+}

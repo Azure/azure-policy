@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "Azure AI Services resources should restrict network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "By restricting network access, you can ensure that only allowed networks can access the service. This can be achieved by configuring network rules so that only applications from allowed networks can access the Azure AI service.",
+    "metadata": {
+      "version": "3.1.0",
+      "category": "Azure Ai Services"
+    },
+    "version": "3.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.CognitiveServices/accounts"
+              },
+              {
+                "field": "Microsoft.CognitiveServices/accounts/publicNetworkAccess",
+                "notEquals": "Disabled"
+              },
+              {
+                "field": "Microsoft.CognitiveServices/accounts/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Search/searchServices"
+              },
+              {
+                "field": "Microsoft.Search/searchServices/networkRuleSet.ipRules[*]",
+                "exists": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/037eea7a-bd0a-46c5-9a66-03aea78705d3",
+  "name": "037eea7a-bd0a-46c5-9a66-03aea78705d3"
+}

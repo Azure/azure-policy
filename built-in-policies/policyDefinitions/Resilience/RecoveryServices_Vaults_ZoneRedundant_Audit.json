@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Backup and Site Recovery should be Zone Redundant",
+    "description": "Backup and Site Recovery can be configured to be Zone Redundant or not. Backup and Site Recovery is Zone Redundant if it's 'standardTierStorageRedundancy' property is set to 'ZoneRedundant'. Enforcing this policy helps ensure that Backup and Site Recovery is appropriately configured for zone resilience, reducing the risk of downtime during zone outages.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "Resilience",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit (default), the policy will only audit resources for compliance. If you choose Deny, the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/Vaults"
+          },
+          {
+            "field": "Microsoft.RecoveryServices/vaults/redundancySettings.standardTierStorageRedundancy",
+            "notEquals": "ZoneRedundant"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ae243d87-5cf3-4dce-90bd-6d62be328de3",
+  "name": "ae243d87-5cf3-4dce-90bd-6d62be328de3"
+}
