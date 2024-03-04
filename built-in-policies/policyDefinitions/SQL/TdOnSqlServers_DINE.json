@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Defender to be enabled on SQL servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable Azure Defender on your Azure SQL Servers to detect anomalous activities indicating unusual and potentially harmful attempts to access or exploit databases.",
+    "metadata": {
+      "version": "2.1.0",
+      "category": "SQL"
+    },
+    "version": "2.1.0",
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+          },
+          {
+            "field": "kind",
+            "notContains": "analytics"
+          }
+        ]
+      },
+      "then": {
+        "effect": "DeployIfNotExists",
+        "details": {
+          "type": "Microsoft.Sql/servers/securityAlertPolicies",
+          "name": "Default",
+          "existenceCondition": {
+            "field": "Microsoft.Sql/securityAlertPolicies.state",
+            "equals": "Enabled"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/056cd41c-7e88-42e1-933e-88ba6a50c9c3"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "name": "[concat(parameters('serverName'), '/Default')]",
+                    "type": "Microsoft.Sql/servers/securityAlertPolicies",
+                    "apiVersion": "2020-11-01-preview",
+                    "properties": {
+                      "state": "Enabled"
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/36d49e87-48c4-4f2e-beed-ba4ed02b71f5",
+  "name": "36d49e87-48c4-4f2e-beed-ba4ed02b71f5"
+}

@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "App Service apps should require FTPS only",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable FTPS enforcement for enhanced security.",
+    "metadata": {
+      "version": "3.0.0",
+      "category": "App Service"
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/ftpsState",
+            "in": [
+              "FtpsOnly",
+              "Disabled"
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4d24b6d4-5e53-4a4f-a7f4-618fa573ee4b",
+  "name": "4d24b6d4-5e53-4a4f-a7f4-618fa573ee4b"
+}

@@ -1,0 +1,89 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Disable Cross Subscription Restore for Backup Vaults",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable or PermanentlyDisable Cross Subscription Restore for your Backup vault so that restore targets cannot be in different subscription from the vault subscription. Learn more at: https://aka.ms/csrstatechange.",
+    "metadata": {
+      "version": "1.1.0-preview",
+      "category": "Backup",
+      "preview": true
+    },
+    "version": "1.1.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      },
+      "crossSubscriptionRestoreState": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Cross Subscription Restore State",
+          "description": "Settings to disable or permanently disable Cross Subscription Restore. Please note that Cross Subscription Restore once permanently disabled on a vault cannot be re-enabled.",
+          "deprecated": true
+        },
+        "allowedValues": [
+          "Disable",
+          "PermanentlyDisable"
+        ],
+        "defaultValue": "Disable"
+      },
+      "crossSubscriptionRestoreStateParameter": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Cross Subscription Restore State",
+          "description": "Settings to disable or permanently disable Cross Subscription Restore. Please note that Cross Subscription Restore once permanently disabled on a vault cannot be re-enabled."
+        },
+        "allowedValues": [
+          "Disabled",
+          "PermanentlyDisabled"
+        ],
+        "defaultValue": "Disabled"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataProtection/backupVaults"
+          },
+          {
+            "field": "Microsoft.DataProtection/backupVaults/featureSettings.crossSubscriptionRestoreSettings.state",
+            "notEquals": "[parameters('crossSubscriptionRestoreStateParameter')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "deny",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-12-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.DataProtection/backupVaults/featureSettings.crossSubscriptionRestoreSettings.state",
+              "value": "[parameters('crossSubscriptionRestoreStateParameter')]"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.1.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4d479a11-f2b5-4f0a-bb1e-d2332aa95cda",
+  "name": "4d479a11-f2b5-4f0a-bb1e-d2332aa95cda"
+}

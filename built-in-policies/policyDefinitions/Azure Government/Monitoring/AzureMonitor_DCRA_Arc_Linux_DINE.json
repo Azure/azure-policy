@@ -1,0 +1,163 @@
+{
+  "properties": {
+    "displayName": "Configure Linux Arc Machines to be associated with a Data Collection Rule or a Data Collection Endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploy Association to link Linux Arc machines to the specified Data Collection Rule or the specified Data Collection Endpoint. The list of locations are updated over time as support is increased.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Monitoring"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "dcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id or Data Collection Endpoint Resource Id",
+          "description": "Resource Id of the Data Collection Rule or the Data Collection Endpoint to be applied on the Linux machines in scope.",
+          "portalReview": "true"
+        }
+      },
+      "resourceType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Resource Type",
+          "description": "Either a Data Collection Rule (DCR) or a Data Collection Endpoint (DCE)",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "Microsoft.Insights/dataCollectionRules",
+          "Microsoft.Insights/dataCollectionEndpoints"
+        ],
+        "defaultValue": "Microsoft.Insights/dataCollectionRules"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "equals": "linux"
+          },
+          {
+            "field": "location",
+            "in": [
+              "usgovvirginia",
+              "usgovarizona",
+              "usgovtexas"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "evaluationDelay": "AfterProvisioning",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+                "equals": "[parameters('dcrResourceId')]"
+              },
+              {
+                "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionEndpointId",
+                "equals": "[parameters('dcrResourceId')]"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "dcrResourceId": {
+                    "type": "string"
+                  },
+                  "resourceType": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "dcrAssociationName": "[concat('assoc-', uniqueString(concat(parameters('resourceName'), parameters('dcrResourceId'))))]",
+                  "dceAssociationName": "configurationAccessEndpoint",
+                  "dcrResourceType": "Microsoft.Insights/dataCollectionRules",
+                  "dceResourceType": "Microsoft.Insights/dataCollectionEndpoints"
+                },
+                "resources": [
+                  {
+                    "condition": "[equals(parameters('resourceType'), variables('dcrResourceType'))]",
+                    "name": "[variables('dcrAssociationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionRuleId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.HybridCompute/machines/', parameters('resourceName'))]"
+                  },
+                  {
+                    "condition": "[equals(parameters('resourceType'), variables('dceResourceType'))]",
+                    "name": "[variables('dceAssociationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionEndpointId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.HybridCompute/machines/', parameters('resourceName'))]"
+                  }
+                ]
+              },
+              "parameters": {
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "dcrResourceId": {
+                  "value": "[parameters('dcrResourceId')]"
+                },
+                "resourceType": {
+                  "value": "[parameters('resourceType')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d5c37ce1-5f52-4523-b949-f19bf945b73a",
+  "name": "d5c37ce1-5f52-4523-b949-f19bf945b73a"
+}

@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Configure key vaults to enable firewall",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable the key vault firewall so that the key vault is not accessible by default to any public IPs. You can then configure specific IP ranges to limit access to those networks. Learn more at: https://docs.microsoft.com/azure/key-vault/general/network-security",
+    "metadata": {
+      "version": "1.1.1",
+      "category": "Key Vault"
+    },
+    "version": "1.1.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+            "notEquals": "Deny"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/f25e0fa2-a7c8-4377-a976-54943a77a395"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+              "value": "Deny"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.1.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ac673a9a-f77d-4846-b2d8-a57f8e1c01dc",
+  "name": "ac673a9a-f77d-4846-b2d8-a57f8e1c01dc"
+}

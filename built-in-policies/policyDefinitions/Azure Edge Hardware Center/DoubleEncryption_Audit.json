@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Azure Edge Hardware Center devices should have double encryption support enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Ensure that devices ordered from Azure Edge Hardware Center have double encryption support enabled, to secure the data at rest on the device. This option adds a second layer of data encryption.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Azure Edge Hardware Center"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EdgeOrder/orderItems"
+          },
+          {
+            "field": "Microsoft.EdgeOrder/orderItems/orderItemDetails.preferences.encryptionPreferences.doubleEncryptionStatus",
+            "notEquals": "Enabled"
+          },
+          {
+            "field": "Microsoft.EdgeOrder/orderItems/orderItemDetails.productDetails.productDoubleEncryptionStatus",
+            "notEquals": "Enabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/08a6b96f-576e-47a2-8511-119a212d344d",
+  "name": "08a6b96f-576e-47a2-8511-119a212d344d"
+}

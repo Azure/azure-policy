@@ -1,0 +1,328 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Deploy prerequisites to audit Windows VMs on which the remote connection status does not match the specified one",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines on which the remote host connection status does not match the specified one. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "metadata": {
+      "version": "3.0.0-deprecated",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "deprecated": true
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "host": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Remote Host Name",
+          "description": "Specifies the Domain Name System (DNS) name or IP address of the remote host machine."
+        }
+      },
+      "port": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Port",
+          "description": "The TCP port number on the remote host name."
+        }
+      },
+      "shouldConnect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Should connect to remote host",
+          "description": "Must be 'True' or 'False'. 'True' indicates that the virtual machine should be able to establish a connection with the remote host specified, so the machine will be non-compliant if it cannot establish a connection. 'False' indicates that the virtual machine should not be able to establish a connection with the remote host specified, so the machine will be non-compliant if it can establish a connection."
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "False"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imagePublisher",
+                "in": [
+                  "esri",
+                  "incredibuild",
+                  "MicrosoftDynamicsAX",
+                  "MicrosoftSharepoint",
+                  "MicrosoftVisualStudio",
+                  "MicrosoftWindowsDesktop",
+                  "MicrosoftWindowsServerHPCPack"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "2008*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftSQLServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "notLike": "SQL2008*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-dsvm"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "dsvm-windows"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "standard-data-science-vm",
+                      "windows-data-science-vm"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "batch"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "rendering-windows2016"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "center-for-internet-security-inc"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "cis-windows-server-201*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "pivotal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "bosh-windows-server*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloud-infrastructure-services"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "ad*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                        "exists": "true"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "like": "Windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "exists": "false"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2008*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "notLike": "SQL2008*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "WindowsRemoteConnection",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('[WindowsRemoteConnection]WindowsRemoteConnection1;host', '=', parameters('host'), ',', '[WindowsRemoteConnection]WindowsRemoteConnection1;port', '=', parameters('port'), ',', '[WindowsRemoteConnection]WindowsRemoteConnection1;shouldConnect', '=', parameters('shouldConnect')))]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "configurationName": {
+                  "value": "WindowsRemoteConnection"
+                },
+                "host": {
+                  "value": "[parameters('host')]"
+                },
+                "port": {
+                  "value": "[parameters('port')]"
+                },
+                "shouldConnect": {
+                  "value": "[parameters('shouldConnect')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "string"
+                  },
+                  "shouldConnect": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "name": "[WindowsRemoteConnection]WindowsRemoteConnection1;host",
+                            "value": "[parameters('host')]"
+                          },
+                          {
+                            "name": "[WindowsRemoteConnection]WindowsRemoteConnection1;port",
+                            "value": "[parameters('port')]"
+                          },
+                          {
+                            "name": "[WindowsRemoteConnection]WindowsRemoteConnection1;shouldConnect",
+                            "value": "[parameters('shouldConnect')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "apiVersion": "2019-07-01",
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]"
+                  },
+                  {
+                    "apiVersion": "2019-07-01",
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "type": "ConfigurationforWindows",
+                      "typeHandlerVersion": "1.1",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "protectedSettings": {}
+                    },
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5bb36dda-8a78-4df9-affd-4f05a8612a8a",
+  "name": "5bb36dda-8a78-4df9-affd-4f05a8612a8a"
+}

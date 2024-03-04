@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "App Service Environment should have internal encryption enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Setting InternalEncryption to true encrypts the pagefile, worker disks, and internal network traffic between the front ends and workers in an App Service Environment. To learn more, refer to https://docs.microsoft.com/azure/app-service/environment/app-service-app-service-environment-custom-settings#enable-internal-encryption.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "App Service"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/hostingEnvironments"
+          },
+          {
+            "field": "kind",
+            "like": "ASE*"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].name",
+                    "equals": "InternalEncryption"
+                  },
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].value",
+                    "equals": "true"
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fb74e86f-d351-4b8d-b034-93da7391c01f",
+  "name": "fb74e86f-d351-4b8d-b034-93da7391c01f"
+}

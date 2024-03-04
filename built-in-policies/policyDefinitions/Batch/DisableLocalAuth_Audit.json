@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "Batch accounts should have local authentication methods disabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling local authentication methods improves security by ensuring that Batch accounts require Azure Active Directory identities exclusively for authentication. Learn more at: https://aka.ms/batch/auth.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Batch"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Batch/batchAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes",
+                "exists": "false"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes[*]",
+                  "where": {
+                    "not": {
+                      "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes[*]",
+                      "equals": "AAD"
+                    }
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6f68b69f-05fe-49cd-b361-777ee9ca7e35",
+  "name": "6f68b69f-05fe-49cd-b361-777ee9ca7e35"
+}

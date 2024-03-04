@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "The Log Analytics extension should be installed on Virtual Machine Scale Sets",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any Windows/Linux Virtual Machine Scale Sets if the Log Analytics extension is not installed.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Monitoring"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachineScaleSets"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "in": [
+                  "MicrosoftMonitoringAgent",
+                  "OmsAgentForLinux"
+                ]
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/settings.workspaceId",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/efbde977-ba53-4479-b8e9-10b957924fbf",
+  "name": "efbde977-ba53-4479-b8e9-10b957924fbf"
+}

@@ -1,0 +1,80 @@
+{
+  "properties": {
+    "displayName": "Azure Container Instance container group should deploy into a virtual network",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Secure communication between your containers with Azure Virtual Networks. When you specify a virtual network, resources within the virtual network can securely and privately communicate with each other.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Container Instance"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerInstance/containerGroups"
+          },
+          {
+            "not": {
+              "field": "Microsoft.ContainerInstance/containerGroups/ipAddress.type",
+              "equals": "Private"
+            }
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "greater": "2021-03-01"
+                  },
+                  {
+                    "field": "Microsoft.ContainerInstance/containerGroups/subnetIds[*].id",
+                    "exists": false
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "lessOrEquals": "2021-03-01"
+                  },
+                  {
+                    "field": "Microsoft.ContainerInstance/containerGroups/networkProfile.id",
+                    "exists": false
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8af8f826-edcb-4178-b35f-851ea6fea615",
+  "name": "8af8f826-edcb-4178-b35f-851ea6fea615"
+}

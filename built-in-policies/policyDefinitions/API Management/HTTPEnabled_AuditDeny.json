@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "API Management APIs should use only encrypted protocols",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "To ensure security of data in transit, APIs should be available only through encrypted protocols, like HTTPS or WSS. Avoid using unsecured protocols, such as HTTP or WS.",
+    "metadata": {
+      "version": "2.0.2",
+      "category": "API Management"
+    },
+    "version": "2.0.2",
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service/apis"
+          },
+          {
+            "count": {
+              "field": "Microsoft.ApiManagement/service/apis/protocols[*]",
+              "where": {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.ApiManagement/service/apis/protocols[*]",
+                    "equals": "http"
+                  },
+                  {
+                    "field": "Microsoft.ApiManagement/service/apis/protocols[*]",
+                    "equals": "ws"
+                  }
+                ]
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "versions": [
+      "2.0.2"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ee7495e7-3ba7-40b6-bfee-c29e22cc75d4",
+  "name": "ee7495e7-3ba7-40b6-bfee-c29e22cc75d4"
+}

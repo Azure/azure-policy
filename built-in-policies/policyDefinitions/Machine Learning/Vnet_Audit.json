@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Azure Machine Learning Computes should be in a virtual network",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure Virtual Networks provide enhanced security and isolation for your Azure Machine Learning Compute Clusters and Instances, as well as subnets, access control policies, and other features to further restrict access. When a compute is configured with a virtual network, it is not publicly addressable and can only be accessed from virtual machines and applications within the virtual network.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Machine Learning"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices/workspaces/computes"
+          },
+          {
+            "field": "Microsoft.MachineLearningServices/workspaces/computes/computeType",
+            "in": [
+              "AmlCompute",
+              "ComputeInstance"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.MachineLearningServices/workspaces/computes/subnet.id",
+                "exists": false
+              },
+              {
+                "value": "[empty(field('Microsoft.MachineLearningServices/workspaces/computes/subnet.id'))]",
+                "equals": true
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7804b5c7-01dc-4723-969b-ae300cc07ff1",
+  "name": "7804b5c7-01dc-4723-969b-ae300cc07ff1"
+}

@@ -1,0 +1,331 @@
+{
+  "properties": {
+    "displayName": "Deploy Dependency agent for Linux virtual machine scale sets",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploy Dependency agent for Linux virtual machine scale sets if the VM Image (OS) is in the list defined and the agent is not installed. Note: if your scale set upgradePolicy is set to Manual, you need to apply the extension to the all virtual machines in the set by calling upgrade on them. In CLI this would be az vmss update-instances.",
+    "metadata": {
+      "version": "5.0.0",
+      "category": "Monitoring"
+    },
+    "version": "5.0.0",
+    "parameters": {
+      "listOfImageIdToInclude": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Optional: List of VM images that have supported Linux OS to add to scope",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imageId",
+                "in": "[parameters('listOfImageIdToInclude')]"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "UbuntuServer"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "in": [
+                          "14.04.0-LTS",
+                          "14.04.1-LTS",
+                          "14.04.5-LTS"
+                        ]
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "in": [
+                          "16.04-LTS",
+                          "16.04.0-LTS"
+                        ]
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "in": [
+                          "18.04-LTS"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "0001-com-ubuntu-server-focal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "equals": "20_04-lts"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "RHEL",
+                      "RHEL-SAP-HANA"
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "like": "6.*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "like": "8*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "SUSE"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "SLES",
+                              "SLES-HPC",
+                              "SLES-HPC-Priority",
+                              "SLES-SAP",
+                              "SLES-SAP-BYOS",
+                              "SLES-Priority",
+                              "SLES-BYOS",
+                              "SLES-SAPCAL",
+                              "SLES-Standard"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "in": [
+                                  "12-SP2",
+                                  "12-SP3",
+                                  "12-SP4",
+                                  "12-sp4-gen2",
+                                  "12-SP5",
+                                  "15",
+                                  "15-SP1"
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-12-sp5*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-15-sp1*"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "sles-sap-15-sp1*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "equals": "gen1"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "CentOS",
+                      "Centos-LVM",
+                      "CentOS-SRIOV"
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "like": "6.*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "like": "8*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloudera"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cloudera-centos-os"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "like": "7*"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "equals": "DependencyAgentLinux"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.Azure.Monitoring.DependencyAgent"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "vmExtensionName": "DependencyAgentLinux",
+                  "vmExtensionPublisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                  "vmExtensionType": "DependencyAgentLinux",
+                  "vmExtensionTypeHandlerVersion": "9.10"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                    "apiVersion": "2021-04-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "[variables('vmExtensionPublisher')]",
+                      "type": "[variables('vmExtensionType')]",
+                      "typeHandlerVersion": "[variables('vmExtensionTypeHandlerVersion')]",
+                      "autoUpgradeMinorVersion": true
+                    }
+                  }
+                ],
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Enabled extension for: ', parameters('vmName'))]"
+                  }
+                }
+              },
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "5.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/765266ab-e40e-4c61-bcb2-5a5275d0b7c0",
+  "name": "765266ab-e40e-4c61-bcb2-5a5275d0b7c0"
+}

@@ -1,0 +1,251 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Enable ChangeTracking and Inventory for virtual machines",
+    "policyType": "BuiltIn",
+    "description": "Enable ChangeTracking and Inventory for virtual machines. Takes Data Collection Rule ID as parameter and asks for an option to input applicable locations and user-assigned identity for Azure Monitor Agent.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "ChangeTrackingAndInventory",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "bringYourOwnUserAssignedManagedIdentity": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Bring Your Own User-Assigned Managed Identity",
+          "description": "If set to true, Azure Monitor Agent will use the user-assigned managed identity specified via the 'User-Assigned Managed Identity ...' parameters for authentication. Otherwise, Azure Monitor Agent will use the user-assigned managed identity /subscriptions/<subscription-id>/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-<location> for authentication."
+        },
+        "allowedValues": [
+          false,
+          true
+        ]
+      },
+      "userAssignedManagedIdentityName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Name",
+          "description": "The name of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
+        },
+        "defaultValue": ""
+      },
+      "userAssignedManagedIdentityResourceGroup": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource Group",
+          "description": "The resource group of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
+        },
+        "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for all constituent policies",
+          "description": "Enable or disable the execution of each of the constituent policies in the initiative."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "dcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule to be applied on the virtual machines in scope."
+        }
+      },
+      "listOfApplicableLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Applicable Locations",
+          "description": "The list of locations where the policy should be applied.",
+          "strongType": "location"
+        },
+        "allowedValues": [
+          "australiasoutheast",
+          "australiaeast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus2euap",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "norwayeast",
+          "southcentralus",
+          "southeastasia",
+          "switzerlandnorth",
+          "uaenorth",
+          "uksouth",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ],
+        "defaultValue": [
+          "australiasoutheast",
+          "australiaeast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus2euap",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "norwayeast",
+          "southcentralus",
+          "southeastasia",
+          "switzerlandnorth",
+          "uaenorth",
+          "uksouth",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ]
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "AddUserAssignedManagedIdentity_VM",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d367bd60-64ca-4364-98ea-276775bddd94",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "identityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ad1eeff9-20d7-4c82-a04e-903acab0bfc1",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "DeployAMAWindowsVMWithUAIChangeTrackingAndInventory",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedManagedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "userAssignedManagedIdentityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          },
+          "listOfApplicableLocations": {
+            "value": "[parameters('listOfApplicableLocations')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/56d0ed2b-60fc-44bf-af81-a78c851b5fe1",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "DeployAMALinuxVMWithUAIChangeTrackingAndInventory",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedManagedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "userAssignedManagedIdentityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          },
+          "listOfApplicableLocations": {
+            "value": "[parameters('listOfApplicableLocations')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f08f556c-12ff-464d-a7de-40cb5b6cccec",
+        "definitionVersion": "2.*.*-preview",
+        "policyDefinitionReferenceId": "DeployChangeTrackingExtensionWindowsVM",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfApplicableLocations": {
+            "value": "[parameters('listOfApplicableLocations')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ec88097d-843f-4a92-8471-78016d337ba4",
+        "definitionVersion": "2.*.*-preview",
+        "policyDefinitionReferenceId": "DeployChangeTrackingExtensionLinuxVM",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "listOfApplicableLocations": {
+            "value": "[parameters('listOfApplicableLocations')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b6faa975-0add-4f35-8d1c-70bba45c4424",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "DCRAWindowsVMChangeTrackingAndInventory",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
+          },
+          "listOfApplicableLocations": {
+            "value": "[parameters('listOfApplicableLocations')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bef2d677-e829-492d-9a3d-f5a20fda818f",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "DCRALinuxVMChangeTrackingAndInventory",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
+          },
+          "listOfApplicableLocations": {
+            "value": "[parameters('listOfApplicableLocations')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/92a36f05-ebc9-4bba-9128-b47ad2ea3354",
+  "name": "92a36f05-ebc9-4bba-9128-b47ad2ea3354"
+}

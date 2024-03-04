@@ -1,0 +1,341 @@
+{
+  "properties": {
+    "displayName": "Stream Analytics job should connect to trusted inputs and outputs",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Ensure that Stream Analytics jobs do not have arbitrary Input or Output connections that are not defined in the allow-list. This checks that Stream Analytics jobs don't exfiltrate data by connecting to arbitrary sinks outside your organization.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Stream Analytics"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Deny",
+          "Disabled",
+          "Audit"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedEventHubNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed Event Hub namespaces"
+        },
+        "defaultValue": []
+      },
+      "allowedSQLServers": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed SQL servers"
+        },
+        "defaultValue": []
+      },
+      "allowedStorageAccounts": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed storage accounts"
+        },
+        "defaultValue": []
+      },
+      "allowedCosmosAccounts": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed Cosmos DB accounts"
+        },
+        "defaultValue": []
+      },
+      "allowedAzureFunctionAccounts": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed Function Apps"
+        },
+        "defaultValue": []
+      },
+      "allowedIoTHubNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed IoT Hubs"
+        },
+        "defaultValue": []
+      },
+      "allowedMLWebServiceEndpoints": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "List of allowed ML Web Service endpoints"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.StreamAnalytics/streamingjobs/outputs"
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                        "equals": "Microsoft.EventHub/EventHub"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-ServiceBus-EventHub.serviceBusNamespace",
+                        "notIn": "[parameters('allowedEventHubNamespaces')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                        "equals": "Microsoft.Sql/Server/Database"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-Sql-Server-Database.server",
+                        "notIn": "[parameters('allowedSQLServers')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                        "equals": "Microsoft.Storage/Table"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-Storage-Table.accountName",
+                        "notIn": "[parameters('allowedStorageAccounts')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                        "equals": "Microsoft.Storage/DocumentDB"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-Storage-DocumentDB.accountId",
+                        "notIn": "[parameters('allowedCosmosAccounts')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                        "equals": "Microsoft.AzureFunction"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-AzureFunction.functionAppName",
+                        "notIn": "[parameters('allowedAzureFunctionAccounts')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                        "equals": "Microsoft.Storage/Blob"
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-Storage-Blob.storageAccounts[*]",
+                          "where": {
+                            "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.Microsoft-Storage-Blob.storageAccounts[*].accountName",
+                            "notIn": "[parameters('allowedStorageAccounts')]"
+                          }
+                        },
+                        "greater": 0
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.StreamAnalytics/streamingjobs/outputs/datasource.type",
+                    "notIn": [
+                      "Microsoft.EventHub/EventHub",
+                      "Microsoft.Sql/Server/Database",
+                      "Microsoft.Storage/Table",
+                      "Microsoft.Storage/DocumentDB",
+                      "Microsoft.AzureFunction",
+                      "Microsoft.Storage/Blob"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.StreamAnalytics/streamingjobs/inputs"
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.type",
+                        "equals": "Microsoft.EventHub/EventHub"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.Microsoft-ServiceBus-EventHub.serviceBusNamespace",
+                        "notIn": "[parameters('allowedEventHubNamespaces')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.type",
+                        "equals": "Microsoft.Devices/IotHubs"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.Microsoft-Devices-IotHubs.iotHubNamespace",
+                        "notIn": "[parameters('allowedIoTHubNamespaces')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.type",
+                        "equals": "Microsoft.Sql/Server/Database"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Reference.datasource.Microsoft-Sql-Server-Database.server",
+                        "notIn": "[parameters('allowedSqlServers')]"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.type",
+                        "equals": "Microsoft.Storage/Blob"
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.Microsoft-Storage-Blob.storageAccounts[*]",
+                          "where": {
+                            "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.Microsoft-Storage-Blob.storageAccounts[*].accountName",
+                            "notIn": "[parameters('allowedStorageAccounts')]"
+                          }
+                        },
+                        "greater": 0
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Reference.datasource.type",
+                        "equals": "Microsoft.Storage/Blob"
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Reference.datasource.Microsoft-Storage-Blob.storageAccounts[*]",
+                          "where": {
+                            "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Reference.datasource.Microsoft-Storage-Blob.storageAccounts[*].accountName",
+                            "notIn": "[parameters('allowedStorageAccounts')]"
+                          }
+                        },
+                        "greater": 0
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.StreamAnalytics/streamingjobs/inputs/Stream.datasource.type",
+                    "notIn": [
+                      "Microsoft.EventHub/EventHub",
+                      "Microsoft.Devices/IotHubs",
+                      "Microsoft.Sql/Server/Database",
+                      "Microsoft.Storage/Blob"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.StreamAnalytics/streamingjobs/functions"
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/functions[*].type",
+                        "equals": "Microsoft.MachineLearning/WebService"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/functions[*].binding.Microsoft-MachineLearning-WebService.endpoint",
+                        "notIn": "[parameters('allowedMLWebServiceEndpoints')]"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.StreamAnalytics/streamingjobs/functions[*].type",
+                    "notIn": [
+                      "Microsoft.MachineLearning/WebService",
+                      "Microsoft.StreamAnalytics/JavascriptUdf",
+                      "Microsoft.StreamAnalytics/CLRUdf"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.StreamAnalytics/streamingjobs"
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/jobStorageAccount",
+                        "exists": "true"
+                      },
+                      {
+                        "field": "Microsoft.StreamAnalytics/streamingjobs/jobStorageAccount.accountName",
+                        "notIn": "[parameters('allowedStorageAccounts')]"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fe8684d6-3c5b-45c0-a08b-fa92653c2e1c",
+  "name": "fe8684d6-3c5b-45c0-a08b-fa92653c2e1c"
+}

@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Cognitive Services accounts to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for your Cognitive Services resource so that it's not accessible over the public internet. This can reduce data leakage risks. Learn more at: https://go.microsoft.com/fwlink/?linkid=2129800.",
+    "metadata": {
+      "version": "3.0.0",
+      "category": "Cognitive Services"
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Disabled",
+          "Modify"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices/accounts"
+          },
+          {
+            "field": "Microsoft.CognitiveServices/accounts/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2017-04-18')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.CognitiveServices/accounts/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/47ba1dd7-28d9-4b07-a8d5-9813bed64e0c",
+  "name": "47ba1dd7-28d9-4b07-a8d5-9813bed64e0c"
+}

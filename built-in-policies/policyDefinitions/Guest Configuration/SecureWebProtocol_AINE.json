@@ -1,0 +1,286 @@
+{
+  "properties": {
+    "displayName": "Windows machines should be configured to use secure communication protocols",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To protect the privacy of information communicated over the Internet, your machines should use the latest version of the industry-standard cryptographic protocol, Transport Layer Security (TLS). TLS secures communications over a network by encrypting a connection between machines.",
+    "metadata": {
+      "version": "4.1.1",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "AuditSecureProtocol",
+        "version": "1.*",
+        "configurationParameter": {
+          "MinimumTLSVersion": "[SecureWebServer]s1;MinimumTLSVersion"
+        }
+      }
+    },
+    "version": "4.1.1",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "MinimumTLSVersion": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Minimum TLS version",
+          "description": "The minimum TLS protocol version that should be enabled. Windows machines with lower TLS versions will be marked as non-compliant."
+        },
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ],
+        "defaultValue": "1.2"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "2008*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "notLike": "SQL2008*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "dsvm-win*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                            "exists": "true"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "exists": "false"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "notLike": "2008*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "notLike": "SQL2008*"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "value": "[parameters('IncludeArcMachines')]",
+                "equals": "true"
+              },
+              {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.HybridCompute/machines"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/imageOffer",
+                        "like": "windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                      },
+                      {
+                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
+                        "like": "windows*"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "AuditSecureProtocol",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                "equals": "Compliant"
+              },
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+                "equals": "[base64(concat('[SecureWebServer]s1;MinimumTLSVersion', '=', parameters('MinimumTLSVersion')))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "4.1.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5752e6d6-1206-46d8-8ab1-ecc2f71a8112",
+  "name": "5752e6d6-1206-46d8-8ab1-ecc2f71a8112"
+}

@@ -1,0 +1,121 @@
+{
+  "properties": {
+    "displayName": "Configure Storage Accounts to restrict network access through network ACL bypass configuration only.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To improve the security of Storage Accounts, enable access only through network ACL bypass. This policy should be used in combination with a private endpoint for storage account access.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "VirtualEnclaves"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the audit policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      },
+      "bypassConfiguration": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Bypass Configuration",
+          "description": "Bypass the policy for storage accounts that match the configuration"
+        },
+        "allowedValues": [
+          "None",
+          "AzureServices",
+          "Logging",
+          "Metrics",
+          "Logging, Metrics",
+          "Logging, Metrics, AzureServices",
+          "Logging, AzureServices",
+          "Metrics, AzureServices"
+        ],
+        "defaultValue": "AzureServices"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules[*]"
+                },
+                "greaterOrEquals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.resourceAccessRules[*]"
+                },
+                "greaterOrEquals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.virtualNetworkRules[*]"
+                },
+                "greaterOrEquals": 1
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/networkAcls.bypass",
+                "notEquals": "[parameters('bypassConfiguration')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+              "value": "Deny"
+            },
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules",
+              "value": []
+            },
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Storage/storageAccounts/networkAcls.virtualNetworkRules",
+              "value": []
+            },
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Storage/storageAccounts/networkAcls.bypass",
+              "value": "[parameters('bypassConfiguration')]"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/41a72361-06e3-4e80-832a-690bd0708bc1",
+  "name": "41a72361-06e3-4e80-832a-690bd0708bc1"
+}

@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "App Service app slots should not have CORS configured to allow every resource to access your apps",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Cross-Origin Resource Sharing (CORS) should not allow all domains to access your app. Allow only required domains to interact with your app.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/slots/config",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/slots/config/web.cors.allowedOrigins[*]",
+            "notEquals": "*"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cae7c12e-764b-4c87-841a-fdc6675d196f",
+  "name": "cae7c12e-764b-4c87-841a-fdc6675d196f"
+}

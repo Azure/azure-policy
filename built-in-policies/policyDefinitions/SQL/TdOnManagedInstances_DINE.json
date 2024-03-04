@@ -1,0 +1,83 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Defender to be enabled on SQL managed instances",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable Azure Defender on your Azure SQL Managed Instances to detect anomalous activities indicating unusual and potentially harmful attempts to access or exploit databases.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "SQL"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/managedInstances"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/managedInstances/securityAlertPolicies",
+          "name": "Default",
+          "evaluationDelay": "AfterProvisioning",
+          "existenceCondition": {
+            "field": "Microsoft.Sql/managedInstances/securityAlertPolicies/state",
+            "equals": "Enabled"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/056cd41c-7e88-42e1-933e-88ba6a50c9c3"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "instanceName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "name": "[concat(parameters('instanceName'), '/Default')]",
+                    "type": "Microsoft.Sql/managedInstances/securityAlertPolicies",
+                    "apiVersion": "2020-11-01-preview",
+                    "properties": {
+                      "state": "Enabled"
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "instanceName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c5a62eb0-c65a-4220-8a4d-f70dd4ca95dd",
+  "name": "c5a62eb0-c65a-4220-8a4d-f70dd4ca95dd"
+}

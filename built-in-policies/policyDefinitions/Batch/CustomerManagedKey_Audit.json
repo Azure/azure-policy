@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "Azure Batch account should use customer-managed keys to encrypt data",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage the encryption at rest of your Batch account's data. By default, customer data is encrypted with service-managed keys, but customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more at https://aka.ms/Batch-CMK.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Batch"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Batch/batchAccounts"
+          },
+          {
+            "field": "Microsoft.Batch/batchAccounts/encryption.keySource",
+            "notEquals": "Microsoft.KeyVault"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/99e9ccd8-3db9-4592-b0d1-14b1715a4d8a",
+  "name": "99e9ccd8-3db9-4592-b0d1-14b1715a4d8a"
+}

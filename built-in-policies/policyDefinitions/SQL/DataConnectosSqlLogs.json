@@ -1,0 +1,598 @@
+{
+  "properties": {
+    "displayName": "Deploy - Configure diagnostic settings for SQL Databases to Log Analytics workspace",
+    "description": "Deploys the diagnostic settings for SQL Databases to stream resource logs to a Log Analytics workspace when any SQL Database which is missing this diagnostic settings is created or updated.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "4.0.0",
+      "category": "SQL"
+    },
+    "version": "4.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "diagnosticsSettingNameToUse": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Setting name",
+          "description": "Name of the diagnostic settings."
+        },
+        "defaultValue": "SQLDatabaseDiagnosticsLogsToWorkspace"
+      },
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Select the Log Analytics workspace from dropdown list",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      },
+      "QueryStoreRuntimeStatisticsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "QueryStoreRuntimeStatistics - Enabled",
+          "description": "Whether to stream QueryStoreRuntimeStatistics logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "QueryStoreWaitStatisticsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "QueryStoreWaitStatistics - Enabled",
+          "description": "Whether to stream QueryStoreWaitStatistics logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "ErrorsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Errors - Enabled",
+          "description": "Whether to stream Errors logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "DatabaseWaitStatisticsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "DatabaseWaitStatistics - Enabled",
+          "description": "Whether to stream DatabaseWaitStatistics logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "BlocksEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Blocks - Enabled",
+          "description": "Whether to stream Blocks logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "SQLInsightsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "SQLInsights - Enabled",
+          "description": "Whether to stream SQLInsights logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "SQLSecurityAuditEventsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "SQLSecurityAuditEvents - Enabled",
+          "description": "Whether to stream SQLSecurityAuditEvents logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "TimeoutsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Timeouts - Enabled",
+          "description": "Whether to stream Timeouts logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "AutomaticTuningEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "AutomaticTuning - Enabled",
+          "description": "Whether to stream AutomaticTuning logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "DeadlocksEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Deadlocks - Enabled",
+          "description": "Whether to stream Deadlocks logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "Basic": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Basic (metric) - Enabled",
+          "description": "Whether to stream Basic metrics to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "InstanceAndAppAdvanced": {
+        "type": "String",
+        "metadata": {
+          "displayName": "InstanceAndAppAdvanced (metric) - Enabled",
+          "description": "Whether to stream InstanceAndAppAdvanced metrics to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "WorkloadManagement": {
+        "type": "String",
+        "metadata": {
+          "displayName": "WorkloadManagement (metric) - Enabled",
+          "description": "Whether to stream WorkloadManagement metrics to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/databases"
+          },
+          {
+            "field": "name",
+            "notEquals": "master"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                "equals": "[parameters('logAnalytics')]"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "SQLInsights"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('SQLInsightsEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "AutomaticTuning"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('AutomaticTuningEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "QueryStoreRuntimeStatistics"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('QueryStoreRuntimeStatisticsEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "QueryStoreWaitStatistics"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('QueryStoreWaitStatisticsEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Errors"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('ErrorsEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "DatabaseWaitStatistics"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('DatabaseWaitStatisticsEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Timeouts"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('TimeoutsEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Blocks"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('BlocksEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "Deadlocks"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('DeadlocksEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "SQLSecurityAuditEvents"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "[parameters('SQLSecurityAuditEventsEnabled')]"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "equals": 10
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/metrics[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/metrics[*].category",
+                            "equals": "Basic"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
+                            "equals": "[parameters('Basic')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/metrics[*].category",
+                            "equals": "InstanceAndAppAdvanced"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
+                            "equals": "[parameters('InstanceAndAppAdvanced')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/metrics[*].category",
+                            "equals": "WorkloadManagement"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/metrics[*].enabled",
+                            "equals": "[parameters('WorkloadManagement')]"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "equals": 3
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "diagnosticsSettingNameToUse": {
+                    "type": "string"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "Basic": {
+                    "type": "string"
+                  },
+                  "InstanceAndAppAdvanced": {
+                    "type": "string"
+                  },
+                  "WorkloadManagement": {
+                    "type": "string"
+                  },
+                  "QueryStoreRuntimeStatisticsEnabled": {
+                    "type": "string"
+                  },
+                  "QueryStoreWaitStatisticsEnabled": {
+                    "type": "string"
+                  },
+                  "ErrorsEnabled": {
+                    "type": "string"
+                  },
+                  "DatabaseWaitStatisticsEnabled": {
+                    "type": "string"
+                  },
+                  "BlocksEnabled": {
+                    "type": "string"
+                  },
+                  "SQLInsightsEnabled": {
+                    "type": "string"
+                  },
+                  "SQLSecurityAuditEventsEnabled": {
+                    "type": "string"
+                  },
+                  "TimeoutsEnabled": {
+                    "type": "string"
+                  },
+                  "AutomaticTuningEnabled": {
+                    "type": "string"
+                  },
+                  "DeadlocksEnabled": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings",
+                    "apiVersion": "2017-05-01-preview",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [],
+                    "properties": {
+                      "workspaceId": "[parameters('logAnalytics')]",
+                      "metrics": [
+                        {
+                          "category": "Basic",
+                          "enabled": "[parameters('Basic')]"
+                        },
+                        {
+                          "category": "InstanceAndAppAdvanced",
+                          "enabled": "[parameters('InstanceAndAppAdvanced')]"
+                        },
+                        {
+                          "category": "WorkloadManagement",
+                          "enabled": "[parameters('WorkloadManagement')]"
+                        }
+                      ],
+                      "logs": [
+                        {
+                          "category": "SQLInsights",
+                          "enabled": "[parameters('SQLInsightsEnabled')]"
+                        },
+                        {
+                          "category": "AutomaticTuning",
+                          "enabled": "[parameters('AutomaticTuningEnabled')]"
+                        },
+                        {
+                          "category": "QueryStoreRuntimeStatistics",
+                          "enabled": "[parameters('QueryStoreRuntimeStatisticsEnabled')]"
+                        },
+                        {
+                          "category": "QueryStoreWaitStatistics",
+                          "enabled": "[parameters('QueryStoreWaitStatisticsEnabled')]"
+                        },
+                        {
+                          "category": "Errors",
+                          "enabled": "[parameters('ErrorsEnabled')]"
+                        },
+                        {
+                          "category": "DatabaseWaitStatistics",
+                          "enabled": "[parameters('DatabaseWaitStatisticsEnabled')]"
+                        },
+                        {
+                          "category": "Timeouts",
+                          "enabled": "[parameters('TimeoutsEnabled')]"
+                        },
+                        {
+                          "category": "Blocks",
+                          "enabled": "[parameters('BlocksEnabled')]"
+                        },
+                        {
+                          "category": "Deadlocks",
+                          "enabled": "[parameters('DeadlocksEnabled')]"
+                        },
+                        {
+                          "category": "SQLSecurityAuditEvents",
+                          "enabled": "[parameters('SQLSecurityAuditEventsEnabled')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "outputs": {}
+              },
+              "parameters": {
+                "Basic": {
+                  "value": "[parameters('Basic')]"
+                },
+                "InstanceAndAppAdvanced": {
+                  "value": "[parameters('InstanceAndAppAdvanced')]"
+                },
+                "diagnosticsSettingNameToUse": {
+                  "value": "[parameters('diagnosticsSettingNameToUse')]"
+                },
+                "WorkloadManagement": {
+                  "value": "[parameters('WorkloadManagement')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "resourceName": {
+                  "value": "[field('fullName')]"
+                },
+                "QueryStoreRuntimeStatisticsEnabled": {
+                  "value": "[parameters('QueryStoreRuntimeStatisticsEnabled')]"
+                },
+                "QueryStoreWaitStatisticsEnabled": {
+                  "value": "[parameters('QueryStoreWaitStatisticsEnabled')]"
+                },
+                "ErrorsEnabled": {
+                  "value": "[parameters('ErrorsEnabled')]"
+                },
+                "DatabaseWaitStatisticsEnabled": {
+                  "value": "[parameters('DatabaseWaitStatisticsEnabled')]"
+                },
+                "BlocksEnabled": {
+                  "value": "[parameters('BlocksEnabled')]"
+                },
+                "SQLInsightsEnabled": {
+                  "value": "[parameters('SQLInsightsEnabled')]"
+                },
+                "SQLSecurityAuditEventsEnabled": {
+                  "value": "[parameters('SQLSecurityAuditEventsEnabled')]"
+                },
+                "TimeoutsEnabled": {
+                  "value": "[parameters('TimeoutsEnabled')]"
+                },
+                "AutomaticTuningEnabled": {
+                  "value": "[parameters('AutomaticTuningEnabled')]"
+                },
+                "DeadlocksEnabled": {
+                  "value": "[parameters('DeadlocksEnabled')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "4.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b79fa14e-238a-4c2d-b376-442ce508fc84",
+  "name": "b79fa14e-238a-4c2d-b376-442ce508fc84"
+}

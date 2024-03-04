@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "displayName": "[Preview]: A managed identity should be enabled on your machines",
+    "description": "Resources managed by Automanage should have a managed identity.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Automanage",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.HybridCompute/machines"
+            ]
+          },
+          {
+            "field": "identity.type",
+            "notContains": "SystemAssigned"
+          },
+          {
+            "field": "identity.type",
+            "notContains": "UserAssigned"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e4953962-5ae4-43eb-bb92-d66fd5563487",
+  "name": "e4953962-5ae4-43eb-bb92-d66fd5563487"
+}

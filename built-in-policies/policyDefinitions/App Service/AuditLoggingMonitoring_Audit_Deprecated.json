@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: [Deprecated]: Audit enabling of diagnostic logs in App Services",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Audit enabling of diagnostic logs on the app. This enables you to recreate activity trails for investigation purposes if a security incident occurs or your network is compromised",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/config"
+          },
+          {
+            "field": "name",
+            "equals": "web"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/detailedErrorLoggingEnabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/httpLoggingEnabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/requestTracingEnabled",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/752c6934-9bcc-4749-b004-655e676ae2ac",
+  "name": "752c6934-9bcc-4749-b004-655e676ae2ac"
+}

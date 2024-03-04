@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "App Service app slots should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access improves security by ensuring that the App Service is not exposed on the public internet. Creating private endpoints can limit exposure of an App Service. Learn more at: https://aka.ms/app-service-private-endpoint.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/slots/publicNetworkAccess",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/701a595d-38fb-4a66-ae6d-fb3735217622",
+  "name": "701a595d-38fb-4a66-ae6d-fb3735217622"
+}

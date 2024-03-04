@@ -1,0 +1,204 @@
+{
+  "properties": {
+    "displayName": "Deploy - Configure diagnostic settings for Azure Key Vault to Log Analytics workspace",
+    "description": "Deploys the diagnostic settings for Azure Key Vault to stream resource logs to a Log Analytics workspace when any Key Vault which is missing this diagnostic settings is created or updated.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Key Vault"
+    },
+    "version": "2.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "diagnosticsSettingNameToUse": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Setting name",
+          "description": "Name of the diagnostic settings."
+        },
+        "defaultValue": "AzureKeyVaultDiagnosticsLogsToWorkspace"
+      },
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Specify the Log Analytics workspace the Key Vault should be connected to.",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      },
+      "AuditEventEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "AuditEvent - Enabled",
+          "description": "Whether to stream AuditEvent logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "AllMetricsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "AllMetrics - Enabled",
+          "description": "Whether to stream AllMetrics logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.KeyVault/vaults"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "evaluationDelay": "AfterProvisioning",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "anyof": [
+                  {
+                    "field": "Microsoft.Insights/diagnosticSettings/metrics.enabled",
+                    "equals": "[parameters('AllMetricsEnabled')]"
+                  },
+                  {
+                    "count": {
+                      "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                      "where": {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                            "equals": "true"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].category",
+                            "equals": "AuditEvent"
+                          }
+                        ]
+                      }
+                    },
+                    "greaterOrEquals": 1
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                "equals": "[parameters('logAnalytics')]"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "diagnosticsSettingNameToUse": {
+                    "type": "string"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "AuditEventEnabled": {
+                    "type": "string"
+                  },
+                  "AllMetricsEnabled": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
+                    "apiVersion": "2017-05-01-preview",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [],
+                    "properties": {
+                      "workspaceId": "[parameters('logAnalytics')]",
+                      "metrics": [
+                        {
+                          "category": "AllMetrics",
+                          "enabled": "[parameters('AllMetricsEnabled')]",
+                          "retentionPolicy": {
+                            "days": 0,
+                            "enabled": false
+                          },
+                          "timeGrain": null
+                        }
+                      ],
+                      "logs": [
+                        {
+                          "category": "AuditEvent",
+                          "enabled": "[parameters('AuditEventEnabled')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "outputs": {}
+              },
+              "parameters": {
+                "diagnosticsSettingNameToUse": {
+                  "value": "[parameters('diagnosticsSettingNameToUse')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "AuditEventEnabled": {
+                  "value": "[parameters('AuditEventEnabled')]"
+                },
+                "AllMetricsEnabled": {
+                  "value": "[parameters('AllMetricsEnabled')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/951af2fa-529b-416e-ab6e-066fd85ac459",
+  "name": "951af2fa-529b-416e-ab6e-066fd85ac459"
+}

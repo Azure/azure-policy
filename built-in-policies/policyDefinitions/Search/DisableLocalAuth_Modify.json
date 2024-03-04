@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Cognitive Search services to disable local authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable local authentication methods so that your Azure Cognitive Search services exclusively require Azure Active Directory identities for authentication. Learn more at: https://aka.ms/azure-cognitive-search/rbac.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Search"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Search/searchServices"
+          },
+          {
+            "field": "Microsoft.Search/searchServices/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/7ca78c08-252a-4471-8644-bb5ff32d4ba0"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-04-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Search/searchServices/disableLocalAuth",
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4eb216f2-9dba-4979-86e6-5d7e63ce3b75",
+  "name": "4eb216f2-9dba-4979-86e6-5d7e63ce3b75"
+}

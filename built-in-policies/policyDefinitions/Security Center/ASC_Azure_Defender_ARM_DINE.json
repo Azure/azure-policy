@@ -1,0 +1,108 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Defender for Resource Manager to be enabled",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure Defender for Resource Manager automatically monitors the resource management operations in your organization. Azure Defender detects threats and alerts you about suspicious activity. Learn more about the capabilities of Azure Defender for Resource Manager at https://aka.ms/defender-for-resource-manager . Enabling this Azure Defender plan results in charges. Learn about the pricing details per region on Security Center's pricing page: https://aka.ms/pricing-security-center .",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Security Center"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ]
+      },
+      "subPlan": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Defender for Resource Manager plans",
+          "description": "Select a Defender for Resource Manager plan"
+        },
+        "allowedValues": [
+          "PerSubscription",
+          "PerApiCall"
+        ],
+        "defaultValue": "PerApiCall"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "Arm",
+          "deploymentScope": "subscription",
+          "existenceScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Security/pricings/pricingTier",
+                "equals": "Standard"
+              },
+              {
+                "field": "Microsoft.Security/pricings/subPlan",
+                "equals": "[parameters('subPlan')]"
+              }
+            ]
+          },
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "subPlan": {
+                  "value": "[parameters('subPlan')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "subPlan": {
+                    "type": "String"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2023-01-01",
+                    "name": "Arm",
+                    "properties": {
+                      "pricingTier": "Standard",
+                      "subPlan": "[parameters('subPlan')]"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.1.0",
+      "1.0.2"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b7021b2b-08fd-4dc0-9de7-3c6ece09faf9",
+  "name": "b7021b2b-08fd-4dc0-9de7-3c6ece09faf9"
+}

@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "Azure Active Directory should use private link to access Azure services",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Azure AD, you can reduce data leakage risks. Learn more at: https://aka.ms/privateLinkforAzureADDocs. It should be only used from isolated VNETs to Azure services, with no access to the Internet or other services (M365).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Active Directory"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "microsoft.aadiam/privateLinkForAzureAD"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "microsoft.aadiam/privateLinkForAzureAD/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "microsoft.aadiam/privateLinkForAzureAD/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2e9411a0-0c5a-44b3-9ddb-ff10a1a2bf28",
+  "name": "2e9411a0-0c5a-44b3-9ddb-ff10a1a2bf28"
+}

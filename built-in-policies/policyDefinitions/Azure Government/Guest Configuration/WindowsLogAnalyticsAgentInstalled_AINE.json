@@ -1,0 +1,80 @@
+{
+  "properties": {
+    "displayName": "Windows machines should have Log Analytics agent installed on Azure Arc",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Machines are non-compliant if Log Analytics agent is not installed on Azure Arc enabled windows server.",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "1.0.0",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "WindowsLogAnalyticsAgentInstalled",
+        "version": "1.*"
+      }
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "value": "[parameters('IncludeArcMachines')]",
+            "equals": "true"
+          },
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "WindowsLogAnalyticsAgentInstalled",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+            "equals": "Compliant"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4078e558-bda6-41fb-9b3c-361e8875200d",
+  "name": "4078e558-bda6-41fb-9b3c-361e8875200d"
+}

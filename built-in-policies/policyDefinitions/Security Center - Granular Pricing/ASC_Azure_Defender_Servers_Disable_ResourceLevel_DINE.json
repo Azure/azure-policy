@@ -1,0 +1,88 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Defender for Servers to be disabled for all resources (resource level)",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure Defender for Servers provides real-time threat protection for server workloads and generates hardening recommendations as well as alerts about suspicious activities. This policy will disable the Defender for Servers plan for all resources (VMs, VMSSs and ARC Machines) in the selected scope (subscription or resource group).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center - Granular Pricing"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.Compute/virtualMachineScaleSets",
+          "Microsoft.HybridCompute/machines"
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "VirtualMachines",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.Security/pricings/pricingTier",
+            "equals": "Free"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "fullResourceName": {
+                  "value": "[field('id')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "fullResourceName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2024-01-01",
+                    "scope": "[parameters('fullResourceName')]",
+                    "name": "VirtualMachines",
+                    "properties": {
+                      "pricingTier": "Free"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f6ff485a-7630-4730-854d-cd3ad855435e",
+  "name": "f6ff485a-7630-4730-854d-cd3ad855435e"
+}

@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "Service Bus Namespaces should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure Service Bus should have public network access disabled. Disabling public network access improves security by ensuring that the resource isn't exposed on the public internet. You can limit exposure of your resources by creating private endpoints instead. Learn more at: https://docs.microsoft.com/azure/service-bus-messaging/private-link-service",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Service Bus"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "equals": "Microsoft.ServiceBus/namespaces/networkRuleSets",
+                "field": "type"
+              },
+              {
+                "notEquals": "Disabled",
+                "field": "Microsoft.ServiceBus/namespaces/networkRuleSets/publicNetworkAccess"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "equals": "Microsoft.ServiceBus/namespaces",
+                "field": "type"
+              },
+              {
+                "notEquals": "Disabled",
+                "field": "Microsoft.ServiceBus/namespaces/publicNetworkAccess"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cbd11fd3-3002-4907-b6c8-579f0e700e13",
+  "name": "cbd11fd3-3002-4907-b6c8-579f0e700e13"
+}

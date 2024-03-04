@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Event Hub namespaces to disable local authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable local authentication methods so that your Azure Event Hub namespaces exclusively require Microsoft Entra ID identities for authentication. Learn more at: https://aka.ms/disablelocalauth-eh.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Event Hub"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventHub/namespaces"
+          },
+          {
+            "field": "Microsoft.EventHub/namespaces/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/f526a384-b230-433a-b45c-95f59c4a2dec"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.EventHub/namespaces/disableLocalAuth",
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.1",
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/57f35901-8389-40bb-ac49-3ba4f86d889d",
+  "name": "57f35901-8389-40bb-ac49-3ba4f86d889d"
+}

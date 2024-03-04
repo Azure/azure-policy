@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Azure Batch pools should have disk encryption enabled",
+    "description": "Enabling Azure Batch disk encryption ensures that data is always encrypted at rest on your Azure Batch compute node. Learn more about disk encryption in Batch at https://docs.microsoft.com/azure/batch/disk-encryption.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Batch"
+    },
+    "version": "1.0.0",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Batch/batchAccounts/pools"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Batch/batchAccounts/pools/deploymentConfiguration.virtualMachineConfiguration.diskEncryptionConfiguration.targets[*]",
+              "where": {
+                "field": "Microsoft.Batch/batchAccounts/pools/deploymentConfiguration.virtualMachineConfiguration.diskEncryptionConfiguration.targets[*]",
+                "contains": "TemporaryDisk"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1760f9d4-7206-436e-a28f-d9f3a5c8a227",
+  "name": "1760f9d4-7206-436e-a28f-d9f3a5c8a227"
+}

@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure Azure Defender for SQL agents on virtual machines",
+    "policyType": "BuiltIn",
+    "description": "Configure virtual machines to automatically install the Azure Defender for SQL agents where the Azure Monitor Agent is installed. Security Center collects events from the agents and uses them to provide security alerts and tailored hardening tasks (recommendations). Creates a resource group and Log Analytics workspace in the same region as the machine. This policy only applies to VMs in a few regions.",
+    "metadata": {
+      "category": "Monitoring",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "enableCollectionOfSqlQueriesForSecurityResearch": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable collection of SQL queries for security research",
+          "description": "Enable or disable the collection of SQL queries for security research."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the initiative."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ]
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2ada9901-073c-444a-9a9a-91865174f0aa",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "ASC_DeployAzureDefenderForSqlAdvancedThreatProtectionWindowsAgent",
+        "parameters": {
+          "enableCollectionOfSqlQueriesForSecurityResearch": {
+            "value": "[parameters('enableCollectionOfSqlQueriesForSecurityResearch')]"
+          },
+          "azureDefenderForSqlExtensionTypeToInstall": {
+            "value": "AdvancedThreatProtection.Windows"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2ada9901-073c-444a-9a9a-91865174f0aa",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionReferenceId": "ASC_DeployAzureDefenderForSqlVulnerabilityAssessmentWindowsAgent",
+        "parameters": {
+          "enableCollectionOfSqlQueriesForSecurityResearch": {
+            "value": "[parameters('enableCollectionOfSqlQueriesForSecurityResearch')]"
+          },
+          "azureDefenderForSqlExtensionTypeToInstall": {
+            "value": "VulnerabilityAssessment.Windows"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/39a366e6-fdde-4f41-bbf8-3757f46d1611",
+  "name": "39a366e6-fdde-4f41-bbf8-3757f46d1611"
+}

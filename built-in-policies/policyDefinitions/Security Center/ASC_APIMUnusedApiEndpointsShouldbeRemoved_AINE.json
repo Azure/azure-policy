@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "API endpoints that are unused should be disabled and removed from the Azure API Management service",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "As a security best practice, API endpoints that haven't received traffic for 30 days are considered unused and should be removed from the Azure API Management service. Keeping unused API endpoints may pose a security risk to your organization. These may be APIs that should have been deprecated from the Azure API Management service but may have been accidentally left active. Such APIs typically do not receive the most up to date security coverage.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.1"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.ApiManagement/service/apis/operations"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/assessments",
+          "name": "4e8c00a2-e8bc-42a8-9e12-99584a51ad10",
+          "existencecondition": {
+            "field": "microsoft.security/assessments/status.code",
+            "in": [
+              "NotApplicable",
+              "Healthy"
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.1",
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c8acafaf-3d23-44d1-9624-978ef0f8652c",
+  "name": "c8acafaf-3d23-44d1-9624-978ef0f8652c"
+}

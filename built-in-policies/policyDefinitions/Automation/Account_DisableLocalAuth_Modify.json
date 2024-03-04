@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Automation account to disable local authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable local authentication methods so that your Azure Automation accounts exclusively require Azure Active Directory identities for authentication.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Automation"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Automation/automationAccounts"
+          },
+          {
+            "field": "Microsoft.Automation/automationAccounts/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-22')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Automation/automationAccounts/disableLocalAuth",
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/30d1d58e-8f96-47a5-8564-499a3f3cca81",
+  "name": "30d1d58e-8f96-47a5-8564-499a3f3cca81"
+}

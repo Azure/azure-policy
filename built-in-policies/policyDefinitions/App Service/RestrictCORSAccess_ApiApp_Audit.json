@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: CORS should not allow every resource to access your API App",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Cross-Origin Resource Sharing (CORS) should not allow all domains to access your API app. Allow only required domains to interact with your API app. We recommend all customers who are still using API Apps to implement the built-in policy called 'App Service apps should not have CORS configured to allow every resource to access your apps', which is scoped to include API apps in addition to Web Apps.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/web.cors.allowedOrigins[*]",
+            "notEquals": "*"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/358c20a6-3f9e-4f0e-97ff-c6ce485e2aac",
+  "name": "358c20a6-3f9e-4f0e-97ff-c6ce485e2aac"
+}

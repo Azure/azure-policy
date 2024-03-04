@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Azure SignalR Service should use private link",
+    "description": "The policy is deprecated. Please use /providers/Microsoft.Authorization/policyDefinitions/2393d2cf-a342-44cd-a2e2-fe0188fd1234 instead.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.1-deprecated",
+      "category": "SignalR",
+      "deprecated": true
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.SignalRService/SignalR"
+          },
+          {
+            "count": {
+              "field": "Microsoft.SignalRService/SignalR/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.SignalRService/SignalR/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/53503636-bcc9-4748-9663-5348217f160f",
+  "name": "53503636-bcc9-4748-9663-5348217f160f"
+}

@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Modify API Management to disable username and password authentication",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "To better secure developer portal user accounts and their credentials, configure user authentication through Azure AD or Azure AD B2C identity providers and disable the default username and password authentication.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "API Management"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "To better secure developer portal user accounts and their credentials, configure user authentication through Azure AD or Azure AD B2C identity providers and disable the default username and password authentication."
+        },
+        "allowedValues": [
+          "Modify"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service/portalconfigs"
+          },
+          {
+            "field": "Microsoft.ApiManagement/service/portalconfigs/enableBasicAuth",
+            "notEquals": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.ApiManagement/service/portalconfigs/enableBasicAuth",
+              "value": false
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1b0d74ac-4b43-4c39-a15f-594385adc38d",
+  "name": "1b0d74ac-4b43-4c39-a15f-594385adc38d"
+}

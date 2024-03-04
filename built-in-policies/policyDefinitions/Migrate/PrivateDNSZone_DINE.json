@@ -1,0 +1,138 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Migrate resources to use private DNS zones",
+    "description": "Use private DNS zones to override the DNS resolution for a private endpoint. A private DNS zone links to your virtual network to resolve to your Azure Migrate project. Learn more at: https://aka.ms/privatednszone.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Migrate"
+    },
+    "version": "1.0.0",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "parameters": {
+      "privateDnsZoneId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private DNS Zone ID",
+          "description": "Specifies the private DNS zone to use to configure private endpoint",
+          "strongType": "Microsoft.Network/privateDnsZones"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/privateEndpoints"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
+                    "equals": "Default"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].privateLinkServiceId",
+                        "contains": "Microsoft.Migrate/assessmentProjects"
+                      },
+                      {
+                        "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].privateLinkServiceId",
+                        "contains": "Microsoft.Migrate/migrateProjects"
+                      },
+                      {
+                        "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].privateLinkServiceId",
+                        "contains": "Microsoft.OffAzure/masterSites"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "privateDnsZoneId": {
+                    "type": "string"
+                  },
+                  "privateEndpointName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[concat(parameters('privateEndpointName'), '/deployedByPolicy')]",
+                    "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                    "apiVersion": "2020-03-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "privateDnsZoneConfigs": [
+                        {
+                          "name": "default-privateDnsZone",
+                          "properties": {
+                            "privateDnsZoneId": "[parameters('privateDnsZoneId')]"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "privateDnsZoneId": {
+                  "value": "[parameters('privateDnsZoneId')]"
+                },
+                "privateEndpointName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7590a335-57cf-4c95-babd-ecbc8fafeb1f",
+  "name": "7590a335-57cf-4c95-babd-ecbc8fafeb1f"
+}

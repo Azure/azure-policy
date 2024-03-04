@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Ensure that '.NET Framework' version is the latest, if used as a part of the API app",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy is not required since Azure App Service automatically updates and maintains the .NET Framework versions installed on the platform.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/web.netFrameworkVersion",
+            "in": [
+              "v3.0",
+              "v4.0"
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c2e7ca55-f62c-49b2-89a4-d41eb661d2f0",
+  "name": "c2e7ca55-f62c-49b2-89a4-d41eb661d2f0"
+}

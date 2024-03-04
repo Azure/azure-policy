@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "CORS should not allow every domain to access your FHIR Service",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Cross-Origin Resource Sharing (CORS) should not allow all domains to access your FHIR Service. To protect your FHIR Service, remove access for all domains and explicitly define the domains allowed to connect.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Healthcare APIs"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HealthcareApis/workspaces/fhirservices"
+          },
+          {
+            "count": {
+              "field": "Microsoft.HealthcareApis/workspaces/fhirservices/corsConfiguration.origins[*]",
+              "where": {
+                "field": "Microsoft.HealthcareApis/workspaces/fhirservices/corsConfiguration.origins[*]",
+                "equals": "*"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fe1c9040-c46a-4e81-9aea-c7850fbb3aa6",
+  "name": "fe1c9040-c46a-4e81-9aea-c7850fbb3aa6"
+}

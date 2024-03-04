@@ -1,0 +1,317 @@
+{
+  "properties": {
+    "displayName": "Deploy - Configure suppression rules for Azure Security Center alerts",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Suppress Azure Security Center alerts to reduce alerts fatigue by deploying suppression rules on your management group or subscription.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "alertType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Alert Type",
+          "description": "Enter the alert type field of the alert you would like to suppress. Alert type could be queried via alerts api or PowerShell, learn more at https://aka.ms/asc-alertsPwoershell"
+        }
+      },
+      "suppressionRuleName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Rule name",
+          "description": "Rule names must begin with a letter or a number, be between 2 and 50 characters, and contain no symbols other than dashes ( - ) or underscores ( _ )"
+        }
+      },
+      "state": {
+        "type": "String",
+        "metadata": {
+          "displayName": "State"
+        },
+        "allowedValues": [
+          "Enabled",
+          "Disabled"
+        ],
+        "defaultValue": "Enabled"
+      },
+      "reason": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Reason"
+        },
+        "allowedValues": [
+          "The severity of the alert should be lower",
+          "The alert detecting too many normal activities",
+          "The alert is too noisy - hitting on the same resources too many times",
+          "The resource isn't relevant for me to monitor",
+          "The alert detecting normal activity on specific entity",
+          "The alert isn't actionable - not clear how to investigate the threat",
+          "Other"
+        ]
+      },
+      "comment": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Comment"
+        },
+        "defaultValue": ""
+      },
+      "expirationDate": {
+        "type": "DateTime",
+        "metadata": {
+          "displayName": "Expiration date"
+        }
+      },
+      "entityOneType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "First entity type",
+          "description": "To refine the suppression rules to suppress alerts only for specific entities, enter the type of the entity you would like to suppress. Only alerts containing all of the entities defined in the rule will be suppressed (alerts without entities will be suppressed entirely)."
+        },
+        "allowedValues": [
+          "User account - name",
+          "User account - AAD user ID",
+          "User account - UPN suffix",
+          "Azure resource ID",
+          "File - name",
+          "File - directory",
+          "File hash",
+          "Host - name",
+          "Host - Azure ID",
+          "Host - DNS Domain",
+          "Host - OMS agent ID",
+          "IP address",
+          "Malware - name",
+          "Malware - category",
+          "Process - command line",
+          ""
+        ],
+        "defaultValue": ""
+      },
+      "entityOneOp": {
+        "type": "String",
+        "metadata": {
+          "displayName": "First entity operation"
+        },
+        "allowedValues": [
+          "Equals",
+          "Contains",
+          ""
+        ],
+        "defaultValue": ""
+      },
+      "entityOneValue": {
+        "type": "String",
+        "metadata": {
+          "displayName": "First entity value",
+          "description": "The value of the entity. Only alerts containing all of the entities defined in the rule will be suppressed (alerts without entities will be suppressed entirely)."
+        },
+        "defaultValue": ""
+      },
+      "entitySecondType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Second entity type",
+          "description": "To refine the suppression rules to suppress alerts only for specific entities, enter the type of the entity you would like to suppress. Only alerts containing all of the entities defined in the rule will be suppressed (alerts without entities will be suppressed entirely)."
+        },
+        "allowedValues": [
+          "User account - name",
+          "User account - AAD user ID",
+          "User account - UPN suffix",
+          "Azure resource ID",
+          "File - name",
+          "File - directory",
+          "File hash",
+          "Host - name",
+          "Host - Azure ID",
+          "Host - DNS Domain",
+          "Host - OMS agent ID",
+          "IP address",
+          "Malware - name",
+          "Malware - category",
+          "Process - command line",
+          ""
+        ],
+        "defaultValue": ""
+      },
+      "entitySecondOp": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Second entity operation"
+        },
+        "allowedValues": [
+          "Equals",
+          "Contains",
+          ""
+        ],
+        "defaultValue": ""
+      },
+      "entitySecondValue": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Second entity value",
+          "description": "The value of the entity. Only alerts containing all of the entities defined in the rule will be suppressed (alerts without entities will be suppressed entirely)."
+        },
+        "defaultValue": ""
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Security/alertsSuppressionRules",
+          "name": "[parameters('suppressionRuleName')]",
+          "existenceScope": "subscription",
+          "deploymentScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "deployment": {
+            "location": "centralus",
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "alertType": {
+                    "type": "String"
+                  },
+                  "suppressionRuleName": {
+                    "type": "String"
+                  },
+                  "state": {
+                    "type": "String"
+                  },
+                  "reason": {
+                    "type": "String"
+                  },
+                  "comment": {
+                    "type": "String"
+                  },
+                  "expirationDate": {
+                    "type": "String"
+                  },
+                  "entityOneType": {
+                    "type": "String"
+                  },
+                  "entityOneOp": {
+                    "type": "String"
+                  },
+                  "entityOneValue": {
+                    "type": "String"
+                  },
+                  "entitySecondType": {
+                    "type": "String"
+                  },
+                  "entitySecondOp": {
+                    "type": "String"
+                  },
+                  "entitySecondValue": {
+                    "type": "String"
+                  }
+                },
+                "variables": {
+                  "reasonToEnum": {
+                    "The severity of the alert should be lower": "AlertSeverityTooHigh",
+                    "The alert detecting too many normal activities": "FalsePositive",
+                    "The alert is too noisy - hitting on the same resources too many times": "Noise",
+                    "The resource isn't relevant for me to monitor": "NotRelevant",
+                    "The alert detecting normal activity on specific entity": "SpecificEntityFalsePositive",
+                    "The alert isn't actionable - not clear how to investigate the threat": "Unclear",
+                    "Other": "Other"
+                  },
+                  "entityNameToType": {
+                    "User account - name": "entities.account.name",
+                    "User account - AAD user ID": "entities.account.aaduserid",
+                    "User account - UPN suffix": "entities.account.upnsuffix",
+                    "Azure resource ID": "entities.azureresource.resourceid",
+                    "File - name": "entities.file.name",
+                    "File - directory": "entities.file.directory",
+                    "File hash": "entities.filehash.value",
+                    "Host - name": "entities.host.hostname",
+                    "Host - Azure ID": "entities.host.azureid",
+                    "Host - DNS Domain": "entities.host.dnsdomain",
+                    "Host - OMS agent ID": "entities.host.omsagentid",
+                    "IP address": "entities.ip.address",
+                    "Malware - name": "entities.malware.name",
+                    "Malware - category": "entities.malware.category",
+                    "Process - command line: ": "entities.process.commandline"
+                  },
+                  "entityOperationNameToOperation": {
+                    "Equals": "in",
+                    "Contains": "contains"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/alertsSuppressionRules",
+                    "apiVersion": "2019-01-01-preview",
+                    "name": "[parameters('suppressionRuleName')]",
+                    "location": "centralus",
+                    "properties": {
+                      "alertType": "[parameters('alertType')]",
+                      "state": "[parameters('state')]",
+                      "reason": "[variables('reasonToEnum')[parameters('reason')]]",
+                      "comment": "[parameters('comment')]",
+                      "expirationDateUtc": "[parameters('expirationDate')]",
+                      "suppressionAlertsScope": "[if(and(or(empty(parameters('entityOneType')), empty(parameters('entityOneOp')), empty(parameters('entityOneValue'))), or(empty(parameters('entitySecondType')), empty(parameters('entitySecondOp')), empty(parameters('entitySecondValue')))), null(), json(concat('{ \"allOf\": [', if(or(empty(parameters('entityOneType')), empty(parameters('entityOneOp')), empty(parameters('entityOneValue'))), '', concat(' { \"field\": \"', variables('entityNameToType')[parameters('entityOneType')], '\", \"', variables('entityOperationNameToOperation')[parameters('entityOneOp')], '\":', if(equals(parameters('entityOneOp'), 'Equals'), '[', ''), ' \"', parameters('entityOneValue'), '\"', if(equals(parameters('entityOneOp'), 'Equals'), ']', ''), ' }', if(or(empty(parameters('entitySecondType')), empty(parameters('entitySecondOp')), empty(parameters('entitySecondValue'))), '', ', '))), if(or(empty(parameters('entitySecondType')), empty(parameters('entitySecondOp')), empty(parameters('entitySecondValue'))), '', concat(' { \"field\": \"', variables('entityNameToType')[parameters('entitySecondType')], '\", \"', variables('entityOperationNameToOperation')[parameters('entitySecondOp')], '\":', if(equals(parameters('entitySecondOp'), 'Equals'), '[', ''), ' \"', parameters('entitySecondValue'), '\"', if(equals(parameters('entitySecondOp'), 'Equals'), ']', ''), ' } ')), '] }')))]"
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "alertType": {
+                  "value": "[parameters('alertType')]"
+                },
+                "suppressionRuleName": {
+                  "value": "[parameters('suppressionRuleName')]"
+                },
+                "state": {
+                  "value": "[parameters('state')]"
+                },
+                "reason": {
+                  "value": "[parameters('reason')]"
+                },
+                "comment": {
+                  "value": "[parameters('comment')]"
+                },
+                "expirationDate": {
+                  "value": "[parameters('expirationDate')]"
+                },
+                "entityOneType": {
+                  "value": "[parameters('entityOneType')]"
+                },
+                "entityOneOp": {
+                  "value": "[parameters('entityOneOp')]"
+                },
+                "entityOneValue": {
+                  "value": "[parameters('entityOneValue')]"
+                },
+                "entitySecondType": {
+                  "value": "[parameters('entitySecondType')]"
+                },
+                "entitySecondOp": {
+                  "value": "[parameters('entitySecondOp')]"
+                },
+                "entitySecondValue": {
+                  "value": "[parameters('entitySecondValue')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/80e94a21-c6cd-4c95-a2c7-beb5704e61c0",
+  "name": "80e94a21-c6cd-4c95-a2c7-beb5704e61c0"
+}

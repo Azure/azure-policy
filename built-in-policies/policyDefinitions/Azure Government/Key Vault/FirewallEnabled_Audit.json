@@ -1,0 +1,158 @@
+{
+  "properties": {
+    "displayName": "Azure Key Vault should have firewall enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable the key vault firewall so that the key vault is not accessible by default to any public IPs. Optionally, you can configure specific IP ranges to limit access to those networks. Learn more at: https://docs.microsoft.com/azure/key-vault/general/network-security",
+    "metadata": {
+      "version": "1.4.1",
+      "category": "Key Vault"
+    },
+    "version": "1.4.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "restrictIPAddresses": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Would you like to restrict specific IP addresses?",
+          "description": "Select (Yes) to allow or forbid a list of IP addresses. If (No), the list of IP addresses won't have any effect in the policy enforcement"
+        },
+        "defaultValue": "No",
+        "allowedValues": [
+          "Yes",
+          "No"
+        ]
+      },
+      "allowedIPAddresses": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed IP addresses",
+          "description": "Array with allowed public IP addresses. An empty array is evaluated as to allow all IPs."
+        },
+        "defaultValue": []
+      },
+      "forbiddenIPAddresses": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Forbidden IP addresses",
+          "description": "Array with forbidden public IP addresses. An empty array is evaluated as there are no forbidden IP addresses."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/createMode",
+            "notEquals": "recover"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('restrictIPAddresses')]",
+                    "equals": "Yes"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "count": {
+                              "value": "[parameters('allowedIPAddresses')]",
+                              "name": "allowedIPAddresses"
+                            },
+                            "notEquals": 0
+                          },
+                          {
+                            "not": {
+                              "count": {
+                                "field": "Microsoft.KeyVault/vaults/networkAcls.ipRules[*]",
+                                "where": {
+                                  "count": {
+                                    "value": "[parameters('allowedIPAddresses')]",
+                                    "name": "allowedIpAddress",
+                                    "where": {
+                                      "value": "[ipRangeContains(current('allowedIpAddress'), current('Microsoft.KeyVault/vaults/networkAcls.ipRules[*].value'))]",
+                                      "equals": true
+                                    }
+                                  },
+                                  "greater": 0
+                                }
+                              },
+                              "equals": "[length(field('Microsoft.KeyVault/vaults/networkAcls.ipRules[*]'))]"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "count": {
+                              "value": "[parameters('forbiddenIPAddresses')]",
+                              "name": "forbiddenIPAddresses"
+                            },
+                            "notEquals": 0
+                          },
+                          {
+                            "not": {
+                              "count": {
+                                "field": "Microsoft.KeyVault/vaults/networkAcls.ipRules[*]",
+                                "where": {
+                                  "count": {
+                                    "value": "[parameters('forbiddenIPAddresses')]",
+                                    "name": "forbiddenIPAddresses",
+                                    "where": {
+                                      "value": "[ipRangeContains(current('forbiddenIPAddresses'), current('Microsoft.KeyVault/vaults/networkAcls.ipRules[*].value'))]",
+                                      "equals": true
+                                    }
+                                  },
+                                  "greater": 0
+                                }
+                              },
+                              "equals": 0
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.4.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/55615ac9-af46-4a59-874e-391cc3dfb490",
+  "name": "55615ac9-af46-4a59-874e-391cc3dfb490"
+}

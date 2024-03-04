@@ -1,0 +1,284 @@
+{
+  "properties": {
+    "displayName": "Configure Microsoft Defender CSPM plan",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Defender Cloud Security Posture Management (CSPM) provides enhanced posture capabilities and a new intelligent cloud security graph to help identify, prioritize, and reduce risk. Defender CSPM is available in addition to the free foundational security posture capabilities turned on by default in Defender for Cloud.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ]
+      },
+      "isSensitiveDataDiscoveryEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Sensitive Data Discovery Enabled",
+          "description": "Enable or disable the Sensitive Data Discovery add-on feature"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isContainerRegistriesVulnerabilityAssessmentsEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Container Registries Vulnerability Assessments Enabled",
+          "description": "Enable or disable the Container Registries Vulnerability Assessments add-on feature"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isAgentlessDiscoveryForKubernetesEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Agentless Discovery for Kubernetes Enabled",
+          "description": "Enable or disable the Agentless Discovery for Kubernetes add-on feature"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isAgentlessVmScanningEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Agentless VM Scanning Enabled",
+          "description": "Enable or disable the Agentless VM Scanning add-on feature"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isEntraPermissionsManagementEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Permissions Management Enabled",
+          "description": "Enable or disable the Permissions Management add-on feature"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "CloudPosture",
+          "deploymentScope": "subscription",
+          "existenceScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Security/pricings/pricingTier",
+                "equals": "Standard"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "SensitiveDataDiscovery"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isSensitiveDataDiscoveryEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "ContainerRegistriesVulnerabilityAssessments"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "AgentlessDiscoveryForKubernetes"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "AgentlessVmScanning"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isAgentlessVmScanningEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "EntraPermissionsManagement"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isEntraPermissionsManagementEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              }
+            ]
+          },
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "isSensitiveDataDiscoveryEnabled": {
+                  "value": "[parameters('isSensitiveDataDiscoveryEnabled')]"
+                },
+                "isContainerRegistriesVulnerabilityAssessmentsEnabled": {
+                  "value": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                },
+                "isAgentlessDiscoveryForKubernetesEnabled": {
+                  "value": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                },
+                "isAgentlessVmScanningEnabled": {
+                  "value": "[parameters('isAgentlessVmScanningEnabled')]"
+                },
+                "isEntraPermissionsManagementEnabled": {
+                  "value": "[parameters('isEntraPermissionsManagementEnabled')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "isSensitiveDataDiscoveryEnabled": {
+                    "type": "String"
+                  },
+                  "isContainerRegistriesVulnerabilityAssessmentsEnabled": {
+                    "type": "String"
+                  },
+                  "isAgentlessDiscoveryForKubernetesEnabled": {
+                    "type": "String"
+                  },
+                  "isAgentlessVmScanningEnabled": {
+                    "type": "String"
+                  },
+                  "isEntraPermissionsManagementEnabled": {
+                    "type": "String"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2023-01-01",
+                    "name": "CloudPosture",
+                    "properties": {
+                      "pricingTier": "Standard",
+                      "extensions": [
+                        {
+                          "name": "SensitiveDataDiscovery",
+                          "isEnabled": "[parameters('isSensitiveDataDiscoveryEnabled')]"
+                        },
+                        {
+                          "name": "ContainerRegistriesVulnerabilityAssessments",
+                          "isEnabled": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                        },
+                        {
+                          "name": "AgentlessDiscoveryForKubernetes",
+                          "isEnabled": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                        },
+                        {
+                          "name": "AgentlessVmScanning",
+                          "isEnabled": "[parameters('isAgentlessVmScanningEnabled')]"
+                        },
+                        {
+                          "name": "EntraPermissionsManagement",
+                          "isEnabled": "[parameters('isEntraPermissionsManagementEnabled')]"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/72f8cee7-2937-403d-84a1-a4e3e57f3c21",
+  "name": "72f8cee7-2937-403d-84a1-a4e3e57f3c21"
+}

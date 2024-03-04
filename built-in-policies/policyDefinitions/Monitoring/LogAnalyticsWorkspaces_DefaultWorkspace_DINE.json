@@ -1,0 +1,242 @@
+{
+  "properties": {
+    "displayName": "Configure Log Analytics workspace and automation account to centralize logs and monitoring",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Deploy resource group containing Log Analytics workspace and linked automation account to centralize logs and monitoring. The automation account is aprerequisite for solutions like Updates and Change Tracking.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Monitoring"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "rgName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "rgName",
+          "description": "Provide name for resource group"
+        },
+        "defaultValue": "CentralRG"
+      },
+      "workspaceName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "workspaceName",
+          "description": "Provide name for log analytics workspace"
+        },
+        "defaultValue": "CentralWorkspace"
+      },
+      "workspaceRegion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "workspaceRegion",
+          "description": "Enter Azure region for Log Analytics workspace",
+          "strongType": "location"
+        }
+      },
+      "sku": {
+        "type": "String",
+        "metadata": {
+          "displayName": "sku",
+          "description": "Select pricing tier. Legacy tiers (Free, Standalone, PerNode, Standard or Premium) are not available to all customers"
+        },
+        "allowedValues": [
+          "pergb2018",
+          "Free",
+          "Standalone",
+          "PerNode",
+          "Standard",
+          "Premium"
+        ],
+        "defaultValue": "pergb2018"
+      },
+      "dataRetention": {
+        "type": "String",
+        "metadata": {
+          "displayName": "dataRetention",
+          "description": "Enter the retention period in workspace, can be between 7 to 730 days. Billing is per 30 days at the minimum even when retention is shorter"
+        },
+        "defaultValue": "30"
+      },
+      "automationAccountName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "automationAccountName",
+          "description": "Provide name for automation account"
+        },
+        "defaultValue": "CentralAutomationAccount"
+      },
+      "automationRegion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "automationRegion",
+          "description": "Select Azure region for automation account",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Select DeployIfNotExists to deploy central Log Analytics workspace, Audit or Disable to disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.OperationalInsights/workspaces",
+          "name": "[parameters('workspaceName')]",
+          "ResourceGroupName": "[parameters('rgName')]",
+          "existenceScope": "resourcegroup",
+          "deploymentScope": "Subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "location": "West Central US",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "rgName": {
+                  "value": "[parameters('rgName')]"
+                },
+                "workspaceName": {
+                  "value": "[parameters('workspaceName')]"
+                },
+                "workspaceRegion": {
+                  "value": "[parameters('workspaceRegion')]"
+                },
+                "dataRetention": {
+                  "value": "[parameters('dataRetention')]"
+                },
+                "sku": {
+                  "value": "[parameters('sku')]"
+                },
+                "automationAccountName": {
+                  "value": "[parameters('automationAccountName')]"
+                },
+                "automationRegion": {
+                  "value": "[parameters('automationRegion')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "rgName": {
+                    "type": "String"
+                  },
+                  "workspaceName": {
+                    "type": "String"
+                  },
+                  "workspaceRegion": {
+                    "type": "String"
+                  },
+                  "dataRetention": {
+                    "type": "String"
+                  },
+                  "sku": {
+                    "type": "String"
+                  },
+                  "automationAccountName": {
+                    "type": "String"
+                  },
+                  "automationRegion": {
+                    "type": "String"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/resourceGroups",
+                    "apiVersion": "2020-06-01",
+                    "name": "[parameters('rgName')]",
+                    "location": "[parameters('workspaceRegion')]",
+                    "properties": {}
+                  },
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2021-04-01",
+                    "name": "log-analytics",
+                    "resourceGroup": "[parameters('rgName')]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+                    ],
+                    "properties": {
+                      "mode": "Incremental",
+                      "template": {
+                        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {},
+                        "variables": {},
+                        "resources": [
+                          {
+                            "apiversion": "2015-10-31",
+                            "location": "[parameters('AutomationRegion')]",
+                            "name": "[parameters('AutomationAccountName')]",
+                            "type": "Microsoft.Automation/automationAccounts",
+                            "comments": "Automation account for Log Analytics workapce",
+                            "properties": {
+                              "sku": {
+                                "name": "OMS"
+                              }
+                            }
+                          },
+                          {
+                            "apiVersion": "2020-08-01",
+                            "location": "[parameters('workspaceRegion')]",
+                            "name": "[parameters('workspaceName')]",
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "properties": {
+                              "sku": {
+                                "name": "[parameters('sku')]"
+                              },
+                              "retentionInDays": "[parameters('dataRetention')]",
+                              "enableLogAccessUsingOnlyResourcePermissions": true
+                            },
+                            "resources": [
+                              {
+                                "name": "Automation",
+                                "type": "linkedServices",
+                                "apiVersion": "2020-08-01",
+                                "properties": {
+                                  "resourceId": "[concat(subscription().id, '/resourceGroups/', parameters('rgName'), '/providers/Microsoft.Automation/automationAccounts/', parameters('AutomationAccountName'))]"
+                                },
+                                "dependsOn": [
+                                  "[parameters('workspaceName')]",
+                                  "[parameters('AutomationAccountName')]"
+                                ]
+                              }
+                            ]
+                          }
+                        ],
+                        "outputs": {}
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8e3e61b3-0b32-22d5-4edf-55f87fdb5955",
+  "name": "8e3e61b3-0b32-22d5-4edf-55f87fdb5955"
+}

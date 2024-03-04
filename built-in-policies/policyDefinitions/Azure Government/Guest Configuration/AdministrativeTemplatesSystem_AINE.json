@@ -1,0 +1,289 @@
+{
+  "properties": {
+    "displayName": "Windows machines should meet requirements for 'Administrative Templates - System'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Windows machines should have the specified Group Policy settings in the category 'Administrative Templates - System' for settings that control the administrative experience and Remote Assistance. This policy requires that the Guest Configuration prerequisites have been deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "2.0.0",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "AzureBaseline_AdministrativeTemplatesSystem",
+        "version": "1.*",
+        "configurationParameter": {
+          "AlwaysUseClassicLogon": "Always use classic logon;ExpectedValue",
+          "BootStartDriverInitializationPolicy": "Boot-Start Driver Initialization Policy;ExpectedValue",
+          "EnableWindowsNTPClient": "Enable Windows NTP Client;ExpectedValue",
+          "TurnOnConveniencePINSignin": "Turn on convenience PIN sign-in;ExpectedValue"
+        }
+      }
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "AlwaysUseClassicLogon": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Always use classic logon",
+          "description": "Specifies whether to force the user to log on to the computer using the classic logon screen. This setting only works when the computer is not on a domain."
+        },
+        "defaultValue": "0"
+      },
+      "BootStartDriverInitializationPolicy": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Boot-Start Driver Initialization Policy",
+          "description": "Specifies which boot-start drivers are initialized based on a classification determined by an Early Launch Antimalware boot-start driver."
+        },
+        "defaultValue": "3"
+      },
+      "EnableWindowsNTPClient": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Enable Windows NTP Client",
+          "description": "Specifies whether the Windows NTP Client is enabled. Enabling the Windows NTP Client allows your computer to synchronize its computer clock with other NTP servers."
+        },
+        "defaultValue": "1"
+      },
+      "TurnOnConveniencePINSignin": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Turn on convenience PIN sign-in",
+          "description": "Specifies whether a domain user can sign in using a convenience PIN."
+        },
+        "defaultValue": "0"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsDesktop",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "2008*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "notLike": "SQL2008*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "dsvm-windows"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                            "exists": "true"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "exists": "false"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "notLike": "2008*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "notLike": "SQL2008*"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "value": "[parameters('IncludeArcMachines')]",
+                "equals": "true"
+              },
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "windows*"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "AzureBaseline_AdministrativeTemplatesSystem",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                "equals": "Compliant"
+              },
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+                "equals": "[base64(concat('Always use classic logon;ExpectedValue', '=', parameters('AlwaysUseClassicLogon'), ',', 'Boot-Start Driver Initialization Policy;ExpectedValue', '=', parameters('BootStartDriverInitializationPolicy'), ',', 'Enable Windows NTP Client;ExpectedValue', '=', parameters('EnableWindowsNTPClient'), ',', 'Turn on convenience PIN sign-in;ExpectedValue', '=', parameters('TurnOnConveniencePINSignin')))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/968410dc-5ca0-4518-8a5b-7b55f0530ea9",
+  "name": "968410dc-5ca0-4518-8a5b-7b55f0530ea9"
+}

@@ -1,0 +1,98 @@
+{
+  "properties": {
+    "displayName": "Resource logs in Logic Apps should be enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit enabling of resource logs. This enables you to recreate activity trails to use for investigation purposes; when a security incident occurs or when your network is compromised",
+    "metadata": {
+      "version": "5.1.0",
+      "category": "Logic Apps"
+    },
+    "version": "5.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "requiredRetentionDays": {
+        "type": "String",
+        "defaultValue": "365",
+        "metadata": {
+          "displayName": "Required retention (days)",
+          "description": "The required resource logs retention in days"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Logic/workflows"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "existenceCondition": {
+            "count": {
+              "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+              "where": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                        "equals": "true"
+                      },
+                      {
+                        "value": "[padLeft(current('Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.days'), 3, '0')]",
+                        "greaterOrEquals": "[padLeft(parameters('requiredRetentionDays'), 3, '0')]"
+                      },
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                        "equals": "true"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                        "equals": "true"
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/logs[*].retentionPolicy.enabled",
+                            "notEquals": "true"
+                          },
+                          {
+                            "field": "Microsoft.Insights/diagnosticSettings/storageAccountId",
+                            "exists": false
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        }
+      }
+    },
+    "versions": [
+      "5.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/34f95f76-5386-4de7-b824-0d8478470c9d",
+  "name": "34f95f76-5386-4de7-b824-0d8478470c9d"
+}

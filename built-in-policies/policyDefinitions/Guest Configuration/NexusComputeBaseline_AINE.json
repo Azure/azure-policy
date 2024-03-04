@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Nexus Compute Machines should meet Security Baseline",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Utilizes the Azure Policy Guest Configuration agent for auditing. This policy ensures that machines adhere to the Nexus compute security baseline, encompassing various recommendations designed to fortify machines against a range of vulnerabilities and unsafe configurations (Linux only).",
+    "metadata": {
+      "version": "1.1.0-preview",
+      "category": "Guest Configuration",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "NexusLinuxBaseline",
+        "version": "1.*"
+      }
+    },
+    "version": "1.1.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "linux*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "NexusLinuxBaseline",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+            "equals": "Compliant"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.1.0-PREVIEW",
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ec2c1bce-5ad3-4b07-bb4f-e041410cd8db",
+  "name": "ec2c1bce-5ad3-4b07-bb4f-e041410cd8db"
+}

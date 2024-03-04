@@ -1,0 +1,167 @@
+{
+  "properties": {
+    "displayName": "Configure diagnostic settings for Azure Network Security Groups to Log Analytics workspace",
+    "description": "Deploy diagnostic settings to Azure Network Security Groups to stream resource logs to a Log Analytics workspace.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "diagnosticsSettingNameToUse": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Setting name",
+          "description": "Name of the policy for the diagnostics settings."
+        },
+        "defaultValue": "setByPolicy"
+      },
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Select the Log Analytics workspace from dropdown list",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      },
+      "NetworkSecurityGroupEventEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "NetworkSecurityGroupEvent - Enabled",
+          "description": "Whether to stream NetworkSecurityGroupEvent logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      },
+      "NetworkSecurityGroupRuleCounterEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "NetworkSecurityGroupRuleCounter - Enabled",
+          "description": "Whether to stream NetworkSecurityGroupRuleCounter logs to the Log Analytics workspace - True or False"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Network/networkSecurityGroups"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+            "equals": "[parameters('logAnalytics')]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "diagnosticsSettingNameToUse": {
+                    "type": "string"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityGroupEventEnabled": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityGroupRuleCounterEnabled": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings",
+                    "apiVersion": "2017-05-01-preview",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticsSettingNameToUse'))]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [],
+                    "properties": {
+                      "workspaceId": "[parameters('logAnalytics')]",
+                      "metrics": [],
+                      "logs": [
+                        {
+                          "category": "NetworkSecurityGroupEvent",
+                          "enabled": "[parameters('NetworkSecurityGroupEventEnabled')]"
+                        },
+                        {
+                          "category": "NetworkSecurityGroupRuleCounter",
+                          "enabled": "[parameters('NetworkSecurityGroupRuleCounterEnabled')]"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "outputs": {}
+              },
+              "parameters": {
+                "diagnosticsSettingNameToUse": {
+                  "value": "[parameters('diagnosticsSettingNameToUse')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "NetworkSecurityGroupEventEnabled": {
+                  "value": "[parameters('NetworkSecurityGroupEventEnabled')]"
+                },
+                "NetworkSecurityGroupRuleCounterEnabled": {
+                  "value": "[parameters('NetworkSecurityGroupRuleCounterEnabled')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/98a2e215-5382-489e-bd29-32e7190a39ba",
+  "name": "98a2e215-5382-489e-bd29-32e7190a39ba"
+}

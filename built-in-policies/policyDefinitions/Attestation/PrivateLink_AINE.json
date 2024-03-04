@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Azure Attestation providers should use private endpoints",
+    "description": "Private endpoints provide a way to connect Azure Attestation providers to your Azure resources without sending traffic over the public internet. By preventing public access, private endpoints help protect against undesired anonymous access.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Attestation"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Attestation/attestationProviders"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Attestation/attestationProviders/privateEndpointConnections",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Attestation/attestationProviders/privateEndpointConnections/privateEndpoint",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.Attestation/attestationProviders/privateEndpointConnections/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.Attestation/attestationProviders/privateEndpointConnections/privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7b256a2d-058b-41f8-bed9-3f870541c40a",
+  "name": "7b256a2d-058b-41f8-bed9-3f870541c40a"
+}

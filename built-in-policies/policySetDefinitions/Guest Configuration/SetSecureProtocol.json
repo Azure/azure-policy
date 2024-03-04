@@ -1,0 +1,101 @@
+{
+  "properties": {
+    "displayName": "Configure secure communication protocols(TLS 1.1 or TLS 1.2) on Windows machine(including prerequisites)",
+    "policyType": "BuiltIn",
+    "description": "Creates a Guest Configuration assignment(including prerequisites) to configure specified secure protocol version(TLS 1.1 or TLS 1.2) on Windows machine. For details, visit https://aka.ms/SetSecureProtocol",
+    "metadata": {
+      "category": "Guest Configuration",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "MinimumServerTLSVersion": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Minimum Server TLS version",
+          "description": "The minimum server TLS protocol version that should be enabled. Windows servers with lower server TLS versions will be set to desired version.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ],
+        "defaultValue": "1.2"
+      },
+      "MinimumClientTLSVersion": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Minimum Client TLS version",
+          "description": "The minimum client TLS protocol version that should be enabled. Windows servers with lower client TLS versions will be set to desired version.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ],
+        "defaultValue": "1.2"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f40c7c00-b4e3-4068-a315-5fe81347a904",
+        "definitionVersion": "2.*.*-preview",
+        "policyDefinitionReferenceId": "Prerequisite_AddUserIdentity"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/385f5831-96d4-41db-9a3c-cd3af78aaae6",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "Prerequisite_DeployExtensionWindows"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/828ba269-bf7f-4082-83dd-633417bc391d",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "GuestConfiguration_SetSecureProtocol",
+        "parameters": {
+          "MinimumServerTLSVersion": {
+            "value": "[parameters('MinimumServerTLSVersion')]"
+          },
+          "MinimumClientTLSVersion": {
+            "value": "[parameters('MinimumClientTLSVersion')]"
+          },
+          "IncludeArcMachines": {
+            "value": "[parameters('IncludeArcMachines')]"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/ee6f9c39-ca6c-4937-b5b7-f6d9775a6f17",
+  "name": "ee6f9c39-ca6c-4937-b5b7-f6d9775a6f17"
+}

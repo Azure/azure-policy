@@ -1,0 +1,141 @@
+{
+  "properties": {
+    "displayName": "Configure Log Analytics extension on Azure Arc enabled Linux servers. See deprecation notice below",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable VM insights on servers and machines connected to Azure through Arc enabled servers by installing the Log Analytics virtual machine extension. VM insights uses the Log Analytics agent to collect the guest OS performance data, and provides insights into their performance. See more - https://aka.ms/vminsightsdocs. Deprecation notice: The Log Analytics agent is on a deprecation path and won't be supported after August 31, 2024. You must migrate to the replacement 'Azure Monitor agent' prior to that date",
+    "metadata": {
+      "version": "2.1.1",
+      "category": "Monitoring"
+    },
+    "version": "2.1.1",
+    "parameters": {
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Specify the Log Analytics workspace the agent should be connected to. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      },
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "equals": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "OmsAgentForLinux"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "notEquals": "Failed"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "vmExtensionName": "OMSAgentForLinux",
+                  "vmExtensionPublisher": "Microsoft.EnterpriseCloud.Monitoring",
+                  "vmExtensionType": "OmsAgentForLinux"
+                },
+                "resources": [
+                  {
+                    "name": "[concat(parameters('vmName'), '/', variables('vmExtensionName'))]",
+                    "type": "Microsoft.HybridCompute/machines/extensions",
+                    "location": "[parameters('location')]",
+                    "apiVersion": "2019-12-12",
+                    "properties": {
+                      "publisher": "[variables('vmExtensionPublisher')]",
+                      "type": "[variables('vmExtensionType')]",
+                      "settings": {
+                        "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]",
+                        "stopOnMultipleConnections": "true"
+                      },
+                      "protectedSettings": {
+                        "workspaceKey": "[listKeys(parameters('logAnalytics'), '2015-03-20').primarySharedKey]"
+                      }
+                    }
+                  }
+                ],
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Enabled extension for VM', ': ', parameters('vmName'))]"
+                  }
+                }
+              },
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.1.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9d2b61b4-1d14-4a63-be30-d4498e7ad2cf",
+  "name": "9d2b61b4-1d14-4a63-be30-d4498e7ad2cf"
+}

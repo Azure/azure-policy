@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Azure SignalR Service should enable diagnostic logs",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit enabling of diagnostic logs. This enables you to recreate activity trails to use for investigation purposes; when a security incident occurs or when your network is compromised",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SignalR"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.SignalRService/SignalR"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "existenceCondition": {
+            "count": {
+              "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+              "where": {
+                "field": "Microsoft.Insights/diagnosticSettings/logs.enabled",
+                "equals": "true"
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d9f1f9a9-8795-49f9-9e7b-e11db14caeb2",
+  "name": "d9f1f9a9-8795-49f9-9e7b-e11db14caeb2"
+}

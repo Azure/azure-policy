@@ -1,0 +1,112 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Defender for Servers to be disabled for resources (resource level) with the selected tag",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Defender for Servers provides real-time threat protection for server workloads and generates hardening recommendations as well as alerts about suspicious activities. This policy will disable the Defender for Servers plan for all resources (VMs, VMSSs and ARC Machines) that have the selected tag name and tag value(s).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center - Granular Pricing"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "inclusionTagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Inclusion Tag Name",
+          "description": "Name of the tag to use for including resources in the scope of this policy. This should be used along with the Inclusion Tag Value parameter."
+        },
+        "defaultValue": ""
+      },
+      "inclusionTagValues": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Inclusion Tag Values",
+          "description": "Value of the tag to use for including resources in the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Inclusion Tag Name parameter."
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Compute/virtualMachineScaleSets",
+              "Microsoft.HybridCompute/machines"
+            ]
+          },
+          {
+            "field": "[concat('tags[', parameters('inclusionTagName'), ']')]",
+            "in": "[parameters('inclusionTagValues')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "VirtualMachines",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.Security/pricings/pricingTier",
+            "equals": "Free"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "fullResourceName": {
+                  "value": "[field('id')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "fullResourceName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2024-01-01",
+                    "scope": "[parameters('fullResourceName')]",
+                    "name": "VirtualMachines",
+                    "properties": {
+                      "pricingTier": "Free"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/080fedce-9d4a-4d07-abf0-9f036afbc9c8",
+  "name": "080fedce-9d4a-4d07-abf0-9f036afbc9c8"
+}

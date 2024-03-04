@@ -1,0 +1,170 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Arc Private Link Scopes to use private DNS zones",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use private DNS zones to override the DNS resolution for a private endpoint. A private DNS zone links to your virtual network to resolve to Azure Arc Private Link Scopes. Learn more at: https://aka.ms/arc/privatelink.",
+    "metadata": {
+      "version": "1.2.0",
+      "category": "Azure Arc"
+    },
+    "version": "1.2.0",
+    "parameters": {
+      "privateDnsZoneIDForGuestConfiguration": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private DNS Zone ID for privatelink.guestconfiguration.azure.com",
+          "description": "The private DNS zone ID used to resolve a private DNS Zone to the Guest Configuration service.",
+          "strongType": "Microsoft.Network/privateDnsZones",
+          "assignPermissions": true
+        }
+      },
+      "privateDnsZoneIDForHybridResourceProvider": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private DNS Zone ID for privatelink.his.arc.azure.com",
+          "description": "The private DNS zone ID used to resolve a private DNS Zone to the Azure Arc metadata and identity service.",
+          "strongType": "Microsoft.Network/privateDnsZones",
+          "assignPermissions": true
+        }
+      },
+      "privateDnsZoneIDForKubernetesConfiguration": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private DNS Zone ID for privatelink.dp.kubernetesconfiguration.azure.com",
+          "description": "The private DNS zone ID used to resolve a private DNS Zone to the Kubernetes Configuration service.",
+          "strongType": "Microsoft.Network/privateDnsZones",
+          "assignPermissions": true
+        },
+        "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/privateEndpoints"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].privateLinkServiceId",
+                    "contains": "Microsoft.HybridCompute/privateLinkScopes"
+                  },
+                  {
+                    "field": "Microsoft.Network/privateEndpoints/privateLinkServiceConnections[*].groupIds[*]",
+                    "equals": "hybridcompute"
+                  }
+                ]
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "privateDnsZoneIDForGuestConfiguration": {
+                    "type": "string"
+                  },
+                  "privateDnsZoneIDForHybridResourceProvider": {
+                    "type": "string"
+                  },
+                  "privateDnsZoneIDForKubernetesConfiguration": {
+                    "type": "string"
+                  },
+                  "privateEndpointName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[concat(parameters('privateEndpointName'), '/deployedByPolicy')]",
+                    "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+                    "apiVersion": "2020-03-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "privateDnsZoneConfigs": [
+                        {
+                          "name": "privatelink-guestconfiguration-azure-com",
+                          "properties": {
+                            "privateDnsZoneId": "[parameters('privateDnsZoneIDForGuestConfiguration')]"
+                          }
+                        },
+                        {
+                          "name": "privatelink-his-arc-azure-com",
+                          "properties": {
+                            "privateDnsZoneId": "[parameters('privateDnsZoneIDForHybridResourceProvider')]"
+                          }
+                        },
+                        {
+                          "name": "privatelink-dp-kubernetesconfiguration-azure-com",
+                          "properties": {
+                            "privateDnsZoneId": "[parameters('privateDnsZoneIDForKubernetesConfiguration')]"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "privateDnsZoneIDForGuestConfiguration": {
+                  "value": "[parameters('privateDnsZoneIDForGuestConfiguration')]"
+                },
+                "privateDnsZoneIDForHybridResourceProvider": {
+                  "value": "[parameters('privateDnsZoneIDForHybridResourceProvider')]"
+                },
+                "privateDnsZoneIDForKubernetesConfiguration": {
+                  "value": "[parameters('privateDnsZoneIDForKubernetesConfiguration')]"
+                },
+                "privateEndpointName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.2.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/55c4db33-97b0-437b-8469-c4f4498f5df9",
+  "name": "55c4db33-97b0-437b-8469-c4f4498f5df9"
+}

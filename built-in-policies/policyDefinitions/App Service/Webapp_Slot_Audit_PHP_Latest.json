@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "App Service app slots that use PHP should use a specified 'PHP version'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for PHP software either due to security flaws or to include additional functionality. Using the latest PHP version for App Service apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. This policy only applies to Linux apps. This policy requires you to specify a PHP version that meets your requirements.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      },
+      "LinuxPHPVersion": {
+        "type": "String",
+        "defaultValue": "",
+        "metadata": {
+          "displayName": "Linux PHP version",
+          "description": "Specify a supported PHP version for App Service"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/slots/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/slots/config/web.linuxFxVersion",
+                "notContains": "PHP"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/config/web.linuxFxVersion",
+                "equals": "[concat('PHP|', parameters('LinuxPHPVersion'))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f466b2a6-823d-470d-8ea5-b031e72d79ae",
+  "name": "f466b2a6-823d-470d-8ea5-b031e72d79ae"
+}

@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "Azure Virtual Desktop service should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Using Azure Private Link with your Azure Virtual Desktop resources can improve security and keep your data safe. Learn more about private links at: https://aka.ms/avdprivatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Desktop Virtualization"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.DesktopVirtualization/hostpools"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.DesktopVirtualization/hostpools/privateEndpointConnections[*]",
+                  "where": {
+                    "field": "Microsoft.DesktopVirtualization/hostpools/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                    "equals": "Approved"
+                  }
+                },
+                "less": 1
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.DesktopVirtualization/workspaces"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections[*]",
+                  "where": {
+                    "field": "Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                    "equals": "Approved"
+                  }
+                },
+                "less": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ca950cd7-02f7-422e-8c23-91ff40f169c1",
+  "name": "ca950cd7-02f7-422e-8c23-91ff40f169c1"
+}

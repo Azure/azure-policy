@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Synapse Workspace Dedicated SQL minimum TLS version",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Customers can raise or lower the minimal TLS version using the API, for both new Synapse workspaces or existing workspaces. So users who need to use a lower client version in the workspaces can connect while users who has security requirement can raise the minimum TLS version. Learn more at: https://docs.microsoft.com/azure/synapse-analytics/security/connectivity-settings.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Synapse"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Synapse/workspaces/dedicatedSQLminimalTlsSettings"
+          },
+          {
+            "field": "Microsoft.Synapse/workspaces/dedicatedSQLminimalTlsSettings/minimalTlsVersion",
+            "notEquals": "1.2"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Synapse/workspaces/dedicatedSQLminimalTlsSettings/minimalTlsVersion",
+              "value": "1.2"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8b5c654c-fb07-471b-aa8f-15fea733f140",
+  "name": "8b5c654c-fb07-471b-aa8f-15fea733f140"
+}

@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "Synapse workspaces with SQL auditing to storage account destination should be configured with 90 days retention or higher",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "For incident investigation purposes, we recommend setting the data retention for your Synapse workspace' SQL auditing to storage account destination to at least 90 days. Confirm that you are meeting the necessary retention rules for the regions in which you are operating. This is sometimes required for compliance with regulatory standards.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Synapse"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Synapse/workspaces"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Synapse/workspaces/auditingSettings",
+          "name": "default",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Synapse/workspaces/auditingSettings/isAzureMonitorTargetEnabled",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.Synapse/workspaces/auditingSettings/storageEndpoint",
+                    "equals": ""
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Synapse/workspaces/auditingSettings/retentionDays",
+                "equals": 0
+              },
+              {
+                "field": "Microsoft.Synapse/workspaces/auditingSettings/retentionDays",
+                "greaterOrEquals": 90
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/529ea018-6afc-4ed4-95bd-7c9ee47b00bc",
+  "name": "529ea018-6afc-4ed4-95bd-7c9ee47b00bc"
+}

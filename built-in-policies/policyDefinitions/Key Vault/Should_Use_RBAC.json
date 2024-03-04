@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Azure Key Vault should use RBAC permission model",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable RBAC permission model across Key Vaults. Learn more at: https://learn.microsoft.com/en-us/azure/key-vault/general/rbac-migration",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Key Vault"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "not": {
+              "field": "Microsoft.KeyVault/vaults/createMode",
+              "equals": "recover"
+            }
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/enableRbacAuthorization",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.KeyVault/vaults/enableRbacAuthorization",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1",
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/12d4fa5e-1f9f-4c21-97a9-b99b3c6611b5",
+  "name": "12d4fa5e-1f9f-4c21-97a9-b99b3c6611b5"
+}

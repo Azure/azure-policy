@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "Azure Attestation providers should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To improve the security of Azure Attestation Service, ensure that it isn't exposed to the public internet and can only be accessed from a private endpoint. Disable the public network access property as described in aka.ms/azureattestation. This option disables access from any public address space outside the Azure IP range, and denies all logins that match IP or virtual network-based firewall rules. This reduces data leakage risks.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Attestation"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Attestation/attestationProviders"
+          },
+          {
+            "field": "Microsoft.Attestation/attestationProviders/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5e7e928c-8693-4a23-9bf3-1c77b9a8fe97",
+  "name": "5e7e928c-8693-4a23-9bf3-1c77b9a8fe97"
+}

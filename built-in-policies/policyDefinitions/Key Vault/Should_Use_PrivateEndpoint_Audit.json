@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "Azure Key Vaults should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to key vault, you can reduce data leakage risks. Learn more about private links at: https://aka.ms/akvprivatelink.",
+    "metadata": {
+      "version": "1.2.1",
+      "category": "Key Vault"
+    },
+    "version": "1.2.1",
+    "parameters": {
+      "audit_effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The Deny effect has been deprecated for this policy given that the simultaneous creation of a Key Vault and its associated private endpoint is not possible. Therefore, Deny prevents the creation of any new Key Vault.",
+          "deprecated": true
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "count": {
+              "field": "Microsoft.KeyVault/vaults/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.KeyVault/vaults/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('audit_effect')]"
+      }
+    },
+    "versions": [
+      "1.2.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a6abeaec-4d90-4a02-805f-6b26c4d3fbe9",
+  "name": "a6abeaec-4d90-4a02-805f-6b26c4d3fbe9"
+}

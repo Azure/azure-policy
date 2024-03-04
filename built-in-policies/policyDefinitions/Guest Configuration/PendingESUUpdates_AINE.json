@@ -1,0 +1,73 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Extended Security Updates should be installed on Windows Server 2012 Arc machines.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Windows Server 2012 Arc machines should have installed all the Extended Security Updates released by Microsoft. This policy requires that the Guest Configuration prerequisites have been deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "PendingESUUpdates",
+        "version": "1.*"
+      },
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/licenseProfile.esuProfile.licenseAssignmentState",
+            "equals": "Assigned"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "PendingESUUpdates",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                "equals": "Compliant"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/14b4e776-9fab-44b0-b53f-38d2458ea8be",
+  "name": "14b4e776-9fab-44b0-b53f-38d2458ea8be"
+}

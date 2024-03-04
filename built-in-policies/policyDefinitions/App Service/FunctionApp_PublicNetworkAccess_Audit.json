@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "Function apps should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access improves security by ensuring that the Function app is not exposed on the public internet. Creating private endpoints can limit exposure of a Function App. Learn more at: https://aka.ms/app-service-private-endpoint.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/publicNetworkAccess",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Web/sites/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/969ac98b-88a8-449f-883c-2e9adb123127",
+  "name": "969ac98b-88a8-449f-883c-2e9adb123127"
+}

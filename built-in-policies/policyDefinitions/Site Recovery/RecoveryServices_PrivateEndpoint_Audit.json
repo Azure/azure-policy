@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Recovery Services vaults should use private link",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Azure Recovery Services vaults, data leakage risks are reduced. Learn more about private links for Azure Site Recovery at: https://aka.ms/HybridScenarios-PrivateLink and https://aka.ms/AzureToAzure-PrivateLink.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Site Recovery",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/vaults"
+          },
+          {
+            "count": {
+              "field": "Microsoft.RecoveryServices/vaults/privateEndpointConnections[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.RecoveryServices/vaults/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                    "equals": "Approved"
+                  },
+                  {
+                    "field": "Microsoft.RecoveryServices/vaults/privateEndpointConnections[*].provisioningState",
+                    "equals": "Succeeded"
+                  },
+                  {
+                    "field": "Microsoft.RecoveryServices/vaults/privateEndpointConnections[*].id",
+                    "contains": "SiteRecovery"
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/11e3da8c-1d68-4392-badd-0ff3c43ab5b0",
+  "name": "11e3da8c-1d68-4392-badd-0ff3c43ab5b0"
+}

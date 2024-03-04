@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Cognitive Services accounts should use a managed identity",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Assigning a managed identity to your Cognitive Service account helps ensure secure authentication. This identity is used by this Cognitive service account to communicate with other Azure services, like Azure Key Vault, in a secure way without you having to manage any credentials.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cognitive Services"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices/accounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "identity.type",
+                "exists": "false"
+              },
+              {
+                "field": "identity.type",
+                "equals": "None"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fe3fd216-4f83-4fc1-8984-2bbec80a3418",
+  "name": "fe3fd216-4f83-4fc1-8984-2bbec80a3418"
+}

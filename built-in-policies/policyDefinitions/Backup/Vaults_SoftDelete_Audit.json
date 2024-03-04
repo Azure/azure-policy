@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Soft delete should be enabled for Backup Vaults",
+    "description": "This policy audits if soft delete is enabled for Backup vaults in the scope. Soft delete can help you recover your data after it has been deleted. Learn more at https://aka.ms/AB-SoftDelete",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "checkAlwaysOnSoftDeleteOnly": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "CheckAlwaysOnSoftDeleteOnly",
+          "description": "This parameter checks if Soft Delete is 'Locked' for Backup Vaults in scope. Selecting 'true' will mark only vaults with Soft Delete 'AlwaysOn' as compliant. Selecting 'false' will mark vaults that have Soft Delete either 'On' or 'AlwaysOn' as compliant."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataProtection/backupvaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DataProtection/backupVaults/securitySettings.softDeleteSettings.state",
+                "notIn": [
+                  "On",
+                  "AlwaysOn"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('checkAlwaysOnSoftDeleteOnly')]",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.DataProtection/backupVaults/securitySettings.softDeleteSettings.state",
+                    "notEquals": "AlwaysOn"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9798d31d-6028-4dee-8643-46102185c016",
+  "name": "9798d31d-6028-4dee-8643-46102185c016"
+}

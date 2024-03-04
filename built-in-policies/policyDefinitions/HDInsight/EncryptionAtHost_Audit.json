@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Azure HDInsight clusters should use encryption at host to encrypt data at rest",
+    "description": "Enabling encryption at host helps protect and safeguard your data to meet your organizational security and compliance commitments. When you enable encryption at host, data stored on the VM host is encrypted at rest and flows encrypted to the Storage service.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "HDInsight"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HDInsight/clusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.HDInsight/clusters/diskEncryptionProperties.encryptionAtHost",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.HDInsight/clusters/diskEncryptionProperties.encryptionAtHost",
+                "equals": false
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1fd32ebd-e4c3-4e13-a54a-d7422d4d95f6",
+  "name": "1fd32ebd-e4c3-4e13-a54a-d7422d4d95f6"
+}

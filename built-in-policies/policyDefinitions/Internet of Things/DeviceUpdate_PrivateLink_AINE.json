@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Azure Device Update for IoT Hub accounts should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Azure Device Update for IoT Hub accounts, data leakage risks are reduced.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Internet of Things"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DeviceUpdate/accounts"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DeviceUpdate/accounts/privateEndpointConnections",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.DeviceUpdate/accounts/privateEndpointConnections/privateEndpoint",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.DeviceUpdate/accounts/privateEndpointConnections/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.DeviceUpdate/accounts/privateEndpointConnections/privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/27d4c5ec-8820-443f-91fe-1215e96f64b2",
+  "name": "27d4c5ec-8820-443f-91fe-1215e96f64b2"
+}

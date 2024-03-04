@@ -1,0 +1,135 @@
+{
+  "properties": {
+    "displayName": "[Preview]: ChangeTracking extension should be installed on your Windows Arc machine",
+    "description": "Install ChangeTracking Extension on Windows Arc machines to enable File Integrity Monitoring(FIM) in Azure Security Center. FIM examines operating system files, Windows registries, application software, Linux system files, and more, for changes that might indicate an attack. The extension can be installed in virtual machines and locations supported by Azure Monitoring Agent.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Security Center",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ]
+      },
+      "listOfApplicableLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Applicable Locations",
+          "description": "The list of locations where the policy should be applied.",
+          "strongType": "location"
+        },
+        "allowedValues": [
+          "australiasoutheast",
+          "australiaeast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus2euap",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "norwayeast",
+          "southcentralus",
+          "southeastasia",
+          "switzerlandnorth",
+          "uaenorth",
+          "uksouth",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ],
+        "defaultValue": [
+          "australiasoutheast",
+          "australiaeast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus2euap",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "norwayeast",
+          "southcentralus",
+          "southeastasia",
+          "switzerlandnorth",
+          "uaenorth",
+          "uksouth",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "location",
+            "in": "[parameters('listOfApplicableLocations')]"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "ChangeTracking-Windows"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/Publisher",
+                "equals": "Microsoft.Azure.ChangeTrackingAndInventory"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a7f5e735-d212-4c32-9229-d12bffbc7e00",
+  "name": "a7f5e735-d212-4c32-9229-d12bffbc7e00"
+}

@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Function app slots should have 'Client Certificates (Incoming client certificates)' enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Client certificates allow for the app to request a certificate for incoming requests. Only clients with valid certificates will be able to reach the app. This policy has been replaced by a new policy with the same name because Http 2.0 doesn't support client certificates.",
+    "metadata": {
+      "version": "1.1.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/slots/clientCertEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/clientCertEnabled",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0",
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cf9ca02d-383e-4506-a421-258cc1a5300d",
+  "name": "cf9ca02d-383e-4506-a421-258cc1a5300d"
+}

@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Function app slots should require FTPS only",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable FTPS enforcement for enhanced security.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/slots/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/slots/config/ftpsState",
+            "in": [
+              "FtpsOnly",
+              "Disabled"
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e1a09430-221d-4d4c-a337-1edb5a1fa9bb",
+  "name": "e1a09430-221d-4d4c-a337-1edb5a1fa9bb"
+}

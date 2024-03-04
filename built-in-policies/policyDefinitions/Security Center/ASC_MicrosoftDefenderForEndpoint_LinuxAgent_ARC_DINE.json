@@ -1,0 +1,134 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Deploy Microsoft Defender for Endpoint agent on Linux hybrid machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploys Microsoft Defender for Endpoint agent on Linux hybrid machines",
+    "metadata": {
+      "category": "Security Center",
+      "version": "2.0.1-preview",
+      "preview": true
+    },
+    "version": "2.0.1-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osName",
+            "like": "linux*"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/osSku",
+            "notContains": "openshift"
+          },
+          {
+            "field": "tags['MDFCSecurityConnector']",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "name": "MDE.Linux",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/publisher",
+                "equals": "Microsoft.Azure.AzureDefenderForServers"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "MDE.Linux"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "azureResourceId": {
+                  "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.HybridCompute/machines/',field('name'))]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "azureResourceId": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2019-12-12",
+                    "name": "[concat(parameters('vmName'), '/MDE.Linux')]",
+                    "type": "Microsoft.HybridCompute/machines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "publisher": "Microsoft.Azure.AzureDefenderForServers",
+                      "type": "MDE.Linux",
+                      "typeHandlerVersion": "1.0",
+                      "settings": {
+                        "azureResourceId": "[parameters('azureResourceId')]",
+                        "installedBy": "Policy"
+                      },
+                      "protectedSettings": {
+                        "defenderForEndpointOnboardingScript": "[reference(subscriptionResourceId('Microsoft.Security/mdeOnboardings', 'Linux'), '2021-10-01-preview', 'full').properties.onboardingPackageLinux]"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.1-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4eb909e7-6d64-656d-6465-2eeb297a1625",
+  "name": "4eb909e7-6d64-656d-6465-2eeb297a1625"
+}

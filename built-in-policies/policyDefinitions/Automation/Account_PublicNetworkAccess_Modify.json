@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Automation accounts to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for Azure Automation account so that it isn't accessible over the public internet. This configuration helps protect them against data leakage risks. You can limit exposure of the your Automation account resources by creating private endpoints instead. Learn more at: https://aka.ms/privateendpoints.",
+    "metadata": {
+      "category": "Automation",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Automation/automationAccounts"
+          },
+          {
+            "field": "Microsoft.Automation/automationAccounts/publicNetworkAccess",
+            "notEquals": false
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.Automation/automationAccounts/publicNetworkAccess",
+              "value": false
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/23b36a7c-9d26-4288-a8fd-c1d2fa284d8c",
+  "name": "23b36a7c-9d26-4288-a8fd-c1d2fa284d8c"
+}

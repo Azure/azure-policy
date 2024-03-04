@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Ensure that 'HTTP Version' is the latest, if used to run the API app",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for HTTP either due to security flaws or to include additional functionality. Using the latest HTTP version for web apps to take advantage of security fixes, if any, and/or new functionalities of the newer version. We recommend all customers who are still using API Apps to implement the built-in policy called 'App Service apps should use latest 'HTTP Version'', which is scoped to include API apps in addition to Web Apps.",
+    "metadata": {
+      "version": "2.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/web.http20Enabled",
+            "equals": "true"
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/991310cd-e9f3-47bc-b7b6-f57b557d07db",
+  "name": "991310cd-e9f3-47bc-b7b6-f57b557d07db"
+}

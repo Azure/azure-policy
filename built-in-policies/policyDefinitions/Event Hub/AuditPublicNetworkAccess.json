@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "Event Hub Namespaces should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Azure Event Hub should have public network access disabled. Disabling public network access improves security by ensuring that the resource isn't exposed on the public internet. You can limit exposure of your resources by creating private endpoints instead. Learn more at: https://docs.microsoft.com/azure/event-hubs/private-link-service",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Event Hub"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "equals": "Microsoft.EventHub/namespaces/networkRuleSets",
+                "field": "type"
+              },
+              {
+                "notEquals": "Disabled",
+                "field": "Microsoft.EventHub/namespaces/networkRuleSets/publicNetworkAccess"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "equals": "Microsoft.EventHub/namespaces",
+                "field": "type"
+              },
+              {
+                "notEquals": "Disabled",
+                "field": "Microsoft.EventHub/namespaces/publicNetworkAccess"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0602787f-9896-402a-a6e1-39ee63ee435e",
+  "name": "0602787f-9896-402a-a6e1-39ee63ee435e"
+}

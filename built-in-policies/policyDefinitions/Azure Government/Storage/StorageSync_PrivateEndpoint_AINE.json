@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "Azure File Sync should use private link",
+    "description": "Creating a private endpoint for the indicated Storage Sync Service resource allows you to address your Storage Sync Service resource from within the private IP address space of your organization's network, rather than through the internet-accessible public endpoint. Creating a private endpoint by itself does not disable the public endpoint.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.StorageSync/storageSyncServices"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.StorageSync/storageSyncServices/privateEndpointConnections",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.StorageSync/storageSyncServices/privateEndpointConnections/privateEndpoint",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.StorageSync/storageSyncServices/privateEndpointConnections/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.StorageSync/storageSyncServices/privateEndpointConnections/privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1d320205-c6a1-4ac6-873d-46224024e8e2",
+  "name": "1d320205-c6a1-4ac6-873d-46224024e8e2"
+}

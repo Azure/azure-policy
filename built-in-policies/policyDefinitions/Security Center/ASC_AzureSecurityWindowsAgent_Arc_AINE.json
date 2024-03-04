@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Security agent should be installed on your Windows Arc machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Install the Azure Security agent on your Windows Arc machines in order to monitor your machines for security configurations and vulnerabilities. Results of the assessments can seen and managed in Azure Security Center.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "AzureSecurityWindowsAgent"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/Publisher",
+                "equals": "Microsoft.Azure.Security.Monitoring"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0367cfc4-90b3-46ba-a8a6-ddd5d3514878",
+  "name": "0367cfc4-90b3-46ba-a8a6-ddd5d3514878"
+}
