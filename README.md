@@ -66,7 +66,7 @@ Support for requesting aliases is handled by Azure Customer Support. Open a new 
 If you have questions you haven't been able to answer from the [**Azure Policy documentation**](https://docs.microsoft.com/azure/governance/policy), there are a few places that host discussions on Azure Policy:
 
  - [Microsoft Tech Community](https://techcommunity.microsoft.com/) [**Azure Governance conversation space**](https://techcommunity.microsoft.com/t5/Azure-Governance/bd-p/AzureGovernance)
- - Join the Customer Call on Azure Governance (register [here](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbRxn7UD7lweFDnmuLj72r6E1UN1dLNTBZUVMyNVpHUjJLRE5PVDVGNlkyOC4u)) Latest customer call (December) recording can be found [here](https://youtu.be/SboRUcRZqyc)
+ - Join the Customer Call on Azure Governance (register [here](https://forms.office.com/Pages/ResponsePage.aspx?id=v4j5cvGGr0GRqy180BHbRxn7UD7lweFDnmuLj72r6E1UN1dLNTBZUVMyNVpHUjJLRE5PVDVGNlkyOC4u)) 
  - Search old [**issues in this repo**](https://github.com/Azure/azure-policy/issues)
  - Search or add to Azure Policy discussions on [**StackOverflow**](https://stackoverflow.com/questions/tagged/azure-policy+or+azure+policy)
  - Feature request please add or vote on [**Ideas**](https://feedback.azure.com/d365community/forum/675ae472-f324-ec11-b6e6-000d3a4f0da0#) with Category: "Azure Policy"
@@ -123,6 +123,8 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
   - This type does not support LIST API which does not allow for compliance results to be populated.
 Microsoft.Cdn/CdnWebApplicationFirewallPolicies
   - This type does not support LIST API which does not allow for compliance results to be populated.
+Microsoft.EventGrid/eventSubscriptions
+- This type does not support LIST API which does not allow for compliance results to be populated.
 
 
 
