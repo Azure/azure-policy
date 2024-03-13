@@ -1,0 +1,55 @@
+{
+    "properties": {
+      "displayName": "PostgreSQL flexible servers should use customer-managed keys to encrypt data at rest",
+      "policyType": "BuiltIn",
+      "mode": "Indexed",
+      "description": "Use customer-managed keys to manage the encryption at rest of your PostgreSQL flexible servers. By default, the data is encrypted at rest with platform-managed keys, but customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management.",
+      "metadata": {
+        "version": "1.0.0",
+        "category": "SQL"
+      },
+      "version": "1.0.0",
+      "parameters": {
+        "effect": {
+          "type": "string",
+          "defaultValue": "Audit",
+          "allowedValues": [
+            "Audit",
+            "Deny",
+            "Disabled"
+          ],
+          "metadata": {
+            "displayName": "Effect",
+            "description": "Enable or disable the execution of the policy"
+          }
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+            },
+            {
+              "allOf": [
+                {
+                  "field": "Microsoft.DBforPostgreSQL/flexibleServers/dataEncryption.type",
+                  "notEquals": "AzureKeyVault"
+                },
+                {
+                  "field": "Microsoft.DBforPostgreSQL/flexibleServers/dataEncryption.primaryKeyURI",
+                  "exists": "false"
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "[parameters('effect')]"
+        }
+      }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/10eb971a-df79-4e74-89e1-0e9e419cd69a",
+    "name": "10eb971a-df79-4e74-89e1-0e9e419cd69a"
+  }
