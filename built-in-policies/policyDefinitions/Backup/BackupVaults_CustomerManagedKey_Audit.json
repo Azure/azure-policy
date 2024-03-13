@@ -1,0 +1,55 @@
+{
+    "properties": {
+        "displayName": "Azure Backup vaults should use customer-managed keys for encrypting backup data",
+        "description": "Use customer-managed keys to manage the encryption at rest of your backup data. By default, customer data is encrypted with service-managed keys, but customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more at https://aka.ms/AB-CmkEncryption.",
+        "policyType": "BuiltIn",
+        "mode": "Indexed",
+        "metadata": {
+            "version": "1.0.0",
+            "category": "Backup"
+        },
+        "version": "1.0.0",
+        "parameters": {
+            "effect": {
+                "type": "String",
+                "metadata": {
+                    "displayName": "Effect",
+                    "description": "Enable or disable the execution of the policy."
+                },
+                "allowedValues": [
+                    "Audit",
+                    "Deny",
+                    "Disabled"
+                ],
+                "defaultValue": "Audit"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.DataProtection/backupvaults"
+                    },
+                    {
+                        "allOf": [
+                            {
+                                "field": "Microsoft.DataProtection/backupvaults/securitySettings.encryptionSettings.state",
+                                "notEquals": "Enabled"
+                            },
+                            {
+                                "field": "Microsoft.DataProtection/backupvaults/securitySettings.encryptionSettings.keyVaultProperties.keyUri",
+                                "exists": "false"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "then": {
+            "effect": "[parameters('effect')]"
+        }
+    },
+    "id": "/providers/Microsoft.Authorization/policyDefinitions/2f348bcf-2233-4afe-9b83-11799564f991",
+    "name": "2f348bcf-2233-4afe-9b83-11799564f991"
+}
