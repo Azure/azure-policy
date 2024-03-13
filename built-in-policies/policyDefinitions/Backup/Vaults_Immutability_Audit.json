@@ -1,0 +1,82 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Immutability must be enabled for backup vaults",
+    "description": "This policy audits if the immutable vaults property is enabled for Backup vaults in the scope. This helps protect your backup data from being deleted before its intended expiry. Learn more at https://aka.ms/AB-ImmutableVaults.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.1-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.1-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "checkLockedImmutabiltyOnly": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "CheckLockedImmutabiltyOnly",
+          "description": "This parameter checks if Immutability is locked for Backup Vaults in scope. Selecting 'true' will mark only vaults with Immutability 'Locked' as compliant. Selecting 'false' will mark vaults that have Immutability either 'Enabled' or 'Locked' as compliant."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataProtection/backupvaults"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DataProtection/backupVaults/securitySettings.immutabilitySettings.State",
+                "notIn": [
+                  "Locked",
+                  "Unlocked"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('checkLockedImmutabiltyOnly')]",
+                    "equals": true
+                  },
+                  {
+                    "field": "Microsoft.DataProtection/backupVaults/securitySettings.immutabilitySettings.State",
+                    "notEquals": "Locked"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1-PREVIEW",
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2514263b-bc0d-4b06-ac3e-f262c0979018",
+  "name": "2514263b-bc0d-4b06-ac3e-f262c0979018"
+}

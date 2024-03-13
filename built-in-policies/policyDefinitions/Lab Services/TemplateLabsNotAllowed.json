@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Lab Services should not allow template virtual machines for labs",
+    "description": "This policy prevents creation and customization of a template virtual machines for labs managed through Lab Services.",
+    "mode": "Indexed",
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Lab Services"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "excludeLabPlanId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Lab Plan Id to exclude",
+          "description": "Optionally enter the lab Plan Id to exclude for this policy assignment."
+        },
+        "defaultValue": ""
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.LabServices/labs"
+          },
+          {
+            "field": "Microsoft.LabServices/labs/labPlanId",
+            "notEquals": "[parameters('excludeLabPlanId')]"
+          },
+          {
+            "field": "Microsoft.LabServices/labs/virtualMachineProfile.createOption",
+            "equals": "TemplateVM"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e8a5a3eb-1ab6-4657-a701-7ae432cf14e1",
+  "name": "e8a5a3eb-1ab6-4657-a701-7ae432cf14e1"
+}

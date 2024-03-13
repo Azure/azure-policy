@@ -1,0 +1,229 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Deploy Microsoft Defender for Endpoint agent on Windows virtual machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploys Microsoft Defender for Endpoint on applicable Windows VM images.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "2.0.1-preview",
+      "preview": true
+    },
+    "version": "2.0.1-preview",
+    "parameters": {
+      "PublishersToExclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Optional: List Of Image Publishers to exclude",
+          "description": "List of Windows image Publishers to exclude from MDE provision"
+        },
+        "defaultValue": []
+      },
+      "ImageIdsToExclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Optional: List of virtual machine images to exclude",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoImage'"
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+            "like": "Windows*"
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Compute/virtualMachines/imagePublisher",
+                  "in": "[parameters('PublishersToExclude')]"
+                }
+              },
+              {
+                "value": "[empty(parameters('PublishersToExclude'))]",
+                "equals": "true"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.id",
+                  "in": "[parameters('ImageIdsToExclude')]"
+                }
+              },
+              {
+                "value": "[empty(parameters('ImageIdsToExclude'))]",
+                "equals": "true"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "win7"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "win8"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "2008"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "win10"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "windows-10"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "contains": "windows-10"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imagePublisher",
+                      "equals": "MicrosoftWindowsDesktop"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imagePublisher",
+                      "equals": "azureopenshift"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imagePublisher",
+                      "equals": "AzureDatabricks"
+                    }
+                  ]
+                }
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsDesktop"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "contains": "evd"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "MDE.Windows",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.Azure.AzureDefenderForServers"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "equals": "MDE.Windows"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "azureResourceId": {
+                  "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Compute/virtualMachines/',field('name'))]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "azureResourceId": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2020-06-01",
+                    "name": "[concat(parameters('vmName'), '/MDE.Windows')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "publisher": "Microsoft.Azure.AzureDefenderForServers",
+                      "type": "MDE.Windows",
+                      "typeHandlerVersion": "1.0",
+                      "settings": {
+                        "azureResourceId": "[parameters('azureResourceId')]",
+                        "vNextEnabled": "true",
+                        "installedBy": "Policy"
+                      },
+                      "protectedSettings": {
+                        "defenderForEndpointOnboardingScript": "[reference(subscriptionResourceId('Microsoft.Security/mdeOnboardings', 'Windows'), '2021-10-01-preview', 'full').properties.onboardingPackageWindows]"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.1-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1ec9c2c2-6d64-656d-6465-3ec3309b8579",
+  "name": "1ec9c2c2-6d64-656d-6465-3ec3309b8579"
+}

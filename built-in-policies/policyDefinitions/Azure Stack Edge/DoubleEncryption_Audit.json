@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Azure Stack Edge devices should use double-encryption",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To secure the data at rest on the device, ensure it's double-encrypted, the access to data is controlled, and once the device is deactivated, the data is securely erased off the data disks. Double encryption is the use of two layers of encryption: BitLocker XTS-AES 256-bit encryption on the data volumes and built-in encryption of the hard drives. Learn more in the security overview documentation for the specific Stack Edge device.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Azure Stack Edge"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy."
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataBoxEdge/DataBoxEdgeDevices"
+          },
+          {
+            "field": "Microsoft.DataboxEdge/DataBoxEdgeDevices/sku.name",
+            "notIn": [
+              "TEA_1Node",
+              "TEA_1Node_UPS",
+              "TEA_1Node_Heater",
+              "TEA_1Node_UPS_Heater",
+              "TEA_4Node_Heater",
+              "TEA_4Node_UPS_Heater",
+              "TMA",
+              "EdgePR_Base",
+              "EdgePR_Base_UPS",
+              "EdgeMR_Mini"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b4ac1030-89c5-4697-8e00-28b5ba6a8811",
+  "name": "b4ac1030-89c5-4697-8e00-28b5ba6a8811"
+}

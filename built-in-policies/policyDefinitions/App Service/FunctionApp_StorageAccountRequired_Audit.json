@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Function apps should use an Azure file share for its content directory",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "The content directory of a Function app should be located on an Azure file share. The storage account information for the file share must be provided before any publishing activity. To learn more about using Azure Files for hosting app service content refer to https://go.microsoft.com/fwlink/?linkid=2151594.",
+    "metadata": {
+      "version": "3.0.0",
+      "category": "App Service"
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
+            "field": "Microsoft.Web/sites/storageAccountRequired",
+            "equals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4d0bc837-6eff-477e-9ecd-33bf8d4212a5",
+  "name": "4d0bc837-6eff-477e-9ecd-33bf8d4212a5"
+}

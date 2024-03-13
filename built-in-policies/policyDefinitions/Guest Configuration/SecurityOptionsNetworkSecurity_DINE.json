@@ -1,0 +1,422 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Deploy prerequisites to audit Windows VMs configurations in 'Security Options - Network Security'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines with non-compliant settings in Group Policy category: 'Security Options - Network Security'. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "metadata": {
+      "version": "1.2.0-deprecated",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "deprecated": true
+    },
+    "version": "1.2.0",
+    "parameters": {
+      "NetworkSecurityConfigureEncryptionTypesAllowedForKerberos": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network Security: Configure encryption types allowed for Kerberos",
+          "description": "Specifies the encryption types that Kerberos is allowed to use."
+        },
+        "defaultValue": "2147483644"
+      },
+      "NetworkSecurityLANManagerAuthenticationLevel": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network security: LAN Manager authentication level",
+          "description": "Specify which challenge-response authentication protocol is used for network logons. This choice affects the level of authentication protocol used by clients, the level of session security negotiated, and the level of authentication accepted by servers."
+        },
+        "defaultValue": "5"
+      },
+      "NetworkSecurityLDAPClientSigningRequirements": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network security: LDAP client signing requirements",
+          "description": "Specify the level of data signing that is requested on behalf of clients that issue LDAP BIND requests."
+        },
+        "defaultValue": "1"
+      },
+      "NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network security: Minimum session security for NTLM SSP based (including secure RPC) clients",
+          "description": "Specifies which behaviors are allowed by clients for applications using the NTLM Security Support Provider (SSP). The SSP Interface (SSPI) is used by applications that need authentication services. See https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/network-security-minimum-session-security-for-ntlm-ssp-based-including-secure-rpc-servers for more information."
+        },
+        "defaultValue": "537395200"
+      },
+      "NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Network security: Minimum session security for NTLM SSP based (including secure RPC) servers",
+          "description": "Specifies which behaviors are allowed by servers for applications using the NTLM Security Support Provider (SSP). The SSP Interface (SSPI) is used by applications that need authentication services."
+        },
+        "defaultValue": "537395200"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "in": [
+                      "esri",
+                      "incredibuild",
+                      "MicrosoftDynamicsAX",
+                      "MicrosoftSharepoint",
+                      "MicrosoftVisualStudio",
+                      "MicrosoftWindowsDesktop",
+                      "MicrosoftWindowsServerHPCPack"
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftWindowsServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "2008*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "MicrosoftSQLServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "notLike": "SQL2008*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "dsvm-windows"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "in": [
+                          "standard-data-science-vm",
+                          "windows-data-science-vm"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "batch"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "rendering-windows2016"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "center-for-internet-security-inc"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "cis-windows-server-201*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "pivotal"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "bosh-windows-server*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloud-infrastructure-services"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "ad*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                            "exists": "true"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Windows*"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "exists": "false"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "notLike": "2008*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "notLike": "SQL2008*"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.HybridCompute/machines"
+              },
+              {
+                "field": "Microsoft.HybridCompute/imageOffer",
+                "like": "windows*"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "AzureBaseline_SecurityOptionsNetworkSecurity",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('Network Security: Configure encryption types allowed for Kerberos;ExpectedValue', '=', parameters('NetworkSecurityConfigureEncryptionTypesAllowedForKerberos'), ',', 'Network security: LAN Manager authentication level;ExpectedValue', '=', parameters('NetworkSecurityLANManagerAuthenticationLevel'), ',', 'Network security: LDAP client signing requirements;ExpectedValue', '=', parameters('NetworkSecurityLDAPClientSigningRequirements'), ',', 'Network security: Minimum session security for NTLM SSP based (including secure RPC) clients;ExpectedValue', '=', parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients'), ',', 'Network security: Minimum session security for NTLM SSP based (including secure RPC) servers;ExpectedValue', '=', parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers')))]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                },
+                "configurationName": {
+                  "value": "AzureBaseline_SecurityOptionsNetworkSecurity"
+                },
+                "NetworkSecurityConfigureEncryptionTypesAllowedForKerberos": {
+                  "value": "[parameters('NetworkSecurityConfigureEncryptionTypesAllowedForKerberos')]"
+                },
+                "NetworkSecurityLANManagerAuthenticationLevel": {
+                  "value": "[parameters('NetworkSecurityLANManagerAuthenticationLevel')]"
+                },
+                "NetworkSecurityLDAPClientSigningRequirements": {
+                  "value": "[parameters('NetworkSecurityLDAPClientSigningRequirements')]"
+                },
+                "NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients": {
+                  "value": "[parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients')]"
+                },
+                "NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers": {
+                  "value": "[parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityConfigureEncryptionTypesAllowedForKerberos": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityLANManagerAuthenticationLevel": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityLDAPClientSigningRequirements": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients": {
+                    "type": "string"
+                  },
+                  "NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('microsoft.hybridcompute/machines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "name": "Network Security: Configure encryption types allowed for Kerberos;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityConfigureEncryptionTypesAllowedForKerberos')]"
+                          },
+                          {
+                            "name": "Network security: LAN Manager authentication level;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityLANManagerAuthenticationLevel')]"
+                          },
+                          {
+                            "name": "Network security: LDAP client signing requirements;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityLDAPClientSigningRequirements')]"
+                          },
+                          {
+                            "name": "Network security: Minimum session security for NTLM SSP based (including secure RPC) clients;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients')]"
+                          },
+                          {
+                            "name": "Network security: Minimum session security for NTLM SSP based (including secure RPC) servers;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "name": "Network Security: Configure encryption types allowed for Kerberos;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityConfigureEncryptionTypesAllowedForKerberos')]"
+                          },
+                          {
+                            "name": "Network security: LAN Manager authentication level;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityLANManagerAuthenticationLevel')]"
+                          },
+                          {
+                            "name": "Network security: LDAP client signing requirements;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityLDAPClientSigningRequirements')]"
+                          },
+                          {
+                            "name": "Network security: Minimum session security for NTLM SSP based (including secure RPC) clients;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCClients')]"
+                          },
+                          {
+                            "name": "Network security: Minimum session security for NTLM SSP based (including secure RPC) servers;ExpectedValue",
+                            "value": "[parameters('NetworkSecurityMinimumSessionSecurityForNTLMSSPBasedIncludingSecureRPCServers')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2019-07-01",
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]"
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2019-07-01",
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "type": "ConfigurationforWindows",
+                      "typeHandlerVersion": "1.1",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "protectedSettings": {}
+                    },
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.2.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/36e17963-7202-494a-80c3-f508211c826b",
+  "name": "36e17963-7202-494a-80c3-f508211c826b"
+}

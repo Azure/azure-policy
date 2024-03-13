@@ -1,0 +1,138 @@
+{
+  "properties": {
+    "displayName": "Configure disk access resources with private endpoints",
+    "description": "Private endpoints connect your virtual networks to Azure services without a public IP address at the source or destination. By mapping private endpoints to disk access resources, you can reduce data leakage risks. Learn more about private links at: https://aka.ms/disksprivatelinksdoc.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "location": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Location",
+          "strongType": "location",
+          "description": "All disk access resources in this region are validated and private endpoints are created in this region."
+        }
+      },
+      "privateEndpointSubnetId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private endpoint subnet ID",
+          "description": "A subnet with private endpoint network policies disabled.",
+          "strongType": "Microsoft.Network/virtualNetworks/subnets"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/diskAccesses"
+          },
+          {
+            "field": "location",
+            "equals": "[parameters('location')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/diskAccesses/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.Compute/diskAccesses/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "name": {
+                  "value": "[concat('pe','-',field('name'))]"
+                },
+                "serviceId": {
+                  "value": "[field('id')]"
+                },
+                "privateEndpointSubnetId": {
+                  "value": "[parameters('privateEndpointSubnetId')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "serviceId": {
+                    "type": "string"
+                  },
+                  "privateEndpointSubnetId": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[parameters('name')]",
+                    "type": "Microsoft.Network/privateEndpoints",
+                    "apiVersion": "2019-11-01",
+                    "location": "[parameters('location')]",
+                    "tags": {},
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('privateEndpointSubnetId')]"
+                      },
+                      "privateLinkServiceConnections": [
+                        {
+                          "name": "[parameters('name')]",
+                          "properties": {
+                            "privateLinkServiceId": "[parameters('serviceId')]",
+                            "groupIds": [
+                              "disks"
+                            ]
+                          }
+                        }
+                      ],
+                      "manualPrivateLinkServiceConnections": []
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/582bd7a6-a5f6-4dc6-b9dc-9cb81fe0d4c5",
+  "name": "582bd7a6-a5f6-4dc6-b9dc-9cb81fe0d4c5"
+}

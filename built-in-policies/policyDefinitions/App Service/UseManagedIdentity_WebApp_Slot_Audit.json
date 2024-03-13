@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "App Service app slots should use managed identity",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use a managed identity for enhanced authentication security",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/slots/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/slots/config/managedServiceIdentityId",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/config/xmanagedServiceIdentityId",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4a15c15f-90d5-4a1f-8b63-2903944963fd",
+  "name": "4a15c15f-90d5-4a1f-8b63-2903944963fd"
+}

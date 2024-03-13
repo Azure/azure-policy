@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Cognitive Services accounts should use customer owned storage",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer owned storage to control the data stored at rest in Cognitive Services. To learn more about customer owned storage, visit https://aka.ms/cogsvc-cmk.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "Cognitive Services"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices/accounts"
+          },
+          {
+            "count": {
+              "field": "Microsoft.CognitiveServices/accounts/userOwnedStorage[*]"
+            },
+            "less": 1
+          },
+          {
+            "count": {
+              "field": "Microsoft.CognitiveServices/accounts/capabilities[*]",
+              "where": {
+                "field": "Microsoft.CognitiveServices/accounts/capabilities[*].name",
+                "equals": "CustomerManagedStorage"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/46aa9b05-0e60-4eae-a88b-1e9d374fa515",
+  "name": "46aa9b05-0e60-4eae-a88b-1e9d374fa515"
+}

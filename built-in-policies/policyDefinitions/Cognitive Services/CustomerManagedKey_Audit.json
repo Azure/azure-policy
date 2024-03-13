@@ -1,0 +1,71 @@
+{
+  "properties": {
+    "displayName": "Cognitive Services accounts should enable data encryption with a customer-managed key",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data stored in Cognitive Services to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more about customer-managed keys at https://go.microsoft.com/fwlink/?linkid=2121321.",
+    "metadata": {
+      "version": "2.1.0",
+      "category": "Cognitive Services"
+    },
+    "version": "2.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      },
+      "excludedKinds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded Kinds",
+          "description": "The list of excluded API kinds for customer-managed key, default is the list of API kinds that don't have data stored in Cognitive Services"
+        },
+        "defaultValue": [
+          "CognitiveServices",
+          "Knowledge",
+          "LUIS",
+          "QnAMaker",
+          "TextAnalytics",
+          "ComputerVision",
+          "HealthDecisionSupport",
+          "ImmersiveReader"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices/accounts"
+          },
+          {
+            "field": "Microsoft.CognitiveServices/accounts/encryption.keySource",
+            "notEquals": "Microsoft.KeyVault"
+          },
+          {
+            "field": "kind",
+            "notIn": "[parameters('excludedKinds')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/67121cc7-ff39-4ab8-b7e3-95b84dab487d",
+  "name": "67121cc7-ff39-4ab8-b7e3-95b84dab487d"
+}

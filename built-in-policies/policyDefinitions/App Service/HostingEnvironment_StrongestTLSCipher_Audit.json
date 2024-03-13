@@ -1,0 +1,75 @@
+{
+  "properties": {
+    "displayName": "App Service Environment should be configured with strongest TLS Cipher suites",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "The two most minimal and strongest cipher suites required for App Service Environment to function correctly are : TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 and TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "kind",
+            "like": "ASE*"
+          },
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/hostingEnvironments"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].name",
+                    "contains": "FrontEndSSLCipherSuiteOrder"
+                  },
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].value",
+                    "contains": "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+                  },
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].value",
+                    "contains": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+                  },
+                  {
+                    "value": "[less(length(field('Microsoft.Web/HostingEnvironments/clusterSettings[*].value')), 80)]",
+                    "equals": "true"
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/817dcf37-e83d-4999-a472-644eada2ea1e",
+  "name": "817dcf37-e83d-4999-a472-644eada2ea1e"
+}

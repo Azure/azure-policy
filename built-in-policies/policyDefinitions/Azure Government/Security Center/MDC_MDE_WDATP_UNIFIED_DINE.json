@@ -1,0 +1,83 @@
+{
+  "properties": {
+    "displayName": "Configure Microsoft Defender for Endpoint integration settings with Microsoft Defender for Cloud (WDATP_UNIFIED_SOLUTION)",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Configures the Microsoft Defender for Endpoint integration settings, within Microsoft Defender for Cloud (also known as WDATP_UNIFIED_SOLUTION), for enabling auto provisioning of MDE Unified Agent for Windows Server 2012R2 and 2016. WDATP setting must be turned on for this setting to be applied. See: https://learn.microsoft.com/azure/defender-for-cloud/integration-defender-for-endpoint for more information.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/settings",
+          "name": "WDATP_UNIFIED_SOLUTION",
+          "deploymentScope": "subscription",
+          "existenceScope": "subscription",
+          "existenceCondition": {
+            "field": "Microsoft.Security/settings/DataExportSetting.enabled",
+            "equals": "true"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "deployment": {
+            "location": "northeurope",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {},
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json",
+                "contentVersion": "1.0.0.0",
+                "parameters": {},
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/settings",
+                    "apiVersion": "2022-05-01",
+                    "name": "WDATP_UNIFIED_SOLUTION",
+                    "kind": "DataExportSettings",
+                    "properties": {
+                      "enabled": "true"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/48666c5d-cec1-4043-ab6b-1be05abb24f2",
+  "name": "48666c5d-cec1-4043-ab6b-1be05abb24f2"
+}

@@ -1,0 +1,114 @@
+{
+  "properties": {
+    "displayName": "Configure SQL servers to have auditing enabled to Log Analytics workspace",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To ensure the operations performed against your SQL assets are captured, SQL servers should have auditing enabled. If auditing is not enabled, this policy will configure auditing events to flow to the specified Log Analytics workspace.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "logAnalyticsWorkspaceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics Workspace ID",
+          "description": "Auditing will write database events to this Log Analytics Workspace. This should be in the following format '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{resourcegroup}/providers/Microsoft.OperationalInsights/workspaces/{logAnalyticsWorkspaceName}'",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/servers/auditingSettings",
+          "name": "Default",
+          "existenceCondition": {
+            "field": "Microsoft.Sql/servers/auditingSettings/state",
+            "equals": "Enabled"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
+            "/providers/Microsoft.Authorization/roleDefinitions/056cd41c-7e88-42e1-933e-88ba6a50c9c3"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "logAnalyticsWorkspaceId": {
+                    "type": "string",
+                    "minLength": 90
+                  },
+                  "serverName": {
+                    "type": "string",
+                    "minLength": 3
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings",
+                    "apiVersion": "2021-05-01-preview",
+                    "name": "[concat(parameters('serverName'),'/master/microsoft.insights/SQLSecurityAuditEvents_3d229c42-c7e7-4c97-9a99-ec0d0d8b86c1')]",
+                    "properties": {
+                      "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                      "logs": [
+                        {
+                          "category": "SQLSecurityAuditEvents",
+                          "enabled": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "[concat(parameters('serverName'),'/default')]",
+                    "type": "Microsoft.Sql/servers/auditingSettings",
+                    "apiVersion": "2017-03-01-preview",
+                    "properties": {
+                      "State": "Enabled",
+                      "isAzureMonitorTargetEnabled": true
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                },
+                "logAnalyticsWorkspaceId": {
+                  "value": "[parameters('logAnalyticsWorkspaceId')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/25da7dfb-0666-4a15-a8f5-402127efd8bb",
+  "name": "25da7dfb-0666-4a15-a8f5-402127efd8bb"
+}

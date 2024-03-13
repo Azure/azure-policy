@@ -1,0 +1,139 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure Recovery Services vaults to use private endpoints for backup",
+    "policyType": "BuiltIn",
+    "description": "Private endpoints connect your virtual networks to Azure services without a public IP address at the source or destination. By mapping private endpoints to Recovery Services vaults, you can reduce data leakage risks. Note that your vaults need to meet certain pre-requisites to be eligible for private endpoint configuration. Learn more at : https://go.microsoft.com/fwlink/?linkid=2187162.",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "privateEndpointSubnetId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Private endpoint subnet ID",
+          "description": "A subnet with private endpoint network policies disabled.",
+          "strongType": "Microsoft.Network/virtualNetworks/subnets"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "AllOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/vaults"
+          },
+          {
+            "AnyOf": [
+              {
+                "field": "Microsoft.RecoveryServices/vaults/backupStorageVersion",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.RecoveryServices/vaults/backupStorageVersion",
+                "equals": "V1"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.RecoveryServices/vaults/privateEndpointConnections",
+          "existenceCondition": {
+            "value": "[field('Microsoft.RecoveryServices/vaults/privateEndpointStateForBackup')]",
+            "Equals": "Enabled"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "name": {
+                  "value": "[concat('pe-',field('name'))]"
+                },
+                "serviceId": {
+                  "value": "[concat(subscription().id,'/resourceGroups/',resourceGroup().name,'/providers/', 'Microsoft.RecoveryServices/vaults/', field('name'))]"
+                },
+                "privateEndpointSubnetId": {
+                  "value": "[parameters('privateEndpointSubnetId')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "name": {
+                    "type": "String"
+                  },
+                  "serviceId": {
+                    "type": "String"
+                  },
+                  "privateEndpointSubnetId": {
+                    "type": "String"
+                  },
+                  "location": {
+                    "type": "String"
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[parameters('name')]",
+                    "type": "Microsoft.Network/privateEndpoints",
+                    "apiVersion": "2019-11-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "subnet": {
+                        "id": "[parameters('privateEndpointSubnetId')]"
+                      },
+                      "privateLinkServiceConnections": [
+                        {
+                          "name": "[parameters('name')]",
+                          "properties": {
+                            "privateLinkServiceId": "[parameters('serviceId')]",
+                            "groupIds": [
+                              "AzureBackup"
+                            ],
+                            "requestMessage": "autoapprove"
+                          }
+                        }
+                      ],
+                      "manualPrivateLinkServiceConnections": []
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8015d6ed-3641-4534-8d0b-5c67b67ff7de",
+  "name": "8015d6ed-3641-4534-8d0b-5c67b67ff7de"
+}

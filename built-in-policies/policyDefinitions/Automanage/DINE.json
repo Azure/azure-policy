@@ -1,0 +1,547 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "displayName": "[Deprecated]: Configure virtual machines to be onboarded to Azure Automanage",
+    "description": "Azure Automanage enrolls, configures, and monitors virtual machines with best practice as defined in the Microsoft Cloud Adoption Framework for Azure. Use this policy to apply Automanage to your selected scope.",
+    "metadata": {
+      "version": "4.2.1-deprecated",
+      "category": "Automanage",
+      "deprecated": true
+    },
+    "version": "4.2.1",
+    "parameters": {
+      "automanageAccount": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Automanage account",
+          "description": "The Automanage account is an Azure managed identity under which virtual machine operations are performed. If this account is outside of the scope of the assignment you must manually grant 'Contributor' permissions (or similar) on the account to the policy assignment's principal ID."
+        },
+        "defaultValue": ""
+      },
+      "configurationProfileAssignment": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Configuration profile",
+          "description": "The management services provided are based on whether the machine is intended to be used in a dev/test environment or production."
+        },
+        "allowedValues": [
+          "Azure virtual machine best practices – Production",
+          "Azure virtual machine best practices – Dev/test"
+        ],
+        "defaultValue": "Azure virtual machine best practices – Production"
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "location",
+            "in": [
+              "eastus",
+              "eastus2",
+              "westus",
+              "westus2",
+              "centralus",
+              "southcentralus",
+              "westcentralus",
+              "northeurope",
+              "westeurope",
+              "canadacentral",
+              "japaneast",
+              "uksouth",
+              "australiaeast",
+              "australiasoutheast",
+              "southeastasia"
+            ]
+          },
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imagePublisher",
+                "in": [
+                  "esri",
+                  "incredibuild",
+                  "MicrosoftDynamicsAX",
+                  "MicrosoftSharepoint",
+                  "MicrosoftVisualStudio",
+                  "MicrosoftWindowsDesktop",
+                  "MicrosoftWindowsServerHPCPack"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "2008*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftSQLServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "notLike": "SQL2008*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-dsvm"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "dsvm-windows"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "standard-data-science-vm",
+                      "windows-data-science-vm"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "batch"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "rendering-windows2016"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "center-for-internet-security-inc"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "cis-windows-server-201*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "pivotal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "bosh-windows-server*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloud-infrastructure-services"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "ad*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                        "exists": "true"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "like": "Windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.id",
+                    "exists": "true"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.sku",
+                    "exists": "false"
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Compute/imagePublisher",
+                "in": [
+                  "microsoft-aks",
+                  "qubole-inc",
+                  "datastax",
+                  "couchbase",
+                  "scalegrid",
+                  "checkpoint",
+                  "paloaltonetworks",
+                  "debian"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "CentOS*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "CentOS*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "RHEL",
+                      "RHEL-HA",
+                      "RHEL-SAP",
+                      "RHEL-SAP-APPS",
+                      "RHEL-SAP-HA",
+                      "RHEL-SAP-HANA",
+                      "rhel-raw"
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "RHEL",
+                      "RHEL-HA",
+                      "RHEL-SAP",
+                      "RHEL-SAP-APPS",
+                      "RHEL-SAP-HA",
+                      "RHEL-SAP-HANA",
+                      "rhel-raw"
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "osa",
+                      "rhel-byos"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "center-for-internet-security-inc"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "cis-centos-7-l1",
+                      "cis-centos-7-v2-1-1-l1",
+                      "cis-nginx-centos-7-v1-1-0-l1",
+                      "cis-oracle-linux-7-v2-0-0-l1",
+                      "cis-postgresql-11-centos-linux-7-level-1",
+                      "cis-rhel-7-l2",
+                      "cis-rhel-7-v2-2-0-l1",
+                      "cis-suse-linux-12-v2-0-0-l1",
+                      "cis-ubuntu-linux-1604-v1-0-0-l1",
+                      "cis-ubuntu-linux-1804-l1"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "credativ"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Suse"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "SLES*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "11*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Suse"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "SLES*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "15*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "UbuntuServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "12*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-dsvm"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "linux-data-science-vm-ubuntu",
+                      "azureml"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloudera"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cloudera-centos-os"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloudera"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cloudera-altus-centos-os"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "linux*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
+                        "exists": "true"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "like": "Linux*"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.id",
+                    "exists": "true"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.sku",
+                    "exists": "false"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.Automanage/configurationProfileAssignments",
+          "name": "default",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Automanage/configurationProfileAssignments/configurationProfile",
+                "equals": "[if(equals(parameters('configurationProfileAssignment'),'Azure virtual machine best practices – Dev/test'), '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesDevTest', '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesProduction')]"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "machineName": {
+                  "value": "[field('Name')]"
+                },
+                "automanageAccount": {
+                  "value": "[parameters('automanageAccount')]"
+                },
+                "configurationProfileAssignment": {
+                  "value": "[parameters('configurationProfileAssignment')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "machineName": {
+                    "type": "String"
+                  },
+                  "automanageAccount": {
+                    "type": "string"
+                  },
+                  "configurationProfileAssignment": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Compute/virtualMachines/providers/configurationProfileAssignments",
+                    "apiVersion": "[if(equals(parameters('automanageAccount'),''), '2022-05-04', '2022-05-04')]",
+                    "name": "[concat(parameters('machineName'), '/Microsoft.Automanage/', 'default')]",
+                    "properties": {
+                      "configurationProfile": "[if(equals(parameters('configurationProfileAssignment'),'Azure virtual machine best practices – Dev/test'), '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesDevTest', '/providers/Microsoft.Automanage/bestPractices/AzureBestPracticesProduction')]"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "4.2.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/270610db-8c04-438a-a739-e8e6745b22d3",
+  "name": "270610db-8c04-438a-a739-e8e6745b22d3"
+}

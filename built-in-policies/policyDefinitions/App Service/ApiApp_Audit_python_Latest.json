@@ -1,0 +1,87 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: API apps that use Python should use the latest 'Python version'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for Python software either due to security flaws or to include additional functionality. Using the latest Python version for API apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. We recommend all customers who are still using API apps to implement the built-in policy called 'App Service apps that use Python should use the latest 'Python version''.",
+    "metadata": {
+      "version": "3.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "WindowsPythonLatestVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Latest Windows Python version",
+          "description": "Latest supported Python version for App Services",
+          "deprecated": true
+        },
+        "defaultValue": "3.6"
+      },
+      "LinuxPythonLatestVersion": {
+        "type": "String",
+        "defaultValue": "3.9",
+        "metadata": {
+          "displayName": "Linux Latest Python version",
+          "description": "Latest supported Python version for App Services"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "PYTHON"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "equals": "[concat('PYTHON|', parameters('LinuxPythonLatestVersion'))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/74c3584d-afae-46f7-a20a-6f8adba71a16",
+  "name": "74c3584d-afae-46f7-a20a-6f8adba71a16"
+}

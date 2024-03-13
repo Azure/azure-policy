@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "App Service apps should use a virtual network service endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use virtual network service endpoints to restrict access to your app from selected subnets from an Azure virtual network. To learn more about App Service service endpoints, visit https://aka.ms/appservice-vnet-service-endpoint.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Network"
+    },
+    "version": "2.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/virtualNetworkConnections",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/virtualnetworkconnections/vnetResourceId",
+            "exists": "true"
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2d21331d-a4c2-4def-a9ad-ee4e1e023beb",
+  "name": "2d21331d-a4c2-4def-a9ad-ee4e1e023beb"
+}

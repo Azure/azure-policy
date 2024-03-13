@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Service Fabric clusters should only use Azure Active Directory for client authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit usage of client authentication only via Azure Active Directory in Service Fabric",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Service Fabric"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ServiceFabric/clusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ServiceFabric/clusters/azureActiveDirectory.tenantId",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.ServiceFabric/clusters/azureActiveDirectory.tenantId",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b54ed75b-3e1a-44ac-a333-05ba39b99ff0",
+  "name": "b54ed75b-3e1a-44ac-a333-05ba39b99ff0"
+}

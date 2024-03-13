@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Function apps should use latest 'HTTP Version'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for HTTP either due to security flaws or to include additional functionality. Using the latest HTTP version for web apps to take advantage of security fixes, if any, and/or new functionalities of the newer version.",
+    "metadata": {
+      "version": "4.0.0",
+      "category": "App Service"
+    },
+    "version": "4.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/web.http20Enabled",
+            "equals": "true"
+          }
+        }
+      }
+    },
+    "versions": [
+      "4.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e2c1c086-2d84-4019-bff3-c44ccd95113c",
+  "name": "e2c1c086-2d84-4019-bff3-c44ccd95113c"
+}

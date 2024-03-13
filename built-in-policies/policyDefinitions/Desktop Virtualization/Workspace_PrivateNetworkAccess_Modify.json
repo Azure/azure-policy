@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Virtual Desktop workspaces to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for your Azure Virtual Desktop workspace resource so the feed is not accessible over the public internet. This improves security and keeps your data safe. Learn more at: https://aka.ms/avdprivatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Desktop Virtualization"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DesktopVirtualization/workspaces"
+          },
+          {
+            "field": "Microsoft.DesktopVirtualization/workspaces/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/21efdde3-836f-432b-bf3d-3e8e734d4b2b"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-04-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.DesktopVirtualization/workspaces/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ce6ebf1d-0b94-4df9-9257-d8cacc238b4f",
+  "name": "ce6ebf1d-0b94-4df9-9257-d8cacc238b4f"
+}

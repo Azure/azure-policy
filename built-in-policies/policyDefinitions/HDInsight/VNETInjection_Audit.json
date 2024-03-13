@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Azure HDInsight clusters should be injected into a virtual network",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Injecting Azure HDInsight clusters in a virtual network unlocks advanced HDInsight networking and security features and provides you with control over your network security configuration.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "HDInsight"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HDInsight/clusters"
+          },
+          {
+            "count": {
+              "field": "Microsoft.HDInsight/clusters/computeProfile.roles[*]",
+              "where": {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.HDInsight/clusters/computeProfile.roles[*].virtualNetworkProfile.id",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.HDInsight/clusters/computeProfile.roles[*].virtualNetworkProfile.subnet",
+                    "exists": false
+                  }
+                ]
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b0ab5b05-1c98-40f7-bb9e-dc568e41b501",
+  "name": "b0ab5b05-1c98-40f7-bb9e-dc568e41b501"
+}

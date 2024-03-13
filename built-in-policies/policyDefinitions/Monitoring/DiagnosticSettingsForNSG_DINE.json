@@ -1,0 +1,191 @@
+{
+  "properties": {
+    "displayName": "Deploy Diagnostic Settings for Network Security Groups",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy automatically deploys diagnostic settings to network security groups. A storage account with name '{storagePrefixParameter}{NSGLocation}' will be automatically created.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "Monitoring"
+    },
+    "version": "2.0.1",
+    "parameters": {
+      "storagePrefix": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account Prefix for Regional Storage Account",
+          "description": "This prefix will be combined with the network security group location to form the created storage account name."
+        }
+      },
+      "rgName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Resource Group Name for Storage Account (must exist)",
+          "description": "The resource group that the storage account will be created in. This resource group must already exist.",
+          "strongType": "ExistingResourceGroups"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Network/networkSecurityGroups"
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "name": "setbypolicy",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "storagePrefix": {
+                    "type": "string"
+                  },
+                  "nsgName": {
+                    "type": "string"
+                  },
+                  "rgName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "storageDeployName": "[concat('policyStorage_', uniqueString(parameters('location'), parameters('nsgName')))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings",
+                    "name": "[concat(parameters('nsgName'),'/Microsoft.Insights/setbypolicy')]",
+                    "apiVersion": "2017-05-01-preview",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                      "[variables('storageDeployName')]"
+                    ],
+                    "properties": {
+                      "storageAccountId": "[reference(variables('storageDeployName')).outputs.storageAccountId.value]",
+                      "logs": [
+                        {
+                          "category": "NetworkSecurityGroupEvent",
+                          "enabled": true,
+                          "retentionPolicy": {
+                            "enabled": false,
+                            "days": 0
+                          }
+                        },
+                        {
+                          "category": "NetworkSecurityGroupRuleCounter",
+                          "enabled": true,
+                          "retentionPolicy": {
+                            "enabled": false,
+                            "days": 0
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "apiVersion": "2017-05-10",
+                    "name": "[variables('storageDeployName')]",
+                    "type": "Microsoft.Resources/deployments",
+                    "resourceGroup": "[parameters('rgName')]",
+                    "properties": {
+                      "mode": "incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "parameters": {
+                        "location": {
+                          "value": "[parameters('location')]"
+                        },
+                        "storagePrefix": {
+                          "value": "[parameters('storagePrefix')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "location": {
+                            "type": "string"
+                          },
+                          "storagePrefix": {
+                            "type": "string"
+                          }
+                        },
+                        "variables": {
+                          "storageAccountName": "[concat(take(concat(parameters('storageprefix'), uniqueString(subscription().id)),sub(24,length(parameters('location')))), parameters('location'))]"
+                        },
+                        "resources": [
+                          {
+                            "apiVersion": "2017-06-01",
+                            "type": "Microsoft.Storage/storageAccounts",
+                            "name": "[variables('storageAccountName')]",
+                            "sku": {
+                              "name": "Standard_LRS",
+                              "tier": "Standard"
+                            },
+                            "kind": "Storage",
+                            "location": "[parameters('location')]",
+                            "tags": {
+                              "created-by": "policy"
+                            },
+                            "scale": null,
+                            "properties": {
+                              "networkAcls": {
+                                "bypass": "AzureServices",
+                                "defaultAction": "Allow",
+                                "ipRules": [],
+                                "virtualNetworkRules": []
+                              },
+                              "supportsHttpsTrafficOnly": true
+                            }
+                          }
+                        ],
+                        "outputs": {
+                          "storageAccountId": {
+                            "type": "string",
+                            "value": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "storagePrefix": {
+                  "value": "[parameters('storagePrefix')]"
+                },
+                "rgName": {
+                  "value": "[parameters('rgName')]"
+                },
+                "nsgName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c9c29499-c1d1-4195-99bd-2ec9e3a9dc89",
+  "name": "c9c29499-c1d1-4195-99bd-2ec9e3a9dc89"
+}

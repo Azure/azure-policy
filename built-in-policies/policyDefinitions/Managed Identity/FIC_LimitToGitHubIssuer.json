@@ -1,0 +1,98 @@
+{
+  "properties": {
+    "displayName": "[Preview]: [Preview]: Managed Identity Federated Credentials from GitHub should be from trusted repository owners",
+    "mode": "All",
+    "policyType": "BuiltIn",
+    "description": "This policy limits federation with GitHub repos to only approved repository owners.",
+    "metadata": {
+      "version": "1.0.1-preview",
+      "category": "Managed Identity",
+      "preview": true
+    },
+    "version": "1.0.1-preview",
+    "parameters": {
+      "allowedRepoOwners": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Repo Owners",
+          "description": "The list of allowed owners. Empty to allow all owners."
+        }
+      },
+      "allowedRepoExceptions": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Repo Exception",
+          "description": "The list of specific repo names (including owner) that are exempt from the above repo ownership rules."
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials"
+          },
+          {
+            "allOf": [
+              {
+                "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                "equals": "https://token.actions.githubusercontent.com"
+              },
+              {
+                "not": {
+                  "anyOf": [
+                    {
+                      "allOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "count": {
+                                "value": "[parameters('allowedRepoOwners')]"
+                              },
+                              "equals": 0
+                            },
+                            {
+                              "value": "[if(greaterOrEquals(length(split(if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/subject'),':')),2),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),':')[1],''), '/')),2),split(if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/subject'),':')),2),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/subject'),':')[1],''), '/')[0],'')]",
+                              "in": "[parameters('allowedRepoOwners')]"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "value": "[if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/subject'),':')),2),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/subject'),':')[1],'')]",
+                      "in": "[parameters('allowedRepoExceptions')]"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fd1a8e20-2c4f-4a6c-9354-b58d786d9a1f",
+  "name": "fd1a8e20-2c4f-4a6c-9354-b58d786d9a1f"
+}

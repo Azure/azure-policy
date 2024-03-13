@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "App Service app slots should only be accessible over HTTPS",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use of HTTPS ensures server/service authentication and protects data in transit from network layer eavesdropping attacks.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "App Service"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          },
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/slots/httpsOnly",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/httpsOnly",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ae1b9a8c-dfce-4605-bd91-69213b4a26fc",
+  "name": "ae1b9a8c-dfce-4605-bd91-69213b4a26fc"
+}

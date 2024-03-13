@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "CORS should not allow every resource to access your map account.",
+    "policyType": "BuiltIn",
+    "description": "Cross-Origin Resource Sharing (CORS) should not allow all domains to access your map account. Allow only required domains to interact with your map account.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Maps"
+    },
+    "version": "1.0.0",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Disabled",
+          "Audit",
+          "Deny"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Maps/accounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Maps/accounts/cors.corsRules[*].allowedOrigins",
+                "exists": false
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Maps/accounts/cors.corsRules[*].allowedOrigins[*]",
+                  "where": {
+                    "field": "Microsoft.Maps/accounts/cors.corsRules[*].allowedOrigins[*]",
+                    "in": [
+                      "*",
+                      ""
+                    ]
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/50553764-7777-43cf-bf12-8647e0b9ba01",
+  "name": "50553764-7777-43cf-bf12-8647e0b9ba01"
+}

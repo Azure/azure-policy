@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "Azure SignalR Service should disable public network access",
+    "description": "To improve the security of Azure SignalR Service resource, ensure that it isn't exposed to the public internet and can only be accessed from a private endpoint. Disable the public network access property as described in https://aka.ms/asrs/networkacls. This option disables access from any public address space outside the Azure IP range, and denies all logins that match IP or virtual network-based firewall rules. This reduces data leakage risks.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "SignalR"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.SignalRService/SignalR"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.SignalRService/SignalR/networkACLs.defaultAction",
+                "equals": "Allow"
+              },
+              {
+                "field": "Microsoft.SignalRService/SignalR/networkACLs.publicNetwork.allow",
+                "exists": false
+              },
+              {
+                "count": {
+                  "field": "Microsoft.SignalRService/SignalR/networkACLs.publicNetwork.allow[*]"
+                },
+                "greater": 0
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.SignalRService/SignalR/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/21a9766a-82a5-4747-abb5-650b6dbba6d0",
+  "name": "21a9766a-82a5-4747-abb5-650b6dbba6d0"
+}

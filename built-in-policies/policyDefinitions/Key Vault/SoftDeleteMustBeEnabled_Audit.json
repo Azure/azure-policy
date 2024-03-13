@@ -1,0 +1,88 @@
+{
+  "properties": {
+    "displayName": "Key vaults should have soft delete enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deleting a key vault without soft delete enabled permanently deletes all secrets, keys, and certificates stored in the key vault. Accidental deletion of a key vault can lead to permanent data loss. Soft delete allows you to recover an accidentally deleted key vault for a configurable retention period.",
+    "metadata": {
+      "version": "3.0.0",
+      "category": "Key Vault"
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "not": {
+              "field": "Microsoft.KeyVault/vaults/createMode",
+              "equals": "recover"
+            }
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "less": "2019-09-01"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.KeyVault/vaults/enableSoftDelete",
+                        "equals": "false"
+                      },
+                      {
+                        "field": "Microsoft.KeyVault/vaults/enableSoftDelete",
+                        "exists": "false"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "greaterOrEquals": "2019-09-01"
+                  },
+                  {
+                    "field": "Microsoft.KeyVault/vaults/enableSoftDelete",
+                    "equals": "false"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1e66c121-a66a-4b1f-9b83-0fd99bf0fc2d",
+  "name": "1e66c121-a66a-4b1f-9b83-0fd99bf0fc2d"
+}

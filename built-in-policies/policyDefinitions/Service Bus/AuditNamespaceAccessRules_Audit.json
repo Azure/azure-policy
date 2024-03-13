@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "All authorization rules except RootManageSharedAccessKey should be removed from Service Bus namespace",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Service Bus clients should not use a namespace level access policy that provides access to all queues and topics in a namespace. To align with the least privilege security model, you should create access policies at the entity level for queues and topics to provide access to only the specific entity",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Service Bus"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ServiceBus/namespaces/authorizationRules"
+          },
+          {
+            "field": "name",
+            "notEquals": "RootManageSharedAccessKey"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a1817ec0-a368-432a-8057-8371e17ac6ee",
+  "name": "a1817ec0-a368-432a-8057-8371e17ac6ee"
+}

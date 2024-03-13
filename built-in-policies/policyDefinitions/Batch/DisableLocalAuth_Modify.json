@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "displayName": "Configure Batch accounts to disable local authentication",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable location authentication methods so that your Batch accounts require Azure Active Directory identities exclusively for authentication. Learn more at: https://aka.ms/batch/auth.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Batch"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Batch/batchAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes",
+                "exists": "false"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes[*]",
+                  "where": {
+                    "not": {
+                      "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes[*]",
+                      "equals": "AAD"
+                    }
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Batch/batchAccounts/allowedAuthenticationModes",
+              "value": [
+                "AAD"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4dbc2f5c-51cf-4e38-9179-c7028eed2274",
+  "name": "4dbc2f5c-51cf-4e38-9179-c7028eed2274"
+}

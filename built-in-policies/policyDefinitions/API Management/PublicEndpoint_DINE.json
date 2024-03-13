@@ -1,0 +1,109 @@
+{
+  "properties": {
+    "displayName": "Configure API Management services to disable access to API Management public service configuration endpoints",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To improve the security of API Management services, restrict connectivity to service configuration endpoints, like direct access management API, Git configuration management endpoint, or self-hosted gateways configuration endpoint.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "API Management"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "endpointType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Public Endpoint Type",
+          "description": "Public Endpoint Type for which to enforce the access check"
+        },
+        "allowedValues": [
+          "Management",
+          "Git",
+          "Gateway Configuration"
+        ],
+        "defaultValue": "Management"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service"
+          },
+          {
+            "field": "Microsoft.ApiManagement/service/sku.name",
+            "notEquals": "Consumption"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.ApiManagement/service/tenant",
+          "name": "[if(equals(parameters('endpointType'), 'Management'), 'access', if(equals(parameters('endpointType'), 'Git'), 'gitaccess', 'gatewayaccess'))]",
+          "evaluationDelay": "AfterProvisioningSuccess",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/312a565d-c81f-4fd8-895a-4e21e48d571c"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.ApiManagement/service/tenant/enabled",
+            "equals": false
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "endpointType": {
+                    "type": "string"
+                  },
+                  "apimName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[concat(parameters('apimName'), '/', parameters('endpointType'))]",
+                    "type": "Microsoft.ApiManagement/service/tenant",
+                    "apiVersion": "2020-06-01-preview",
+                    "properties": {
+                      "enabled": false
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "endpointType": {
+                  "value": "[if(equals(parameters('endpointType'), 'Management'), 'access', if(equals(parameters('endpointType'), 'Git'), 'gitaccess', 'gatewayaccess'))]"
+                },
+                "apimName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7ca8c8ac-3a6e-493d-99ba-c5fa35347ff2",
+  "name": "7ca8c8ac-3a6e-493d-99ba-c5fa35347ff2"
+}

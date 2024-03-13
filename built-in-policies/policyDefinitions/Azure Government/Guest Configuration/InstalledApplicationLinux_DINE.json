@@ -1,0 +1,398 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Deploy prerequisites to audit Linux VMs that do not have the specified applications installed",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy creates a Guest Configuration assignment to audit Linux virtual machines that do not have the specified applications installed. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "metadata": {
+      "version": "4.1.0-deprecated",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "deprecated": true
+    },
+    "version": "4.1.0",
+    "parameters": {
+      "ApplicationName": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Application names",
+          "description": "A semicolon-separated list of the names of the applications that should be installed. e.g. 'python; powershell'"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imagePublisher",
+                "in": [
+                  "microsoft-aks",
+                  "qubole-inc",
+                  "datastax",
+                  "couchbase",
+                  "scalegrid",
+                  "checkpoint",
+                  "paloaltonetworks",
+                  "debian"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "CentOS*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Oracle"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Oracle-Linux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "RHEL",
+                      "RHEL-HA",
+                      "RHEL-SAP",
+                      "RHEL-SAP-APPS",
+                      "RHEL-SAP-HA",
+                      "RHEL-SAP-HANA"
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "osa",
+                      "rhel-byos"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "center-for-internet-security-inc"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "cis-centos-7-l1",
+                      "cis-centos-7-v2-1-1-l1",
+                      "cis-centos-8-l1",
+                      "cis-debian-linux-8-l1",
+                      "cis-debian-linux-9-l1",
+                      "cis-nginx-centos-7-v1-1-0-l1",
+                      "cis-oracle-linux-7-v2-0-0-l1",
+                      "cis-oracle-linux-8-l1",
+                      "cis-postgresql-11-centos-linux-7-level-1",
+                      "cis-rhel-7-l2",
+                      "cis-rhel-7-v2-2-0-l1",
+                      "cis-rhel-8-l1",
+                      "cis-suse-linux-12-v2-0-0-l1",
+                      "cis-ubuntu-linux-1604-v1-0-0-l1",
+                      "cis-ubuntu-linux-1804-l1"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "credativ"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Debian"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "7*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Suse"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "SLES*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "11*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "contains": "Ubuntu"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "12*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-dsvm"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "linux-data-science-vm-ubuntu",
+                      "azureml",
+                      "ubuntu-hpc",
+                      "ubuntu-1804"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloudera"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cloudera-centos-os"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "6*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloudera"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cloudera-altus-centos-os"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "linux*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
+                        "exists": "true"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "like": "Linux*"
+                      }
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "exists": "false"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "notIn": [
+                          "OpenLogic",
+                          "RedHat",
+                          "credativ",
+                          "Suse",
+                          "Canonical",
+                          "microsoft-dsvm",
+                          "cloudera",
+                          "microsoft-ads",
+                          "center-for-internet-security-inc",
+                          "Oracle",
+                          "AzureDatabricks"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "installed_application_linux",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('[ChefInSpec]InstalledApplicationLinuxResource1;AttributesYmlContent', '=', concat('packages: [', replace(parameters('ApplicationName'), ';', ','), ']')))]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "configurationName": {
+                  "value": "installed_application_linux"
+                },
+                "ApplicationName": {
+                  "value": "[parameters('ApplicationName')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "ApplicationName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "name": "[ChefInSpec]InstalledApplicationLinuxResource1;AttributesYmlContent",
+                            "value": "[concat('packages: [', replace(parameters('ApplicationName'), ';', ','), ']')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "apiVersion": "2019-07-01",
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]"
+                  },
+                  {
+                    "apiVersion": "2019-07-01",
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforLinux')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "type": "ConfigurationforLinux",
+                      "typeHandlerVersion": "1.0",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "protectedSettings": {}
+                    },
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "4.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4d1c04de-2172-403f-901b-90608c35c721",
+  "name": "4d1c04de-2172-403f-901b-90608c35c721"
+}

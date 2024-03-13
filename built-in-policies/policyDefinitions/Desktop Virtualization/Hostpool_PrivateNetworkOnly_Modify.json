@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Virtual Desktop hostpools to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for session hosts and end users on your Azure Virtual Desktop hostpool resource so that it's not accessible over the public internet. This improves security and keeps your data safe. Learn more at: https://aka.ms/avdprivatelink.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Desktop Virtualization"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DesktopVirtualization/hostpools"
+          },
+          {
+            "field": "Microsoft.DesktopVirtualization/hostPools/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/e307426c-f9b6-4e81-87de-d99efb3c32bc"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-04-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.DesktopVirtualization/hostPools/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2a0913ff-51e7-47b8-97bb-ea17127f7c8d",
+  "name": "2a0913ff-51e7-47b8-97bb-ea17127f7c8d"
+}

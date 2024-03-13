@@ -1,0 +1,183 @@
+{
+  "properties": {
+    "displayName": "[Preview]: [Preview]: Managed Identity Federated Credentials should be from allowed issuer types",
+    "mode": "All",
+    "policyType": "BuiltIn",
+    "description": "This policy limits whether Managed Identities can use federated credentials, which common issuer types are allowed, and provides a list of allowed issuer exceptions.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Managed Identity",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowFederatedCredentials": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow Federated Credentials",
+          "description": "Set this value to true to allow Federated Credentials to be configured on Azure Managed Identities."
+        },
+        "defaultValue": false
+      },
+      "allowAKS": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow AKS",
+          "description": "Set this value to true to allow Azure Managed Identities federation with Azure Kubernetes Service Clusters."
+        },
+        "defaultValue": false
+      },
+      "allowGitHub": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow GitHub",
+          "description": "Set this value to true to allow Azure Managed Identities federation with GitHub Actions."
+        },
+        "defaultValue": false
+      },
+      "allowAWS": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow AWS",
+          "description": "Set this value to true to allow Azure Managed Identities federation with Amazon Web Services resources."
+        },
+        "defaultValue": false
+      },
+      "allowGCS": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Allow GCS",
+          "description": "Set this value to true to allow Azure Managed Identities federation with Google Cloud resources."
+        },
+        "defaultValue": false
+      },
+      "allowedIssuerExceptions": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Exception Issuers",
+          "description": "The list of specific issuers allowed."
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('allowFederatedCredentials')]",
+                "equals": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),3),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[2],'')]",
+                    "like": "*.oic.prod-aks.azure.com"
+                  },
+                  {
+                    "value": "[parameters('allowAKS')]",
+                    "equals": false
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                    "equals": "https://token.actions.githubusercontent.com"
+                  },
+                  {
+                    "value": "[parameters('allowGitHub')]",
+                    "equals": false
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                    "equals": "https://cognito-identity.amazonaws.com"
+                  },
+                  {
+                    "value": "[parameters('allowAWS')]",
+                    "equals": false
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                    "equals": "https://accounts.google.com"
+                  },
+                  {
+                    "value": "[parameters('allowGCS')]",
+                    "equals": false
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "value": "[if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),3),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[2],'')]",
+                          "like": "*.oic.prod-aks.azure.com"
+                        },
+                        {
+                          "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                          "equals": "https://token.actions.githubusercontent.com"
+                        },
+                        {
+                          "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                          "equals": "https://cognito-identity.amazonaws.com"
+                        },
+                        {
+                          "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                          "equals": "https://accounts.google.com"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "field": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer",
+                      "in": "[parameters('allowedIssuerExceptions')]"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2571b7c3-3056-4a61-b00a-9bc5232234f5",
+  "name": "2571b7c3-3056-4a61-b00a-9bc5232234f5"
+}

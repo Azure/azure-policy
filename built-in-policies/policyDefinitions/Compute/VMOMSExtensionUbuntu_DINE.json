@@ -1,0 +1,135 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Deploy default Log Analytics Extension for Ubuntu VMs",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy deploys the Log Analytics Extension on Ubuntu VMs, and connects to the selected Log Analytics workspace",
+    "metadata": {
+      "version": "1.0.1-deprecated",
+      "category": "Compute",
+      "deprecated": true
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "logAnalytics": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics workspace",
+          "description": "Select Log Analytics workspace from dropdown list. If this workspace is outside of the scope of the assignment you must manually grant 'Log Analytics Contributor' permissions (or similar) to the policy assignment's principal ID.",
+          "strongType": "omsWorkspace"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/imagePublisher",
+            "equals": "Canonical"
+          },
+          {
+            "field": "Microsoft.Compute/imageOffer",
+            "equals": "UbuntuServer"
+          },
+          {
+            "field": "Microsoft.Compute/imageSKU",
+            "in": [
+              "18.04-LTS",
+              "16.04-LTS",
+              "16.04.0-LTS",
+              "14.04.2-LTS",
+              "12.04.5-LTS"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "equals": "OmsAgentForLinux"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[concat(parameters('vmName'),'/omsPolicy')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "apiVersion": "2017-12-01",
+                    "properties": {
+                      "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                      "type": "OmsAgentForLinux",
+                      "typeHandlerVersion": "1.4",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {
+                        "workspaceId": "[reference(parameters('logAnalytics'), '2015-03-20').customerId]"
+                      },
+                      "protectedSettings": {
+                        "workspaceKey": "[listKeys(parameters('logAnalytics'), '2015-03-20').primarySharedKey]"
+                      }
+                    }
+                  }
+                ],
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Enabled monitoring for Linux VM', ': ', parameters('vmName'))]"
+                  }
+                }
+              },
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3d8640fc-63f6-4734-8dcb-cfd3d8c78f38",
+  "name": "3d8640fc-63f6-4734-8dcb-cfd3d8c78f38"
+}

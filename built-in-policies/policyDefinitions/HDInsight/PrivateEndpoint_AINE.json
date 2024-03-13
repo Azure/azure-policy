@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "Azure HDInsight should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Azure HDInsight clusters, you can reduce data leakage risks. Learn more about private links at: https://aka.ms/hdi.pl.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "HDInsight"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HDInsight/clusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.HDInsight/clusters/networkProperties.privateLink",
+                "equals": "Enabled"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.HDInsight/clusters/privateLinkConfigurations[*]"
+                },
+                "greaterOrEquals": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HDInsight/clusters/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.HDInsight/clusters/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c8cc2f85-e019-4065-9fa3-5e6a2b2dde56",
+  "name": "c8cc2f85-e019-4065-9fa3-5e6a2b2dde56"
+}

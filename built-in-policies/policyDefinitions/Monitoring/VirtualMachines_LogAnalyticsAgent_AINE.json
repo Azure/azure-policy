@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "Virtual machines should have the Log Analytics extension installed",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any Windows/Linux virtual machines if the Log Analytics extension is not installed.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Monitoring"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Compute/virtualMachines"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.EnterpriseCloud.Monitoring"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "in": [
+                  "MicrosoftMonitoringAgent",
+                  "OmsAgentForLinux"
+                ]
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                "equals": "Succeeded"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/settings.workspaceId",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a70ca396-0a34-413a-88e1-b956c1e683be",
+  "name": "a70ca396-0a34-413a-88e1-b956c1e683be"
+}

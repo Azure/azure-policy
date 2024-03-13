@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Ensure that '.NET Framework' version is the latest, if used as a part of the Function App",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy is not required since Azure App Service automatically updates and maintains the .NET Framework versions installed on the platform.",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "functionapp*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/config/web.netFrameworkVersion",
+            "in": [
+              "v3.0",
+              "v4.0"
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/10c1859c-e1a7-4df3-ab97-a487fa8059f6",
+  "name": "10c1859c-e1a7-4df3-ab97-a487fa8059f6"
+}

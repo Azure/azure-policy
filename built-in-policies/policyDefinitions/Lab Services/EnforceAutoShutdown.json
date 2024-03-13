@@ -1,0 +1,102 @@
+{
+  "properties": {
+    "displayName": "Lab Services should enable all options for auto shutdown",
+    "description": "This policy provides helps with cost management by enforcing all automatic shutdown options are enabled for a lab.",
+    "mode": "Indexed",
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Lab Services"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "excludeLabPlanId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Lab Plan Id to exclude",
+          "description": "Optionally enter the lab Plan Id to exclude for this policy assignment."
+        },
+        "defaultValue": ""
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.LabServices/labs"
+              },
+              {
+                "field": "Microsoft.LabServices/labs/labPlanId",
+                "notEquals": "[parameters('excludeLabPlanId')]"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.LabServices/labs/autoShutdownProfile.shutdownOnDisconnect",
+                    "equals": "Disabled"
+                  },
+                  {
+                    "field": "Microsoft.LabServices/labs/autoShutdownProfile.shutdownWhenNotConnected",
+                    "equals": "Disabled"
+                  },
+                  {
+                    "field": "Microsoft.LabServices/labs/autoShutdownProfile.shutdownOnIdle",
+                    "equals": "None"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.LabServices/labplans"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.LabServices/labPlans/defaultAutoShutdownProfile.shutdownOnDisconnect",
+                    "equals": "Disabled"
+                  },
+                  {
+                    "field": "Microsoft.LabServices/labPlans/defaultAutoShutdownProfile.shutdownWhenNotConnected",
+                    "equals": "Disabled"
+                  },
+                  {
+                    "field": "Microsoft.LabServices/labPlans/defaultAutoShutdownProfile.shutdownOnIdle",
+                    "equals": "None"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a6e9cf2d-7d76-440e-b795-8da246bd3aab",
+  "name": "a6e9cf2d-7d76-440e-b795-8da246bd3aab"
+}

@@ -1,0 +1,93 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Audit Windows VMs that contain certificates expiring within the specified number of days",
+    "policyType": "BuiltIn",
+    "description": "This initiative deploys the policy requirements and audits Windows virtual machines that contain certificates expiring within the specified number of days. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "metadata": {
+      "version": "1.0.0-deprecated",
+      "category": "Guest Configuration",
+      "deprecated": true
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "CertificateStorePath": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Certificate store path",
+          "description": "The path to the certificate store containing the certificates to check the expiration dates of. Default value is 'Cert:' which is the root certificate store path, so all certificates on the machine will be checked. Other example paths: 'Cert:\\LocalMachine', 'Cert:\\LocalMachine\\TrustedPublisher', 'Cert:\\CurrentUser'"
+        },
+        "defaultValue": "Cert:"
+      },
+      "ExpirationLimitInDays": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Expiration limit in days",
+          "description": "An integer indicating the number of days within which to check for certificates that are expiring. For example, if this value is 30, any certificate expiring within the next 30 days will cause this policy to be non-compliant."
+        },
+        "defaultValue": "30"
+      },
+      "CertificateThumbprintsToInclude": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Certificate thumbprints to include",
+          "description": "A semicolon-separated list of certificate thumbprints to check under the specified path. If a value is not specified, all certificates under the certificate store path will be checked. If a value is specified, no certificates other than those with the thumbprints specified will be checked. e.g. THUMBPRINT1;THUMBPRINT2;THUMBPRINT3"
+        },
+        "defaultValue": ""
+      },
+      "CertificateThumbprintsToExclude": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Certificate thumbprints to exclude",
+          "description": "A semicolon-separated list of certificate thumbprints to ignore. e.g. THUMBPRINT1;THUMBPRINT2;THUMBPRINT3"
+        },
+        "defaultValue": ""
+      },
+      "IncludeExpiredCertificates": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include expired certificates",
+          "description": "Must be 'true' or 'false'. True indicates that any found certificates that have already expired will also make this policy non-compliant. False indicates that certificates that have expired will be be ignored."
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/c5fbc59e-fb6f-494f-81e2-d99a671bdaa8",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "Deploy_CertificateExpiration",
+        "parameters": {
+          "CertificateStorePath": {
+            "value": "[parameters('CertificateStorePath')]"
+          },
+          "ExpirationLimitInDays": {
+            "value": "[parameters('ExpirationLimitInDays')]"
+          },
+          "CertificateThumbprintsToInclude": {
+            "value": "[parameters('CertificateThumbprintsToInclude')]"
+          },
+          "CertificateThumbprintsToExclude": {
+            "value": "[parameters('CertificateThumbprintsToExclude')]"
+          },
+          "IncludeExpiredCertificates": {
+            "value": "[parameters('IncludeExpiredCertificates')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/9328f27e-611e-44a7-a244-39109d7d35ab",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "Audit_CertificateExpiration"
+      }
+    ],
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/b6f5e05c-0aaa-4337-8dd4-357c399d12ae",
+  "name": "b6f5e05c-0aaa-4337-8dd4-357c399d12ae"
+}

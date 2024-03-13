@@ -1,0 +1,326 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Deploy prerequisites to audit Windows VMs configurations in 'Administrative Templates - Network'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy creates a Guest Configuration assignment to audit Windows virtual machines with non-compliant settings in Group Policy category: 'Administrative Templates - Network'. It also creates a system-assigned managed identity and deploys the VM extension for Guest Configuration. This policy should only be used along with its corresponding audit policy in an initiative. For more information on Guest Configuration policies, please visit https://aka.ms/gcpol",
+    "metadata": {
+      "version": "3.0.0-deprecated",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "deprecated": true
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "EnableInsecureGuestLogons": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Enable insecure guest logons",
+          "description": "Specifies whether the SMB client will allow insecure guest logons to an SMB server."
+        },
+        "defaultValue": "0"
+      },
+      "AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Allow simultaneous connections to the Internet or a Windows Domain",
+          "description": "Specify whether to prevent computers from connecting to both a domain based network and a non-domain based network at the same time. A value of 0 allows simultaneous connections, and a value of 1 blocks them."
+        },
+        "defaultValue": "1"
+      },
+      "TurnOffMulticastNameResolution": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Turn off multicast name resolution",
+          "description": "Specifies whether LLMNR, a secondary name resolution protocol that transmits using multicast over a local subnet link on a single subnet, is enabled."
+        },
+        "defaultValue": "1"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Compute/imagePublisher",
+                "in": [
+                  "esri",
+                  "incredibuild",
+                  "MicrosoftDynamicsAX",
+                  "MicrosoftSharepoint",
+                  "MicrosoftVisualStudio",
+                  "MicrosoftWindowsDesktop",
+                  "MicrosoftWindowsServerHPCPack"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftWindowsServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSKU",
+                    "notLike": "2008*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "MicrosoftSQLServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "notLike": "SQL2008*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-dsvm"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "dsvm-windows"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoft-ads"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "standard-data-science-vm",
+                      "windows-data-science-vm"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "batch"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "rendering-windows2016"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "center-for-internet-security-inc"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "cis-windows-server-201*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "pivotal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "bosh-windows-server*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloud-infrastructure-services"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "ad*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                        "exists": "true"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                        "like": "Windows*"
+                      }
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "exists": "false"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2008*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "notLike": "SQL2008*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "AzureBaseline_AdministrativeTemplatesNetwork",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+            "equals": "[base64(concat('Enable insecure guest logons;ExpectedValue', '=', parameters('EnableInsecureGuestLogons'), ',', 'Minimize the number of simultaneous connections to the Internet or a Windows Domain;ExpectedValue', '=', parameters('AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain'), ',', 'Turn off multicast name resolution;ExpectedValue', '=', parameters('TurnOffMulticastNameResolution')))]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "configurationName": {
+                  "value": "AzureBaseline_AdministrativeTemplatesNetwork"
+                },
+                "EnableInsecureGuestLogons": {
+                  "value": "[parameters('EnableInsecureGuestLogons')]"
+                },
+                "AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain": {
+                  "value": "[parameters('AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain')]"
+                },
+                "TurnOffMulticastNameResolution": {
+                  "value": "[parameters('TurnOffMulticastNameResolution')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "EnableInsecureGuestLogons": {
+                    "type": "string"
+                  },
+                  "AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain": {
+                    "type": "string"
+                  },
+                  "TurnOffMulticastNameResolution": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "configurationParameter": [
+                          {
+                            "name": "Enable insecure guest logons;ExpectedValue",
+                            "value": "[parameters('EnableInsecureGuestLogons')]"
+                          },
+                          {
+                            "name": "Minimize the number of simultaneous connections to the Internet or a Windows Domain;ExpectedValue",
+                            "value": "[parameters('AllowSimultaneousConnectionsToTheInternetOrAWindowsDomain')]"
+                          },
+                          {
+                            "name": "Turn off multicast name resolution;ExpectedValue",
+                            "value": "[parameters('TurnOffMulticastNameResolution')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "apiVersion": "2019-07-01",
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    },
+                    "name": "[parameters('vmName')]",
+                    "location": "[parameters('location')]"
+                  },
+                  {
+                    "apiVersion": "2019-07-01",
+                    "name": "[concat(parameters('vmName'), '/AzurePolicyforWindows')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "Microsoft.GuestConfiguration",
+                      "type": "ConfigurationforWindows",
+                      "typeHandlerVersion": "1.1",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {},
+                      "protectedSettings": {}
+                    },
+                    "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/',parameters('vmName'),'/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/',parameters('configurationName'))]"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/985285b7-b97a-419c-8d48-c88cc934c8d8",
+  "name": "985285b7-b97a-419c-8d48-c88cc934c8d8"
+}

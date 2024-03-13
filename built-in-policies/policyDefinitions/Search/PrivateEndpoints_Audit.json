@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "Azure Cognitive Search services should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Azure Cognitive Search, data leakage risks are reduced. Learn more about private links at: https://aka.ms/azure-cognitive-search/inbound-private-endpoints.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Search"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Search/searchServices"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Search/searchServices/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.Search/searchServices/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0fda3595-9f2b-4592-8675-4231d6fa82fe",
+  "name": "0fda3595-9f2b-4592-8675-4231d6fa82fe"
+}

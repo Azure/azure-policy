@@ -1,0 +1,119 @@
+{
+  "properties": {
+    "displayName": "Configure basic Microsoft Defender for Storage to be enabled (Activity Monitoring only)",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Microsoft Defender for Storage is an Azure-native layer of security intelligence that detects potential threats to your storage accounts.\nThis policy will enable the basic Defender for Storage capabilities (Activity Monitoring). To enable full protection, which also includes On-upload Malware Scanning and Sensitive Data Threat Detection use the full enablement policy: aka.ms/DefenderForStoragePolicy. To learn more about Defender for Storage capabilities and benefits, visit aka.ms/DefenderForStorage.",
+    "version": "1.1.0",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Security Center"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "subPlan": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage bundle's sub plan",
+          "description": "Sets the sub plan for Storage bundle"
+        },
+        "allowedValues": [
+          "PerTransaction",
+          "PerStorageAccount",
+          "DefenderForStorageV2"
+        ],
+        "defaultValue": "DefenderForStorageV2"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "StorageAccounts",
+          "deploymentScope": "subscription",
+          "existenceScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Security/pricings/pricingTier",
+                "equals": "Standard"
+              },
+              {
+                "field": "Microsoft.Security/pricings/subPlan",
+                "equals": "[parameters('subPlan')]"
+              }
+            ]
+          },
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "subPlan": {
+                  "value": "[parameters('subPlan')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "subPlan": {
+                    "type": "String"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2023-01-01",
+                    "name": "StorageAccounts",
+                    "properties": {
+                      "subPlan": "[parameters('subPlan')]",
+                      "pricingTier": "Standard",
+                      "extensions": [
+                        {
+                          "name": "OnUploadMalwareScanning",
+                          "isEnabled": "False"
+                        },
+                        {
+                          "name": "SensitiveDataDiscovery",
+                          "isEnabled": "False"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.1.0",
+      "1.0.2"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/17bc14a7-92e1-4551-8b8c-80f36953e166",
+  "name": "17bc14a7-92e1-4551-8b8c-80f36953e166"
+}

@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "App Service Environment should have TLS 1.0 and 1.1 disabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "TLS 1.0 and 1.1 are out-of-date protocols that do not support modern cryptographic algorithms. Disabling inbound TLS 1.0 and 1.1 traffic helps secure apps in an App Service Environment.",
+    "metadata": {
+      "version": "2.0.1",
+      "category": "App Service"
+    },
+    "version": "2.0.1",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/hostingEnvironments"
+          },
+          {
+            "field": "kind",
+            "like": "ASE*"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].name",
+                    "equals": "DisableTls1.0"
+                  },
+                  {
+                    "field": "Microsoft.Web/HostingEnvironments/clusterSettings[*].value",
+                    "equals": "1"
+                  }
+                ]
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d6545c6b-dd9d-4265-91e6-0b451e2f1c50",
+  "name": "d6545c6b-dd9d-4265-91e6-0b451e2f1c50"
+}

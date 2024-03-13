@@ -1,0 +1,305 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure supported Linux virtual machine scale sets to automatically install the Guest Attestation extension",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configure supported Linux virtual machines scale sets to automatically install the Guest Attestation extension to allow Azure Security Center to proactively attest and monitor the boot integrity. Boot integrity is attested via Remote Attestation.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "6.1.0-preview",
+      "preview": true
+    },
+    "version": "6.1.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "attestationEndpoint": {
+        "defaultValue": "",
+        "type": "string",
+        "metadata": {
+          "displayName": "Guest attestation tenant URL",
+          "description": "The Microsoft Azure Attestation (MAA) custom tenant URL."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "UbuntuServer"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "18_04-lts-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "0001-com-ubuntu-server-focal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "20_04-lts-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "0001-com-ubuntu-confidential-vm-focal"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "20_04-lts-cvm"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "RHEL"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "83-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "SUSE"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "SLES-15-SP2"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "CENTOS"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "8_3-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Oracle"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Oracle-Linux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "ol83-lvm-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoftcblmariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cbl-mariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "1-gen2"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "debian"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "debian-11"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "11-gen2"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.securityType",
+            "in": [
+              "TrustedLaunch",
+              "ConfidentialVM"
+            ]
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled",
+            "equals": "true"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled",
+            "equals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/publisher",
+                "equals": "Microsoft.Azure.Security.LinuxAttestation"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachineScaleSets/extensions/type",
+                "equals": "GuestAttestation"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmssName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "attestationEndpoint": {
+                  "value": "[parameters('attestationEndpoint')]"
+                }
+              },
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmssName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "attestationEndpoint": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "extensionName": "GuestAttestation",
+                  "extensionPublisher": "Microsoft.Azure.Security.LinuxAttestation",
+                  "extensionVersion": "1.0",
+                  "maaTenantName": "GuestAttestation",
+                  "ascReportingEndpoint": ""
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
+                    "apiVersion": "2019-12-01",
+                    "name": "[concat(parameters('vmssName'), '/', variables('extensionName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "[variables('extensionPublisher')]",
+                      "type": "[variables('extensionName')]",
+                      "typeHandlerVersion": "[variables('extensionVersion')]",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {
+                        "AttestationConfig": {
+                          "MaaSettings": {
+                            "maaEndpoint": "[parameters('attestationEndpoint')]",
+                            "maaTenantName": "[variables('maaTenantName')]"
+                          },
+                          "AscSettings": {
+                            "ascReportingEndpoint": "[variables('ascReportingEndpoint')]",
+                            "ascReportingFrequency": ""
+                          },
+                          "useCustomToken": "false",
+                          "disableAlerts": "false"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "6.1.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/57c2e3f0-98cf-4c3b-aa6b-e8f70726e74e",
+  "name": "57c2e3f0-98cf-4c3b-aa6b-e8f70726e74e"
+}

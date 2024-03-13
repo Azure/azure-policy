@@ -1,0 +1,121 @@
+{
+  "properties": {
+    "displayName": "[Preview]: [Preview]: Managed Identity Federated Credentials from Azure Kubernetes should be from trusted sources",
+    "mode": "All",
+    "policyType": "BuiltIn",
+    "description": "This policy limits federeation with Azure Kubernetes clusters to only clusters from approved tenants, approved regions, and a specific exception list of additional clusters.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Managed Identity",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedTenants": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed tenants",
+          "description": "The list of allowed Azure AD tenant ID's of AKS OIDC issuers. Empty to allow all tenants."
+        }
+      },
+      "allowedLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed locations",
+          "description": "The list of allowed locations for AKS OIDC issuers. Empty to allow any location.",
+          "strongType": "location"
+        },
+        "defaultValue": []
+      },
+      "allowedClusterExceptions": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed Exception Clusters",
+          "description": "The list of specific cluster ids that will be exceptions to the location and tenant rules."
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials"
+          },
+          {
+            "allOf": [
+              {
+                "value": "[if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),3),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[2],'')]",
+                "like": "*.oic.prod-aks.azure.com"
+              },
+              {
+                "not": {
+                  "anyOf": [
+                    {
+                      "allOf": [
+                        {
+                          "anyOf": [
+                            {
+                              "count": {
+                                "value": "[parameters('allowedLocations')]"
+                              },
+                              "equals": 0
+                            },
+                            {
+                              "value": "[if(greaterOrEquals(length(split(if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),3),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[2],''), '.')),1),split(if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),3),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[2],''), '.')[0],'')]",
+                              "in": "[parameters('allowedLocations')]"
+                            }
+                          ]
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "count": {
+                                "value": "[parameters('allowedTenants')]"
+                              },
+                              "equals": 0
+                            },
+                            {
+                              "value": "[if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),4),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[3],'')]",
+                              "in": "[parameters('allowedTenants')]"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "value": "[if(greaterOrEquals(length(split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')),5),split(field('Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/issuer'),'/')[4],'')]",
+                      "in": "[parameters('allowedClusterExceptions')]"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ae62c456-33de-4dc8-b100-7ce9028a7d99",
+  "name": "ae62c456-33de-4dc8-b100-7ce9028a7d99"
+}

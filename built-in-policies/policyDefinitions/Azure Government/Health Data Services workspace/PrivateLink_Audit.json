@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "Azure Health Data Services workspace should use private link",
+    "policyType": "BuiltIn",
+    "description": "Health Data Services workspace should have at least one approved private endpoint connection. Clients in a virtual network can securely access resources that have private endpoint connections through private links. For more information, visit: https://aka.ms/healthcareapisprivatelink.",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Health Data Services workspace"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HealthcareApis/workspaces"
+          },
+          {
+            "count": {
+              "field": "Microsoft.HealthcareApis/workspaces/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.HealthcareApis/workspaces/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/64528841-2f92-43f6-a137-d52e5c3dbeac",
+  "name": "64528841-2f92-43f6-a137-d52e5c3dbeac"
+}

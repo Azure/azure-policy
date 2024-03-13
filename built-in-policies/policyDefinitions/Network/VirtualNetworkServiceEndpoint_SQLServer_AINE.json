@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "SQL Server should use a virtual network service endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any SQL Server not configured to use a virtual network service endpoint.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Sql/servers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/servers/virtualNetworkRules",
+          "existenceCondition": {
+            "field": "Microsoft.Sql/servers/virtualNetworkRules/virtualNetworkSubnetId",
+            "exists": "true"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ae5d2f14-d830-42b6-9899-df6cfe9c71a3",
+  "name": "ae5d2f14-d830-42b6-9899-df6cfe9c71a3"
+}

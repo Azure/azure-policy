@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "FHIR Service should use a customer-managed key to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use a customer-managed key to control the encryption at rest of the data stored in Azure Health Data Services FHIR Service when this is a regulatory or compliance requirement. Customer-managed keys also deliver double encryption by adding a second layer of encryption on top of the default one done with service-managed keys.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Healthcare APIs"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HealthcareApis/workspaces/fhirservices"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.HealthcareApis/workspaces/fhirservices/encryption.customerManagedKeyEncryption.keyEncryptionKeyUrl",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.HealthcareApis/workspaces/fhirservices/encryption.customerManagedKeyEncryption.keyEncryptionKeyUrl",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c42dee8c-0202-4a12-bd8e-3e171cbf64dd",
+  "name": "c42dee8c-0202-4a12-bd8e-3e171cbf64dd"
+}

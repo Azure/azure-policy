@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Ensure that 'PHP version' is the latest, if used as a part of the API app",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for PHP software either due to security flaws or to include additional functionality. Using the latest PHP version for API apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. We recommend all customers who are still using API Apps to implement the built-in policy called 'App Service apps that use PHP should use the latest 'PHP version'', which is scoped to include API apps.",
+    "metadata": {
+      "version": "2.1.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "2.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "PHPLatestVersion": {
+        "type": "String",
+        "defaultValue": "7.4",
+        "metadata": {
+          "displayName": "Latest PHP version",
+          "description": "Latest supported PHP version for App Services"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "PHP"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "equals": "[concat('PHP|', parameters('PHPLatestVersion'))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1bc1795e-d44a-4d48-9b3b-6fff0fd5f9ba",
+  "name": "1bc1795e-d44a-4d48-9b3b-6fff0fd5f9ba"
+}

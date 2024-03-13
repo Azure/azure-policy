@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Cognitive Services accounts should use customer owned storage or enable data encryption.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy is deprecated. Cognitive Services have data encryption enforced.",
+    "metadata": {
+      "version": "2.0.0-deprecated",
+      "category": "Cognitive Services",
+      "deprecated": true
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Disabled",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices/accounts"
+          },
+          {
+            "count": {
+              "field": "Microsoft.CognitiveServices/accounts/userOwnedStorage[*]"
+            },
+            "less": 1
+          },
+          {
+            "field": "Microsoft.CognitiveServices/accounts/encryption.keySource",
+            "exists": "false"
+          },
+          {
+            "field": "Microsoft.CognitiveServices/accounts/encryption",
+            "exists": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/11566b39-f7f7-4b82-ab06-68d8700eb0a4",
+  "name": "11566b39-f7f7-4b82-ab06-68d8700eb0a4"
+}

@@ -1,0 +1,90 @@
+{
+  "properties": {
+    "displayName": "Function apps that use Java should use a specified 'Java version'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for Java software either due to security flaws or to include additional functionality. Using the latest Java version for Function apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. This policy only applies to Linux apps. This policy requires you to specify a Java version that meets your requirements.",
+    "metadata": {
+      "version": "3.1.0",
+      "category": "App Service"
+    },
+    "version": "3.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "JavaLatestVersion": {
+        "type": "String",
+        "defaultValue": "11",
+        "metadata": {
+          "displayName": "Latest Java version",
+          "description": "Latest supported Java version for App Services",
+          "deprecated": true
+        }
+      },
+      "LinuxJavaVersion": {
+        "type": "String",
+        "defaultValue": "",
+        "metadata": {
+          "displayName": "Linux Java version",
+          "description": "Specify a supported Java version for Function apps"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "JAVA"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "equals": "[concat('JAVA|', parameters('LinuxJavaVersion'))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9d0b6ea4-93e2-4578-bf2f-6bb17d22b4bc",
+  "name": "9d0b6ea4-93e2-4578-bf2f-6bb17d22b4bc"
+}

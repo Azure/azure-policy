@@ -1,0 +1,81 @@
+{
+  "properties": {
+    "displayName": "Deploy Advanced Threat Protection for Cosmos DB Accounts",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy enables Advanced Threat Protection across Cosmos DB accounts.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cosmos DB"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DocumentDB/databaseAccounts"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/advancedThreatProtectionSettings",
+          "name": "current",
+          "existenceCondition": {
+            "field": "Microsoft.Security/advancedThreatProtectionSettings/isEnabled",
+            "equals": "true"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "cosmosDbAccountName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2019-01-01",
+                    "type": "Microsoft.DocumentDB/databaseAccounts/providers/advancedThreatProtectionSettings",
+                    "name": "[concat(parameters('cosmosDbAccountName'), '/Microsoft.Security/current')]",
+                    "properties": {
+                      "isEnabled": true
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "cosmosDbAccountName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b5f04e03-92a3-4b09-9410-2cc5e5047656",
+  "name": "b5f04e03-92a3-4b09-9410-2cc5e5047656"
+}

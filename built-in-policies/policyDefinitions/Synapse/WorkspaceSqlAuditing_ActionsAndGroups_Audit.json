@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "Synapse workspace auditing settings should have action groups configured to capture critical activities",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To ensure your audit logs are as thorough as possible, the AuditActionsAndGroups property should include all the relevant groups. We recommend adding at least SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP, FAILED_DATABASE_AUTHENTICATION_GROUP, and BATCH_COMPLETED_GROUP. This is sometimes required for compliance with regulatory standards.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Synapse"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Synapse/workspaces"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Synapse/workspaces/auditingSettings",
+          "name": "default",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Synapse/workspaces/auditingSettings/auditActionsAndGroups[*]",
+                  "notEquals": "SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Synapse/workspaces/auditingSettings/auditActionsAndGroups[*]",
+                  "notEquals": "FAILED_DATABASE_AUTHENTICATION_GROUP"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Synapse/workspaces/auditingSettings/auditActionsAndGroups[*]",
+                  "notEquals": "BATCH_COMPLETED_GROUP"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2b18f286-371e-4b80-9887-04759970c0d3",
+  "name": "2b18f286-371e-4b80-9887-04759970c0d3"
+}

@@ -1,0 +1,112 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure supported Windows Arc machines to automatically install the Azure Security agent",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configure supported Windows Arc machines to automatically install the Azure Security agent. Security Center collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Target Windows Arc machines must be in a supported location.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HybridCompute/machines/extensions",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/type",
+                "equals": "AzureSecurityWindowsAgent"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/Publisher",
+                "equals": "Microsoft.Azure.Security.Monitoring"
+              },
+              {
+                "field": "Microsoft.HybridCompute/machines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "vmName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "location": {
+                    "type": "string"
+                  },
+                  "vmName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.HybridCompute/machines/extensions",
+                    "name": "[concat(parameters('vmName'), '/', 'AzureSecurityWindowsAgent')]",
+                    "apiVersion": "2021-06-10-preview",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "publisher": "Microsoft.Azure.Security.Monitoring",
+                      "type": "AzureSecurityWindowsAgent",
+                      "settings": {},
+                      "protectedSettings": {}
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d01f3018-de9f-4d75-8dae-d12c1875da9f",
+  "name": "d01f3018-de9f-4d75-8dae-d12c1875da9f"
+}

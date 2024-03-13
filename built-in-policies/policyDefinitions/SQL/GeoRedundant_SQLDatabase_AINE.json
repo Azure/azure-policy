@@ -1,0 +1,69 @@
+{
+  "properties": {
+    "displayName": "Long-term geo-redundant backup should be enabled for Azure SQL Databases",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy audits any Azure SQL Database with long-term geo-redundant backup not enabled.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "SQL"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/databases"
+          },
+          {
+            "field": "name",
+            "notEquals": "master"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies",
+          "name": "default",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies/weeklyRetention",
+                "notEquals": "PT0S"
+              },
+              {
+                "field": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies/monthlyRetention",
+                "notEquals": "PT0S"
+              },
+              {
+                "field": "Microsoft.Sql/servers/databases/backupLongTermRetentionPolicies/yearlyRetention",
+                "notEquals": "PT0S"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d38fc420-0735-4ef3-ac11-c806f651a570",
+  "name": "d38fc420-0735-4ef3-ac11-c806f651a570"
+}

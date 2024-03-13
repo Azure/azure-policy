@@ -1,0 +1,507 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure Linux Virtual Machines to be associated with a Data Collection Rule for ChangeTracking and Inventory",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploy Association to link Linux virtual machines to the specified Data Collection Rule to enable ChangeTracking and Inventory. The list of locations and OS images are updated over time as support is increased.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "ChangeTrackingAndInventory",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "dcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Rule Resource Id",
+          "description": "Resource Id of the Data Collection Rule to be applied on the Linux machines in scope."
+        }
+      },
+      "listOfApplicableLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Applicable Locations",
+          "description": "The list of locations where the policy should be applied.",
+          "strongType": "location"
+        },
+        "allowedValues": [
+          "australiasoutheast",
+          "australiaeast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus2euap",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "norwayeast",
+          "southcentralus",
+          "southeastasia",
+          "switzerlandnorth",
+          "uaenorth",
+          "uksouth",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ],
+        "defaultValue": [
+          "australiasoutheast",
+          "australiaeast",
+          "brazilsouth",
+          "canadacentral",
+          "centralindia",
+          "centralus",
+          "eastasia",
+          "eastus2euap",
+          "eastus",
+          "eastus2",
+          "francecentral",
+          "japaneast",
+          "koreacentral",
+          "northcentralus",
+          "northeurope",
+          "norwayeast",
+          "southcentralus",
+          "southeastasia",
+          "switzerlandnorth",
+          "uaenorth",
+          "uksouth",
+          "westcentralus",
+          "westeurope",
+          "westus",
+          "westus2"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "location",
+            "in": "[parameters('listOfApplicableLocations')]"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "RedHat"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "RHEL",
+                      "RHEL-ARM64",
+                      "RHEL-BYOS",
+                      "RHEL-HA",
+                      "RHEL-SAP",
+                      "RHEL-SAP-APPS",
+                      "RHEL-SAP-HA"
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm8*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "SUSE"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "in": [
+                              "SLES",
+                              "SLES-HPC",
+                              "SLES-HPC-Priority",
+                              "SLES-SAP",
+                              "SLES-SAP-BYOS",
+                              "SLES-Priority",
+                              "SLES-BYOS",
+                              "SLES-SAPCAL",
+                              "SLES-Standard"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSku",
+                                "like": "12*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageSku",
+                                "like": "15*"
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-12*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "sles-15*"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "in": [
+                              "gen1",
+                              "gen2"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Canonical"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "equals": "UbuntuServer"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "0001-com-ubuntu-server-*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "0001-com-ubuntu-pro-*"
+                      }
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "in": [
+                      "14.04.0-lts",
+                      "14.04.1-lts",
+                      "14.04.2-lts",
+                      "14.04.3-lts",
+                      "14.04.4-lts",
+                      "14.04.5-lts",
+                      "16_04_0-lts-gen2",
+                      "16_04-lts-gen2",
+                      "16.04-lts",
+                      "16.04.0-lts",
+                      "18_04-lts-arm64",
+                      "18_04-lts-gen2",
+                      "18.04-lts",
+                      "20_04-lts-arm64",
+                      "20_04-lts-gen2",
+                      "20_04-lts",
+                      "22_04-lts-gen2",
+                      "22_04-lts",
+                      "pro-16_04-lts-gen2",
+                      "pro-16_04-lts",
+                      "pro-18_04-lts-gen2",
+                      "pro-18_04-lts",
+                      "pro-20_04-lts-gen2",
+                      "pro-20_04-lts",
+                      "pro-22_04-lts-gen2",
+                      "pro-22_04-lts"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Oracle"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "Oracle-Linux"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "OpenLogic"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "CentOS",
+                      "Centos-LVM",
+                      "CentOS-SRIOV"
+                    ]
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "6*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "cloudera"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cloudera-centos-os"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "7*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "almalinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "almalinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "ctrliqinc1648673227698"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "like": "rocky-8*"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "like": "rocky-8*"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "credativ"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "Debian"
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "equals": "9"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "Debian"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "in": [
+                      "debian-10",
+                      "debian-11"
+                    ]
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "in": [
+                      "10",
+                      "10-gen2",
+                      "11",
+                      "11-gen2"
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/imagePublisher",
+                    "equals": "microsoftcblmariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageOffer",
+                    "equals": "cbl-mariner"
+                  },
+                  {
+                    "field": "Microsoft.Compute/imageSku",
+                    "in": [
+                      "1-gen2",
+                      "cbl-mariner-1",
+                      "cbl-mariner-2",
+                      "cbl-mariner-2-arm64",
+                      "cbl-mariner-2-gen2"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/microsoft.authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.Insights/dataCollectionRuleAssociations/dataCollectionRuleId",
+            "equals": "[parameters('dcrResourceId')]"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "dcrResourceId": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "associationName": "[concat('ct-', uniqueString(parameters('dcrResourceId')))]"
+                },
+                "resources": [
+                  {
+                    "name": "[variables('associationName')]",
+                    "type": "Microsoft.Insights/dataCollectionRuleAssociations",
+                    "apiVersion": "2021-04-01",
+                    "properties": {
+                      "dataCollectionRuleId": "[parameters('dcrResourceId')]"
+                    },
+                    "scope": "[concat('Microsoft.Compute/virtualMachines/', parameters('resourceName'))]"
+                  }
+                ]
+              },
+              "parameters": {
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "dcrResourceId": {
+                  "value": "[parameters('dcrResourceId')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bef2d677-e829-492d-9a3d-f5a20fda818f",
+  "name": "bef2d677-e829-492d-9a3d-f5a20fda818f"
+}

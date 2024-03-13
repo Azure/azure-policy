@@ -1,0 +1,66 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Managed identity should be used in your API App",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use a managed identity for enhanced authentication security. We recommend all customers who are still using API Apps to implement the built-in policy called 'App Service apps should use managed identity', which is scoped to include API apps in addition to Web Apps.",
+    "metadata": {
+      "version": "2.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/managedServiceIdentityId",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/xmanagedServiceIdentityId",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c4d441f8-f9d9-4a9e-9cef-e82117cb3eef",
+  "name": "c4d441f8-f9d9-4a9e-9cef-e82117cb3eef"
+}

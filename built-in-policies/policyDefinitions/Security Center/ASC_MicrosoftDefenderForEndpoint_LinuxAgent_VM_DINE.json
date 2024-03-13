@@ -1,0 +1,339 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Deploy Microsoft Defender for Endpoint agent on Linux virtual machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploys Microsoft Defender for Endpoint agent on applicable Linux VM images.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "3.0.0-preview",
+      "preview": true
+    },
+    "version": "3.0.0-preview",
+    "parameters": {
+      "PublishersToExclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Optional: List Of Image Publishers to exclude",
+          "description": "List of Linux image Publishers to exclude from MDE provision"
+        },
+        "defaultValue": []
+      },
+      "ImageIdsToExclude": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Optional: List of virtual machine images to exclude",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoImage'"
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+            "like": "linux*"
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Compute/virtualMachines/imagePublisher",
+                  "in": "[parameters('PublishersToExclude')]"
+                }
+              },
+              {
+                "value": "[empty(parameters('PublishersToExclude'))]",
+                "equals": "true"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Compute/virtualMachines/storageProfile.imageReference.id",
+                  "in": "[parameters('ImageIdsToExclude')]"
+                }
+              },
+              {
+                "value": "[empty(parameters('ImageIdsToExclude'))]",
+                "equals": "true"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "not": {
+                  "field": "Microsoft.Compute/imagePublisher",
+                  "in": [
+                    "AzureDatabricks",
+                    "azureopenshift",
+                    "cisco",
+                    "fortinet",
+                    "juniper-networks",
+                    "barracudanetworks",
+                    "checkpoint",
+                    "imperva",
+                    "qualysguard",
+                    "f5-networks",
+                    "paloaltonetworks",
+                    "rohdeschwarzcybersecuritysas",
+                    "sonicwall-inc",
+                    "esdenera",
+                    "brocade_communications",
+                    "5nine-software-inc",
+                    "forcepoint-llc",
+                    "hillstone-networks",
+                    "netgate",
+                    "microsoft-aks"
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Compute/imageOffer",
+                  "contains": "firewall"
+                }
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Compute/imageSKU",
+                  "Like": "centos-6*"
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imagePublisher",
+                      "equals": "cloudera"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "6"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "equals": "CentOS"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "6*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "RHEL"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "6*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "UbuntuServer"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "12*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "UbuntuServer"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "14*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "RightImage-Ubuntu"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "14*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "RightImage-Ubuntu"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "12*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "Debian*"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "Like": "8*"
+                    }
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Compute/imageOffer",
+                      "Like": "Oracle-Linux*"
+                    },
+                    {
+                      "field": "Microsoft.Compute/imageSKU",
+                      "contains": "6"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "MDE.Linux",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.Azure.AzureDefenderForServers"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "equals": "MDE.Linux"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                "equals": "Succeeded"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "azureResourceId": {
+                  "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Compute/virtualMachines/',field('name'))]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "azureResourceId": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2020-06-01",
+                    "name": "[concat(parameters('vmName'), '/MDE.Linux')]",
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "autoUpgradeMinorVersion": true,
+                      "publisher": "Microsoft.Azure.AzureDefenderForServers",
+                      "type": "MDE.Linux",
+                      "typeHandlerVersion": "1.0",
+                      "settings": {
+                        "azureResourceId": "[parameters('azureResourceId')]",
+                        "installedBy": "Policy"
+                      },
+                      "protectedSettings": {
+                        "defenderForEndpointOnboardingScript": "[reference(subscriptionResourceId('Microsoft.Security/mdeOnboardings', 'Linux'), '2021-10-01-preview', 'full').properties.onboardingPackageLinux]"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d30025d0-6d64-656d-6465-67688881b632",
+  "name": "d30025d0-6d64-656d-6465-67688881b632"
+}

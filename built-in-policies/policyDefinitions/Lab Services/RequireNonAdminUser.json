@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "displayName": "Lab Services should require non-admin user for labs",
+    "description": "This policy requires non-admin user accounts to be created for the labs managed through lab-services.",
+    "mode": "Indexed",
+    "policyType": "BuiltIn",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Lab Services"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "excludeLabPlanId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Lab Plan Id to exclude",
+          "description": "Optionally enter the lab Plan Id to exclude for this policy assignment."
+        },
+        "defaultValue": ""
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.LabServices/labs"
+          },
+          {
+            "field": "Microsoft.LabServices/labs/labPlanId",
+            "notEquals": "[parameters('excludeLabPlanId')]"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.LabServices/labs/virtualMachineProfile.nonAdminUser.username",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.LabServices/labs/virtualMachineProfile.nonAdminUser.username",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0fd9915e-cab3-4f24-b200-6e20e1aa276a",
+  "name": "0fd9915e-cab3-4f24-b200-6e20e1aa276a"
+}

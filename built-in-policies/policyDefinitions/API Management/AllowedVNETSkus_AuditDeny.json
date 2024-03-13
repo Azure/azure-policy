@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "displayName": "API Management service should use a SKU that supports virtual networks",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "With supported SKUs of API Management, deploying service into a virtual network unlocks advanced API Management networking and security features which provides you greater control over your network security configuration. Learn more at: https://aka.ms/apimvnet.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "API Management"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "listOfAllowedSKUs": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of SKUs that can be specified for Azure API Management service.",
+          "displayName": "Allowed SKUs"
+        },
+        "allowedValues": [
+          "Developer",
+          "Basic",
+          "Standard",
+          "Premium",
+          "Isolated",
+          "Consumption"
+        ],
+        "defaultValue": [
+          "Developer",
+          "Premium",
+          "Isolated"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service"
+          },
+          {
+            "not": {
+              "field": "Microsoft.ApiManagement/service/sku.name",
+              "in": "[parameters('listOfAllowedSKUs')]"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/73ef9241-5d81-4cd4-b483-8443d1730fe5",
+  "name": "73ef9241-5d81-4cd4-b483-8443d1730fe5"
+}

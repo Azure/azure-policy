@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "App Service apps should enable configuration routing to Azure Virtual Network",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "By default, app configuration such as pulling container images and mounting content storage will not be routed through the regional virtual network integration. Using the API to set routing options to true enables configuration traffic through the Azure Virtual Network. These settings allow features like network security groups and user defined routes to be used, and service endpoints to be private. For more information, visit https://aka.ms/appservice-vnet-configuration-routing.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/vnetImagePullEnabled",
+                "notEquals": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/vnetContentShareEnabled",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/801543d1-1953-4a90-b8b0-8cf6d41473a5",
+  "name": "801543d1-1953-4a90-b8b0-8cf6d41473a5"
+}

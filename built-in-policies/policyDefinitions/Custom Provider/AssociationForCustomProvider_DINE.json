@@ -1,0 +1,124 @@
+{
+  "properties": {
+    "displayName": "Deploy associations for a custom provider",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploys an association resource that associates selected resource types to the specified custom provider. This policy deployment does not support nested resource types.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Custom Provider"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "targetCustomProviderId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Custom provider ID",
+          "description": "Resource ID of the Custom provider to which resources need to be associated."
+        }
+      },
+      "resourceTypesToAssociate": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Resource types to associate",
+          "description": "The list of resource types to be associated to the custom provider.",
+          "strongType": "resourceTypes"
+        }
+      },
+      "associationNamePrefix": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Association name prefix",
+          "description": "Prefix to be added to the name of the association resource being created."
+        },
+        "defaultValue": "DeployedByPolicy"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "in": "[parameters('resourceTypesToAssociate')]"
+      },
+      "then": {
+        "effect": "deployIfNotExists",
+        "details": {
+          "type": "Microsoft.CustomProviders/Associations",
+          "name": "[concat(parameters('associationNamePrefix'), '-', uniqueString(parameters('targetCustomProviderId')))]",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "associatedResourceName": {
+                    "type": "string"
+                  },
+                  "resourceTypesToAssociate": {
+                    "type": "string"
+                  },
+                  "targetCustomProviderId": {
+                    "type": "string"
+                  },
+                  "associationNamePrefix": {
+                    "type": "string"
+                  }
+                },
+                "variables": {
+                  "resourceType": "[concat(parameters('resourceTypesToAssociate'), '/providers/associations')]",
+                  "resourceName": "[concat(parameters('associatedResourceName'), '/microsoft.customproviders/', parameters('associationNamePrefix'), '-', uniqueString(parameters('targetCustomProviderId')))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2017-05-10",
+                    "name": "[concat(deployment().Name, '-2')]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "resources": [
+                          {
+                            "type": "[variables('resourceType')]",
+                            "name": "[variables('resourceName')]",
+                            "apiVersion": "2018-09-01-preview",
+                            "properties": {
+                              "targetResourceId": "[parameters('targetCustomProviderId')]"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "resourceTypesToAssociate": {
+                  "value": "[field('type')]"
+                },
+                "associatedResourceName": {
+                  "value": "[field('name')]"
+                },
+                "targetCustomProviderId": {
+                  "value": "[parameters('targetCustomProviderId')]"
+                },
+                "associationNamePrefix": {
+                  "value": "[parameters('associationNamePrefix')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c15c281f-ea5c-44cd-90b8-fc3c14d13f0c",
+  "name": "c15c281f-ea5c-44cd-90b8-fc3c14d13f0c"
+}

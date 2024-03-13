@@ -1,0 +1,97 @@
+{
+  "properties": {
+    "displayName": "Configure App Service app slots to turn off remote debugging",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Remote debugging requires inbound ports to be opened on an App Service app. Remote debugging should be turned off.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "App Service"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/slots/config",
+          "name": "web",
+          "existenceCondition": {
+            "field": "Microsoft.Web/sites/slots/config/web.remoteDebuggingEnabled",
+            "equals": "false"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/de139f84-1756-47ae-9be6-808fbbe84772"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "siteName": {
+                  "value": "[field('name')]"
+                },
+                "siteId": {
+                  "value": "[field('id')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "siteName": {
+                    "type": "string"
+                  },
+                  "siteId": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Web/sites/slots/config",
+                    "apiVersion": "2021-02-01",
+                    "name": "[format('{0}/{1}/web', split(parameters('siteId'),'/')[8], parameters('siteName'))]",
+                    "properties": {
+                      "remoteDebuggingEnabled": "false"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cca5adfe-626b-4cc6-8522-f5b6ed2391bd",
+  "name": "cca5adfe-626b-4cc6-8522-f5b6ed2391bd"
+}

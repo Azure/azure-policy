@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Container Apps should disable external network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable external network access to your Container Apps by enforcing internal-only ingress. This will ensure inbound communication for Container Apps is limited to callers within the Container Apps environment.",
+    "metadata": {
+      "version": "1.0.1",
+      "category": "Container Apps"
+    },
+    "version": "1.0.1",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.App/containerApps"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.App/containerApps/configuration.ingress",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.App/containerApps/configuration.ingress.external",
+                "equals": true
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/783ea2a8-b8fd-46be-896a-9ae79643a0b1",
+  "name": "783ea2a8-b8fd-46be-896a-9ae79643a0b1"
+}

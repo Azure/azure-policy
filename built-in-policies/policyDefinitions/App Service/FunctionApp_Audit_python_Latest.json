@@ -1,0 +1,99 @@
+{
+  "properties": {
+    "displayName": "Function apps that use Python should use a specified 'Python version'",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for Python software either due to security flaws or to include additional functionality. Using the latest Python version for Function apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. This policy only applies to Linux apps. This policy requires you to specify a Python version that meets your requirements.",
+    "metadata": {
+      "version": "4.1.0",
+      "category": "App Service"
+    },
+    "version": "4.1.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "WindowsPythonLatestVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Latest Windows Python version",
+          "description": "Latest supported Python version for App Services",
+          "deprecated": true
+        },
+        "defaultValue": "3.6"
+      },
+      "LinuxPythonLatestVersion": {
+        "type": "String",
+        "defaultValue": "3.9",
+        "metadata": {
+          "displayName": "Linux Latest Python version",
+          "description": "Latest supported Python version for App Services",
+          "deprecated": true
+        }
+      },
+      "LinuxPythonVersion": {
+        "type": "String",
+        "defaultValue": "",
+        "metadata": {
+          "displayName": "Linux Python version",
+          "description": "Specify a supported Python version for Function apps"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "PYTHON"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "equals": "[concat('PYTHON|', parameters('LinuxPythonVersion'))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "4.1.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7238174a-fd10-4ef0-817e-fc820a951d73",
+  "name": "7238174a-fd10-4ef0-817e-fc820a951d73"
+}

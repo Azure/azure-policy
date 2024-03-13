@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "App Service apps should use managed identity",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use a managed identity for enhanced authentication security",
+    "metadata": {
+      "version": "3.0.0",
+      "category": "App Service"
+    },
+    "version": "3.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/managedServiceIdentityId",
+                "exists": "true"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/xmanagedServiceIdentityId",
+                "exists": "true"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "3.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/2b9ad585-36bc-4615-b300-fd4435808332",
+  "name": "2b9ad585-36bc-4615-b300-fd4435808332"
+}

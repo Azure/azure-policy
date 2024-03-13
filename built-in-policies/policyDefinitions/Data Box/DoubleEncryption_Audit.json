@@ -1,0 +1,70 @@
+{
+  "properties": {
+    "displayName": "Azure Data Box jobs should enable double encryption for data at rest on the device",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable a second layer of software-based encryption for data at rest on the device. The device is already protected via Advanced Encryption Standard 256-bit encryption for data at rest. This option adds a second layer of data encryption.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Data Box"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "supportedSKUs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Supported SKUs",
+          "description": "The list of SKUs that support software-based double encryption"
+        },
+        "allowedValues": [
+          "DataBox",
+          "DataBoxHeavy"
+        ],
+        "defaultValue": [
+          "DataBox",
+          "DataBoxHeavy"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DataBox/jobs"
+          },
+          {
+            "field": "Microsoft.Databox/jobs/sku.name",
+            "in": "[parameters('supportedSKUs')]"
+          },
+          {
+            "field": "Microsoft.DataBox/jobs/details.preferences.encryptionPreferences.doubleEncryption",
+            "notEquals": "Enabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c349d81b-9985-44ae-a8da-ff98d108ede8",
+  "type": "Microsoft.Authorization/policyDefinitions",
+  "name": "c349d81b-9985-44ae-a8da-ff98d108ede8"
+}

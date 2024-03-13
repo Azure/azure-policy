@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "[Deprecated]: Ensure that 'Java version' is the latest, if used as a part of the API app",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Periodically, newer versions are released for Java either due to security flaws or to include additional functionality. Using the latest Python version for API apps is recommended in order to take advantage of security fixes, if any, and/or new functionalities of the latest version. We recommend all customers who are still using API apps to implement the built-in policy called 'App Service apps that use Java should use the latest 'Java version'', which is scoped to include API apps in addition to Web apps.",
+    "metadata": {
+      "version": "2.0.0-deprecated",
+      "category": "App Service",
+      "deprecated": true
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "JavaLatestVersion": {
+        "type": "String",
+        "defaultValue": "11",
+        "metadata": {
+          "displayName": "Latest Java version",
+          "description": "Latest supported Java version for App Services"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "field": "kind",
+            "like": "*api"
+          },
+          {
+            "field": "kind",
+            "contains": "linux"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Web/sites/config",
+          "name": "web",
+          "existenceCondition": {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "notContains": "JAVA"
+              },
+              {
+                "field": "Microsoft.Web/sites/config/web.linuxFxVersion",
+                "like": "[concat('*', parameters('JavaLatestVersion'))]"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "2.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/88999f4c-376a-45c8-bcb3-4058f713cf39",
+  "name": "88999f4c-376a-45c8-bcb3-4058f713cf39"
+}
