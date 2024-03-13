@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Stack HCI servers should have consistently enforced application control policies",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "At a minimum, apply the Microsoft WDAC base policy in enforced mode on all Azure Stack HCI servers. Applied Windows Defender Application Control (WDAC) policies must be consistent across servers in the same cluster.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Stack HCI",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "AuditIfNotExists"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureStackHCI/clusters"
+          },
+          {
+            "field": "Microsoft.AzureStackHCI/clusters/reportedProperties.clusterVersion",
+            "greater": "10.0.20350"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.AzureStackHCI/clusters/securitySettings",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.AzureStackHCI/clusters/securitySettings/securityComplianceStatus.wdacCompliance",
+                "in": [
+                  "Compliant",
+                  "Pending"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dad3a6b9-4451-492f-a95c-69efc6f3fada",
+  "name": "dad3a6b9-4451-492f-a95c-69efc6f3fada"
+}
