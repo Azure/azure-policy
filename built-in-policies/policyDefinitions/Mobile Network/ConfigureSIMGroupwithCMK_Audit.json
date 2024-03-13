@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "SIM Group should use customer-managed keys to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage the encryption at rest of SIM secrets in a SIM Group. Customer-managed keys are commonly required to meet regulatory compliance standards and they enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management.",
+    "metadata": {
+      "category": "Mobile Network",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MobileNetwork/simGroups"
+          },
+          {
+            "value": "[length(field('Microsoft.MobileNetwork/simGroups/encryptionKey.keyUrl'))]",
+            "equals": "0"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/45c4e9bd-ad6b-4634-9566-c2dad2f03cbf",
+  "name": "45c4e9bd-ad6b-4634-9566-c2dad2f03cbf"
+}

@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Stack HCI systems should have encrypted volumes",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use BitLocker to encrypt the OS and data volumes on Azure Stack HCI systems.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Stack HCI",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "AuditIfNotExists"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.AzureStackHCI/clusters"
+          },
+          {
+            "field": "Microsoft.AzureStackHCI/clusters/reportedProperties.clusterVersion",
+            "greater": "10.0.20350"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.AzureStackHCI/clusters/securitySettings",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.AzureStackHCI/clusters/securitySettings/securityComplianceStatus.dataAtRestEncrypted",
+                "in": [
+                  "Compliant",
+                  "Pending"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ee8ca833-1583-4d24-837e-96c2af9488a4",
+  "name": "ee8ca833-1583-4d24-837e-96c2af9488a4"
+}
