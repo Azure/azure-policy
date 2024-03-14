@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Disks and OS image should support TrustedLaunch",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "TrustedLaunch improves security of a Virtual Machine which requires OS Disk & OS Image to support it (Gen 2). To learn more about TrustedLaunch, visit https://aka.ms/trustedlaunch",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Trusted Launch"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/disks"
+          },
+          {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/disks/osType",
+                "exists": "true"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Compute/disks/hyperVGeneration",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Compute/disks/hyperVGeneration",
+                    "equals": "V1"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b03bb370-5249-4ea4-9fce-2552e87e45fa",
+  "name": "b03bb370-5249-4ea4-9fce-2552e87e45fa"
+}
