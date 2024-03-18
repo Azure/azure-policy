@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Configure auto-assessment (every 24 hours) for OS updates on native Azure virtual machines. You can control the scope of assignment according to machine subscription, resource group, location or tag. Learn more about this for Windows: https://aka.ms/computevm-windowspatchassessmentmode, for Linux: https://aka.ms/computevm-linuxpatchassessmentmode.",
     "metadata": {
-      "version": "4.7.0",
+      "version": "4.8.0",
       "category": "Azure Update Manager"
     },
-    "version": "4.7.0",
+    "version": "4.8.0",
     "parameters": {
       "assessmentMode": {
         "type": "String",
@@ -158,6 +158,34 @@
                           {
                             "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
                             "exists": "true"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageId",
+                                "contains": "Microsoft.Compute/galleries"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageId",
+                                "contains": "Microsoft.Compute/images"
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption",
+                                "equals": "Attach"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
+                            "exists": "false"
+                          },
+                          {
+                            "value": "[requestContext().apiVersion]",
+                            "greaterOrEquals": "2023-07-01"
                           }
                         ]
                       },
@@ -774,6 +802,34 @@
                       {
                         "allOf": [
                           {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageId",
+                                "contains": "Microsoft.Compute/galleries"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageId",
+                                "contains": "Microsoft.Compute/images"
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption",
+                                "equals": "Attach"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
+                            "exists": "false"
+                          },
+                          {
+                            "value": "[requestContext().apiVersion]",
+                            "greaterOrEquals": "2023-07-01"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
                             "field": "Microsoft.Compute/imagePublisher",
                             "equals": "MicrosoftWindowsServer"
                           },
@@ -963,6 +1019,7 @@
       }
     },
     "versions": [
+      "4.8.0",
       "4.7.0",
       "4.6.0",
       "4.5.0",
