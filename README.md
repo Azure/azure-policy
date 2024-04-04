@@ -228,12 +228,30 @@ All Databricks resources bypass policy enforcement at creation time. Databricks 
 
 ### Resources that are exempt from policy evaluation
 
+Resource types in the following namespaces are excluded from policy evaluation:
 - Microsoft.Resources/*, except resource groups and subscriptions. 
    - For example, `Microsoft.Resources/deployments` and `Microsoft.Resources/templateSpecs` are not evaluated by policy.
 - Microsoft.Billing/*
 - Microsoft.Capacity/reservationOrders/*
 - Microsoft.Help/*
 - Microsoft.Diagnostics/*
+
+The following resource types are also excluded from policy evaluation:
+- Microsoft.Automation/automationAccounts/jobs
+- Microsoft.Cdn/cdnWebApplicationFirewallManagedRuleSets
+- Microsoft.Cdn/edgenodes
+- Microsoft.classicNetwork/ExpressRouteCrossConnections
+- Microsoft.Compute/restorePointCollections/restorePoints
+- Microsoft.Databricks/workspaces/dbWorkspaces
+- Microsoft.DocumentDb/databaseAccounts/privateEndpointConnectionProxies
+- Microsoft.KeyVault/vaults/secrets
+- Microsoft.KubernetesConfiguration/extensions
+- Microsoft.Maintenance/configurationAssignments
+- Microsoft.Maintenance/applyUpdates
+- Microsoft.Security/assessments
+- Microsoft.SecurityInsights/incidents
+- Microsoft.ServiceBus/namespaces/topics
+- Microsoft.Sql/Servers/databases/recommendedSensitivityLabels
 
 ### Resource types that exceed current enforcement and compliance scale
 
