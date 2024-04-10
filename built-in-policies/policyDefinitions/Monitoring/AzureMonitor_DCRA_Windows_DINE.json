@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Deploy Association to link Windows virtual machines, virtual machine scale sets, and Arc machines to the specified Data Collection Rule or the specified Data Collection Endpoint. The list of locations and OS images are updated over time as support is increased.",
     "metadata": {
-      "version": "4.3.0",
+      "version": "4.4.0",
       "category": "Monitoring"
     },
-    "version": "4.3.0",
+    "version": "4.4.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -21,6 +21,18 @@
           "Disabled"
         ],
         "defaultValue": "DeployIfNotExists"
+      },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to Azure Monitor Agent-Supported Operating Systems",
+          "description": "If set to true, the policy will apply only to machines with AMA-supported operating systems. Otherwise, the policy will apply to all machines in the assignment scope. For supported operating systems, see https://aka.ms/AMAOverview."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       },
       "listOfWindowsImageIdToInclude": {
         "type": "Array",
@@ -147,6 +159,38 @@
                   },
                   {
                     "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "value": "[parameters('scopeToSupportedImages')]",
+                            "equals": false
+                          },
+                          {
+                            "field": "type",
+                            "equals": "Microsoft.Compute/virtualMachines"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "like": "Linux*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "value": "[parameters('scopeToSupportedImages')]",
+                            "equals": false
+                          },
+                          {
+                            "field": "type",
+                            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
+                            "like": "Linux*"
+                          }
+                        ]
+                      },
                       {
                         "field": "Microsoft.Compute/imageId",
                         "in": "[parameters('listOfWindowsImageIdToInclude')]"
@@ -459,6 +503,7 @@
       }
     },
     "versions": [
+      "4.4.0",
       "4.3.0",
       "4.2.0"
     ]
