@@ -5,10 +5,10 @@
     "mode": "All",
     "description": "To ensure your subscription owners are notified when there is a potential security breach in their subscription, set email notifications to subscription owners for high severity alerts in Security Center.",
     "metadata": {
-      "version": "2.0.0",
+      "version": "2.1.0",
       "category": "Security Center"
     },
-    "version": "2.0.0",
+    "version": "2.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -41,8 +41,30 @@
                   "equals": "Off"
                 },
                 {
-                  "field": "Microsoft.Security/securityContacts/alertNotifications.minimalSeverity",
-                  "equals": "High"
+                  "anyOf": [
+                    {
+                      "field": "Microsoft.Security/securityContacts/alertNotifications.minimalSeverity",
+                      "equals": "High"
+                    },
+                    {
+                      "count": {
+                        "field": "Microsoft.Security/securityContacts/notificationsSources[*]",
+                        "where": {
+                          "allOf": [
+                            {
+                              "field": "Microsoft.Security/securityContacts/notificationsSources[*].sourceType",
+                              "equals": "Alert"
+                            },
+                            {
+                              "field": "Microsoft.Security/securityContacts/notificationsSources[*].Alert.minimalSeverity",
+                              "equals": "High"
+                            }
+                          ]
+                        }
+                      },
+                      "equals": 1
+                    }
+                  ]
                 }
               ]
             }
@@ -51,6 +73,7 @@
       }
     },
     "versions": [
+      "2.1.0",
       "2.0.0"
     ]
   },
