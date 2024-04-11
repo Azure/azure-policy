@@ -5,10 +5,10 @@
     "mode": "All",
     "description": "To ensure the relevant people in your organization are notified when there is a potential security breach in one of your subscriptions, enable email notifications for high severity alerts in Security Center.",
     "metadata": {
-      "version": "1.0.1",
+      "version": "1.1.0",
       "category": "Security Center"
     },
-    "version": "1.0.1",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -33,13 +33,38 @@
         "details": {
           "type": "Microsoft.Security/securityContacts",
           "existenceCondition": {
-            "field": "Microsoft.Security/securityContacts/alertNotifications",
-            "notEquals": "Off"
+            "not": {
+              "anyOf": [
+                {
+                  "field": "Microsoft.Security/securityContacts/alertNotifications",
+                  "notEquals": "On"
+                },
+                {
+                  "allOf": [
+                    {
+                      "field": "Microsoft.Security/securityContacts/isEnabled",
+                      "notEquals": true
+                    },
+                    {
+                      "count": {
+                        "field": "Microsoft.Security/securityContacts/notificationsSources[*]",
+                        "where": {
+                          "field": "Microsoft.Security/securityContacts/notificationsSources[*].sourceType",
+                          "equals": "Alert"
+                        }
+                      },
+                      "equals": 1
+                    }
+                  ]
+                }
+              ]
+            }
           }
         }
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.1"
     ]
   },

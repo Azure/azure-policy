@@ -4,11 +4,11 @@
     "policyType": "BuiltIn",
     "description": "A collection of Kubernetes best practices that are recommended by Azure Kubernetes Service (AKS). For the best experience, use deployment safeguards to assign this policy initiative: https://aka.ms/aks/deployment-safeguards. Azure Policy Add-On for AKS is a pre-requisite for applying these best practices to your clusters. For instructions on enabling the Azure Policy Add-On, go to aka.ms/akspolicydoc",
     "metadata": {
-      "version": "1.4.1-preview",
+      "version": "1.6.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
-    "version": "1.4.1-preview",
+    "version": "1.6.0-preview",
     "parameters": {
       "warn": {
         "type": "Boolean",
@@ -123,6 +123,18 @@
           "readinessProbe",
           "livenessProbe"
         ]
+      },
+      "effectForMutationPolicies": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Mutate Effect",
+          "description": "'Mutate' modifies a non-compliant resource to be compliant when creating or updating. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "Mutate",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled"
       }
     },
     "policyDefinitions": [
@@ -349,9 +361,103 @@
             "value": "[parameters('excludedNamespaces')]"
           }
         }
+      },
+      {
+        "policyDefinitionReferenceId": "readOnlyRootFileSystemInitContainers",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2ae2f266-ecc3-4d26-82c5-8c3cb7774f45",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effectForMutationPolicies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "resourceCPULimits",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/42ba1d72-e90f-42f8-bf99-5a1351eed2b1",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effectForMutationPolicies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "resourceMemoryLimits",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5f86d473-38a8-46c9-bdfe-d7fa3b9836bf",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effectForMutationPolicies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "imagesDoNotUseLatest",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/021f8078-41a0-40e6-81b6-c6597da9f3ee",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "warn": {
+            "value": "[parameters('warn')]"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "containerEnforcePreStopHook",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1a3b9003-eac6-4d39-a184-4a567ace7645",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "warn": {
+            "value": "[parameters('warn')]"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "mutateMaxUnavailablePods",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d77f191e-2338-45d0-b6d4-4ee1c586a192",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effectForMutationPolicies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "mutateReadOnlyRootFilesystem",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8e875f96-2c56-40ca-86db-b9f6a0be7347",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effectForMutationPolicies')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "mutateReservedSystemPoolTaints",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/e16d171b-bfe5-4d79-a525-19736b396e92",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effectForMutationPolicies')]"
+          }
+        }
       }
     ],
     "versions": [
+      "1.6.0-PREVIEW",
+      "1.5.0-PREVIEW",
       "1.4.1-PREVIEW",
       "1.4.0-PREVIEW",
       "1.3.3-PREVIEW",
