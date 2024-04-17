@@ -1,0 +1,83 @@
+{
+  "properties": {
+    "displayName": "Configure Advanced Threat Protection to be enabled on Azure database for MySQL flexible servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enable Advanced Threat Protection on your Azure database for MySQL flexible servers to detect anomalous activities indicating unusual and potentially harmful attempts to access or exploit databases.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Security Center"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforMySQL/flexibleservers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforMySQL/flexibleservers/advancedThreatProtectionSettings",
+          "name": "Default",
+          "evaluationDelay": "AfterProvisioningSuccess",
+          "existenceCondition": {
+            "field": "Microsoft.DBforMySQL/flexibleServers/advancedThreatProtectionSettings/state",
+            "equals": "Enabled"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "name": "[concat(parameters('serverName'), '/Default')]",
+                    "type": "Microsoft.DBforMySQL/flexibleservers/advancedThreatProtectionSettings",
+                    "apiVersion": "2023-12-01-preview",
+                    "properties": {
+                      "state": "Enabled"
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3d5ed4c2-5e50-4c76-932b-8982691b68ae",
+  "name": "3d5ed4c2-5e50-4c76-932b-8982691b68ae"
+}

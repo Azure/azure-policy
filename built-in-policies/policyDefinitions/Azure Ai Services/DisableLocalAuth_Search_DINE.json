@@ -1,0 +1,117 @@
+{
+  "properties": {
+    "displayName": "Configure Azure AI Services resources  to disable local key access (disable local authentication)",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Key access (local authentication) is recommended to be disabled for security. Azure OpenAI Studio, typically used in development/testing, requires key access and will not function if key access is disabled. After disabling, Microsoft Entra ID becomes the only access method, which allows maintaining minimum privilege principle and granular control. Learn more at: https://aka.ms/AI/auth",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Ai Services"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "disableLocalAuth": {
+        "type": "String",
+        "metadata": {
+          "displayName": "disableLocalAuth",
+          "description": "The disableLocalAuth property of the Azure AI service"
+        },
+        "allowedValues": [
+          "True",
+          "False"
+        ],
+        "defaultValue": "True"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Search/searchServices"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Search/searchServices",
+          "name": "[field('name')]",
+          "existenceCondition": {
+            "field": "Microsoft.Search/searchServices/disableLocalAuth",
+            "equals": true
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/a001fd3d-188f-4b5d-821b-7da978bf7442",
+            "/providers/Microsoft.Authorization/roleDefinitions/25fbc0a9-bd7c-42a3-aa1a-3b75d497ee68",
+            "/providers/Microsoft.Authorization/roleDefinitions/7ca78c08-252a-4471-8644-bb5ff32d4ba0"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "disableLocalAuth": {
+                    "type": "string"
+                  },
+                  "sku": {
+                    "type": "object"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.Search/searchServices",
+                    "apiVersion": "2023-11-01",
+                    "name": "[parameters('resourceName')]",
+                    "location": "[parameters('location')]",
+                    "sku": "[parameters('sku')]",
+                    "properties": {
+                      "disableLocalAuth": "[parameters('disableLocalAuth')]"
+                    }
+                  }
+                ],
+                "outputs": {}
+              },
+              "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "disableLocalAuth": {
+                  "value": "[parameters('disableLocalAuth')]"
+                },
+                "sku": {
+                  "value": "[field('Microsoft.Search/searchServices/sku')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d45520cb-31ca-44ba-8da2-fcf914608544",
+  "name": "d45520cb-31ca-44ba-8da2-fcf914608544"
+}
