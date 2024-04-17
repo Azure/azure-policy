@@ -5,11 +5,11 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Setting container memory limits to prevent resource exhaustion attacks in a Kubernetes cluster.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -23,6 +23,18 @@
           "Disabled"
         ],
         "defaultValue": "Mutate"
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation."
+        },
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc"
+        ]
       }
     },
     "policyRule": {
@@ -36,11 +48,13 @@
           "mutationInfo": {
             "sourceType": "PublicURL",
             "url": "https://store.policy.core.windows.net/kubernetes/mutate-resource-memory-limits/v1/mutation.yaml"
-          }
+          },
+          "excludedNamespaces": "[parameters('excludedNamespaces')]"
         }
       }
     },
     "versions": [
+      "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },

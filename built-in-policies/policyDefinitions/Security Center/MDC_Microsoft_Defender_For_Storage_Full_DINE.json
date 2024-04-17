@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "All",
     "description": "Microsoft Defender for Storage is an Azure-native layer of security intelligence that detects potential threats to your storage accounts.\nThis policy will enable all Defender for Storage capabilities; Activity Monitoring, Malware Scanning and Sensitive Data Threat Detection. To learn more about Defender for Storage capabilities and benefits, visit aka.ms/DefenderForStorage.",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -33,6 +33,14 @@
           "false"
         ],
         "defaultValue": "true"
+      },
+      "capGBPerMonthPerStorageAccount": {
+        "type": "Integer",
+        "metadata": {
+          "displayName": "Cap GB Per Month Per Storage Account",
+          "description": "Limit the GB to be scanned per month for each storage account within the subscription. Set to -1 for unlimited GB scanning"
+        },
+        "defaultValue": 5000
       },
       "isSensitiveDataDiscoveryEnabled": {
         "type": "String",
@@ -118,16 +126,22 @@
                 "isOnUploadMalwareScanningEnabled": {
                   "value": "[parameters('isOnUploadMalwareScanningEnabled')]"
                 },
+                "capGBPerMonthPerStorageAccount": {
+                  "value": "[parameters('capGBPerMonthPerStorageAccount')]"
+                },
                 "isSensitiveDataDiscoveryEnabled": {
                   "value": "[parameters('isSensitiveDataDiscoveryEnabled')]"
                 }
               },
               "template": {
                 "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
+                "contentVersion": "1.1.0.0",
                 "parameters": {
                   "isOnUploadMalwareScanningEnabled": {
                     "type": "String"
+                  },
+                  "capGBPerMonthPerStorageAccount": {
+                    "type": "int"
                   },
                   "isSensitiveDataDiscoveryEnabled": {
                     "type": "String"
@@ -145,7 +159,10 @@
                       "extensions": [
                         {
                           "name": "OnUploadMalwareScanning",
-                          "isEnabled": "[parameters('isOnUploadMalwareScanningEnabled')]"
+                          "isEnabled": "[parameters('isOnUploadMalwareScanningEnabled')]",
+                          "additionalExtensionProperties": {
+                            "CapGBPerMonthPerStorageAccount": "[parameters('capGBPerMonthPerStorageAccount')]"
+                          }
                         },
                         {
                           "name": "SensitiveDataDiscovery",
@@ -163,6 +180,7 @@
       }
     },
     "versions": [
+      "1.2.0",
       "1.1.0"
     ]
   },

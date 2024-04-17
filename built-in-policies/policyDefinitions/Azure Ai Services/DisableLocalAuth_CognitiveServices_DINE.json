@@ -1,0 +1,150 @@
+{
+  "properties": {
+    "displayName": "Configure Azure AI Services resources to disable local key access (disable local authentication)",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Key access (local authentication) is recommended to be disabled for security. Azure OpenAI Studio, typically used in development/testing, requires key access and will not function if key access is disabled. After disabling, Microsoft Entra ID becomes the only access method, which allows maintaining minimum privilege principle and granular control. Learn more at: https://aka.ms/AI/auth",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Ai Services"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "disableLocalAuth": {
+        "type": "String",
+        "metadata": {
+          "displayName": "disableLocalAuth",
+          "description": "The disableLocalAuth property of the Azure AI service"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "publicNetworkAccess": {
+        "type": "String",
+        "metadata": {
+          "displayName": "publicNetworkAccess",
+          "description": "The publicNetworkAccess property of the Azure AI service"
+        },
+        "allowedValues": [
+          "Disabled",
+          "Enabled"
+        ],
+        "defaultValue": "Disabled"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.CognitiveServices/accounts"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.CognitiveServices/accounts",
+          "name": "[field('name')]",
+          "existenceCondition": {
+            "field": "Microsoft.CognitiveServices/accounts/disableLocalAuth",
+            "equals": true
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/a001fd3d-188f-4b5d-821b-7da978bf7442",
+            "/providers/microsoft.authorization/roleDefinitions/25fbc0a9-bd7c-42a3-aa1a-3b75d497ee68"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "resourceName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "disableLocalAuth": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "sku": {
+                    "type": "object"
+                  },
+                  "publicNetworkAccess": {
+                    "type": "string"
+                  },
+                  "networkAcls": {
+                    "type": "object"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.CognitiveServices/accounts",
+                    "apiVersion": "2023-10-01-preview",
+                    "name": "[parameters('resourceName')]",
+                    "kind": "[parameters('kind')]",
+                    "sku": "[parameters('sku')]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "customSubDomainName": "[parameters('resourceName')]",
+                      "disableLocalAuth": "[parameters('disableLocalAuth')]",
+                      "publicNetworkAccess": "[parameters('publicNetworkAccess')]",
+                      "networkAcls": "[parameters('networkAcls')]"
+                    }
+                  }
+                ],
+                "outputs": {}
+              },
+              "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                },
+                "disableLocalAuth": {
+                  "value": "[parameters('disableLocalAuth')]"
+                },
+                "kind": {
+                  "value": "[field('kind')]"
+                },
+                "sku": {
+                  "value": "[field('Microsoft.CognitiveServices/accounts/sku')]"
+                },
+                "publicNetworkAccess": {
+                  "value": "[parameters('publicNetworkAccess')]"
+                },
+                "networkAcls": {
+                  "value": "[field('Microsoft.CognitiveServices/accounts/networkAcls')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/55eff01b-f2bd-4c32-9203-db285f709d30",
+  "name": "55eff01b-f2bd-4c32-9203-db285f709d30"
+}
