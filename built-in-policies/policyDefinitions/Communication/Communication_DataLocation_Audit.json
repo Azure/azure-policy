@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Communication service resource should use allow listed data location",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Create a Communication service resource only from an allow listed data location. This data location determines where the data of the communication service resource will be stored at rest, ensuring your preferred allow listed data locations as this cannot be changed after resource creation.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Communication"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "allowedDataLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed data locations",
+          "description": "The list of allowed data locations for your communication service resources."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Communication/CommunicationServices"
+          },
+          {
+            "field": "Microsoft.Communication/communicationServices/dataLocation",
+            "notIn": "[parameters('allowedDataLocations')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/93c45b74-42a1-4967-b25d-82c4dc630921",
+  "name": "93c45b74-42a1-4967-b25d-82c4dc630921"
+}

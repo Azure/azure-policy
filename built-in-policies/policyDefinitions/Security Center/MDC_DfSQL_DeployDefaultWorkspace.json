@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and Log Analytics workspace in the same region as the machine.",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "metadata": {
-      "version": "1.2.0",
+      "version": "1.3.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -66,8 +66,7 @@
           "type": "Microsoft.OperationalInsights/workspaces",
           "deploymentScope": "subscription",
           "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
-            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
           ],
           "existenceScope": "subscription",
           "existenceCondition": {
@@ -149,7 +148,7 @@
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                   "defaultRGLocation": "[parameters('location')]",
                   "workspaceName": "[concat('D4SQL-', replace(subscription().subscriptionId, '-', ''),'-', parameters('location'))]",
-                  "deployWorkspace": "[concat('deployWorkspace-', variables('workspaceName'))]"
+                  "deployWorkspace": "[concat('deployWS-', variables('workspaceName'))]"
                 },
                 "resources": [
                   {
@@ -208,18 +207,6 @@
                               },
                               "retentionInDays": 30
                             }
-                          },
-                          {
-                            "type": "Microsoft.OperationalInsights/workspaces/providers/locks",
-                            "apiVersion": "2020-05-01",
-                            "name": "[concat(parameters('workspaceName'), '/Microsoft.Authorization/', 'CanNotDeleteLock-', parameters('workspaceName'))]",
-                            "dependsOn": [
-                              "[parameters('workspaceName')]"
-                            ],
-                            "properties": {
-                              "level": "CanNotDelete",
-                              "notes": "Please do not delete this workspace since Defender for SQL extension enabled by Azure Policy is relying on its existence."
-                            }
                           }
                         ]
                       }
@@ -233,6 +220,7 @@
       }
     },
     "versions": [
+      "1.3.0",
       "1.2.0",
       "1.1.2",
       "1.1.1-PREVIEW"

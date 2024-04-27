@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Communication service resource should use a managed identity",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Assigning a managed identity to your Communication service resource helps ensure secure authentication. This identity is used by this Communication service resource to communicate with other Azure services, like Azure Storage, in a secure way without you having to manage any credentials.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Communication"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "microsoft.communication/communicationservices"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "identity.type",
+                "exists": "false"
+              },
+              {
+                "field": "identity.type",
+                "equals": "None"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bcff6755-335b-484d-b435-d1161db39cdc",
+  "name": "bcff6755-335b-484d-b435-d1161db39cdc"
+}
