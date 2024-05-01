@@ -233,7 +233,7 @@ The following resource types bypass policy evaluation:
 
 There are also scenarios in which policy evaluation is skipped for resources in managed resource groups:
 - Cross-tenant requests in RGs managed by `Microsoft.Databricks/workspaces`
-  - Policy evaluation is skipped for these scenarios, which occur at creation time when the Databricks RP deploys locked resources needed to power the service within the managed RG. This is done so that customer policy assignments do not lead to partial deployment of these resources, which could cause inintended billing and inability to modify. 
+  - Policy evaluation is skipped for these scenarios, which occur at creation time when the Databricks RP deploys locked resources needed to power the service within the managed RG. This is done so that customer policy assignments do not lead to partial deployment of these resources, which could cause unintended billing and inability to modify. 
   - Databricks resources will have policy enforcement post-creation, when requests are made within the same tenant.
   - To provide feedback on this deployment experience, please leverage the [Databricks UserVoice](https://feedback.azure.com/forums/909463-azure-databricks). 
 - Cross-tenant requests in RGs managed by `Microsoft.Solutions/applications`
