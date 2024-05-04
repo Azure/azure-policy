@@ -1,0 +1,191 @@
+{
+  "properties": {
+    "displayName": "Enable logging by category group for microsoft.network/vpngateways to Log Analytics",
+    "description": "Resource logs should be enabled to track activities and events that take place on your resources and give you visibility and insights into any changes that occur. This policy deploys a diagnostic setting using a category group to route logs to a Log Analytics workspace for microsoft.network/vpngateways.",
+    "mode": "Indexed",
+    "policyType": "BuiltIn",
+    "version": "1.0.0",
+    "metadata": {
+      "category": "Monitoring",
+      "version": "1.0.0"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "diagnosticSettingName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Diagnostic Setting Name",
+          "description": "Diagnostic Setting Name"
+        },
+        "defaultValue": "setByPolicy-LogAnalytics"
+      },
+      "categoryGroup": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Category Group",
+          "description": "Diagnostic category group - none, audit, or allLogs."
+        },
+        "allowedValues": [
+          "audit",
+          "allLogs"
+        ],
+        "defaultValue": "audit"
+      },
+      "resourceLocationList": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Resource Location List",
+          "description": "Resource Location List to send logs to nearby Log Analytics. A single entry \"*\" selects all locations (default)."
+        },
+        "defaultValue": [
+          "*"
+        ]
+      },
+      "logAnalytics": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Log Analytics Workspace",
+          "description": "Log Analytics Workspace",
+          "strongType": "omsWorkspace",
+          "assignPermissions": true
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "microsoft.network/vpngateways"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[first(parameters('resourceLocationList'))]",
+                "equals": "*"
+              },
+              {
+                "field": "location",
+                "in": "[parameters('resourceLocationList')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Insights/diagnosticSettings",
+          "evaluationDelay": "AfterProvisioning",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "count": {
+                  "field": "Microsoft.Insights/diagnosticSettings/logs[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].enabled",
+                        "equals": "[equals(parameters('categoryGroup'), 'allLogs')]"
+                      },
+                      {
+                        "field": "microsoft.insights/diagnosticSettings/logs[*].categoryGroup",
+                        "equals": "allLogs"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "field": "Microsoft.Insights/diagnosticSettings/workspaceId",
+                "equals": "[parameters('logAnalytics')]"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "http://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "diagnosticSettingName": {
+                    "type": "string"
+                  },
+                  "logAnalytics": {
+                    "type": "string"
+                  },
+                  "categoryGroup": {
+                    "type": "String"
+                  },
+                  "resourceName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "microsoft.network/vpngateways/providers/diagnosticSettings",
+                    "apiVersion": "2021-05-01-preview",
+                    "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
+                    "properties": {
+                      "workspaceId": "[parameters('logAnalytics')]",
+                      "logs": [
+                        {
+                          "categoryGroup": "allLogs",
+                          "enabled": "[equals(parameters('categoryGroup'), 'allLogs')]"
+                        }
+                      ],
+                      "metrics": []
+                    }
+                  }
+                ],
+                "outputs": {
+                  "policy": {
+                    "type": "string",
+                    "value": "[concat('Diagnostic setting ', parameters('diagnosticSettingName'), ' for type microsoft.network/vpngateways, resourceName ', parameters('resourceName'), ' to Log Analytics ', parameters('logAnalytics'), ' configured')]"
+                  }
+                }
+              },
+              "parameters": {
+                "diagnosticSettingName": {
+                  "value": "[parameters('diagnosticSettingName')]"
+                },
+                "logAnalytics": {
+                  "value": "[parameters('logAnalytics')]"
+                },
+                "categoryGroup": {
+                  "value": "[parameters('categoryGroup')]"
+                },
+                "resourceName": {
+                  "value": "[field('name')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "name": "d8624de8-47fe-47c0-bea0-2d8329b628fe",
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d8624de8-47fe-47c0-bea0-2d8329b628fe"
+}
