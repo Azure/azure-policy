@@ -230,6 +230,7 @@ The following resource types bypass policy evaluation:
 - `Microsoft.Capacity/reservationOrders/*`
 - `Microsoft.Help/*`
 - `Microsoft.Diagnostics/*`
+- `Microsoft.AppConfiguration/configurationStores/keyValues`
 
 There are also scenarios in which policy evaluation is skipped for resources in managed resource groups:
 - Cross-tenant requests in RGs managed by `Microsoft.Databricks/workspaces`
