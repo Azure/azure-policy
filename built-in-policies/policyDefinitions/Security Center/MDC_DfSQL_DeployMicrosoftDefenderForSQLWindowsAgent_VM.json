@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Configure Windows SQL Virtual Machines to automatically install the Microsoft Defender for SQL extension. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations).",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "metadata": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -36,6 +36,26 @@
         "metadata": {
           "displayName": "Workspace Id",
           "description": "Workspace Id of the Log Analytics workspace destination for the Data Collection Rule."
+        },
+        "defaultValue": ""
+      },
+      "bringYourOwnDcr": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Bring your own DCR",
+          "description": "Enable or disable the use of a user-defined Data Collection Rule."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "dcrResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "DCR Resource Id",
+          "description": "Resource Id of the user-defined Data Collection Rule."
         },
         "defaultValue": ""
       }
@@ -101,6 +121,12 @@
                 },
                 "userWorkspaceId": {
                   "value": "[parameters('userWorkspaceId')]"
+                },
+                "bringYourOwnDcr": {
+                  "value": "[parameters('bringYourOwnDcr')]"
+                },
+                "dcrResourceId": {
+                  "value": "[parameters('dcrResourceId')]"
                 }
               },
               "template": {
@@ -117,6 +143,12 @@
                     "type": "string"
                   },
                   "userWorkspaceId": {
+                    "type": "string"
+                  },
+                  "bringYourOwnDcr": {
+                    "type": "bool"
+                  },
+                  "dcrResourceId": {
                     "type": "string"
                   }
                 },
@@ -164,7 +196,7 @@
                   "subscriptionId": "[subscription().subscriptionId]",
                   "defaultRGName": "[concat('DefaultResourceGroup-', variables('locationCode'))]",
                   "dcrName": "[if(empty(parameters('userWorkspaceId')), concat('MicrosoftDefenderForSQL-', variables('actualLocation'), '-dcr'), concat('D4SQL-', replace(parameters('userWorkspaceId'), '-', ''), '-dcr'))]",
-                  "dcrId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName'))]",
+                  "dcrId": "[if(parameters('bringYourOwnDcr'), parameters('dcrResourceId'), concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('defaultRGName'), '/providers/Microsoft.Insights/dataCollectionRules/', variables('dcrName')))]",
                   "dcraName": "[concat(parameters('vmName'),'/Microsoft.Insights/MicrosoftDefenderForSQL-RulesAssociation')]"
                 },
                 "resources": [
@@ -204,6 +236,7 @@
       }
     },
     "versions": [
+      "1.4.0",
       "1.3.0",
       "1.2.1",
       "1.2.0-PREVIEW"
