@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Linux virtual machines for collecting telemetry data from the guest OS. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "3.6.0",
+      "version": "3.7.0",
       "category": "Monitoring"
     },
-    "version": "3.6.0",
+    "version": "3.7.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -32,6 +32,26 @@
           false,
           true
         ]
+      },
+      "restrictBringYourOwnUserAssignedIdentityToSubscription": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Restrict Bring Your Own User-Assigned Identity to Subscription",
+          "description": "Enable this to enforce the user assigned identity must exist in the same subscription as the virtual machine. When true, must provide User-Assigned Managed Identity Name and User-Assigned Managed Identity Resource Group Name parameters. When false, the parameter User Assigned Managed Identity Resource Id will be used instead."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
+      "userAssignedIdentityResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource ID",
+          "description": "The resource ID of the pre-created user-assigned managed identity. This parameter is only used when the restrict Bring Your Own User-Assigned Identity To Subscription parameter is false."
+        },
+        "defaultValue": ""
       },
       "userAssignedManagedIdentityName": {
         "type": "String",
@@ -602,7 +622,7 @@
                   "value": "[field('location')]"
                 },
                 "userAssignedManagedIdentity": {
-                  "value": "[if(parameters('bringYourOwnUserAssignedManagedIdentity'), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('userAssignedManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userAssignedManagedIdentityName')), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-', field('location')))]"
+                  "value": "[if(parameters('bringYourOwnUserAssignedManagedIdentity'), if(parameters('restrictBringYourOwnUserAssignedIdentityToSubscription'), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('userAssignedManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userAssignedManagedIdentityName')), parameters('userAssignedIdentityResourceId')), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-', field('location')))]"
                 }
               }
             }
@@ -611,6 +631,7 @@
       }
     },
     "versions": [
+      "3.7.0",
       "3.6.0",
       "3.5.0",
       "3.4.0"

@@ -5,11 +5,11 @@
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Windows virtual machine scale sets for enabling ChangeTracking and Inventory. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "ChangeTrackingAndInventory",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -34,6 +34,26 @@
           true
         ]
       },
+      "restrictBringYourOwnUserAssignedIdentityToSubscription": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Restrict Bring Your Own User-Assigned Identity to Subscription",
+          "description": "Enable this to enforce the user assigned identity must exist in the same subscription as the virtual machine. When true, must provide User-Assigned Managed Identity Name and User-Assigned Managed Identity Resource Group Name parameters. When false, the parameter User Assigned Managed Identity Resource Id will be used instead."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
+      "userAssignedIdentityResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource ID",
+          "description": "The resource ID of the pre-created user-assigned managed identity. This parameter is only used when the restrict Bring Your Own User-Assigned Identity To Subscription parameter is false."
+        },
+        "defaultValue": ""
+      },
       "userAssignedManagedIdentityName": {
         "type": "String",
         "metadata": {
@@ -57,60 +77,7 @@
           "description": "The list of locations where the policy should be applied.",
           "strongType": "location"
         },
-        "allowedValues": [
-          "australiasoutheast",
-          "australiaeast",
-          "brazilsouth",
-          "canadacentral",
-          "centralindia",
-          "centralus",
-          "eastasia",
-          "eastus2euap",
-          "eastus",
-          "eastus2",
-          "francecentral",
-          "japaneast",
-          "koreacentral",
-          "northcentralus",
-          "northeurope",
-          "norwayeast",
-          "southcentralus",
-          "southeastasia",
-          "switzerlandnorth",
-          "uaenorth",
-          "uksouth",
-          "westcentralus",
-          "westeurope",
-          "westus",
-          "westus2"
-        ],
-        "defaultValue": [
-          "australiasoutheast",
-          "australiaeast",
-          "brazilsouth",
-          "canadacentral",
-          "centralindia",
-          "centralus",
-          "eastasia",
-          "eastus2euap",
-          "eastus",
-          "eastus2",
-          "francecentral",
-          "japaneast",
-          "koreacentral",
-          "northcentralus",
-          "northeurope",
-          "norwayeast",
-          "southcentralus",
-          "southeastasia",
-          "switzerlandnorth",
-          "uaenorth",
-          "uksouth",
-          "westcentralus",
-          "westeurope",
-          "westus",
-          "westus2"
-        ]
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -121,8 +88,16 @@
             "equals": "Microsoft.Compute/virtualMachineScaleSets"
           },
           {
-            "field": "location",
-            "in": "[parameters('listOfApplicableLocations')]"
+            "anyOf": [
+              {
+                "value": "[empty(parameters('listOfApplicableLocations'))]",
+                "equals": true
+              },
+              {
+                "field": "location",
+                "in": "[parameters('listOfApplicableLocations')]"
+              }
+            ]
           },
           {
             "anyOf": [
@@ -387,7 +362,7 @@
                   "value": "[field('location')]"
                 },
                 "userAssignedManagedIdentity": {
-                  "value": "[if(parameters('bringYourOwnUserAssignedManagedIdentity'), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('userAssignedManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userAssignedManagedIdentityName')), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-', field('location')))]"
+                  "value": "[if(parameters('bringYourOwnUserAssignedManagedIdentity'), if(parameters('restrictBringYourOwnUserAssignedIdentityToSubscription'), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('userAssignedManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userAssignedManagedIdentityName')), parameters('userAssignedIdentityResourceId')), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-', field('location')))]"
                 }
               }
             }
@@ -396,6 +371,7 @@
       }
     },
     "versions": [
+      "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },
