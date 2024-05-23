@@ -3,10 +3,10 @@
     "displayName": "Configure SQL VMs and Arc-enabled SQL Servers to install Microsoft Defender for SQL and AMA with a LA workspace",
     "policyType": "BuiltIn",
     "description": "Microsoft Defender for SQL collects events from the agents and uses them to provide security alerts and tailored hardening tasks (recommendations). Creates a resource group and a Data Collection Rule and Log Analytics workspace in the same region as the machine.",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "metadata": {
       "category": "Security Center",
-      "version": "1.2.1"
+      "version": "1.3.0"
     },
     "parameters": {
       "workspaceRegion": {
@@ -45,6 +45,26 @@
           "description": "The location of the resource group 'Built-In-Identity-RG' created by the policy."
         },
         "defaultValue": "eastus"
+      },
+      "bringYourOwnUserAssignedManagedIdentity": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Bring your own User-Assigned Managed Identity",
+          "description": "Enable this to use your own user-assigned managed identity. The pre-created identity MUST exist otherwise the policy deployment will fail. If enabled, ensure that the user-assigned managed identity resource ID parameter matches the pre-created user-assigned managed identity resource ID. If not enabled, the policy will create a new user-assigned managed identitiy per subscription, in a new resource group named 'Built-In-Identity-RG'."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "userAssignedIdentityResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource ID",
+          "description": "The resource ID of the pre-created user-assigned managed identity. This parameter is only used when bringYourOwnUserAssignedManagedIdentity is set to true"
+        },
+        "defaultValue": ""
       }
     },
     "policyDefinitions": [
@@ -55,13 +75,27 @@
         "parameters": {
           "builtInIdentityResourceGroupLocation": {
             "value": "[parameters('builtInIdentityResourceGroupLocation')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedIdentityResourceId": {
+            "value": "[parameters('userAssignedIdentityResourceId')]"
           }
         }
       },
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f91991d1-5383-4c95-8ee5-5ac423dd8bb1",
         "policyDefinitionReferenceId": "MDC_DfSQL_DeployWindowsAMA_VM",
-        "definitionVersion": "1.*.*"
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "userAssignedIdentityResourceId": {
+            "value": "[parameters('userAssignedIdentityResourceId')]"
+          }
+        }
       },
       {
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ddca0ddc-4e9d-4bbb-92a1-f7c4dd7ef7ce",
@@ -118,6 +152,7 @@
       }
     ],
     "versions": [
+      "1.3.0",
       "1.2.1",
       "1.2.0-PREVIEW"
     ]

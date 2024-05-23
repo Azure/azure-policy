@@ -4,12 +4,32 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Windows SQL Virtual Machines. Learn more: https://aka.ms/AMAOverview.",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "metadata": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "Security Center"
     },
     "parameters": {
+      "bringYourOwnUserAssignedManagedIdentity": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Bring Your Own User-Assigned Identity",
+          "description": "Enable this to use your pre-created user-assigned managed identity. The pre-created identity MUST exist otherwise the policy deployment will fail. If enabled, ensure that the user-assigned managed identity resource ID parameter matches the pre-created user-assigned managed identity resource ID. If not enabled, the policy will create per subscription, per resource user-assigned managed identities in a new resource group named 'Built-In-Identity-RG'."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "userAssignedIdentityResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource ID",
+          "description": "The resource ID of the pre-created user-assigned managed identity. This parameter is only used when the Centralized User-Assigned Managed Identity parameter is true."
+        },
+        "defaultValue": ""
+      },
       "effect": {
         "type": "String",
         "metadata": {
@@ -79,7 +99,7 @@
                   "value": "[field('location')]"
                 },
                 "userAssignedManagedIdentity": {
-                  "value": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-', field('location'))]"
+                  "value": "[if(parameters('bringYourOwnUserAssignedManagedIdentity'), parameters('userAssignedIdentityResourceId'), concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-', field('location')))]"
                 }
               },
               "template": {
@@ -135,6 +155,7 @@
       }
     },
     "versions": [
+      "1.4.0",
       "1.3.0",
       "1.2.2",
       "1.2.1-PREVIEW"
