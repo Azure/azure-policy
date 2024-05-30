@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "You can use Azure Update Manager in Azure to save recurring deployment schedules to install operating system updates for your Windows Server and Linux machines in Azure, in on-premises environments, and in other cloud environments connected using Azure Arc-enabled servers. This policy will also change the patch mode for the Azure Virtual Machine to 'AutomaticByPlatform'. See more: https://aka.ms/umc-scheduled-patching",
     "metadata": {
-      "version": "3.10.0",
+      "version": "3.12.0",
       "category": "Azure Update Manager"
     },
-    "version": "3.10.0",
+    "version": "3.12.0",
     "parameters": {
       "maintenanceConfigurationResourceId": {
         "type": "String",
@@ -124,76 +124,144 @@
                   {
                     "anyOf": [
                       {
-                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-                        "in": "[parameters('operatingSystemTypes')]"
-                      },
-                      {
                         "allOf": [
                           {
-                            "value": "Linux",
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "exists": "true"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
                             "in": "[parameters('operatingSystemTypes')]"
                           },
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "in": [
-                              "sles-standard",
-                              "sles-sapcal",
-                              "sles-sap-byos",
-                              "sles-sap",
-                              "sles-byos",
-                              "sles-15-sp4-sapcal",
-                              "sles-15-sp4-basic",
-                              "sles-15-sp4",
-                              "sles-15-sp3-sapcal",
-                              "sles-15-sp2-hpc",
-                              "sles-15-sp2-basic",
-                              "sles-15-sp1-sapcal",
-                              "sles",
-                              "sle-hpc-15-sp4",
-                              "sles-12-sp5",
-                              "sles-15-sp2",
-                              "centos-hpc",
-                              "centos-ci",
-                              "centos-lvm",
-                              "Centos",
-                              "rhel-sap-ha",
-                              "rhel-sap-apps",
-                              "RHEL-RAW",
-                              "RHEL",
-                              "aml-workstation",
-                              "aks",
-                              "oracle-database-19-3",
-                              "oracle-database",
-                              "oracle-linux",
-                              "cbl-mariner",
-                              "0001-com-ubuntu-server-jammy",
-                              "0001-com-ubuntu-pro-jammy",
-                              "0001-com-ubuntu-pro-focal",
-                              "0001-com-ubuntu-server-focal",
-                              "0001-com-ubuntu-pro-bionic",
-                              "UbuntuServer"
+                            "anyOf": [
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/galleries"
+                              },
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/images"
+                              }
                             ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
+                            "exists": "true"
                           }
                         ]
                       },
                       {
                         "allOf": [
                           {
-                            "value": "Windows",
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "exists": "true"
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
                             "in": "[parameters('operatingSystemTypes')]"
                           },
                           {
-                            "field": "Microsoft.Compute/imageOffer",
-                            "in": [
-                              "WindowsServer",
-                              "microsoftserveroperatingsystems-previews",
-                              "windowsserverhotpatch-previews",
-                              "sql2016sp1-ws2016",
-                              "sql2016sp2-ws201",
-                              "sql2017-ws2016",
-                              "sql2019-ws2019",
-                              "dynamics",
-                              "process-server"
+                            "anyOf": [
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/galleries"
+                              },
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/images"
+                              },
+                              {
+                                "value": "[field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption')]",
+                                "equals": "Attach"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
+                            "exists": "false"
+                          },
+                          {
+                            "value": "[requestContext().apiVersion]",
+                            "greaterOrEquals": "2023-07-01"
+                          }
+                        ]
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "in": "[parameters('operatingSystemTypes')]"
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "value": "Linux",
+                                "in": "[parameters('operatingSystemTypes')]"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "in": [
+                                  "sles-standard",
+                                  "sles-sapcal",
+                                  "sles-sap-byos",
+                                  "sles-sap",
+                                  "sles-byos",
+                                  "sles-15-sp4-sapcal",
+                                  "sles-15-sp4-basic",
+                                  "sles-15-sp4",
+                                  "sles-15-sp3-sapcal",
+                                  "sles-15-sp2-hpc",
+                                  "sles-15-sp2-basic",
+                                  "sles-15-sp1-sapcal",
+                                  "sles",
+                                  "sle-hpc-15-sp4",
+                                  "sles-12-sp5",
+                                  "sles-15-sp2",
+                                  "centos-hpc",
+                                  "centos-ci",
+                                  "centos-lvm",
+                                  "Centos",
+                                  "rhel-sap-ha",
+                                  "rhel-sap-apps",
+                                  "RHEL-RAW",
+                                  "RHEL",
+                                  "aml-workstation",
+                                  "aks",
+                                  "oracle-database-19-3",
+                                  "oracle-database",
+                                  "oracle-linux",
+                                  "cbl-mariner",
+                                  "0001-com-ubuntu-server-jammy",
+                                  "0001-com-ubuntu-pro-jammy",
+                                  "0001-com-ubuntu-pro-focal",
+                                  "0001-com-ubuntu-server-focal",
+                                  "0001-com-ubuntu-pro-bionic",
+                                  "UbuntuServer"
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "allOf": [
+                              {
+                                "value": "Windows",
+                                "in": "[parameters('operatingSystemTypes')]"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "in": [
+                                  "WindowsServer",
+                                  "microsoftserveroperatingsystems-previews",
+                                  "windowsserverhotpatch-previews",
+                                  "sql2016sp1-ws2016",
+                                  "sql2016sp2-ws201",
+                                  "sql2017-ws2016",
+                                  "sql2019-ws2019",
+                                  "dynamics",
+                                  "process-server"
+                                ]
+                              }
                             ]
                           }
                         ]
@@ -300,6 +368,62 @@
                   },
                   {
                     "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "exists": "true"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/galleries"
+                              },
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/images"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
+                            "exists": "true"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                            "exists": "true"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/galleries"
+                              },
+                              {
+                                "value": "[field('Microsoft.Compute/imageId')]",
+                                "contains": "Microsoft.Compute/images"
+                              },
+                              {
+                                "value": "[field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption')]",
+                                "equals": "Attach"
+                              }
+                            ]
+                          },
+                          {
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.computerName",
+                            "exists": "false"
+                          },
+                          {
+                            "value": "[requestContext().apiVersion]",
+                            "greaterOrEquals": "2023-07-01"
+                          }
+                        ]
+                      },
                       {
                         "allOf": [
                           {
@@ -1061,10 +1185,10 @@
                   "value": "[tolower(field('Microsoft.Compute/imageOffer'))]"
                 },
                 "patchMode": {
-                  "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.patchMode'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.patchMode')), 'NA')]"
+                  "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(or(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), contains(createArray('microsoftwindowsserver', 'microsoftsqlserver', 'microsoftdynamicsax', 'microsoftazuresiterecovery', 'microsoftbiztalkserver', 'microsoftpowerbi', 'microsoftsharepoint', 'microsoftwindowsserverhpcpack', 'microsoftvisualstudio'),tolower(field('Microsoft.Compute/imagePublisher')))), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.patchMode'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.patchMode')), 'NA')]"
                 },
                 "bypassCheckValue": {
-                  "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(or(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), contains(tolower(field('Microsoft.Compute/imagePublisher')), 'window')), if(empty(field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings')), bool('false'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule')), if(empty(field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings')), bool('false'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule'))), bool('false'))]"
+                  "value": "[if(equals(toLower(field('type')), 'microsoft.compute/virtualmachines'), if(or(equals(toLower(field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')), 'windows'), contains(createArray('microsoftwindowsserver', 'microsoftsqlserver', 'microsoftdynamicsax', 'microsoftazuresiterecovery', 'microsoftbiztalkserver', 'microsoftpowerbi', 'microsoftsharepoint', 'microsoftwindowsserverhpcpack', 'microsoftvisualstudio'), toLower(field('Microsoft.Compute/imagePublisher')))), if(contains(field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings'), 'bypassPlatformSafetyChecksOnUserSchedule'), field('Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule'), bool('false')), if(contains(field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings'), 'bypassPlatformSafetyChecksOnUserSchedule'), field('Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings.bypassPlatformSafetyChecksOnUserSchedule'), bool('false'))), bool('false'))]"
                 },
                 "location": {
                   "value": "[field('location')]"
@@ -1148,7 +1272,7 @@
                   {
                     "condition": "[variables('patchModeShouldBeChanged')]",
                     "type": "Microsoft.Compute/virtualMachines",
-                    "apiVersion": "2023-03-01",
+                    "apiVersion": "2023-09-01",
                     "name": "[variables('machineName')]",
                     "location": "[parameters('location')]",
                     "properties": {
@@ -1196,6 +1320,8 @@
       }
     },
     "versions": [
+      "3.12.0",
+      "3.11.0",
       "3.10.0",
       "3.9.1"
     ]
