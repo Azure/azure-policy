@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "Disconnections should be logged for PostgreSQL flexible servers.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy helps audit any PostgreSQL flexible servers in your environment without log_disconnections enabled.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "log_disconnections",
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+            "equals": "ON"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1d14b021-1bae-4f93-b36b-69695e14984a",
+  "name": "1d14b021-1bae-4f93-b36b-69695e14984a"
+}

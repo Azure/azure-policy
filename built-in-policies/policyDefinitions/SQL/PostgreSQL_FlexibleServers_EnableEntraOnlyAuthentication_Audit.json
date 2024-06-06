@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure PostgreSQL flexible server should have Microsoft Entra Only Authentication enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling local authentication methods and allowing only Microsoft Entra Authentication improves security by ensuring that Azure PostgreSQL flexible server can exclusively be accessed by Microsoft Entra identities.",
+    "metadata": {
+      "preview": true,
+      "version": "1.0.0-preview",
+      "category": "SQL"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DBForPostgreSql/flexibleServers"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DBForPostgreSql/flexibleServers/authConfig.activeDirectoryAuth",
+                "notEquals": "Enabled"
+              },
+              {
+                "field": "Microsoft.DBForPostgreSql/flexibleServers/authConfig.passwordAuth",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fa498b91-8a7e-4710-9578-da944c68d1fe",
+  "name": "fa498b91-8a7e-4710-9578-da944c68d1fe"
+}
