@@ -125,7 +125,7 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
   - This type does not support LIST API which does not allow for compliance results to be populated. This type also does not support GET API calls at a subscription level which can lead to incorrect compliance results over time.
 - `Microsoft.EventGrid/eventSubscriptions`
   - This type does not support LIST API which does not allow for compliance results to be populated.
-- `Microsoft.AppConfiguration/configurationStores/keyValues`
+- `Microsoft.AppConfiguration/configurationStores/*`
   - This type does not support LIST API which does not allow for compliance results to be populated. 
 
 ### Resource Type not correctly published by resource provider
