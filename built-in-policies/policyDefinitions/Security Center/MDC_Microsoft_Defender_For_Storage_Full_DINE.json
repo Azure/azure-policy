@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "All",
     "description": "Microsoft Defender for Storage is an Azure-native layer of security intelligence that detects potential threats to your storage accounts.\nThis policy will enable all Defender for Storage capabilities; Activity Monitoring, Malware Scanning and Sensitive Data Threat Detection. To learn more about Defender for Storage capabilities and benefits, visit aka.ms/DefenderForStorage.",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "metadata": {
-      "version": "1.3.0",
+      "version": "1.4.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -38,7 +38,7 @@
         "type": "Integer",
         "metadata": {
           "displayName": "Cap GB Per Month Per Storage Account",
-          "description": "Limit the GB to be scanned per month for each storage account within the subscription. Set to -1 for unlimited GB scanning"
+          "description": "Limit the GB scanned per month for each storage account within the subscription.\nValue must be an integer, 10GB or higher\nSet to -1 for unlimited scanning"
         },
         "defaultValue": 5000
       },
@@ -135,7 +135,7 @@
               },
               "template": {
                 "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.2.0.0",
+                "contentVersion": "1.3.0.0",
                 "parameters": {
                   "isOnUploadMalwareScanningEnabled": {
                     "type": "String"
@@ -147,44 +147,30 @@
                     "type": "String"
                   }
                 },
-                "variables": {},
+                "variables": {
+                  "enabledMalwareScanningExtension": {
+                    "name": "OnUploadMalwareScanning",
+                    "isEnabled": "true",
+                    "additionalExtensionProperties": {
+                      "CapGBPerMonthPerStorageAccount": "[parameters('capGBPerMonthPerStorageAccount')]"
+                    }
+                  },
+                  "disabledMalwareScanningExtension": {
+                    "name": "OnUploadMalwareScanning",
+                    "isEnabled": "false"
+                  },
+                  "malwareScanningExtension": "[if(equals(parameters('isOnUploadMalwareScanningEnabled'),'true'), variables('enabledMalwareScanningExtension'), variables('disabledMalwareScanningExtension'))]"
+                },
                 "resources": [
                   {
                     "type": "Microsoft.Security/pricings",
                     "apiVersion": "2023-01-01",
                     "name": "StorageAccounts",
-                    "condition": "[equals(parameters('isOnUploadMalwareScanningEnabled'), 'true')]",
                     "properties": {
                       "subPlan": "DefenderForStorageV2",
                       "pricingTier": "Standard",
                       "extensions": [
-                        {
-                          "name": "OnUploadMalwareScanning",
-                          "isEnabled": "[parameters('isOnUploadMalwareScanningEnabled')]",
-                          "additionalExtensionProperties": {
-                            "CapGBPerMonthPerStorageAccount": "[parameters('capGBPerMonthPerStorageAccount')]"
-                          }
-                        },
-                        {
-                          "name": "SensitiveDataDiscovery",
-                          "isEnabled": "[parameters('isSensitiveDataDiscoveryEnabled')]"
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "type": "Microsoft.Security/pricings",
-                    "apiVersion": "2023-01-01",
-                    "name": "StorageAccounts",
-                    "condition": "[equals(parameters('isOnUploadMalwareScanningEnabled'), 'false')]",
-                    "properties": {
-                      "subPlan": "DefenderForStorageV2",
-                      "pricingTier": "Standard",
-                      "extensions": [
-                        {
-                          "name": "OnUploadMalwareScanning",
-                          "isEnabled": "[parameters('isOnUploadMalwareScanningEnabled')]"
-                        },
+                        "[variables('malwareScanningExtension')]",
                         {
                           "name": "SensitiveDataDiscovery",
                           "isEnabled": "[parameters('isSensitiveDataDiscoveryEnabled')]"
@@ -201,6 +187,7 @@
       }
     },
     "versions": [
+      "1.4.0",
       "1.3.0",
       "1.2.0",
       "1.1.0"
