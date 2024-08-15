@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "displayName": "Azure Cache for Redis Enterprise should use private link",
+    "description": "Private endpoints lets you connect your virtual network to Azure services without a public IP address at the source or destination. By mapping private endpoints to your Azure Cache for Redis Enterprise instances, data leakage risks are reduced. Learn more at: https://docs.microsoft.com/azure/azure-cache-for-redis/cache-private-link.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Cache"
+    },
+    "version": "1.0.0",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Cache/redisEnterprise"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Cache/redisEnterprise/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.Cache/redisEnterprise/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/960e650e-9ce3-4316-9590-8ee2c016ca2f",
+  "name": "960e650e-9ce3-4316-9590-8ee2c016ca2f"
+}
