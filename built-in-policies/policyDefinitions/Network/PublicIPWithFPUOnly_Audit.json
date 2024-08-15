@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Public IPs and Public IP prefixes should have FirstPartyUsage tag",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Ensure all Public IP addresses and Public IP Prefixes have a FirstPartyUsage tag.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Network"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Network/publicIPAddresses"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Network/publicIPAddresses/ipTags[*]",
+                  "where": {
+                    "field": "Microsoft.Network/publicIPAddresses/ipTags[*].ipTagType",
+                    "equals": "FirstPartyUsage"
+                  }
+                },
+                "less": 1
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Network/publicIPPrefixes"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Network/publicIPPrefixes/ipTags[*]",
+                  "where": {
+                    "field": "Microsoft.Network/publicIPPrefixes/ipTags[*].ipTagType",
+                    "equals": "FirstPartyUsage"
+                  }
+                },
+                "less": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fe8a9af4-a003-4c7d-b7a4-b9808310c4f8",
+  "name": "fe8a9af4-a003-4c7d-b7a4-b9808310c4f8"
+}
