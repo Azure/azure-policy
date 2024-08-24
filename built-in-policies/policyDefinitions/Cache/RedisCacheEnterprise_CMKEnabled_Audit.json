@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "Azure Cache for Redis Enterprise should use customer-managed keys for encrypting disk data",
+    "description": "Use customer-managed keys (CMK) to manage the encryption at rest of your on-disk data. By default, customer data is encrypted with platform-managed keys (PMK), but customer-managed keys are commonly required to meet regulatory compliance standards. Customer-managed keys enable the data to be encrypted with an Azure Key Vault key created and owned by you. You have full control and responsibility for the key lifecycle, including rotation and management. Learn more at https://aka.ms/RedisCMK.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "category": "Cache",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Cache/redisEnterprise"
+          },
+          {
+            "field": "Microsoft.Cache/redisEnterprise/encryption.customerManagedKeyEncryption",
+            "exists": "false"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/09aa11bb-87ec-409f-bf0b-49b7c1561a87",
+  "name": "09aa11bb-87ec-409f-bf0b-49b7c1561a87"
+}
