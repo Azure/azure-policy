@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group, a Data Collection Rule and Log Analytics workspace in the same region as the machine.",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "metadata": {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -40,15 +40,11 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "equals": "Microsoft.SqlVirtualMachine/SqlVirtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-            "like": "Windows*"
-          },
-          {
-            "field": "Microsoft.Compute/imagePublisher",
-            "equals": "microsoftsqlserver"
+            "field": "Microsoft.SqlVirtualMachine/sqlVirtualMachines/osType",
+            "equals": "Windows"
           }
         ]
       },
@@ -86,7 +82,7 @@
                   "value": "[field('location')]"
                 },
                 "vmName": {
-                  "value": "[field('fullName')]"
+                  "value": "[last(split(field('Microsoft.SqlVirtualMachine/SqlVirtualMachines/virtualMachineResourceId'), '/'))]"
                 },
                 "enableCollectionOfSqlQueriesForSecurityResearch": {
                   "value": "[parameters('enableCollectionOfSqlQueriesForSecurityResearch')]"
@@ -358,6 +354,7 @@
       }
     },
     "versions": [
+      "1.6.0",
       "1.5.0",
       "1.4.0",
       "1.3.0",
