@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and a Data Collection Rule in the same region as the user-defined Log Analytics workspace.",
-    "version": "1.6.0",
+    "version": "1.7.0",
     "metadata": {
-      "version": "1.6.0",
+      "version": "1.7.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -80,15 +80,11 @@
           },
           {
             "field": "type",
-            "equals": "Microsoft.Compute/virtualMachines"
+            "equals": "Microsoft.SqlVirtualMachine/SqlVirtualMachines"
           },
           {
-            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-            "like": "Windows*"
-          },
-          {
-            "field": "Microsoft.Compute/imagePublisher",
-            "equals": "microsoftsqlserver"
+            "field": "Microsoft.SqlVirtualMachine/sqlVirtualMachines/osType",
+            "equals": "Windows"
           }
         ]
       },
@@ -126,7 +122,7 @@
                   "value": "[field('location')]"
                 },
                 "vmName": {
-                  "value": "[field('fullName')]"
+                  "value": "[last(split(field('Microsoft.SqlVirtualMachine/SqlVirtualMachines/virtualMachineResourceId'), '/'))]"
                 },
                 "userWorkspaceResourceId": {
                   "value": "[parameters('userWorkspaceResourceId')]"
@@ -403,6 +399,7 @@
       }
     },
     "versions": [
+      "1.7.0",
       "1.6.0",
       "1.5.0",
       "1.4.0",
