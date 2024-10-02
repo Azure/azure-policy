@@ -310,4 +310,10 @@ Currently Azure Policy supports only alphanumeric characters for property and al
   - `redisConfiguration.preferred-data-archive-auth-method`
   - `redisConfiguration.preferred-data-persistence-auth-method`
 
+### Read only aliases 
+
+In few instances, aliases for read-only properties will be generated. These aliases are strictly meant for auditing purposes, since the read-only nature does not allow for modification post resource/configuration deployment. If a policy with a modify or DINE effect targets this alias, the compliance results will show non-compliance. However, when remediated the read-only properties are not evaluated.  This renders the resource compliant and not triggering remediation. In most cases, if remediation is triggered, the system is not allowed to alter the read-only property. 
+
+
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
