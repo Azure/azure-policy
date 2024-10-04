@@ -312,7 +312,7 @@ Currently Azure Policy supports only alphanumeric characters for property and al
 
 ### Read only aliases 
 
-In rare instances, aliases for read-only properties have be generated (request for R/O are not supported at this time). These aliases are strictly meant for auditing purposes, since the read-only nature does not allow for modification post resource/configuration deployment. If a policy with a modify or DINE effect targets this alias, the compliance results will show non-compliance. However, when remediated the read-only properties are not evaluated.  This renders the resource compliant and not triggering remediation. In most cases, if remediation is triggered, the system is not allowed to alter the read-only property. 
+In rare instances, aliases for read-only properties have be generated (request for R/O are not supported at this time). These aliases are strictly meant for auditing purposes, since the read-only nature does not allow for modification post resource/configuration deployment. If a policy with a modify or DINE effect targets this alias, the compliance results will show non-compliance. However, when remediated the read-only properties are not evaluated.  This causes the resource to evaluate as compliant and not remediate. In most cases, if remediation is manually triggered, the system is not allowed to alter the read-only property. 
 
 Some examples of read-only aliases: 
  - `Microsoft.Authorization/roleAssignmentScheduleInstances/*`
