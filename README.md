@@ -310,4 +310,39 @@ Currently Azure Policy supports only alphanumeric characters for property and al
   - `redisConfiguration.preferred-data-archive-auth-method`
   - `redisConfiguration.preferred-data-persistence-auth-method`
 
+### Read only aliases 
+
+In rare instances, aliases for read-only properties have be generated (request for R/O are not supported at this time). These aliases are strictly meant for auditing purposes, since the read-only nature does not allow for modification post resource/configuration deployment. If a policy with a modify or DINE effect targets this alias, the compliance results will show non-compliance. However, when remediated the read-only properties are not evaluated.  This causes the resource to evaluate as compliant and not remediate. In most cases, if remediation is manually triggered, the system is not allowed to alter the read-only property. 
+
+Some examples of read-only aliases: 
+ - `Microsoft.Authorization/roleAssignmentScheduleInstances/*`
+ - `Microsoft.BotService/botServices/networkSecurityPerimeterConfigurations/*`
+ - `Microsoft.Cache/Redis/privateEndpointConnections[*]`
+ - `Microsoft.Cache/Redis/privateEndpointConnections[*].privateLinkServiceConnectionState.status`
+ - `Microsoft.Cache/Redis/privateEndpointConnections[*].provisioningState`
+ - `Microsoft.Compute/virtualMachines/provisioningState`
+ - `Microsoft.DocumentDB/databaseAccounts/networkSecurityPerimeterConfigurations/networkSecurityPerimeter.id`
+ - `Microsoft.DocumentDB/databaseAccounts/networkSecurityPerimeterConfigurations/profile.name`
+ - `Microsoft.DocumentDB/databaseAccounts/networkSecurityPerimeterConfigurations/resourceAssociation.accessMode`
+ - `Microsoft.EventHub/namespaces/networkSecurityPerimeterConfigurations/networkSecurityPerimeter.id`
+ - `Microsoft.EventHub/namespaces/networkSecurityPerimeterConfigurations/resourceAssociation.accessMode`
+ - `Microsoft.EventHub/namespaces/networkSecurityPerimeterConfigurations/profile.name`
+ - `Microsoft.KeyVault/vaults/networkSecurityPerimeterConfigurations/networkSecurityPerimeter.id`
+ - `Microsoft.KeyVault/vaults/networkSecurityPerimeterConfigurations/resourceAssociation.accessMode`
+ - `Microsoft.KeyVault/vaults/networkSecurityPerimeterConfigurations/profile.name`
+ - `Microsoft.Sql/servers/networkSecurityPerimeterConfigurations/networkSecurityPerimeter.id`
+ - `Microsoft.Sql/servers/networkSecurityPerimeterConfigurations/resourceAssociation.accessMode`
+ - `Microsoft.Sql/servers/networkSecurityPerimeterConfigurations/profile.name`
+ - `Microsoft.Storage/storageAccounts/primaryEndpoints`
+ - `Microsoft.Storage/storageAccounts/primaryEndpoints.web`
+ - `Microsoft.Storage/storageAccounts/primaryEndpoints.blob`
+ - `Microsoft.Storage/storageAccounts/primaryEndpoints.queue`
+ - `Microsoft.Storage/storageAccounts/primaryEndpoints.table`
+ - `Microsoft.Storage/storageAccounts/primaryEndpoints.file`
+ - `Microsoft.Storage/storageAccounts/networkSecurityPerimeterConfigurations/networkSecurityPerimeter.id`
+ - `Microsoft.Storage/storageAccounts/networkSecurityPerimeterConfigurations/resourceAssociation.accessMode`
+ - `Microsoft.Storage/storageAccounts/networkSecurityPerimeterConfigurations/profile.name`
+
+
+
 *This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.*
