@@ -1,0 +1,86 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Machine Learning Deployments should only use approved Registry Models",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.MachineLearningServices.v2.Data",
+    "description": "Restrict the deployment of Registry models to control externally created models used within your organization",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Machine Learning",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "allowedPublishers": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Allowed Model Publishers",
+          "description": "List of Publishers whose Models are allowed to be deployed."
+        }
+      },
+      "allowedAssetIds": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Allowed Asset Ids",
+          "description": "List of AssetIds of Models that are allowed to be deployed. This can include partial assetIds to allow all Models under a given scope."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices.v2.Data/workspaces/deployments"
+          },
+          {
+            "field": "Microsoft.MachineLearningServices.v2.Data/workspaces/deployments/model.registryName",
+            "exists": true
+          },
+          {
+            "allOf": [
+              {
+                "field": "Microsoft.MachineLearningServices.v2.Data/workspaces/deployments/model.publisher",
+                "notin": "[parameters('allowedPublishers')]"
+              },
+              {
+                "count": {
+                  "value": "[parameters('allowedAssetIds')]",
+                  "name": "allowedAssetId",
+                  "where": {
+                    "field": "Microsoft.MachineLearningServices.v2.Data/workspaces/deployments/model.assetId",
+                    "contains": "[current('allowedAssetId')]"
+                  }
+                },
+                "equals": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/12e5dd16-d201-47ff-849b-8454061c293d",
+  "name": "12e5dd16-d201-47ff-849b-8454061c293d"
+}
