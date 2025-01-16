@@ -61,6 +61,18 @@
           "strongType": "omsWorkspace",
           "assignPermissions": true
         }
+      },
+      "destinationType": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Destination Type",
+          "description": "Destination table type output in Log Analytics Workspace - null (AzureDiagnostics) or Dedicated (Resource Specific)"
+        },
+        "allowedValues": [
+          "null",
+          "Dedicated"
+        ],
+        "defaultValue": "null"
       }
     },
     "policyRule": {
@@ -136,6 +148,9 @@
                   },
                   "resourceName": {
                     "type": "string"
+                  },
+                  "destinationType": {
+                    "type": "String"
                   }
                 },
                 "variables": {},
@@ -145,6 +160,7 @@
                     "apiVersion": "2021-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
                     "properties": {
+                      "logAnalyticsDestinationType": "[parameters('destinationType')]",
                       "workspaceId": "[parameters('logAnalytics')]",
                       "logs": [
                         {
@@ -175,6 +191,9 @@
                 },
                 "resourceName": {
                   "value": "[field('name')]"
+                },
+                "destinationType": {
+                  "value": "[parameters('destinationType')]"
                 }
               }
             }
