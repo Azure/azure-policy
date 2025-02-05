@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Configure Windows SQL Virtual Machines to automatically install the Microsoft Defender for SQL extension. Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations).",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "metadata": {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -66,10 +66,6 @@
           {
             "field": "type",
             "equals": "Microsoft.SqlVirtualMachine/SqlVirtualMachines"
-          },
-          {
-            "field": "Microsoft.SqlVirtualMachine/sqlVirtualMachines/osType",
-            "equals": "Windows"
           }
         ]
       },
@@ -77,23 +73,39 @@
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Compute/virtualMachines/extensions",
-          "name": "[concat(last(split(field('Microsoft.SqlVirtualMachine/SqlVirtualMachines/virtualMachineResourceId'), '/')), '/MicrosoftDefenderForSQL')]",
+          "name": "[concat(last(split(field('Microsoft.SqlVirtualMachine/SqlVirtualMachines/virtualMachineResourceId'), '/')), '/?')]",
           "evaluationDelay": "AfterProvisioning",
           "existenceCondition": {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/type",
-                "equals": "AdvancedThreatProtection.Windows"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                    "equals": "SqlIaaSAgentLinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                    "equals": "Microsoft.SqlServer.Management"
+                  }
+                ]
               },
               {
-                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
-                "equals": "Microsoft.Azure.AzureDefenderForSQL"
-              },
-              {
-                "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
-                "in": [
-                  "Succeeded",
-                  "Provisioning succeeded"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                    "equals": "AdvancedThreatProtection.Windows"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                    "equals": "Microsoft.Azure.AzureDefenderForSQL"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                    "in": [
+                      "Succeeded",
+                      "Provisioning succeeded"
+                    ]
+                  }
                 ]
               }
             ]
@@ -232,6 +244,7 @@
       }
     },
     "versions": [
+      "1.6.0",
       "1.5.0",
       "1.4.0",
       "1.3.0",

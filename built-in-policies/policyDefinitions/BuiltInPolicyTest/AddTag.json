@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "Add a tag to resources - This built-in is created for versioning test.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Adds the specified tag and value when any resource missing this tag is created or updated. Existing resources can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed. Does not modify tags on resource groups.",
+    "metadata": {
+      "version": "2.0.0",
+      "category": "BuiltInPolicyTest"
+    },
+    "version": "2.0.0",
+    "parameters": {
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag Name",
+          "description": "Name of the tag, such as 'environment'"
+        }
+      },
+      "tagValue": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag Value",
+          "description": "Value of the tag, such as 'production'"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "[concat('tags[', parameters('tagName'), ']')]",
+        "exists": "false"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "operation": "add",
+              "field": "[concat('tags[', parameters('tagName'), ']')]",
+              "value": "[parameters('tagValue')]"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "2.0.0",
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/125b7269-7ec9-47bf-8beb-8865b61c2c95",
+  "name": "125b7269-7ec9-47bf-8beb-8865b61c2c95"
+}

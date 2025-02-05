@@ -3,13 +3,13 @@
     "displayName": "[Preview]: Azure Cache for Redis should be Zone Redundant",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Azure Cache for Redis can be configured to be Zone Redundant or not. Azure Cache for Redis instances with fewer than 2 entries in their zones array are not Zone Redundant. This policy identifies Azure Cache for Redis instances lacking the redundancy needed to withstand a zone outage.",
+    "description": "Azure Cache for Redis can be configured to be Zone Redundant or not. Azure Cache for Redis instances with fewer than 2 entries in their zones array or zonalAllocationPolicy is set to 'NoZones' or the sku is 'Basic' are not Zone Redundant. This policy identifies Azure Cache for Redis instances lacking the redundancy needed to withstand a zone outage.",
     "metadata": {
       "category": "Resilience",
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -33,10 +33,34 @@
             "equals": "Microsoft.Cache/Redis"
           },
           {
-            "count": {
-              "field": "Microsoft.Cache/Redis/zones[*]"
-            },
-            "less": 2
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Cache/Redis/zones[*]",
+                    "exists": true
+                  },
+                  {
+                    "count": {
+                      "field": "Microsoft.Cache/Redis/zones[*]"
+                    },
+                    "less": 2
+                  },
+                  {
+                    "field": "Microsoft.Cache/Redis/zonalAllocationPolicy",
+                    "notEquals": "Automatic"
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Cache/Redis/zonalAllocationPolicy",
+                "equals": "NoZones"
+              },
+              {
+                "field": "Microsoft.Cache/Redis/sku.name",
+                "equals": "Basic"
+              }
+            ]
           }
         ]
       },
@@ -45,6 +69,7 @@
       }
     },
     "versions": [
+      "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },

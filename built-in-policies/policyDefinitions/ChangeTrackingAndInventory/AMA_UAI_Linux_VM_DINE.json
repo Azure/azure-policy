@@ -1,15 +1,14 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure Linux VMs to install AMA for ChangeTracking and Inventory with user-assigned managed identity",
+    "displayName": "Configure Linux VMs to install AMA for ChangeTracking and Inventory with user-assigned managed identity",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Linux virtual machines for enabling ChangeTracking and Inventory. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "1.5.0-preview",
-      "category": "ChangeTrackingAndInventory",
-      "preview": true
+      "version": "1.6.0",
+      "category": "ChangeTrackingAndInventory"
     },
-    "version": "1.5.0-preview",
+    "version": "1.6.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -104,6 +103,30 @@
               {
                 "allOf": [
                   {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                    "like": "Linux*"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageId",
+                        "contains": "Microsoft.Compute/galleries"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageId",
+                        "contains": "Microsoft.Compute/images"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption",
+                        "equals": "Attach"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
                     "field": "Microsoft.Compute/imagePublisher",
                     "equals": "RedHat"
                   },
@@ -131,11 +154,19 @@
                       },
                       {
                         "field": "Microsoft.Compute/imageSku",
+                        "like": "9*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
                         "like": "rhel-lvm7*"
                       },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "rhel-lvm8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "rhel-lvm9*"
                       }
                     ]
                   }
@@ -280,6 +311,18 @@
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "ol7*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "ol8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "ol9*"
                       }
                     ]
                   }
@@ -301,10 +344,6 @@
                   },
                   {
                     "anyOf": [
-                      {
-                        "field": "Microsoft.Compute/imageSku",
-                        "like": "6*"
-                      },
                       {
                         "field": "Microsoft.Compute/imageSku",
                         "like": "7*"
@@ -344,8 +383,16 @@
                     "equals": "almalinux"
                   },
                   {
-                    "field": "Microsoft.Compute/imageSku",
-                    "like": "8*"
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "8*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSku",
+                        "like": "9*"
+                      }
+                    ]
                   }
                 ]
               },
@@ -520,6 +567,7 @@
       }
     },
     "versions": [
+      "1.6.0",
       "1.5.0-PREVIEW",
       "1.4.0-PREVIEW",
       "1.3.0-PREVIEW"
