@@ -4,9 +4,9 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Microsoft Defender for SQL collects events from the agent and uses them to provide security alerts and tailored hardening tasks (recommendations). Create a resource group and a Data Collection Rule in the same region as the user-defined Log Analytics workspace.",
-    "version": "1.7.0",
+    "version": "1.9.0",
     "metadata": {
-      "version": "1.7.0",
+      "version": "1.9.0",
       "category": "Security Center"
     },
     "parameters": {
@@ -81,32 +81,51 @@
           {
             "field": "type",
             "equals": "Microsoft.SqlVirtualMachine/SqlVirtualMachines"
-          },
-          {
-            "field": "Microsoft.SqlVirtualMachine/sqlVirtualMachines/osType",
-            "equals": "Windows"
           }
         ]
       },
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
-          "type": "Microsoft.Insights/dataCollectionRules",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(last(split(field('Microsoft.SqlVirtualMachine/SqlVirtualMachines/virtualMachineResourceId'), '/')), '/?')]",
           "evaluationDelay": "AfterProvisioning",
           "deploymentScope": "subscription",
           "roleDefinitionIds": [
             "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
           ],
-          "existenceScope": "subscription",
           "existenceCondition": {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "location",
-                "equals": "[parameters('workspaceRegion')]"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                    "equals": "SqlIaaSAgentLinux"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                    "equals": "Microsoft.SqlServer.Management"
+                  }
+                ]
               },
               {
-                "field": "name",
-                "equals": "[if(empty(parameters('userWorkspaceId')), concat('MicrosoftDefenderForSQL-', parameters('workspaceRegion'), '-dcr'), concat('D4SQL-', replace(parameters('userWorkspaceId'), '-', ''), '-dcr'))]"
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                    "equals": "AdvancedThreatProtection.Windows"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                    "equals": "Microsoft.Azure.AzureDefenderForSQL"
+                  },
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/extensions/provisioningState",
+                    "in": [
+                      "Succeeded",
+                      "Provisioning succeeded"
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -182,57 +201,6 @@
                     "location": "[variables('defaultRGLocation')]",
                     "tags": {
                       "createdBy": "MicrosoftDefenderForSQL"
-                    }
-                  },
-                  {
-                    "type": "Microsoft.Resources/deployments",
-                    "name": "[variables('deployDefenderForSQL')]",
-                    "apiVersion": "2022-09-01",
-                    "resourceGroup": "[parameters('resourceGroup')]",
-                    "properties": {
-                      "mode": "Incremental",
-                      "expressionEvaluationOptions": {
-                        "scope": "inner"
-                      },
-                      "parameters": {
-                        "location": {
-                          "value": "[parameters('location')]"
-                        },
-                        "vmName": {
-                          "value": "[parameters('vmName')]"
-                        }
-                      },
-                      "template": {
-                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                        "contentVersion": "1.0.0.0",
-                        "parameters": {
-                          "location": {
-                            "type": "string"
-                          },
-                          "vmName": {
-                            "type": "string"
-                          }
-                        },
-                        "variables": {},
-                        "resources": [
-                          {
-                            "type": "Microsoft.Compute/virtualMachines/extensions",
-                            "name": "[concat(parameters('vmName'), '/', 'MicrosoftDefenderForSQL')]",
-                            "apiVersion": "2023-03-01",
-                            "location": "[parameters('location')]",
-                            "tags": {
-                              "createdBy": "MicrosoftDefenderForSQL"
-                            },
-                            "properties": {
-                              "publisher": "Microsoft.Azure.AzureDefenderForSQL",
-                              "type": "AdvancedThreatProtection.Windows",
-                              "typeHandlerVersion": "2.0",
-                              "autoUpgradeMinorVersion": true,
-                              "enableAutomaticUpgrade": true
-                            }
-                          }
-                        ]
-                      }
                     }
                   },
                   {
@@ -390,6 +358,60 @@
                         ]
                       }
                     }
+                  },
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "name": "[variables('deployDefenderForSQL')]",
+                    "apiVersion": "2022-09-01",
+                    "resourceGroup": "[parameters('resourceGroup')]",
+                    "dependsOn": [
+                      "[variables('deployDataCollectionRulesAssociation')]"
+                    ],
+                    "properties": {
+                      "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
+                      "parameters": {
+                        "location": {
+                          "value": "[parameters('location')]"
+                        },
+                        "vmName": {
+                          "value": "[parameters('vmName')]"
+                        }
+                      },
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {
+                          "location": {
+                            "type": "string"
+                          },
+                          "vmName": {
+                            "type": "string"
+                          }
+                        },
+                        "variables": {},
+                        "resources": [
+                          {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(parameters('vmName'), '/', 'MicrosoftDefenderForSQL')]",
+                            "apiVersion": "2023-03-01",
+                            "location": "[parameters('location')]",
+                            "tags": {
+                              "createdBy": "MicrosoftDefenderForSQL"
+                            },
+                            "properties": {
+                              "publisher": "Microsoft.Azure.AzureDefenderForSQL",
+                              "type": "AdvancedThreatProtection.Windows",
+                              "typeHandlerVersion": "2.0",
+                              "autoUpgradeMinorVersion": true,
+                              "enableAutomaticUpgrade": true
+                            }
+                          }
+                        ]
+                      }
+                    }
                   }
                 ]
               }
@@ -399,6 +421,8 @@
       }
     },
     "versions": [
+      "1.9.0",
+      "1.8.0",
       "1.7.0",
       "1.6.0",
       "1.5.0",

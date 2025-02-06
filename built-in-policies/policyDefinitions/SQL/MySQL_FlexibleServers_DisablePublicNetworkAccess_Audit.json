@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Disabling the public network access property improves security by ensuring your Azure Database for MySQL flexible servers can only be accessed from a private endpoint. This configuration strictly disables access from any public address space outside of Azure IP range and denies all logins that match IP or virtual network-based firewall rules.",
     "metadata": {
-      "version": "2.1.0",
+      "version": "2.2.0",
       "category": "SQL"
     },
-    "version": "2.1.0",
+    "version": "2.2.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -40,8 +40,72 @@
             "exists": "false"
           },
           {
-            "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
-            "notEquals": "Disabled"
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/createMode",
+                    "equals": "Create"
+                  },
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
+                    "notEquals": "Disabled"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/createMode",
+                    "equals": "PointInTimeRestore"
+                  },
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
+                    "notEquals": "Disabled"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/createMode",
+                    "equals": "GeoRestore"
+                  },
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
+                    "notEquals": "Disabled"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/createMode",
+                    "equals": "Replica"
+                  },
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
+                    "notEquals": "Disabled"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/createMode",
+                    "notEquals": "Create"
+                  },
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
+                    "exists": "true"
+                  },
+                  {
+                    "field": "Microsoft.DBforMySQL/flexibleServers/network.publicNetworkAccess",
+                    "notEquals": "Disabled"
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -50,6 +114,7 @@
       }
     },
     "versions": [
+      "2.2.0",
       "2.1.0"
     ]
   },

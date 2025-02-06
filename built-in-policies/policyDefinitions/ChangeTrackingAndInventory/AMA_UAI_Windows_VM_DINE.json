@@ -1,15 +1,14 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure Windows VMs to install AMA for ChangeTracking and Inventory with user-assigned managed identity",
+    "displayName": "Configure Windows VMs to install AMA for ChangeTracking and Inventory with user-assigned managed identity",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "Automate the deployment of Azure Monitor Agent extension on your Windows virtual machines for enabling ChangeTracking and Inventory. This policy will install the extension and configure it to use the specified user-assigned managed identity if the OS and region are supported, and skip install otherwise. Learn more: https://aka.ms/AMAOverview.",
     "metadata": {
-      "version": "1.1.0-preview",
-      "category": "ChangeTrackingAndInventory",
-      "preview": true
+      "version": "1.2.0",
+      "category": "ChangeTrackingAndInventory"
     },
-    "version": "1.1.0-preview",
+    "version": "1.2.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -101,6 +100,30 @@
           },
           {
             "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                    "like": "Windows*"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imageId",
+                        "contains": "Microsoft.Compute/galleries"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageId",
+                        "contains": "Microsoft.Compute/images"
+                      },
+                      {
+                        "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.createOption",
+                        "equals": "Attach"
+                      }
+                    ]
+                  }
+                ]
+              },
               {
                 "allOf": [
                   {
@@ -276,7 +299,10 @@
                   },
                   {
                     "field": "Microsoft.Compute/imageOffer",
-                    "equals": "Windows-10"
+                    "in": [
+                      "Windows-10",
+                      "Windows-11"
+                    ]
                   }
                 ]
               }
@@ -371,6 +397,7 @@
       }
     },
     "versions": [
+      "1.2.0",
       "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]

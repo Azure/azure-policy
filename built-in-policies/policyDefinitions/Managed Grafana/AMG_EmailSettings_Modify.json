@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Managed Grafana workspaces to disable email settings",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable SMTP settings configuration of email contact point for alerting in Grafana workspace.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Managed Grafana"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Dashboard/grafana"
+          },
+          {
+            "field": "Microsoft.Dashboard/grafana/grafanaConfigurations.smtp.enabled",
+            "equals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2022-10-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Dashboard/grafana/grafanaConfigurations.smtp.enabled",
+              "value": false
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f757d603-5178-4168-ac45-5223f681023f",
+  "name": "f757d603-5178-4168-ac45-5223f681023f"
+}
