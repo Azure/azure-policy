@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "App Service app slots should enable end to end encryption",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Enabling end to end encryption ensures front-end intra-cluster traffic between App Service front-ends and the workers running application workloads is encrypted.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "notContains": "functionapp"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/slots/endToEndEncryptionEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Web/sites/slots/endToEndEncryptionEnabled",
+                "notEquals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/123aed70-491a-4f07-a569-e1f3a8dd651e",
+  "name": "123aed70-491a-4f07-a569-e1f3a8dd651e"
+}

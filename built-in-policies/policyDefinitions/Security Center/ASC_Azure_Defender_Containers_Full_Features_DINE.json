@@ -5,13 +5,13 @@
     "mode": "All",
     "description": "New capabilities are continuously being added to Defender for Containers plan, which may require the user's explicit enablement. Use this policy to make sure all new capabilities will be enabled.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Security Center"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
-        "type": "string",
+        "type": "String",
         "defaultValue": "DeployIfNotExists",
         "metadata": {
           "displayName": "Effect",
@@ -26,7 +26,43 @@
         "type": "String",
         "metadata": {
           "displayName": "Container Registries Vulnerability Assessments Enabled",
-          "description": "Controls the container registries vulnerability assessments add-on"
+          "description": "Controls the container registries vulnerability assessments extension"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isAgentlessDiscoveryForKubernetesEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Agentless Discovery For Kubernetes Enabled",
+          "description": "Controls the agentless discovery for Kubernetes extension"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isAgentlessVmScanningEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Agentless VM Scanning Enabled",
+          "description": "Controls the agentless VM scanning extension"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isContainerSensorEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Container Sensor Enabled",
+          "description": "Controls the container sensor extension"
         },
         "allowedValues": [
           "true",
@@ -73,6 +109,60 @@
                   }
                 },
                 "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "AgentlessDiscoveryForKubernetes"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "AgentlessVmScanning"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isAgentlessVmScanningEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "ContainerSensor"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isContainerSensorEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
               }
             ]
           },
@@ -83,6 +173,15 @@
               "parameters": {
                 "isContainerRegistriesVulnerabilityAssessmentsEnabled": {
                   "value": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                },
+                "isAgentlessDiscoveryForKubernetesEnabled": {
+                  "value": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                },
+                "isAgentlessVmScanningEnabled": {
+                  "value": "[parameters('isAgentlessVmScanningEnabled')]"
+                },
+                "isContainerSensorEnabled": {
+                  "value": "[parameters('isContainerSensorEnabled')]"
                 }
               },
               "template": {
@@ -90,6 +189,15 @@
                 "contentVersion": "1.0.0.0",
                 "parameters": {
                   "isContainerRegistriesVulnerabilityAssessmentsEnabled": {
+                    "type": "String"
+                  },
+                  "isAgentlessDiscoveryForKubernetesEnabled": {
+                    "type": "String"
+                  },
+                  "isAgentlessVmScanningEnabled": {
+                    "type": "String"
+                  },
+                  "isContainerSensorEnabled": {
                     "type": "String"
                   }
                 },
@@ -104,6 +212,18 @@
                         {
                           "name": "ContainerRegistriesVulnerabilityAssessments",
                           "isEnabled": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                        },
+                        {
+                          "name": "AgentlessDiscoveryForKubernetes",
+                          "isEnabled": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                        },
+                        {
+                          "name": "AgentlessVmScanning",
+                          "isEnabled": "[parameters('isAgentlessVmScanningEnabled')]"
+                        },
+                        {
+                          "name": "ContainerSensor",
+                          "isEnabled": "[parameters('isContainerSensorEnabled')]"
                         }
                       ]
                     }
@@ -116,6 +236,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },
