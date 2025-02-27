@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Backup should be enabled on Azure file shares",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Ensure protection of your Azure file shares by enabling Azure Backup. Azure Backup is a secure and cost effective data protection solution for Azure.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Backup",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/fileServices/shares"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/fileServices/shares/enabledProtocols",
+            "equals": "SMB"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.RecoveryServices/backupprotecteditems"
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cfc5190a-3b19-4a23-b563-a4c719b666e4",
+  "name": "cfc5190a-3b19-4a23-b563-a4c719b666e4"
+}
