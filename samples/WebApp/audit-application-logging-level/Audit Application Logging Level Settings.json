@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "Audit - Application Logging Level Settings",
+    "policyType": "Custom",
+    "mode": "All",
+    "description": "This policy audits Azure App Services to ensure that application logging levels for both Azure Blob Storage and FileSystem are not set to 'Information' or 'Verbose'.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "AuditIfNotExists"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "field": "Microsoft.Web/sites/config/logs.applicationLogs.azureBlobStorage.level",
+            "in": [
+              "Information",
+              "Verbose"
+            ]
+          },
+          {
+            "field": "Microsoft.Web/sites/config/logs.applicationLogs.fileSystem.level",
+            "in": [
+              "Information",
+              "Verbose"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    }
+  }
+}
