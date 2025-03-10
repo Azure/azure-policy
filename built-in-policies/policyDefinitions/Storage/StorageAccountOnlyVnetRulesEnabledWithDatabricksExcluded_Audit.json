@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "Storage accounts should restrict network access using virtual network rules (excluding storage accounts created by Databricks)",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Protect your storage accounts from potential threats using virtual network rules as a preferred method instead of IP-based filtering. Disabling IP-based filtering prevents public IPs from accessing your storage accounts.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the audit policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "value": "[resourcegroup().managedBy]",
+            "notContains": "/providers/Microsoft.Databricks/"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+                "notEquals": "Deny"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules[*]"
+                },
+                "greaterOrEquals": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/db4f9b05-5ffd-4b34-b714-3c710dbb3fd6",
+  "name": "db4f9b05-5ffd-4b34-b714-3c710dbb3fd6"
+}
