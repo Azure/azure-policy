@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Storage accounts should use private link (excluding storage accounts created by Databricks)",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your storage account, data leakage risks are reduced. Learn more about private links at - https://aka.ms/azureprivatelinkoverview",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "value": "[resourcegroup().managedBy]",
+            "notContains": "/providers/Microsoft.Databricks/"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Storage/storageAccounts/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1604f626-4d8d-4124-8bb8-b1e5f95562de",
+  "name": "1604f626-4d8d-4124-8bb8-b1e5f95562de"
+}
