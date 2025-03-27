@@ -5,10 +5,10 @@
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "SignalR"
     },
-    "version": "1.1.0",
+    "version": "1.2.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -33,24 +33,14 @@
           {
             "anyOf": [
               {
-                "field": "Microsoft.SignalRService/SignalR/networkACLs.defaultAction",
-                "equals": "Allow"
+                "field": "Microsoft.SignalRService/SignalR/publicNetworkAccess",
+                "exists": "false"
               },
               {
-                "field": "Microsoft.SignalRService/SignalR/networkACLs.publicNetwork.allow",
-                "exists": false
-              },
-              {
-                "count": {
-                  "field": "Microsoft.SignalRService/SignalR/networkACLs.publicNetwork.allow[*]"
-                },
-                "greater": 0
+                "field": "Microsoft.SignalRService/SignalR/publicNetworkAccess",
+                "notEquals": "Disabled"
               }
             ]
-          },
-          {
-            "field": "Microsoft.SignalRService/SignalR/publicNetworkAccess",
-            "notEquals": "Disabled"
           }
         ]
       },
@@ -63,16 +53,6 @@
           ],
           "operations": [
             {
-              "operation": "addOrReplace",
-              "field": "Microsoft.SignalRService/SignalR/networkACLs.defaultAction",
-              "value": "Deny"
-            },
-            {
-              "operation": "addOrReplace",
-              "field": "Microsoft.SignalRService/SignalR/networkACLs.publicNetwork.allow",
-              "value": []
-            },
-            {
               "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-06-01-preview')]",
               "operation": "addOrReplace",
               "field": "Microsoft.SignalRService/SignalR/publicNetworkAccess",
@@ -83,6 +63,7 @@
       }
     },
     "versions": [
+      "1.2.0",
       "1.1.0"
     ]
   },
