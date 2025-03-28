@@ -1,0 +1,285 @@
+{
+  "properties": {
+    "displayName": "Enable Azure Monitor for VMs with Azure Monitoring Agent(AMA)",
+    "policyType": "BuiltIn",
+    "description": "Enable Azure Monitor for the virtual machines (VMs) with AMA.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Monitoring"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "enableProcessesAndDependencies": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable Processes and Dependencies",
+          "description": "This is the flag for enabling processes and dependencies data collection in VMInsights"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "bringYourOwnUserAssignedManagedIdentity": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Bring Your Own User-Assigned Managed Identity",
+          "description": "If set to true, Azure Monitor Agent will use the user-assigned managed identity specified via the 'User-Assigned Managed Identity ...' parameters for authentication. Otherwise, Azure Monitor Agent will use the user-assigned managed identity /subscriptions/<subscription-id>/resourceGroups/built-in-identity-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/built-in-identity-<location> for authentication."
+        },
+        "allowedValues": [
+          false,
+          true
+        ]
+      },
+      "restrictBringYourOwnUserAssignedIdentityToSubscription": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Restrict Bring Your Own User-Assigned Identity to Subscription",
+          "description": "Enable this to enforce the user assigned identity must exist in the same subscription as the virtual machine. When true, must provide User-Assigned Managed Identity Name and User-Assigned Managed Identity Resource Group Name parameters. When false, the parameter User Assigned Managed Identity Resource Id will be used instead."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
+      "userAssignedIdentityResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource ID",
+          "description": "The resource ID of the pre-created user-assigned managed identity. This parameter is only used when the restrict Bring Your Own User-Assigned Identity To Subscription parameter is false."
+        },
+        "defaultValue": ""
+      },
+      "userAssignedManagedIdentityName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Name",
+          "description": "The name of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
+        },
+        "defaultValue": ""
+      },
+      "userAssignedManagedIdentityResourceGroup": {
+        "type": "String",
+        "metadata": {
+          "displayName": "User-Assigned Managed Identity Resource Group",
+          "description": "The resource group of the user-assigned managed identity which Azure Monitor Agent will use for authentication when 'Bring Your Own User-Assigned Managed Identity' is set to true."
+        },
+        "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for all constituent policies",
+          "description": "Enable or disable the execution of each of the constituent policies in the initiative."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "scopeToSupportedImages": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Scope Policy to supported Operating Systems",
+          "description": "If set to true, the policy will apply only to virtual machines with supported operating systems. Otherwise, the policy will apply to all virtual machine resources in the assignment scope."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
+      },
+      "dcrResourceId": {
+        "type": "string",
+        "metadata": {
+          "displayName": "VMI Data Collection Rule Resource Id",
+          "description": "VMI Data collection rule azure resource ID to be assocaited with all VMs in the scope. Please refer to this link for newer experience migration: https://aka.ms/vminsights-dcrOnboarding",
+          "portalReview": "true"
+        }
+      },
+      "listOfImageIdToInclude_linux": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Optional: List of VM images that have supported Linux OS to add to scope",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage"
+        },
+        "defaultValue": []
+      },
+      "listOfImageIdToInclude_windows": {
+        "type": "array",
+        "metadata": {
+          "displayName": "Optional: List of VM images that have supported Windows OS to add to scope",
+          "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "AddUserAssignedManagedIdentity_VM",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d367bd60-64ca-4364-98ea-276775bddd94",
+        "parameters": {
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "restrictBringYourOwnUserAssignedIdentityToSubscription": {
+            "value": "[parameters('restrictBringYourOwnUserAssignedIdentityToSubscription')]"
+          },
+          "userAssignedIdentityResourceId": {
+            "value": "[parameters('userAssignedIdentityResourceId')]"
+          },
+          "userAssignedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "identityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DeployAzureMonitoringAgentLinuxVMWithUAI",
+        "definitionVersion": "3.*.*",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ae8a10e6-19d6-44a3-a02d-a2bdfc707742",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "restrictBringYourOwnUserAssignedIdentityToSubscription": {
+            "value": "[parameters('restrictBringYourOwnUserAssignedIdentityToSubscription')]"
+          },
+          "userAssignedIdentityResourceId": {
+            "value": "[parameters('userAssignedIdentityResourceId')]"
+          },
+          "userAssignedManagedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "userAssignedManagedIdentityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          },
+          "scopeToSupportedImages": {
+            "value": "[parameters('scopeToSupportedImages')]"
+          },
+          "listOfLinuxImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_linux')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "deployAzureMonitoringAgentWindowsVMWithUAI",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/637125fd-7c39-4b94-bb0a-d331faf333a9",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": "[parameters('bringYourOwnUserAssignedManagedIdentity')]"
+          },
+          "restrictBringYourOwnUserAssignedIdentityToSubscription": {
+            "value": "[parameters('restrictBringYourOwnUserAssignedIdentityToSubscription')]"
+          },
+          "userAssignedIdentityResourceId": {
+            "value": "[parameters('userAssignedIdentityResourceId')]"
+          },
+          "userAssignedManagedIdentityName": {
+            "value": "[parameters('userAssignedManagedIdentityName')]"
+          },
+          "userAssignedManagedIdentityResourceGroup": {
+            "value": "[parameters('userAssignedManagedIdentityResourceGroup')]"
+          },
+          "scopeToSupportedImages": {
+            "value": "[parameters('scopeToSupportedImages')]"
+          },
+          "listOfWindowsImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_windows')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DependencyAgentExtension_Windows_VM_AMA_Deploy",
+        "definitionVersion": "1.*.*-preview",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/89ca9cc7-25cd-4d53-97ba-445ca7a1f222",
+        "parameters": {
+          "listOfImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_windows')]"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "enableProcessesAndDependencies": {
+            "value": "[parameters('enableProcessesAndDependencies')]"
+          },
+          "scopeToSupportedImages": {
+            "value": "[parameters('scopeToSupportedImages')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DependencyAgentExtension_Linux_VM_AMA_Deploy",
+        "definitionVersion": "3.*.*-preview",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d55b81e1-984f-4a96-acab-fae204e3ca7f",
+        "parameters": {
+          "listOfImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_linux')]"
+          },
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "enableProcessesAndDependencies": {
+            "value": "[parameters('enableProcessesAndDependencies')]"
+          },
+          "scopeToSupportedImages": {
+            "value": "[parameters('scopeToSupportedImages')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DataCollectionRuleAssociation_Linux",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2ea82cdd-f2e8-4500-af75-67a2e084ca74",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
+          },
+          "scopeToSupportedImages": {
+            "value": "[parameters('scopeToSupportedImages')]"
+          },
+          "listOfLinuxImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_linux')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "DataCollectionRuleAssociation_Windows",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/eab1f514-22e3-42e3-9a1f-e1dc9199355c",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dcrResourceId')]"
+          },
+          "scopeToSupportedImages": {
+            "value": "[parameters('scopeToSupportedImages')]"
+          },
+          "listOfWindowsImageIdToInclude": {
+            "value": "[parameters('listOfImageIdToInclude_windows')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/924bfe3a-762f-40e7-86dd-5c8b95eb09e6",
+  "name": "924bfe3a-762f-40e7-86dd-5c8b95eb09e6"
+}
