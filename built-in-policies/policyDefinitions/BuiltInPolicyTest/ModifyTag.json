@@ -1,14 +1,15 @@
 {
   "properties": {
-    "displayName": "Add a tag to resources - This built-in is created for versioning test.",
+    "displayName": "[Preview]: Add a tag to a network security group resource - This built-in is created for versioning test.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Adds the specified tag and value when any resource missing this tag is created or updated. Existing resources can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed. Does not modify tags on resource groups.",
+    "description": "Adds the specified tag and value when a network security group resource missing this tag is created or updated. Existing resources can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed. Does not modify tags on resource groups.",
     "metadata": {
-      "version": "2.0.0",
-      "category": "BuiltInPolicyTest"
+      "version": "2.0.0-preview",
+      "category": "BuiltInPolicyTest",
+      "preview": true
     },
-    "version": "2.0.0",
+    "version": "2.0.0-preview",
     "parameters": {
       "tagName": {
         "type": "String",
@@ -39,8 +40,18 @@
     },
     "policyRule": {
       "if": {
-        "field": "[concat('tags[', parameters('tagName'), ']')]",
-        "exists": "false"
+        "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.Network/networkSecurityGroups"
+            ]
+          },
+          {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "exists": "false"
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",
@@ -59,7 +70,7 @@
       }
     },
     "versions": [
-      "2.0.0",
+      "2.0.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },
