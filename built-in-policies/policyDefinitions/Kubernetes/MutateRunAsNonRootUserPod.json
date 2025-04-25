@@ -1,15 +1,15 @@
 {
   "properties": {
-    "displayName": "[Preview]: Prevents init containers from being ran as root by setting runAsNotRoot to true.",
+    "displayName": "[Preview]: Sets Kubernetes cluster Pod securityContext.runAsUser fields to 1000, a non-root user id",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Setting runAsNotRoot to true increases security by preventing containers from being ran as root.",
+    "description": "Reduces attack surface introduced by escalating privileges as root user in the presence of security vulnerabilities.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "category": "Kubernetes",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "source": {
         "type": "String",
@@ -48,6 +48,14 @@
           "gatekeeper-system",
           "azure-arc"
         ]
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -61,16 +69,18 @@
           "source": "[parameters('source')]",
           "mutationInfo": {
             "sourceType": "PublicURL",
-            "url": "https://store.policy.core.windows.net/kubernetes/mutate-run-as-non-root-initContainers/v1/mutation.yaml"
+            "url": "https://store.policy.core.windows.net/kubernetes/mutate-run-as-user-pod/v1/mutation.yaml"
           },
+          "namespaces": "[parameters('namespaces')]",
           "excludedNamespaces": "[parameters('excludedNamespaces')]"
         }
       }
     },
     "versions": [
+      "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/fed6510d-00b9-40db-a347-933125a6a327",
-  "name": "fed6510d-00b9-40db-a347-933125a6a327"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fe74a23d-79e4-401c-bd0d-fd7a5b35af32",
+  "name": "fe74a23d-79e4-401c-bd0d-fd7a5b35af32"
 }

@@ -1,0 +1,314 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure backup for Azure Files Shares with a given tag to a new recovery services vault with a new policy",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Enforce backup for all Azure Files by deploying a recovery services vault in the same location and resource group as the storage account. Doing this is useful when different application teams in your organization are allocated separate resource groups and need to manage their own backups and restores. You can optionally include Azure Files in storage accounts containing a specified tag to control the scope of assignment.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "vaultName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Vault Name",
+          "description": "Name of the Recovery Services Vault where backups should be registered."
+        }
+      },
+      "vaultLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Location (Specify the location of the FileShares that you want to protect)",
+          "description": "Location of the FileShares. The FileShares should be in the same location as the vault."
+        }
+      },
+      "policyName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Backup Policy Name",
+          "description": "Name of the Azure Backup Policy to be created for Azure File Shares in the specified vault."
+        },
+        "defaultValue": "DefaultBackupPolicy"
+      },
+      "inclusionTagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Inclusion Tag Name",
+          "description": "Name of the tag to use for including FileShares in the scope of this policy. This should be used along with the Inclusion Tag Value parameter."
+        },
+        "defaultValue": ""
+      },
+      "inclusionTagValues": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Inclusion Tag Values",
+          "description": "Value of the tag to use for including FileShares in the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Inclusion Tag Name parameter."
+        },
+        "defaultValue": []
+      },
+      "registerStorageAccount": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Register Storage Account",
+          "description": "Set to true if the existing Storage Account has to be registered to the Recovery Services Vault; set to false otherwise."
+        },
+        "defaultValue": true
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/fileServices/shares"
+          },
+          {
+            "field": "location",
+            "equals": "[parameters('vaultLocation')]"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "[concat('tags[', parameters('inclusionTagName'), ']')]",
+                "in": "[parameters('inclusionTagValues')]"
+              },
+              {
+                "value": "[empty(parameters('inclusionTagValues'))]",
+                "equals": "true"
+              },
+              {
+                "value": "[empty(parameters('inclusionTagName'))]",
+                "equals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.RecoveryServices/backupprotecteditems",
+          "existenceCondition": {
+            "field": "type",
+            "equals": "Microsoft.RecoveryServices/backupprotecteditems"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab",
+            "/providers/Microsoft.Authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vaultName": {
+                    "type": "string"
+                  },
+                  "vaultLocation": {
+                    "type": "string"
+                  },
+                  "policyName": {
+                    "type": "string",
+                    "defaultValue": "DefaultBackupPolicy"
+                  },
+                  "existingStorageAccountName": {
+                    "type": "string"
+                  },
+                  "existingFileShareName": {
+                    "type": "string"
+                  },
+                  "existingResourceGroupName": {
+                    "type": "string"
+                  },
+                  "registerStorageAccount": {
+                    "type": "bool",
+                    "defaultValue": "true"
+                  },
+                  "schedule": {
+                    "type": "object",
+                    "defaultValue": {
+                      "schedulePolicyType": "SimpleSchedulePolicy",
+                      "scheduleRunFrequency": "Daily",
+                      "scheduleRunDays": null,
+                      "scheduleRunTimes": [
+                        "2025-04-04T08:00:00Z"
+                      ]
+                    }
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "defaultValue": "UTC"
+                  },
+                  "retention": {
+                    "type": "object",
+                    "defaultValue": {
+                      "snapshotRetentionInDays": 5,
+                      "vaultRetention": {
+                        "retentionPolicyType": "LongTermRetentionPolicy",
+                        "dailySchedule": {
+                          "retentionTimes": [
+                            "2025-04-04T08:00:00Z"
+                          ],
+                          "retentionDuration": {
+                            "count": 30,
+                            "durationType": "Days"
+                          }
+                        },
+                        "weeklySchedule": null,
+                        "monthlySchedule": null,
+                        "yearlySchedule": null
+                      }
+                    }
+                  }
+                },
+                "variables": {
+                  "backupFabric": "Azure",
+                  "backupManagementType": "AzureStorage",
+                  "containerName": "[concat('storagecontainer;Storage;', parameters('existingResourceGroupName'), ';', parameters('existingStorageAccountName'))]",
+                  "protectedItemName": "[concat('AzureFileShare;', parameters('existingFileShareName'))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.RecoveryServices/vaults",
+                    "apiVersion": "2023-06-01",
+                    "name": "[parameters('vaultName')]",
+                    "location": "[parameters('vaultLocation')]",
+                    "sku": {
+                      "name": "Standard"
+                    },
+                    "properties": {
+                      "publicNetworkAccess": "Enabled"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+                    "apiVersion": "2016-06-01",
+                    "name": "[concat(parameters('vaultName'), '/', parameters('policyName'))]",
+                    "properties": {
+                      "backupManagementType": "[variables('backupManagementType')]",
+                      "workLoadType": "AzureFileShare",
+                      "schedulePolicy": "[parameters('schedule')]",
+                      "timeZone": "[parameters('timeZone')]",
+                      "vaultretentionPolicy": "[parameters('retention')]"
+                    },
+                    "dependsOn": [
+                      "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName'))]"
+                    ]
+                  },
+                  {
+                    "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers",
+                    "apiVersion": "2023-06-01",
+                    "name": "[concat(parameters('vaultName'), '/', variables('backupFabric'), '/', variables('containerName'))]",
+                    "properties": {
+                      "backupManagementType": "[variables('backupManagementType')]",
+                      "containerType": "StorageContainer",
+                      "sourceResourceId": "[resourceId(parameters('existingResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]"
+                    },
+                    "condition": "[parameters('registerStorageAccount')]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.RecoveryServices/vaults', parameters('vaultName'))]"
+                    ]
+                  },
+                  {
+                    "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+                    "apiVersion": "2023-06-01",
+                    "name": "[concat(parameters('vaultName'), '/', variables('backupFabric'), '/', variables('containerName'), '/', variables('protectedItemName'))]",
+                    "properties": {
+                      "protectedItemType": "AzureFileShareProtectedItem",
+                      "sourceResourceId": "[resourceId(parameters('existingResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]",
+                      "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', parameters('vaultName'), parameters('policyName'))]"
+                    },
+                    "condition": "[parameters('registerStorageAccount')]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers', parameters('vaultName'), variables('backupFabric'), variables('containerName'))]",
+                      "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', parameters('vaultName'), parameters('policyName'))]"
+                    ]
+                  }
+                ]
+              },
+              "parameters": {
+                "vaultName": {
+                  "value": "[parameters('vaultName')]"
+                },
+                "vaultLocation": {
+                  "value": "[parameters('vaultLocation')]"
+                },
+                "policyName": {
+                  "value": "[parameters('policyName')]"
+                },
+                "existingStorageAccountName": {
+                  "value": "[first(skip(split(field('id'), '/'), 8))]"
+                },
+                "existingFileShareName": {
+                  "value": "[field('name')]"
+                },
+                "existingResourceGroupName": {
+                  "value": "[resourceGroup().name]"
+                },
+                "registerStorageAccount": {
+                  "value": "[parameters('registerStorageAccount')]"
+                },
+                "schedule": {
+                  "value": {
+                    "schedulePolicyType": "SimpleSchedulePolicy",
+                    "scheduleRunFrequency": "Daily",
+                    "scheduleRunDays": null,
+                    "scheduleRunTimes": [
+                      "2025-04-04T08:00:00Z"
+                    ]
+                  }
+                },
+                "timeZone": {
+                  "value": "UTC"
+                },
+                "retention": {
+                  "value": {
+                    "snapshotRetentionInDays": 5,
+                    "vaultRetention": {
+                      "retentionPolicyType": "LongTermRetentionPolicy",
+                      "dailySchedule": {
+                        "retentionTimes": [
+                          "2025-04-04T08:00:00Z"
+                        ],
+                        "retentionDuration": {
+                          "count": 30,
+                          "durationType": "Days"
+                        }
+                      },
+                      "weeklySchedule": null,
+                      "monthlySchedule": null,
+                      "yearlySchedule": null
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f32ca068-2ada-4705-b5b5-84ce89422846",
+  "name": "f32ca068-2ada-4705-b5b5-84ce89422846"
+}

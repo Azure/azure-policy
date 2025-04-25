@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Azure Machine Learning and Ai Studio should use Allow Only Approved Outbound Managed Vnet mode",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Managed VNet isolation streamlines and automates your network isolation configuration with a built-in, workspace-level Azure Machine Learning managed VNet. The managed VNet secures your managed Azure Machine Learning resources, such as compute instances, compute clusters, serverless compute, and managed online endpoints.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Machine Learning"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "isolationMode": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Isolation mode of the azure machine learning workspace",
+          "description": "Managed network isolation mode of the azure machine learning workspace which configures the network settings of the workspace."
+        },
+        "allowedValues": [
+          "AllowInternetOutbound",
+          "AllowOnlyApprovedOutbound",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled"
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices/workspaces"
+          },
+          {
+            "field": "Microsoft.MachineLearningServices/workspaces/managedNetwork.isolationMode",
+            "notEquals": "[parameters('isolationMode')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6ddb1705-c8cf-450e-aa4b-19ad6703c440",
+  "name": "6ddb1705-c8cf-450e-aa4b-19ad6703c440"
+}

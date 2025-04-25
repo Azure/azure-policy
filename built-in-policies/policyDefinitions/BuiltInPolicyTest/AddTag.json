@@ -1,21 +1,26 @@
 {
   "properties": {
-    "displayName": "Add a tag to resources - This built-in is created for versioning test.",
+    "displayName": "[Preview]: Append a tag and its value to resources - This built-in is created for versioning test.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Adds the specified tag and value when any resource missing this tag is created or updated. Existing resources can be remediated by triggering a remediation task. If the tag exists with a different value it will not be changed. Does not modify tags on resource groups.",
+    "description": "Appends the specified tag and value when any resource which is missing this tag is created or updated. Does not modify the tags of resources created before this policy was applied until those resources are changed. Does not apply to resource groups. New 'modify' effect policies are available that support remediation of tags on existing resources (see https://aka.ms/modifydoc).",
     "metadata": {
-      "version": "2.0.0",
-      "category": "BuiltInPolicyTest"
+      "version": "1.0.0-preview",
+      "category": "BuiltInPolicyTest",
+      "preview": true
     },
-    "version": "2.0.0",
+    "version": "1.0.0-preview",
     "parameters": {
       "tagName": {
         "type": "String",
         "metadata": {
           "displayName": "Tag Name",
           "description": "Name of the tag, such as 'environment'"
-        }
+        },
+        "allowedValues": [
+          "TestCategory",
+          "ServiceID"
+        ]
       },
       "tagValue": {
         "type": "String",
@@ -31,10 +36,10 @@
           "description": "Enable or disable the execution of the policy"
         },
         "allowedValues": [
-          "Modify",
+          "Append",
           "Disabled"
         ],
-        "defaultValue": "Modify"
+        "defaultValue": "Append"
       }
     },
     "policyRule": {
@@ -44,22 +49,15 @@
       },
       "then": {
         "effect": "[parameters('effect')]",
-        "details": {
-          "roleDefinitionIds": [
-            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
-          ],
-          "operations": [
-            {
-              "operation": "add",
-              "field": "[concat('tags[', parameters('tagName'), ']')]",
-              "value": "[parameters('tagValue')]"
-            }
-          ]
-        }
+        "details": [
+          {
+            "field": "[concat('tags[', parameters('tagName'), ']')]",
+            "value": "[parameters('tagValue')]"
+          }
+        ]
       }
     },
     "versions": [
-      "2.0.0",
       "1.0.0-PREVIEW"
     ]
   },

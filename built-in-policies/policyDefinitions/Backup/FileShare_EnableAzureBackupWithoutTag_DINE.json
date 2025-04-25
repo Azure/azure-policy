@@ -1,0 +1,250 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure backup for Azure Files Shares without a given tag to an existing recovery services vault in the same location",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Enforce backup for all Azure Files by backing them up to an existing central recovery services vault in the same location and subscription as the storage account. Doing this is useful when there is a central team in your organization managing backups for all resources in a subscription. You can optionally exclude Azure Files in storage accounts containing a specified tag to control the scope of assignment.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Backup"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "registerStorageAccount": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Register Storage Account",
+          "description": "Set to true if the existing Storage Account has to be registered to the Recovery Services Vault; set to false otherwise."
+        },
+        "defaultValue": false
+      },
+      "vaultName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Vault Name",
+          "description": "Name of the Recovery Services Vault where backups should be registered."
+        }
+      },
+      "vaultLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Location (Specify the location of the FileShares that you want to protect)",
+          "description": "Location of the FileShares. The FileShares should be in the same location as the vault."
+        }
+      },
+      "backupPolicyName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Backup Policy Name",
+          "description": "Specify the Name of the Azure Backup policy to configure backup of the file shares. The selected Azure Backup policy should be of type Azure File Share. This policy needs to be in a vault that is present in the location chosen above. For example - /subscriptions/<SubscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.RecoveryServices/vaults/<VaultName>/backupPolicies/<BackupPolicyName>"
+        }
+      },
+      "exclusionTagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Exclusion Tag Name",
+          "description": "Name of the tag to use for excluding FileShares in the scope of this policy. This should be used along with the Exclusion Tag Value parameter."
+        },
+        "defaultValue": ""
+      },
+      "exclusionTagValue": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Exclusion Tag Values",
+          "description": "Value of the tag to use for excluding FileShares in the scope of this policy (in case of multiple values, use a comma-separated list). This should be used along with the Exclusion Tag Name parameter."
+        },
+        "defaultValue": []
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/fileServices/shares"
+          },
+          {
+            "field": "location",
+            "equals": "[parameters('vaultLocation')]"
+          },
+          {
+            "anyOf": [
+              {
+                "not": {
+                  "field": "[concat('tags[', parameters('exclusionTagName'), ']')]",
+                  "in": "[parameters('exclusionTagValue')]"
+                }
+              },
+              {
+                "value": "[empty(parameters('exclusionTagValue'))]",
+                "equals": "true"
+              },
+              {
+                "value": "[empty(parameters('exclusionTagName'))]",
+                "equals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.RecoveryServices/backupprotecteditems",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab",
+            "/providers/Microsoft.Authorization/roleDefinitions/5e467623-bb1f-42f4-a55d-6e525e11384b"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "registerStorageAccount": {
+                    "type": "bool",
+                    "defaultValue": false,
+                    "metadata": {
+                      "description": "Set to true if the existing Storage Account needs to be registered to the Recovery Services Vault; set to false otherwise."
+                    }
+                  },
+                  "vaultName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Vault name to register backup."
+                    }
+                  },
+                  "existingResourceGroupName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Existing Resource Group Name."
+                    }
+                  },
+                  "existingFileShareName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Existing File Share Name."
+                    }
+                  },
+                  "backupPolicyName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Backup Policy Name."
+                    }
+                  },
+                  "existingStorageAccountName": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "ResourceId of the Storage Account."
+                    }
+                  },
+                  "location": {
+                    "type": "string",
+                    "metadata": {
+                      "description": "Location for all resources."
+                    }
+                  }
+                },
+                "variables": {
+                  "existingStorageAccountName": "[parameters('existingStorageAccountName')]",
+                  "existingResourceGroupName": "[parameters('existingResourceGroupName')]",
+                  "existingFileShareName": "[parameters('existingFileShareName')]",
+                  "backupPolicyName": "[parameters('backupPolicyName')]",
+                  "vaultName": "[parameters('vaultName')]",
+                  "backupFabric": "Azure",
+                  "backupManagementType": "AzureStorage"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2021-04-01",
+                    "resourceGroup": "[variables('existingResourceGroupName')]",
+                    "name": "[concat('DeployProtection-', uniqueString(variables('existingStorageAccountName')))]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "parameters": {},
+                        "resources": [
+                          {
+                            "condition": "[parameters('registerStorageAccount')]",
+                            "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers",
+                            "apiVersion": "2021-12-01",
+                            "name": "[format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName'))]",
+                            "properties": {
+                              "backupManagementType": "[variables('backupManagementType')]",
+                              "containerType": "StorageContainer",
+                              "sourceResourceId": "[resourceId(parameters('existingResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]"
+                            }
+                          },
+                          {
+                            "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+                            "apiVersion": "2021-12-01",
+                            "name": "[format('{0}/{1}/{2}/{3}', split(format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName')), '/')[0], split(format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName')), '/')[1], split(format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName')), '/')[2], format('AzureFileShare;{0}', parameters('existingFileShareName')))]",
+                            "properties": {
+                              "protectedItemType": "AzureFileShareProtectedItem",
+                              "sourceResourceId": "[resourceId(parameters('existingResourceGroupName'), 'Microsoft.Storage/storageAccounts', parameters('existingStorageAccountName'))]",
+                              "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', parameters('vaultName'), parameters('backupPolicyName'))]",
+                              "isInlineInquiry": true
+                            },
+                            "dependsOn": [
+                              "[resourceId('Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers', split(format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName')), '/')[0], split(format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName')), '/')[1], split(format('{0}/{1}/storagecontainer;Storage;{2};{3}', parameters('vaultName'), variables('backupFabric'), parameters('existingResourceGroupName'), parameters('existingStorageAccountName')), '/')[2])]"
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "existingStorageAccountName": {
+                  "value": "[first(skip(split(field('id'), '/'), 8))]"
+                },
+                "existingFileShareName": {
+                  "value": "[field('name')]"
+                },
+                "existingResourceGroupName": {
+                  "value": "[resourceGroup().name]"
+                },
+                "registerStorageAccount": {
+                  "value": "[parameters('registerStorageAccount')]"
+                },
+                "vaultName": {
+                  "value": "[parameters('vaultName')]"
+                },
+                "backupPolicyName": {
+                  "value": "[parameters('backupPolicyName')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e159e079-0ddd-4905-97c9-79a8fca6d880",
+  "name": "e159e079-0ddd-4905-97c9-79a8fca6d880"
+}
