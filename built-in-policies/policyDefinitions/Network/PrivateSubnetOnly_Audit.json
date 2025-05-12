@@ -5,10 +5,10 @@
     "mode": "All",
     "description": "Ensure your subnets are secure by default by preventing default outbound access. For more information go to https://aka.ms/defaultoutboundaccessretirement",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Network"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -34,8 +34,22 @@
                 "equals": "Microsoft.Network/virtualNetworks"
               },
               {
-                "field": "Microsoft.Network/virtualNetworks/subnets[*].defaultOutboundAccess",
-                "notEquals": "false"
+                "count": {
+                  "field": "Microsoft.Network/virtualNetworks/subnets[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Network/virtualNetworks/subnets[*].defaultOutboundAccess",
+                        "notEquals": "false"
+                      },
+                      {
+                        "field": "Microsoft.Network/virtualNetworks/subnets[*].defaultOutboundAccess",
+                        "exists": false
+                      }
+                    ]
+                  }
+                },
+                "greater": 0
               }
             ]
           },
@@ -58,6 +72,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },
