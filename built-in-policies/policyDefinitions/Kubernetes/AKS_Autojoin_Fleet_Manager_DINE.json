@@ -1,0 +1,199 @@
+{
+  "properties": {
+    "displayName": "Configure AKS clusters to automatically join the specified Azure Kubernetes Fleet Manager",
+    "policyType": "BuiltIn",
+    "mode": "indexed",
+    "description": "Detect and ensure that AKS clusters join a given Azure Kubernetes Fleet Manager. Optionally, select a look-up tag to specify what fleet update group to join. To learn more, visit https://aka.ms/kubernetes-fleet/policy",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "fleet-subscription-id": {
+        "type": "string",
+        "metadata": {
+          "description": "The Kubernetes Fleet Manager subscription ID.",
+          "displayName": "Fleet Subscription ID"
+        }
+      },
+      "fleet-resource-group": {
+        "type": "string",
+        "metadata": {
+          "description": "The Kubernetes Fleet Manager resource group.",
+          "displayName": "Fleet resource group"
+        }
+      },
+      "fleet-name": {
+        "type": "string",
+        "metadata": {
+          "description": "The Kubernetes Fleet Manager name that the clusters will join.",
+          "displayName": "Fleet name"
+        }
+      },
+      "fleet-group-tag": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Optional. The tag on the AKS cluster whose value will be resolved and used as the fleet member group name at join time. A valid fleet member group name must: 1. be an empty string; or 2. contain 1 to 50 lowercase alphanumeric characters or '-', and start and end with an alphanumeric character.",
+          "displayName": "UpdateRun group tag"
+        }
+      },
+      "skip-cluster-tag": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Optional. The resource tag to put on any AKS cluster in scope you intend to skip from being evaluated by this policy. The tag value must be set to 'true'.",
+          "displayName": "Skip cluster tag"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "field": "identity.type",
+            "in": [
+              "UserAssigned",
+              "SystemAssigned"
+            ]
+          },
+          {
+            "not": {
+              "allOf": [
+                {
+                  "value": "[resourceGroup().name]",
+                  "like": "FL_*"
+                },
+                {
+                  "field": "name",
+                  "equals": "hub"
+                }
+              ]
+            }
+          },
+          {
+            "field": "[concat('tags[', parameters('skip-cluster-tag'), ']')]",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.ContainerService/fleetMemberships",
+          "name": "default",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/63bb64ad-9799-4770-b5c3-24ed299a07bf",
+            "/providers/Microsoft.Authorization/roleDefinitions/ed7f3fbd-7b88-4dd4-9017-9adb7ce333f8"
+          ],
+          "existenceScope": "resourceGroup",
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "member-name": {
+                    "type": "string"
+                  },
+                  "fleet-name": {
+                    "type": "string"
+                  },
+                  "fleet-resource-group": {
+                    "type": "string"
+                  },
+                  "fleet-subscription-id": {
+                    "type": "string"
+                  },
+                  "cluster-resource-id": {
+                    "type": "string"
+                  },
+                  "cluster-name": {
+                    "type": "string"
+                  },
+                  "fleet-group": {
+                    "type": "string",
+                    "defaultValue": ""
+                  }
+                },
+                "resources": [
+                  {
+                    "name": "[concat(take(parameters('cluster-name'), 39), '-join-fleet-', uniqueString(parameters('fleet-subscription-id'), parameters('fleet-resource-group'), parameters('fleet-name'), parameters('cluster-resource-id')))]",
+                    "type": "Microsoft.Resources/deployments",
+                    "apiVersion": "2022-09-01",
+                    "subscriptionId": "[parameters('fleet-subscription-id')]",
+                    "resourceGroup": "[parameters('fleet-resource-group')]",
+                    "properties": {
+                      "mode": "Incremental",
+                      "template": {
+                        "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                        "contentVersion": "1.0.0.0",
+                        "resources": [
+                          {
+                            "type": "Microsoft.ContainerService/fleets/members",
+                            "apiVersion": "2024-04-01",
+                            "name": "[concat(parameters('fleet-name'), '/', parameters('member-name'))]",
+                            "properties": {
+                              "clusterResourceId": "[parameters('cluster-resource-id')]",
+                              "group": "[parameters('fleet-group')]"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "member-name": {
+                  "value": "[concat(take(field('name'), 36), '-', uniqueString(field('id')))]"
+                },
+                "fleet-name": {
+                  "value": "[parameters('fleet-name')]"
+                },
+                "fleet-resource-group": {
+                  "value": "[parameters('fleet-resource-group')]"
+                },
+                "fleet-subscription-id": {
+                  "value": "[parameters('fleet-subscription-id')]"
+                },
+                "cluster-resource-id": {
+                  "value": "[field('id')]"
+                },
+                "cluster-name": {
+                  "value": "[field('name')]"
+                },
+                "fleet-group": {
+                  "value": "[field(concat('tags[', parameters('fleet-group-tag'), ']'))]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cadd9445-aeb8-4ee4-b505-c279db2f737f",
+  "name": "cadd9445-aeb8-4ee4-b505-c279db2f737f"
+}
