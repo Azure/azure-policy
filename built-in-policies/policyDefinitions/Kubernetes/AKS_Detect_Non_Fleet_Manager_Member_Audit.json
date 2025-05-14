@@ -1,0 +1,79 @@
+{
+  "properties": {
+    "displayName": "Azure Kubernetes Service clusters should be a member of an Azure Kubernetes Fleet Manager.",
+    "policyType": "BuiltIn",
+    "mode": "indexed",
+    "description": "Detect and report any AKS clusters that are not members of an Azure Kubernetes Fleet Manager. To learn more, visit https://aka.ms/kubernetes-fleet/policy",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Kubernetes"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "skip-cluster-tag": {
+        "type": "string",
+        "defaultValue": "",
+        "metadata": {
+          "description": "Optional. The resource tag to put on any AKS cluster in scope you intend to skip from being evaluated by this policy. The tag value must be set to 'true'.",
+          "displayName": "Skip cluster tag"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "not": {
+              "allOf": [
+                {
+                  "value": "[resourceGroup().name]",
+                  "like": "FL_*"
+                },
+                {
+                  "field": "name",
+                  "equals": "hub"
+                }
+              ]
+            }
+          },
+          {
+            "field": "[concat('tags[', parameters('skip-cluster-tag'), ']')]",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.ContainerService/fleetMemberships",
+          "name": "default",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/ed7f3fbd-7b88-4dd4-9017-9adb7ce333f8"
+          ],
+          "existenceScope": "resourceGroup"
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c7f49635-e3f0-4986-b072-90d0c7c3d4cd",
+  "name": "c7f49635-e3f0-4986-b072-90d0c7c3d4cd"
+}
