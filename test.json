@@ -1,0 +1,82 @@
+{
+    "properties": {
+        "displayName": "Audit if VM backup is not enabled or incorrect policy is used",
+        "policyType": "Custom",
+        "mode": "All",
+        "description": "Audits if a VM is not protected by backup or is using a backup policy that doesn't match its NetEnvironment tag (Prod, QA, Dev).",
+        "metadata": {
+            "category": "Backup",
+            "version": "1.1.0"
+        },
+        "parameters": {
+            "environmentTagName": {
+                "type": "String"
+            },
+            "prodPolicyName": {
+                "type": "String"
+            },
+            "nonProdPolicyName": {
+                "type": "String"
+            },
+            "prodEnvironments": {
+                "type": "Array"
+            },
+            "nonProdEnvironments": {
+                "type": "Array"
+            }
+        },
+        "policyRule": {
+            "if": {
+                "allOf": [
+                    {
+                        "field": "type",
+                        "equals": "Microsoft.Compute/virtualMachines"
+                    },
+                    {
+                        "anyOf": [
+                            {
+                                "not": {
+                                    "field": "Microsoft.RecoveryServices/backupProtectedItems[*].properties.sourceResourceId",
+                                    "equals": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Compute/virtualMachines/', field('name'))]"
+                                }
+                            },
+                            {
+                                "anyOf": [
+                                    {
+                                        "allOf": [
+                                            {
+                                                "field": "[concat('tags[', parameters('environmentTagName'), ']')]",
+                                                "in": "[parameters('prodEnvironments')]"
+                                            },
+                                            {
+                                                "field": "Microsoft.RecoveryServices/backupProtectedItems[*].properties.policyName",
+                                                "notEquals": "[parameters('prodPolicyName')]"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "allOf": [
+                                            {
+                                                "field": "[concat('tags[', parameters('environmentTagName'), ']')]",
+                                                "in": "[parameters('nonProdEnvironments')]"
+                                            },
+                                            {
+                                                "field": "Microsoft.RecoveryServices/backupProtectedItems[*].properties.policyName",
+                                                "notEquals": "[parameters('nonProdPolicyName')]"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "then": {
+                "effect": "audit"
+            }
+        }
+    },
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "audit-if-backup-not-enabled-or-wrong-policy"
+}
