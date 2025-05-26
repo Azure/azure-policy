@@ -1,0 +1,86 @@
+{
+    "properties": {
+      "displayName": "Deny VM creation if backup is not enabled or incorrect policy is used",
+      "policyType": "Custom",
+      "mode": "All",
+      "description": "Prevents creation of virtual machines unless they are protected with Azure Backup using the correct policy for the environment.",
+      "metadata": {
+        "category": "Backup",
+        "version": "1.1.0"
+      },
+      "parameters": {
+        "environmentTagName": {
+          "type": "String"
+        },
+        "prodPolicyName": {
+          "type": "String"
+        },
+        "nonProdPolicyName": {
+          "type": "String"
+        },
+        "prodEnvironments": {
+          "type": "Array"
+        },
+        "nonProdEnvironments": {
+          "type": "Array"
+        }
+      },
+      "policyRule": {
+        "if": {
+          "allOf": [
+            {
+              "field": "type",
+              "equals": "Microsoft.Compute/virtualMachines"
+            },
+            {
+              "anyOf": [
+                {
+                  "not": {
+                    "field": "Microsoft.RecoveryServices/backupProtectedItems[*].properties.sourceResourceId",
+                    "equals": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Compute/virtualMachines/', field('name'))]"
+                  }
+                },
+                {
+                  "anyOf": [
+                    {
+                      "allOf": [
+                        {
+                          "field": "[concat('tags[', parameters('environmentTagName'), ']')]",
+                          "in": "[parameters('prodEnvironments')]"
+                        },
+                        {
+                          "not": {
+                            "field": "Microsoft.RecoveryServices/backupProtectedItems[*].properties.policyName",
+                            "equals": "[parameters('prodPolicyName')]"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "allOf": [
+                        {
+                          "field": "[concat('tags[', parameters('environmentTagName'), ']')]",
+                          "in": "[parameters('nonProdEnvironments')]"
+                        },
+                        {
+                          "not": {
+                            "field": "Microsoft.RecoveryServices/backupProtectedItems[*].properties.policyName",
+                            "equals": "[parameters('nonProdPolicyName')]"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "then": {
+          "effect": "deny"
+        }
+      }
+    },
+    "type": "Microsoft.Authorization/policyDefinitions",
+    "name": "deny-if-backup-not-compliant"
+  }
