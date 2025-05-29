@@ -1,0 +1,321 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Kubernetes cluster should follow the security control recommendations of Center for Internet Security (CIS) Kubernetes benchmark",
+    "policyType": "BuiltIn",
+    "description": "This initiative includes the policies for the security recommendation for Center for Internet Security (CIS) Kubernetes benchmark, you can use this initiative to stay compliant with CIS Kubernetes benchmark. For more information of CIS compliance, visit: https://aka.ms/aks/cis-kubernetes",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "'Audit' allows a non-compliant resource to be created or updated, but flags it as non-compliant. 'Disabled' turns off the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "namespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace inclusions",
+          "description": "List of Kubernetes namespaces to only include in policy evaluation. An empty list means the policy is applied to all resources in all namespaces."
+        },
+        "defaultValue": []
+      },
+      "excludedNamespaces": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Namespace exclusions",
+          "description": "List of Kubernetes namespaces to exclude from policy evaluation. System namespaces \"kube-system\", \"gatekeeper-system\" and \"azure-arc\" are always excluded by design. \"azure-extensions-usage-system\" is optional to remove."
+        },
+        "defaultValue": [
+          "kube-system",
+          "gatekeeper-system",
+          "azure-arc",
+          "azure-extensions-usage-system"
+        ]
+      },
+      "excludedImages": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Image exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository."
+        },
+        "defaultValue": []
+      },
+      "labelSelector": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Kubernetes label selector",
+          "description": "Label query to select Kubernetes resources for policy evaluation. An empty label selector matches all Kubernetes resources."
+        },
+        "defaultValue": {},
+        "schema": {
+          "description": "A label selector is a label query over a set of resources. The result of matchLabels and matchExpressions are ANDed. An empty label selector matches all resources.",
+          "type": "object",
+          "properties": {
+            "matchLabels": {
+              "description": "matchLabels is a map of {key,value} pairs.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "minProperties": 1
+            },
+            "matchExpressions": {
+              "description": "matchExpressions is a list of values, a key, and an operator.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "key is the label key that the selector applies to.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "operator represents a key's relationship to a set of values.",
+                    "type": "string",
+                    "enum": [
+                      "In",
+                      "NotIn",
+                      "Exists",
+                      "DoesNotExist"
+                    ]
+                  },
+                  "values": {
+                    "description": "values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.",
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "key",
+                  "operator"
+                ],
+                "additionalProperties": false
+              },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "allowedHostPaths": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed host paths",
+          "description": "The host paths allowed for pod hostPath volumes to use. Provide an empty paths list to block all host paths.",
+          "portalReview": true
+        },
+        "defaultValue": {
+          "paths": []
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pathPrefix": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "pathPrefix",
+                  "readOnly"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "paths"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ca8d5704-aa2b-40cf-b110-dc19052825ad",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "CIS5.1.1-NoWildcardsInRoles",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a3dc4946-dba6-43e6-950d-f96532848c9f",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "CIS5.1.3-NoClusterAdminRole",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/95edb821-ddaf-4404-9732-666045e056b4",
+        "definitionVersion": "9.*.*",
+        "policyDefinitionReferenceId": "CIS5.2.2-NoPrivilegedContainers",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImages')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/47a1ee2f-2a2a-4576-bf2a-e0e36709c2b8",
+        "definitionVersion": "5.*.*",
+        "policyDefinitionReferenceId": "CIS5.2.3-5.2.4-BlockUsingHostProcessIDAndIPC",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImages')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/82985f06-dc18-4a48-bc1c-b9f4f0098cfe",
+        "definitionVersion": "6.*.*",
+        "policyDefinitionReferenceId": "CIS5.2.5-BlockUsingHostNetwork",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          },
+          "allowHostNetwork": {
+            "value": false
+          },
+          "minPort": {
+            "value": 0
+          },
+          "maxPort": {
+            "value": 0
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImages')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1c6e92c9-99f0-4e55-9cf2-0c234dc48f99",
+        "definitionVersion": "7.*.*",
+        "policyDefinitionReferenceId": "CIS5.2.6-NoPrivilegeEscalation",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImages')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/098fc59e-46c7-4d99-9b16-64990e543d75",
+        "definitionVersion": "6.*.*",
+        "policyDefinitionReferenceId": "CIS5.2.12-NoHostPathVolume",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedNamespaces": {
+            "value": "[parameters('excludedNamespaces')]"
+          },
+          "namespaces": {
+            "value": "[parameters('namespaces')]"
+          },
+          "labelSelector": {
+            "value": "[parameters('labelSelector')]"
+          },
+          "allowedHostPaths": {
+            "value": "[parameters('allowedHostPaths')]"
+          },
+          "excludedImages": {
+            "value": "[parameters('excludedImages')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/4fd005fd-51be-478f-a8fb-149d48b20d48",
+  "name": "4fd005fd-51be-478f-a8fb-149d48b20d48"
+}
