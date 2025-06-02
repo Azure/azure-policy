@@ -1,0 +1,60 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Users must authenticate with multi-factor authentication to delete resources",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy definition blocks resource delete operations when the caller is not authenticated via MFA. For more information, visit https://aka.ms/mfaforazure.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "General",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy"
+        },
+        "allowedValues": [
+          "AuditAction",
+          "DenyAction",
+          "Disabled"
+        ],
+        "defaultValue": "AuditAction"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "value": "[requestContext().identity.idtyp]",
+            "equals": "user"
+          },
+          {
+            "value": "mfa",
+            "notIn": "[split(tryGet(requestContext().identity, 'http://schemas.microsoft.com/claims/authnmethodsreferences'), ',')]"
+          },
+          {
+            "value": "p1",
+            "notIn": "[split(requestContext().identity.acrs, ',')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "actionNames": [
+            "delete"
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/db4a9d17-db75-4f46-9fcb-9f9526604417",
+  "name": "db4a9d17-db75-4f46-9fcb-9f9526604417"
+}

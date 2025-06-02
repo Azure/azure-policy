@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Users must authenticate with multi-factor authentication to create or update resources",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy definition blocks resource create and update operations when the caller is not authenticated via MFA. For more information, visit https://aka.ms/mfaforazure.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "General",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "value": "[requestContext().identity.idtyp]",
+            "equals": "user"
+          },
+          {
+            "value": "mfa",
+            "notIn": "[split(tryGet(requestContext().identity, 'http://schemas.microsoft.com/claims/authnmethodsreferences'), ',')]"
+          },
+          {
+            "value": "p1",
+            "notIn": "[split(requestContext().identity.acrs, ',')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4e6c27d5-a6ee-49cf-b2b4-d8fe90fa2b8b",
+  "name": "4e6c27d5-a6ee-49cf-b2b4-d8fe90fa2b8b"
+}
