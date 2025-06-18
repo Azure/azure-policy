@@ -1,0 +1,75 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Data Collection Rules that target a specific workspace should use the specified Data Collection Endpoint",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit or deny the creation of DCRs that target a workspace and don't use the specified DCE",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Monitoring",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "WorkspaceResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Log Analytics Workspace resource ID",
+          "description": "The Workspace resource ID formatted as a resource path"
+        }
+      },
+      "DceResourceId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Data Collection Endpoint resource ID",
+          "description": "The resource ID of the DCE associated with the workspace (System DCE) formatted as a resource path"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Insights/dataCollectionRules"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Insights/dataCollectionRules/destinations.logAnalytics[*]",
+              "where": {
+                "field": "Microsoft.Insights/dataCollectionRules/destinations.logAnalytics[*].workspaceResourceId",
+                "equals": "[parameters('WorkspaceResourceId')]"
+              }
+            },
+            "equals": "[length(field('Microsoft.Insights/dataCollectionRules/destinations.logAnalytics[*]'))]"
+          },
+          {
+            "field": "Microsoft.Insights/dataCollectionRules/dataCollectionEndpointId",
+            "notEquals": "[parameters('DceResourceId')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1a94e687-23be-4c29-87a9-92c9cabae28f",
+  "name": "1a94e687-23be-4c29-87a9-92c9cabae28f"
+}
