@@ -1,14 +1,15 @@
 {
   "properties": {
-    "displayName": "Deploy Log Analytics extension for Linux virtual machine scale sets. See deprecation notice below",
+    "displayName": "[Deprecated]: Deploy Log Analytics extension for Linux virtual machine scale sets. See deprecation notice below",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Deploy Log Analytics extension for Linux virtual machine scale sets if the VM Image (OS) is in the list defined and the extension is not installed. Note: if your scale set upgradePolicy is set to Manual, you need to apply the extension to the all VMs in the set by calling upgrade on them. In CLI this would be az vmss update-instances. Deprecation notice: The Log Analytics agent will not be supported after August 31, 2024. You must migrate to the replacement 'Azure Monitor agent' prior to that date",
+    "description": "This policy definition is deprecated because OMS Agent has been deprecation on August 31, 2024. While there is not a specific replacement policy, we have various policies available based on the VM setup that can be found under Azure Monitor Agent/DCRA Linux. Learn more about policy definition deprecation at aka.ms/policydefdeprecation.",
     "metadata": {
-      "version": "3.0.0",
-      "category": "Monitoring"
+      "version": "3.1.0-deprecated",
+      "category": "Monitoring",
+      "deprecated": true
     },
-    "version": "3.0.0",
+    "version": "3.1.0",
     "parameters": {
       "logAnalytics": {
         "type": "String",
@@ -26,6 +27,18 @@
           "displayName": "Optional: List of VM images that have supported Linux OS to add to scope",
           "description": "Example value: '/subscriptions/<subscriptionId>/resourceGroups/YourResourceGroup/providers/Microsoft.Compute/images/ContosoStdImage'"
         }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled"
       }
     },
     "policyRule": {
@@ -289,7 +302,7 @@
         ]
       },
       "then": {
-        "effect": "deployIfNotExists",
+        "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.Compute/virtualMachineScaleSets/extensions",
           "roleDefinitionIds": [
@@ -376,6 +389,7 @@
       }
     },
     "versions": [
+      "3.1.0",
       "3.0.0"
     ]
   },
