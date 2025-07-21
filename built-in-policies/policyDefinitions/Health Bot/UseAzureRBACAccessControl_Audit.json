@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Azure Health Bots should use Azure RBAC as their access control method",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Have a more precise and robust control over access control for your healthcare agents, by setting Azure RBAC as your access control method. Roles are assigned through the Access Control blade in your resource page, groups can be leveraged to share permissions, and custom roles can be authored to cater for specific use cases. Learn more at https://docs.microsoft.com/azure/health-bot/cmk",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Health Bot"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The desired effect of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HealthBot/healthBots"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.HealthBot/healthBots/accessControlMethod",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.HealthBot/healthBots/accessControlMethod",
+                "notEquals": "AzureRBAC"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/96561daf-13ae-4008-9300-638df7e6a11a",
+  "name": "96561daf-13ae-4008-9300-638df7e6a11a"
+}

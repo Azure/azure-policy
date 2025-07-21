@@ -1,0 +1,830 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure SSH security posture for Windows",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy configures SSH server security configuration on Windows Server 2025 machines (Azure VMs and Arc-enabled machines). For more information including pre-requisites, settings in scope, defaults, and customization, see https://learn.microsoft.com/azure/osconfig/overviewsshposture-control-windows.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Guest Configuration",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "SetSecureShell",
+        "version": "1.*",
+        "configurationParameter": {
+          "AllowGroups": "Ensure that the allowed groups for SSH are configured;Value",
+          "AllowUsers": "Ensure that the allowed users for SSH access are configured;Value",
+          "AuthenticationMethods": "Ensure that the authentication method for SSH is configured;Value",
+          "DenyGroups": "Ensure that the denied groups for SSH are configured;Value",
+          "DenyUsers": "Ensure that the denied users for SSH are configured;Value",
+          "SyslogFacility": "Ensure that the facility code used when logging messages for SSH is configured;Value",
+          "MaxAuthTries": "Ensure that the SSH MaxAuthTries is configured;Value",
+          "HostKey": "Ensure that the SSH HostKey is configured;Value",
+          "AuthorizedKeysFile": "Ensure that the authorized key file for SSH is configured;Value",
+          "GSSAPIAuthentication": "Ensure that GSSApiAuthentication for SSH is configured;Value",
+          "Banner": "Ensure that the SSH warning banner is configured;Value",
+          "Ciphers": "Ensure that appropriate ciphers are used for SSH;Value",
+          "MACs": "Ensure that only approved MAC algorithms are used;Value",
+          "ClientAliveCountMax": "Ensure that the SSH ClientAliveCountMax is configured;Value",
+          "Port": "Ensure that the SSH port is configured;Value",
+          "LoginGraceTime": "Ensure that the SSH LoginGraceTime is configured;Value",
+          "ClientAliveInterval": "Ensure that the SSH ClientAliveInterval is configured;Value",
+          "PermitEmptyPasswords": "Ensure that the SSH PermitEmptyPasswords is configured;Value"
+        }
+      }
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected machines",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "AllowGroups": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed groups",
+          "description": "List of user groups allowed to connect with SSH. Values are space-separated."
+        },
+        "defaultValue": "administrators \"openssh users\""
+      },
+      "AllowUsers": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed users",
+          "description": "List of users to be allowed to connect with SSH. Values are space-separated."
+        },
+        "defaultValue": ""
+      },
+      "AuthenticationMethods": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Authentication methods",
+          "description": "Authentication Method that can be used."
+        },
+        "allowedValues": [
+          "any",
+          "password",
+          "publickey"
+        ],
+        "defaultValue": "any"
+      },
+      "DenyGroups": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Denied groups",
+          "description": "List of user groups to be denied to connect with SSH. Values are space-separated."
+        },
+        "defaultValue": ""
+      },
+      "DenyUsers": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Denied users",
+          "description": "List of users to be denied to connect with SSH. Values are space-separated."
+        },
+        "defaultValue": ""
+      },
+      "SyslogFacility": {
+        "type": "String",
+        "metadata": {
+          "displayName": "System logging facility",
+          "description": "Gives the facility code that is used when logging messages."
+        },
+        "allowedValues": [
+          "DAEMON",
+          "USER",
+          "AUTH",
+          "LOCAL0",
+          "LOCAL1",
+          "LOCAL2",
+          "LOCAL3",
+          "LOCAL4",
+          "LOCAL5",
+          "LOCAL6",
+          "LOCAL7"
+        ],
+        "defaultValue": "LOCAL0"
+      },
+      "MaxAuthTries": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Maximum authentication attempts",
+          "description": "The maximum number of authentication attempts permitted per connection."
+        },
+        "defaultValue": "6"
+      },
+      "HostKey": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Host key",
+          "description": "Specifies a file containing the private host key used by ssh"
+        },
+        "defaultValue": "__PROGRAMDATA__/ssh/ssh_host_ecdsa_key"
+      },
+      "AuthorizedKeysFile": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Authorized key file",
+          "description": "Specifies the file that contains the public keys used for user authentication."
+        },
+        "defaultValue": "%programdata%/ssh/administrators_authorized_keys"
+      },
+      "GSSAPIAuthentication": {
+        "type": "String",
+        "metadata": {
+          "displayName": "GSSAPI authentication",
+          "description": "Specifies whether user authentication based on GSSAPI is allowed."
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "Banner": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Banner",
+          "description": "The contents of the banner file that is sent to the remote user before authentication is allowed."
+        },
+        "defaultValue": "#######################################################################\r\n\r\nAuthorized access only!\r\n\r\nIf you are not authorized to access or use this system, disconnect now!\r\n\r\n#######################################################################\r\n"
+      },
+      "Ciphers": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Allowed ciphers",
+          "description": "The list of allowed ciphers. Values are comma-separated without space, e.g., aes128-ctr,aes192-ctr,aes256-ctr."
+        },
+        "defaultValue": "aes128-ctr,aes192-ctr,aes256-ctr"
+      },
+      "MACs": {
+        "type": "String",
+        "metadata": {
+          "displayName": "MAC algorithms",
+          "description": "The list of available message authentication code (MAC) algorithms. Values are comma-separated without space, e.g., hmac-sha2-256,hmac-md5-96."
+        },
+        "defaultValue": "hmac-sha2-256"
+      },
+      "ClientAliveCountMax": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Number of client alive messages",
+          "description": "The number of client alive messages which may be sent without sshd receiving any messages back from the client."
+        },
+        "defaultValue": "0"
+      },
+      "Port": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Port",
+          "description": "The SSH port."
+        },
+        "defaultValue": "22"
+      },
+      "LoginGraceTime": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Login grace time",
+          "description": "The time in seconds after which the server disconnects if the user has not successfully logged in."
+        },
+        "defaultValue": "60"
+      },
+      "ClientAliveInterval": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Client alive interval",
+          "description": "Timeout interval in seconds after which if no data has been received from the client, sshd will send a message to request a response."
+        },
+        "defaultValue": "3600"
+      },
+      "PermitEmptyPasswords": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Empty password permission",
+          "description": "Whether the server allows login to accounts with empty password strings."
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Compute/virtualMachineScaleSets",
+              "Microsoft.HybridCompute/machines",
+              "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "in": [
+                      "Microsoft.Compute/virtualMachines",
+                      "Microsoft.Compute/virtualMachineScaleSets"
+                    ]
+                  },
+                  {
+                    "field": "tags['aks-managed-orchestrator']",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "tags['aks-managed-poolName']",
+                    "exists": "false"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "in": [
+                          "esri",
+                          "incredibuild",
+                          "MicrosoftDynamicsAX",
+                          "MicrosoftSharepoint",
+                          "MicrosoftVisualStudio",
+                          "MicrosoftWindowsDesktop",
+                          "MicrosoftWindowsServerHPCPack"
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "like": "2025*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                                "exists": true
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                "like": "Windows*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/VirtualMachineScaleSets/osProfile.windowsConfiguration",
+                                "exists": true
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
+                                "like": "Windows*"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imageSKU",
+                                "exists": false
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "notLike": "SQL2008*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "like": "2025*"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('IncludeArcMachines')]",
+                    "equals": true
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "allOf": [
+                          {
+                            "field": "type",
+                            "equals": "Microsoft.HybridCompute/machines"
+                          },
+                          {
+                            "field": "Microsoft.HybridCompute/imageOffer",
+                            "like": "windows*"
+                          },
+                          {
+                            "field": "Microsoft.HybridCompute/machines/osVersion",
+                            "like": "10.0.26*"
+                          },
+                          {
+                            "field": "Microsoft.HybridCompute/machines/osSku",
+                            "like": "Windows Server*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "type",
+                            "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                          },
+                          {
+                            "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
+                            "like": "windows*"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31"
+          ],
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "[concat('SetSecureShell$pid', uniqueString(policy().assignmentId, policy().definitionReferenceId))]",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                "equals": "Compliant"
+              },
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+                "equals": "[base64(concat('Ensure that the allowed groups for SSH are configured;Value', '=', parameters('AllowGroups'), ',', 'Ensure that the allowed users for SSH access are configured;Value', '=', parameters('AllowUsers'), ',', 'Ensure that the authentication method for SSH is configured;Value', '=', parameters('AuthenticationMethods'), ',', 'Ensure that the denied groups for SSH are configured;Value', '=', parameters('DenyGroups'), ',', 'Ensure that the denied users for SSH are configured;Value', '=', parameters('DenyUsers'), ',', 'Ensure that the facility code used when logging messages for SSH is configured;Value', '=', parameters('SyslogFacility'), ',', 'Ensure that the SSH MaxAuthTries is configured;Value', '=', parameters('MaxAuthTries'), ',', 'Ensure that the SSH HostKey is configured;Value', '=', parameters('HostKey'), ',', 'Ensure that the authorized key file for SSH is configured;Value', '=', parameters('AuthorizedKeysFile'), ',', 'Ensure that GSSApiAuthentication for SSH is configured;Value', '=', parameters('GSSAPIAuthentication'), ',', 'Ensure that the SSH warning banner is configured;Value', '=', parameters('Banner'), ',', 'Ensure that appropriate ciphers are used for SSH;Value', '=', parameters('Ciphers'), ',', 'Ensure that only approved MAC algorithms are used;Value', '=', parameters('MACs'), ',', 'Ensure that the SSH ClientAliveCountMax is configured;Value', '=', parameters('ClientAliveCountMax'), ',', 'Ensure that the SSH port is configured;Value', '=', parameters('Port'), ',', 'Ensure that the SSH LoginGraceTime is configured;Value', '=', parameters('LoginGraceTime'), ',', 'Ensure that the SSH ClientAliveInterval is configured;Value', '=', parameters('ClientAliveInterval'), ',', 'Ensure that the SSH PermitEmptyPasswords is configured;Value', '=', parameters('PermitEmptyPasswords')))]"
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                },
+                "assignmentName": {
+                  "value": "[concat('SetSecureShell$pid', uniqueString(policy().assignmentId, policy().definitionReferenceId))]"
+                },
+                "AllowGroups": {
+                  "value": "[parameters('AllowGroups')]"
+                },
+                "AllowUsers": {
+                  "value": "[parameters('AllowUsers')]"
+                },
+                "AuthenticationMethods": {
+                  "value": "[parameters('AuthenticationMethods')]"
+                },
+                "DenyGroups": {
+                  "value": "[parameters('DenyGroups')]"
+                },
+                "DenyUsers": {
+                  "value": "[parameters('DenyUsers')]"
+                },
+                "SyslogFacility": {
+                  "value": "[parameters('SyslogFacility')]"
+                },
+                "MaxAuthTries": {
+                  "value": "[parameters('MaxAuthTries')]"
+                },
+                "HostKey": {
+                  "value": "[parameters('HostKey')]"
+                },
+                "AuthorizedKeysFile": {
+                  "value": "[parameters('AuthorizedKeysFile')]"
+                },
+                "GSSAPIAuthentication": {
+                  "value": "[parameters('GSSAPIAuthentication')]"
+                },
+                "Banner": {
+                  "value": "[parameters('Banner')]"
+                },
+                "Ciphers": {
+                  "value": "[parameters('Ciphers')]"
+                },
+                "MACs": {
+                  "value": "[parameters('MACs')]"
+                },
+                "ClientAliveCountMax": {
+                  "value": "[parameters('ClientAliveCountMax')]"
+                },
+                "Port": {
+                  "value": "[parameters('Port')]"
+                },
+                "LoginGraceTime": {
+                  "value": "[parameters('LoginGraceTime')]"
+                },
+                "ClientAliveInterval": {
+                  "value": "[parameters('ClientAliveInterval')]"
+                },
+                "PermitEmptyPasswords": {
+                  "value": "[parameters('PermitEmptyPasswords')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "assignmentName": {
+                    "type": "string"
+                  },
+                  "AllowGroups": {
+                    "type": "string"
+                  },
+                  "AllowUsers": {
+                    "type": "string"
+                  },
+                  "AuthenticationMethods": {
+                    "type": "string"
+                  },
+                  "DenyGroups": {
+                    "type": "string"
+                  },
+                  "DenyUsers": {
+                    "type": "string"
+                  },
+                  "SyslogFacility": {
+                    "type": "string"
+                  },
+                  "MaxAuthTries": {
+                    "type": "string"
+                  },
+                  "HostKey": {
+                    "type": "string"
+                  },
+                  "AuthorizedKeysFile": {
+                    "type": "string"
+                  },
+                  "GSSAPIAuthentication": {
+                    "type": "string"
+                  },
+                  "Banner": {
+                    "type": "string"
+                  },
+                  "Ciphers": {
+                    "type": "string"
+                  },
+                  "MACs": {
+                    "type": "string"
+                  },
+                  "ClientAliveCountMax": {
+                    "type": "string"
+                  },
+                  "Port": {
+                    "type": "string"
+                  },
+                  "LoginGraceTime": {
+                    "type": "string"
+                  },
+                  "ClientAliveInterval": {
+                    "type": "string"
+                  },
+                  "PermitEmptyPasswords": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2024-04-05",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('assignmentName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "SetSecureShell",
+                        "version": "1.*",
+                        "assignmentType": "ApplyAndAutoCorrect",
+                        "configurationParameter": [
+                          {
+                            "name": "Ensure that the allowed groups for SSH are configured;Value",
+                            "value": "[parameters('AllowGroups')]"
+                          },
+                          {
+                            "name": "Ensure that the allowed users for SSH access are configured;Value",
+                            "value": "[parameters('AllowUsers')]"
+                          },
+                          {
+                            "name": "Ensure that the authentication method for SSH is configured;Value",
+                            "value": "[parameters('AuthenticationMethods')]"
+                          },
+                          {
+                            "name": "Ensure that the denied groups for SSH are configured;Value",
+                            "value": "[parameters('DenyGroups')]"
+                          },
+                          {
+                            "name": "Ensure that the denied users for SSH are configured;Value",
+                            "value": "[parameters('DenyUsers')]"
+                          },
+                          {
+                            "name": "Ensure that the facility code used when logging messages for SSH is configured;Value",
+                            "value": "[parameters('SyslogFacility')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH MaxAuthTries is configured;Value",
+                            "value": "[parameters('MaxAuthTries')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH HostKey is configured;Value",
+                            "value": "[parameters('HostKey')]"
+                          },
+                          {
+                            "name": "Ensure that the authorized key file for SSH is configured;Value",
+                            "value": "[parameters('AuthorizedKeysFile')]"
+                          },
+                          {
+                            "name": "Ensure that GSSApiAuthentication for SSH is configured;Value",
+                            "value": "[parameters('GSSAPIAuthentication')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH warning banner is configured;Value",
+                            "value": "[parameters('Banner')]"
+                          },
+                          {
+                            "name": "Ensure that appropriate ciphers are used for SSH;Value",
+                            "value": "[parameters('Ciphers')]"
+                          },
+                          {
+                            "name": "Ensure that only approved MAC algorithms are used;Value",
+                            "value": "[parameters('MACs')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH ClientAliveCountMax is configured;Value",
+                            "value": "[parameters('ClientAliveCountMax')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH port is configured;Value",
+                            "value": "[parameters('Port')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH LoginGraceTime is configured;Value",
+                            "value": "[parameters('LoginGraceTime')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH ClientAliveInterval is configured;Value",
+                            "value": "[parameters('ClientAliveInterval')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH PermitEmptyPasswords is configured;Value",
+                            "value": "[parameters('PermitEmptyPasswords')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.HybridCompute/machines'))]",
+                    "apiVersion": "2024-04-05",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('assignmentName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "SetSecureShell",
+                        "version": "1.*",
+                        "assignmentType": "ApplyAndAutoCorrect",
+                        "configurationParameter": [
+                          {
+                            "name": "Ensure that the allowed groups for SSH are configured;Value",
+                            "value": "[parameters('AllowGroups')]"
+                          },
+                          {
+                            "name": "Ensure that the allowed users for SSH access are configured;Value",
+                            "value": "[parameters('AllowUsers')]"
+                          },
+                          {
+                            "name": "Ensure that the authentication method for SSH is configured;Value",
+                            "value": "[parameters('AuthenticationMethods')]"
+                          },
+                          {
+                            "name": "Ensure that the denied groups for SSH are configured;Value",
+                            "value": "[parameters('DenyGroups')]"
+                          },
+                          {
+                            "name": "Ensure that the denied users for SSH are configured;Value",
+                            "value": "[parameters('DenyUsers')]"
+                          },
+                          {
+                            "name": "Ensure that the facility code used when logging messages for SSH is configured;Value",
+                            "value": "[parameters('SyslogFacility')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH MaxAuthTries is configured;Value",
+                            "value": "[parameters('MaxAuthTries')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH HostKey is configured;Value",
+                            "value": "[parameters('HostKey')]"
+                          },
+                          {
+                            "name": "Ensure that the authorized key file for SSH is configured;Value",
+                            "value": "[parameters('AuthorizedKeysFile')]"
+                          },
+                          {
+                            "name": "Ensure that GSSApiAuthentication for SSH is configured;Value",
+                            "value": "[parameters('GSSAPIAuthentication')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH warning banner is configured;Value",
+                            "value": "[parameters('Banner')]"
+                          },
+                          {
+                            "name": "Ensure that appropriate ciphers are used for SSH;Value",
+                            "value": "[parameters('Ciphers')]"
+                          },
+                          {
+                            "name": "Ensure that only approved MAC algorithms are used;Value",
+                            "value": "[parameters('MACs')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH ClientAliveCountMax is configured;Value",
+                            "value": "[parameters('ClientAliveCountMax')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH port is configured;Value",
+                            "value": "[parameters('Port')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH LoginGraceTime is configured;Value",
+                            "value": "[parameters('LoginGraceTime')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH ClientAliveInterval is configured;Value",
+                            "value": "[parameters('ClientAliveInterval')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH PermitEmptyPasswords is configured;Value",
+                            "value": "[parameters('PermitEmptyPasswords')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachineScaleSets'))]",
+                    "apiVersion": "2024-04-05",
+                    "type": "Microsoft.Compute/virtualMachineScaleSets/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('assignmentName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "SetSecureShell",
+                        "version": "1.*",
+                        "assignmentType": "ApplyAndAutoCorrect",
+                        "configurationParameter": [
+                          {
+                            "name": "Ensure that the allowed groups for SSH are configured;Value",
+                            "value": "[parameters('AllowGroups')]"
+                          },
+                          {
+                            "name": "Ensure that the allowed users for SSH access are configured;Value",
+                            "value": "[parameters('AllowUsers')]"
+                          },
+                          {
+                            "name": "Ensure that the authentication method for SSH is configured;Value",
+                            "value": "[parameters('AuthenticationMethods')]"
+                          },
+                          {
+                            "name": "Ensure that the denied groups for SSH are configured;Value",
+                            "value": "[parameters('DenyGroups')]"
+                          },
+                          {
+                            "name": "Ensure that the denied users for SSH are configured;Value",
+                            "value": "[parameters('DenyUsers')]"
+                          },
+                          {
+                            "name": "Ensure that the facility code used when logging messages for SSH is configured;Value",
+                            "value": "[parameters('SyslogFacility')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH MaxAuthTries is configured;Value",
+                            "value": "[parameters('MaxAuthTries')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH HostKey is configured;Value",
+                            "value": "[parameters('HostKey')]"
+                          },
+                          {
+                            "name": "Ensure that the authorized key file for SSH is configured;Value",
+                            "value": "[parameters('AuthorizedKeysFile')]"
+                          },
+                          {
+                            "name": "Ensure that GSSApiAuthentication for SSH is configured;Value",
+                            "value": "[parameters('GSSAPIAuthentication')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH warning banner is configured;Value",
+                            "value": "[parameters('Banner')]"
+                          },
+                          {
+                            "name": "Ensure that appropriate ciphers are used for SSH;Value",
+                            "value": "[parameters('Ciphers')]"
+                          },
+                          {
+                            "name": "Ensure that only approved MAC algorithms are used;Value",
+                            "value": "[parameters('MACs')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH ClientAliveCountMax is configured;Value",
+                            "value": "[parameters('ClientAliveCountMax')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH port is configured;Value",
+                            "value": "[parameters('Port')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH LoginGraceTime is configured;Value",
+                            "value": "[parameters('LoginGraceTime')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH ClientAliveInterval is configured;Value",
+                            "value": "[parameters('ClientAliveInterval')]"
+                          },
+                          {
+                            "name": "Ensure that the SSH PermitEmptyPasswords is configured;Value",
+                            "value": "[parameters('PermitEmptyPasswords')]"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/42830b63-79aa-4ea5-85dc-6baa719d7d7c",
+  "name": "42830b63-79aa-4ea5-85dc-6baa719d7d7c"
+}

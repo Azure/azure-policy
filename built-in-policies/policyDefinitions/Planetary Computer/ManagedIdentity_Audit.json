@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Microsoft Planetary Computer Pro GeoCatalogs should use a managed identity",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Assigning a managed identity to a Planetary Computer GeoCatalog lets it securely access source Storage accounts (Storage Blob Data Reader) for data ingestion without you managing secrets.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Planetary Computer"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Orbital/geocatalogs"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "identity.type",
+                "exists": "false"
+              },
+              {
+                "field": "identity.type",
+                "equals": "None"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9fac9537-cba6-480a-97dc-21a93c1aa055",
+  "name": "9fac9537-cba6-480a-97dc-21a93c1aa055"
+}
