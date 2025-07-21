@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Configure Microsoft Defender threat protection for AI workloads",
+    "displayName": "Configure Microsoft Defender threat protection for AI Services",
     "policyType": "BuiltIn",
     "mode": "All",
-    "description": "New capabilities are continuously being added to threat protection for AI workloads, which may require the user's explicit enablement. Use this policy to make sure all new capabilities will be enabled.",
+    "description": "New capabilities are continuously being added to threat protection for AI Services, which may require the user's explicit enablement. Use this policy to make sure all new capabilities will be enabled.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Security Center"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -27,6 +27,18 @@
         "metadata": {
           "displayName": "AI Prompt Evidence Enabled",
           "description": "Controls the AI prompt evidence feature, which exposes the prompts passed between the user and the model for deeper analysis of AI-related alerts. The prompt snippets will include only segments of the user prompt or model response that were deemed suspicious and relevant for security classifications. While sensitive data or secrets are redacted, customer conversations may be deemed sensitive in nature. The evidence will be available through the Defender portal as part of each alert."
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
+      },
+      "isAIPromptSharingWithPurviewEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "AI Data Security Enabled",
+          "description": "Controls the AI data security feature, allowing Microsoft Purview to access, process, and store prompts and responses, including metadata for security and compliance purposes such as sensitive information type (SIT) classification, reporting in Microsoft Purview Data Security Posture Management for AI, Audit, Insider Risk Management, Communication Compliance, and eDiscovery"
         },
         "allowedValues": [
           "true",
@@ -73,6 +85,24 @@
                   }
                 },
                 "equals": 1
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Security/pricings/extensions[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].name",
+                        "equals": "AIPromptSharingWithPurview"
+                      },
+                      {
+                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                        "equals": "[parameters('isAIPromptSharingWithPurviewEnabled')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 1
               }
             ]
           },
@@ -83,6 +113,9 @@
               "parameters": {
                 "isAIPromptEvidenceEnabled": {
                   "value": "[parameters('isAIPromptEvidenceEnabled')]"
+                },
+                "isAIPromptSharingWithPurviewEnabled": {
+                  "value": "[parameters('isAIPromptSharingWithPurviewEnabled')]"
                 }
               },
               "template": {
@@ -90,6 +123,9 @@
                 "contentVersion": "1.0.0.0",
                 "parameters": {
                   "isAIPromptEvidenceEnabled": {
+                    "type": "String"
+                  },
+                  "isAIPromptSharingWithPurviewEnabled": {
                     "type": "String"
                   }
                 },
@@ -104,6 +140,10 @@
                         {
                           "name": "AIPromptEvidence",
                           "isEnabled": "[parameters('isAIPromptEvidenceEnabled')]"
+                        },
+                        {
+                          "name": "AIPromptSharingWithPurview",
+                          "isEnabled": "[parameters('isAIPromptSharingWithPurviewEnabled')]"
                         }
                       ]
                     }
@@ -116,6 +156,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },
