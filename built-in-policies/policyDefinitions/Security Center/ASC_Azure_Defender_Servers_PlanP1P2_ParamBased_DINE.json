@@ -1,0 +1,111 @@
+{
+  "properties": {
+    "displayName": "Configure Microsoft Defender for Servers plan (P1 OR P2)",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Ensures that the selected Microsoft Defender for Servers subplan (P1 or P2) is enabled at the subscription level. This policy supports dynamic selection via parameters and enforces deployment if not already configured.",
+    "metadata": {
+      "version": "1.1.0",
+      "category": "Security Center"
+    },
+    "version": "1.1.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "subPlan": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Defender for Servers plans",
+          "description": "Select a Defender for Servers plan"
+        },
+        "allowedValues": [
+          "P1",
+          "P2"
+        ],
+        "defaultValue": "P2"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Resources/subscriptions"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/pricings",
+          "name": "VirtualMachines",
+          "deploymentScope": "subscription",
+          "existenceScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Security/pricings/pricingTier",
+                "equals": "Standard"
+              },
+              {
+                "field": "Microsoft.Security/pricings/subPlan",
+                "equals": "[parameters('subPlan')]"
+              },
+              {
+                "field": "Microsoft.Security/pricings/enforce",
+                "equals": "True"
+              }
+            ]
+          },
+          "deployment": {
+            "location": "eastus",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "subPlan": {
+                  "value": "[parameters('subPlan')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "subPlan": {
+                    "type": "String"
+                  }
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/pricings",
+                    "apiVersion": "2024-01-01",
+                    "name": "VirtualMachines",
+                    "properties": {
+                      "pricingTier": "Standard",
+                      "subPlan": "[parameters('subPlan')]",
+                      "enforce": "True"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.1.0",
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5f57b753-04b4-4e5e-aa31-c8888984497a",
+  "name": "5f57b753-04b4-4e5e-aa31-c8888984497a"
+}
