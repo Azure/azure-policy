@@ -1,0 +1,318 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Enable Essential Machine Management",
+    "policyType": "BuiltIn",
+    "description": "Policy initiative to enable Essential Machine Management for Azure Virtual Machines and Arc-enabled servers.",
+    "version": "1.0.0-preview",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "EssentialManagement",
+      "preview": true
+    },
+    "parameters": {
+      "dataCollectionRuleIdForChangeTracking": {
+        "type": "String",
+        "metadata": {
+          "description": "This is a required input for enabling Change Tracking Service by associating a Data Collection Rule with machines.",
+          "displayName": "Data Collection Rule ID for Change Tracking"
+        }
+      },
+      "dataCollectionRuleIdForAzureMonitor": {
+        "type": "String",
+        "metadata": {
+          "description": "This is a required input for enabling Azure Monitor Service by associating a Data Collection Rule with machines.",
+          "displayName": "Data Collection Rule ID for Azure Monitor"
+        }
+      },
+      "deployIfNotExistsPoliciesEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for all deployIfNotExists constituent policies",
+          "description": "Enable or disable the execution of each of the constituent deployIfNotExists policies in the initiative."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/59efceea-0c96-497e-a4a1-4eb2290dac15",
+        "policyDefinitionReferenceId": "AzureUpdateManagerVm-Windows",
+        "definitionVersion": "4.*.*",
+        "parameters": {
+          "osType": {
+            "value": "Windows"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/59efceea-0c96-497e-a4a1-4eb2290dac15",
+        "definitionVersion": "4.*.*",
+        "policyDefinitionReferenceId": "AzureUpdateManagerVm-Linux",
+        "parameters": {
+          "osType": {
+            "value": "Linux"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bfea026e-043f-4ff4-9d1b-bf301ca7ff46",
+        "policyDefinitionReferenceId": "AzureUpdateManagerArc-Windows",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "osType": {
+            "value": "Windows"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bfea026e-043f-4ff4-9d1b-bf301ca7ff46",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "AzureUpdateManagerArc-Linux",
+        "parameters": {
+          "osType": {
+            "value": "Linux"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b6faa975-0add-4f35-8d1c-70bba45c4424",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingDataCollectionRuleAssociationforVm-Windows",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForChangeTracking')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b6faa975-0add-4f35-8d1c-70bba45c4424",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorDataCollectionRuleAssociationforVm-Windows",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForAzureMonitor')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ad1eeff9-20d7-4c82-a04e-903acab0bfc1",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorforVm-Windows",
+        "parameters": {
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": false
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f08f556c-12ff-464d-a7de-40cb5b6cccec",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingforVm-Windows",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bef2d677-e829-492d-9a3d-f5a20fda818f",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingDataCollectionRuleAssociationforVm-Linux",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForChangeTracking')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/bef2d677-e829-492d-9a3d-f5a20fda818f",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorDataCollectionRuleAssociationforVm-Linux",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForAzureMonitor')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/56d0ed2b-60fc-44bf-af81-a78c851b5fe1",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorforVm-Linux",
+        "parameters": {
+          "bringYourOwnUserAssignedManagedIdentity": {
+            "value": false
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ec88097d-843f-4a92-8471-78016d337ba4",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingforVm-Linux",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ef9fe2ce-a588-4edd-829c-6247069dcfdb",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingDataCollectionRuleAssociationforArc-Windows",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForChangeTracking')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ef9fe2ce-a588-4edd-829c-6247069dcfdb",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorDataCollectionRuleAssociationforArc-Windows",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForAzureMonitor')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a7acfae7-9497-4a3f-a3b5-a16a50abbe2f",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorforArc-Windows",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4bb303db-d051-4099-95d2-e3e1428a4cd5",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingforArc-Windows",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/09a1f130-7697-42bc-8d84-8a9ea17e5192",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingDataCollectionRuleAssociationforArc-Linux",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForChangeTracking')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/09a1f130-7697-42bc-8d84-8a9ea17e5192",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorDataCollectionRuleAssociationforArc-Linux",
+        "parameters": {
+          "dcrResourceId": {
+            "value": "[parameters('dataCollectionRuleIdForAzureMonitor')]"
+          },
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/09a1f130-7697-42bc-8d84-8a9ea17e5187",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzureMonitorforArc-Linux",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/10caed8a-652c-4d1d-84e4-2805b7c07278",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "ChangeTrackingforArc-Linux",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('deployIfNotExistsPoliciesEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3cf2ab00-13f1-4d0c-8971-2ac904541a7e",
+        "definitionVersion": "4.*.*",
+        "policyDefinitionReferenceId": "AzurePolicyAndMachineConfigurationWithUserMi"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/497dff13-db2a-4c0f-8603-28fa3b331ab6",
+        "definitionVersion": "4.*.*",
+        "policyDefinitionReferenceId": "AzurePolicyAndMachineConfigurationWithoutUserMi"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/385f5831-96d4-41db-9a3c-cd3af78aaae6",
+        "definitionVersion": "1.*.*",
+        "policyDefinitionReferenceId": "AzurePolicyAndMachineConfigurationforVm-Windows"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/331e8ea8-378a-410f-a2e5-ae22f38bb0da",
+        "definitionVersion": "3.*.*",
+        "policyDefinitionReferenceId": "AzurePolicyAndMachineConfigurationforVm-Linux"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/72650e9f-97bc-4b2a-ab5f-9781a9fcecbc",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "GuestConfigurationSecurityBaseline-Windows",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "true"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fc9b3da7-8347-4380-8e70-0a0361d8dedd",
+        "definitionVersion": "2.*.*",
+        "policyDefinitionReferenceId": "GuestConfigurationSecurityBaseline-Linux",
+        "parameters": {
+          "IncludeArcMachines": {
+            "value": "true"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/2dde6d38-95d9-46cd-bb7c-18dabd06b923",
+  "name": "2dde6d38-95d9-46cd-bb7c-18dabd06b923"
+}
