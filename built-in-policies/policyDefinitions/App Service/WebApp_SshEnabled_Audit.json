@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "App Service apps should disable SSH",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure App Service allows you to open an SSH session to a container running in the service. This feature should be disabled to ensure that SSH is not inadvertently left open on App Service apps, reducing the risk of unauthorized access. Learn more at: https://aka.ms/app-service-ssh",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Web/sites/sshEnabled",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Web/sites/sshEnabled",
+                "notEquals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/25255ddf-ef4f-4283-975a-5590ad111bba",
+  "name": "25255ddf-ef4f-4283-975a-5590ad111bba"
+}
