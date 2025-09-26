@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Communication services should have local authentication disabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy ensures that local authentication methods are disabled for Communication services, requiring Microsoft Entra ID identities for authentication. Enforcing this policy helps improve security by preventing the use of less secure local authentication.",
+    "metadata": {
+      "category": "Communication",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Modify",
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Communication/communicationServices"
+          },
+          {
+            "field": "Microsoft.Communication/communicationServices/disableLocalAuth",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/09976791-48a7-449e-bb21-39d1a415f35"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2025-05-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Communication/communicationServices/disableLocalAuth",
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/145408bc-d134-468a-ae3b-1eaf3b9e5ac7",
+  "name": "145408bc-d134-468a-ae3b-1eaf3b9e5ac7"
+}

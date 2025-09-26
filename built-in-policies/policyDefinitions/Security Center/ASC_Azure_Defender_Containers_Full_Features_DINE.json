@@ -5,10 +5,10 @@
     "mode": "All",
     "description": "New capabilities are continuously being added to Defender for Containers plan, which may require the user's explicit enablement. Use this policy to make sure all new capabilities will be enabled.",
     "metadata": {
-      "version": "1.1.0",
+      "version": "1.2.0",
       "category": "Security Center"
     },
-    "version": "1.1.0",
+    "version": "1.2.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -69,6 +69,18 @@
           "false"
         ],
         "defaultValue": "true"
+      },
+      "isContainerIntegrityContributionEnabled": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Container Integrity Contribution (Security Findings) Enabled",
+          "description": "Controls the containers integrity contribution extension"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "true"
       }
     },
     "policyRule": {
@@ -96,78 +108,76 @@
                 "count": {
                   "field": "Microsoft.Security/pricings/extensions[*]",
                   "where": {
-                    "allOf": [
+                    "anyOf": [
                       {
-                        "field": "Microsoft.Security/pricings/extensions[*].name",
-                        "equals": "ContainerRegistriesVulnerabilityAssessments"
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].name",
+                            "equals": "ContainerRegistriesVulnerabilityAssessments"
+                          },
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                            "equals": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                          }
+                        ]
                       },
                       {
-                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
-                        "equals": "[parameters('isContainerRegistriesVulnerabilityAssessmentsEnabled')]"
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].name",
+                            "equals": "AgentlessDiscoveryForKubernetes"
+                          },
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                            "equals": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].name",
+                            "equals": "AgentlessVmScanning"
+                          },
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                            "equals": "[parameters('isAgentlessVmScanningEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].name",
+                            "equals": "ContainerSensor"
+                          },
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                            "equals": "[parameters('isContainerSensorEnabled')]"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].name",
+                            "equals": "ContainerIntegrityContribution"
+                          },
+                          {
+                            "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
+                            "equals": "[parameters('isContainerIntegrityContributionEnabled')]"
+                          }
+                        ]
                       }
                     ]
                   }
                 },
-                "equals": 1
-              },
-              {
-                "count": {
-                  "field": "Microsoft.Security/pricings/extensions[*]",
-                  "where": {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Security/pricings/extensions[*].name",
-                        "equals": "AgentlessDiscoveryForKubernetes"
-                      },
-                      {
-                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
-                        "equals": "[parameters('isAgentlessDiscoveryForKubernetesEnabled')]"
-                      }
-                    ]
-                  }
-                },
-                "equals": 1
-              },
-              {
-                "count": {
-                  "field": "Microsoft.Security/pricings/extensions[*]",
-                  "where": {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Security/pricings/extensions[*].name",
-                        "equals": "AgentlessVmScanning"
-                      },
-                      {
-                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
-                        "equals": "[parameters('isAgentlessVmScanningEnabled')]"
-                      }
-                    ]
-                  }
-                },
-                "equals": 1
-              },
-              {
-                "count": {
-                  "field": "Microsoft.Security/pricings/extensions[*]",
-                  "where": {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Security/pricings/extensions[*].name",
-                        "equals": "ContainerSensor"
-                      },
-                      {
-                        "field": "Microsoft.Security/pricings/extensions[*].isEnabled",
-                        "equals": "[parameters('isContainerSensorEnabled')]"
-                      }
-                    ]
-                  }
-                },
-                "equals": 1
+                "equals": 5
               }
             ]
           },
           "deployment": {
-            "location": "westeurope",
+            "location": "eastus2",
             "properties": {
               "mode": "incremental",
               "parameters": {
@@ -182,6 +192,9 @@
                 },
                 "isContainerSensorEnabled": {
                   "value": "[parameters('isContainerSensorEnabled')]"
+                },
+                "isContainerIntegrityContributionEnabled": {
+                  "value": "[parameters('isContainerIntegrityContributionEnabled')]"
                 }
               },
               "template": {
@@ -198,6 +211,9 @@
                     "type": "String"
                   },
                   "isContainerSensorEnabled": {
+                    "type": "String"
+                  },
+                  "isContainerIntegrityContributionEnabled": {
                     "type": "String"
                   }
                 },
@@ -224,6 +240,10 @@
                         {
                           "name": "ContainerSensor",
                           "isEnabled": "[parameters('isContainerSensorEnabled')]"
+                        },
+                        {
+                          "name": "ContainerIntegrityContribution",
+                          "isEnabled": "[parameters('isContainerIntegrityContributionEnabled')]"
                         }
                       ]
                     }
@@ -236,6 +256,7 @@
       }
     },
     "versions": [
+      "1.2.0",
       "1.1.0",
       "1.0.0"
     ]

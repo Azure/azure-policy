@@ -1,14 +1,15 @@
 {
   "properties": {
-    "displayName": "Kubernetes cluster containers should not share host namespaces",
+    "displayName": "[Preview]: Kubernetes cluster containers should use only allowed sysctl interfaces",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Block pod containers from sharing the host process ID namespace, host IPC namespace, and host network namespace in a Kubernetes cluster. This recommendation aligns with the Kubernetes Pod Security Standards for host namespaces and is part of CIS 5.2.1, 5.2.2 and 5.2.3 which are intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
+    "description": "Containers should use only allowed sysctl interfaces in a Kubernetes cluster. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "6.0.0",
-      "category": "Kubernetes"
+      "version": "1.0.0-preview",
+      "category": "Kubernetes",
+      "preview": true
     },
-    "version": "6.0.0",
+    "version": "1.0.0-preview",
     "parameters": {
       "source": {
         "type": "String",
@@ -125,14 +126,13 @@
           "additionalProperties": false
         }
       },
-      "excludedImages": {
+      "allowedSysctls": {
         "type": "Array",
         "metadata": {
-          "displayName": "Image exclusions",
-          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository.",
+          "displayName": "Allowed sysctls",
+          "description": "The list of plain sysctl names or sysctl patterns which end with *. The string * matches all sysctls. For more information, visit https://aka.ms/k8s-policy-sysctl-interfaces.",
           "portalReview": true
-        },
-        "defaultValue": []
+        }
       }
     },
     "policyRule": {
@@ -150,7 +150,7 @@
           "warn": "[parameters('warn')]",
           "templateInfo": {
             "sourceType": "PublicURL",
-            "url": "https://store.policy.core.windows.net/kubernetes/block-host-namespace/v3/template.yaml"
+            "url": "https://store.policy.core.windows.net/kubernetes/allowed-sysctl-interfaces/v1/template.yaml"
           },
           "apiGroups": [
             ""
@@ -162,17 +162,15 @@
           "namespaces": "[parameters('namespaces')]",
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
-            "excludedImages": "[parameters('excludedImages')]"
+            "allowedSysctls": "[parameters('allowedSysctls')]"
           }
         }
       }
     },
     "versions": [
-      "6.0.0",
-      "5.2.0",
-      "5.1.0"
+      "1.0.0-PREVIEW"
     ]
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/47a1ee2f-2a2a-4576-bf2a-e0e36709c2b8",
-  "name": "47a1ee2f-2a2a-4576-bf2a-e0e36709c2b8"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5e5a0673-649e-4d50-bf9d-5a387a4e2081",
+  "name": "5e5a0673-649e-4d50-bf9d-5a387a4e2081"
 }
