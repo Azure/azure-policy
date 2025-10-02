@@ -129,6 +129,8 @@ Currently, there is no plan to change this behavior for the above Microsoft.Web 
   - This type does not support LIST API which does not allow for compliance results to be populated.
 - `Microsoft.Opertionalnsights/workspaces/tables`
   - This type is [case-sensitive](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/manage-logs-tables?tabs=api#view-table-properties), which can lead to missing query results during evaluation or remediation if different casing is used. To work around this limitation, use a lower-case resource name.
+- `Microsoft.Advisor/Configurations`
+  - Policy Aliases cannot be generated as this type does not support GET API. 
 
 ### Resource Type not correctly published by resource provider
 
