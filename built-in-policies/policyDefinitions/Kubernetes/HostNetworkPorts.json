@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Kubernetes cluster pods should only use approved host network and port range",
+    "displayName": "Kubernetes cluster pods should only use approved host network and port list",
     "policyType": "BuiltIn",
     "mode": "Microsoft.Kubernetes.Data",
-    "description": "Restrict pod access to the host network and the allowable host port range in a Kubernetes cluster. This recommendation is part of CIS 5.2.4 which is intended to improve the security of your Kubernetes environments. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
+    "description": "Restrict pod access to the host network and the allowable host ports in a Kubernetes cluster. This recommendation is part of CIS 5.2.4 which is intended to improve the security of your Kubernetes environments and aligns with Pod Security Standards (PSS) for hostPorts. This policy is generally available for Kubernetes Service (AKS), and preview for Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "6.2.0",
+      "version": "7.0.0",
       "category": "Kubernetes"
     },
-    "version": "6.2.0",
+    "version": "7.0.0",
     "parameters": {
       "source": {
         "type": "String",
@@ -39,11 +39,8 @@
           "portalReview": true
         },
         "allowedValues": [
-          "audit",
           "Audit",
-          "deny",
           "Deny",
-          "disabled",
           "Disabled"
         ],
         "defaultValue": "Audit"
@@ -137,29 +134,12 @@
         },
         "defaultValue": false
       },
-      "minPort": {
-        "type": "Integer",
-        "metadata": {
-          "displayName": "Min host port",
-          "description": "The minimum value in the allowable host port range that pods can use in the host network namespace.",
-          "portalReview": true
-        },
-        "defaultValue": 0
-      },
-      "maxPort": {
-        "type": "Integer",
-        "metadata": {
-          "displayName": "Max host port",
-          "description": "The maximum value in the allowable host port range that pods can use in the host network namespace.",
-          "portalReview": true
-        },
-        "defaultValue": 0
-      },
-      "excludedContainers": {
+      "allowedHostPorts": {
         "type": "Array",
         "metadata": {
-          "displayName": "Containers exclusions",
-          "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identify is the name of container. Use an empty list to apply this policy to all containers in all namespaces."
+          "displayName": "Allowed host ports list",
+          "description": "The list of specific host ports that pods are allowed to use in the host network namespace. Can include individual ports (e.g., '80') or port ranges (e.g., '3000-5000'). Empty list means no host ports are allowed. Note that port 0 is not allowed according to Pod Security Standards.",
+          "portalReview": true
         },
         "defaultValue": []
       },
@@ -188,7 +168,7 @@
           "warn": "[parameters('warn')]",
           "templateInfo": {
             "sourceType": "PublicURL",
-            "url": "https://store.policy.core.windows.net/kubernetes/host-network-ports/v3/template.yaml"
+            "url": "https://store.policy.core.windows.net/kubernetes/host-network-ports/v4/template.yaml"
           },
           "apiGroups": [
             ""
@@ -201,15 +181,14 @@
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
             "allowHostNetwork": "[parameters('allowHostNetwork')]",
-            "minPort": "[parameters('minPort')]",
-            "maxPort": "[parameters('maxPort')]",
-            "excludedContainers": "[parameters('excludedContainers')]",
+            "allowedHostPorts": "[parameters('allowedHostPorts')]",
             "excludedImages": "[parameters('excludedImages')]"
           }
         }
       }
     },
     "versions": [
+      "7.0.0",
       "6.2.0",
       "6.1.0"
     ]
