@@ -5,10 +5,10 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Limit pod HostPath volume mounts to the allowed host paths in a Kubernetes Cluster. This policy is generally available for Kubernetes Service (AKS), and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "7.2.0",
+      "version": "7.3.0",
       "category": "Kubernetes"
     },
-    "version": "7.2.0",
+    "version": "7.3.0",
     "parameters": {
       "source": {
         "type": "String",
@@ -167,6 +167,45 @@
           "additionalProperties": false
         }
       },
+      "windowsAllowedHostPaths": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Allowed host paths for windows containers",
+          "description": "The host paths allowed for windows pod hostPath volumes to use. Provide an empty paths list to block all host paths. Use \"C:\\\" to allow all windows host paths.",
+          "portalReview": true
+        },
+        "defaultValue": {
+          "paths": []
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "pathPrefix": {
+                    "type": "string"
+                  },
+                  "readOnly": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "pathPrefix",
+                  "readOnly"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "paths"
+          ],
+          "additionalProperties": false
+        }
+      },
       "excludedContainers": {
         "type": "Array",
         "metadata": {
@@ -200,7 +239,7 @@
           "warn": "[parameters('warn')]",
           "templateInfo": {
             "sourceType": "PublicURL",
-            "url": "https://store.policy.azure.us/kubernetes/allowed-host-paths/v3/template.yaml"
+            "url": "https://store.policy.azure.us/kubernetes/allowed-host-paths/v4/template.yaml"
           },
           "apiGroups": [
             ""
@@ -213,6 +252,7 @@
           "labelSelector": "[parameters('labelSelector')]",
           "values": {
             "allowedHostPaths": "[parameters('allowedHostPaths').paths]",
+            "windowsAllowedHostPaths": "[parameters('windowsAllowedHostPaths').paths]",
             "excludedContainers": "[parameters('excludedContainers')]",
             "excludedImages": "[parameters('excludedImages')]"
           }
@@ -220,6 +260,7 @@
       }
     },
     "versions": [
+      "7.3.0",
       "7.2.0",
       "7.1.1"
     ]
