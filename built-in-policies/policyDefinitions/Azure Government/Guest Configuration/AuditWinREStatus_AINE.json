@@ -1,0 +1,82 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Audit Windows machines that do not have Windows Recovery Environment (WinRE) enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audits Windows machines to check if the Windows Recovery Environment (WinRE) is enabled",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Guest Configuration",
+      "preview": true,
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "guestConfiguration": {
+        "name": "AuditWinREStatus",
+        "version": "1.*"
+      }
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "value": "[parameters('IncludeArcMachines')]",
+            "equals": "true"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "AuditWinREStatus",
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+            "equals": "Compliant"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ea13dcd3-9b62-4fa0-9462-1695a76d0e59",
+  "name": "ea13dcd3-9b62-4fa0-9462-1695a76d0e59"
+}
