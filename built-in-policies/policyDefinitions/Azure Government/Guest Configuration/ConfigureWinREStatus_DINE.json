@@ -1,0 +1,131 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure Windows Recovery Environment (WinRE) on Windows machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Creates a Guest Configuration assignment to configure Enables the Windows Recovery Environment (WinRE) on Windows machines.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "preview": true,
+      "guestConfiguration": {
+        "name": "ConfigureWinREStatus",
+        "version": "1.*"
+      }
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "value": "[parameters('IncludeArcMachines')]",
+            "equals": "true"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "ConfigureWinREStatus",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+            "equals": "Compliant"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "configurationName": {
+                  "value": "ConfigureWinREStatus"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "assignmentType": "ApplyAndMonitor"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dd970030-1eb5-4d03-b72e-e2c59dcbb202",
+  "name": "dd970030-1eb5-4d03-b72e-e2c59dcbb202"
+}
