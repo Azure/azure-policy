@@ -1,0 +1,76 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Virtual Machine Scale Sets with more than 2 availability zones should have automatic AZ rebalancing enabled",
+    "policyType": "BuiltIn",
+    "mode": "indexed",
+    "description": "This policy enables automatic AZ rebalancing for Virtual Machine Scale Sets that are otherwise zone resilient. Automatic zone rebalancing helps to ensure that your Virtual Machine Scale Sets are evenly distributed across the zones in the region.",
+    "metadata": {
+      "category": "Automatic Update",
+      "version": "1.0.0-preview",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Modify (default), the policy will enable automatic AZ rebalancing for all zone redundant Virtual Machine Scale Sets. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachineScaleSets"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Compute/virtualMachineScaleSets/zones[*]"
+            },
+            "greater": 2
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachineScaleSets/resiliencyPolicy.automaticZoneRebalancingPolicy",
+            "exists": false
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2024-07-01')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Compute/virtualMachineScaleSets/resiliencyPolicy",
+              "value": {
+                "automaticZoneRebalancingPolicy": {
+                  "enabled": true,
+                  "rebalanceStrategy": "Recreate",
+                  "rebalanceBehavior": "CreateBeforeDelete"
+                }
+              }
+            }
+          ],
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/40d17f6f-a9d2-4f1d-8c37-a699a5372a87",
+  "name": "40d17f6f-a9d2-4f1d-8c37-a699a5372a87"
+}
