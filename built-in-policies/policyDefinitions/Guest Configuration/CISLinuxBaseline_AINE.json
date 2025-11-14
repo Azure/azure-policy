@@ -1,27 +1,28 @@
 {
   "properties": {
-    "displayName": "Windows machines should meet requirements of the Azure compute security baseline",
+    "displayName": "[Preview]: Official CIS Security Benchmarks for Linux Workloads",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol. Machines are non-compliant if the machine is not configured correctly for one of the recommendations in the Azure compute security baseline.",
+    "description": "This policy provides you the ability to customize and deploy CIS Security Benchmarks for audit purposes to your Linux workloads across Azure, on-premises and hybrid environments. The contents of the CIS Security Benchmarks are in parity with the benchmarks published at https://cisecurity.org. The policy is powered by azure-osconfig. Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
     "metadata": {
+      "version": "1.0.0-preview",
       "category": "Guest Configuration",
-      "version": "2.1.0",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
+      "preview": true,
       "guestConfiguration": {
-        "name": "AzureWindowsBaseline",
+        "name": "CISLinuxSecurityBaseline",
         "version": "1.*",
         "configurationParameter": {
-          "BaselineSettings": "AzureWindowsBaseline;BaselineSettings"
+          "BaselineSettings": "CISLinuxSecurityBaseline;BaselineSettings"
         }
       }
     },
-    "version": "2.1.0",
+    "version": "1.0.0-preview",
     "parameters": {
       "IncludeArcMachines": {
-        "type": "string",
+        "type": "String",
         "metadata": {
           "displayName": "Include Arc connected servers",
           "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
@@ -43,7 +44,7 @@
         "defaultValue": ""
       },
       "effect": {
-        "type": "string",
+        "type": "String",
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of this policy"
@@ -69,24 +70,26 @@
                   {
                     "field": "Microsoft.Compute/imagePublisher",
                     "in": [
-                      "esri",
-                      "incredibuild",
-                      "MicrosoftDynamicsAX",
-                      "MicrosoftSharepoint",
-                      "MicrosoftVisualStudio",
-                      "MicrosoftWindowsDesktop",
-                      "MicrosoftWindowsServerHPCPack"
+                      "microsoft-aks",
+                      "qubole-inc",
+                      "datastax",
+                      "couchbase",
+                      "scalegrid",
+                      "checkpoint",
+                      "paloaltonetworks",
+                      "debian",
+                      "credativ"
                     ]
                   },
                   {
                     "allOf": [
                       {
                         "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "MicrosoftWindowsServer"
+                        "equals": "OpenLogic"
                       },
                       {
                         "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "2008*"
+                        "notLike": "6*"
                       }
                     ]
                   },
@@ -94,11 +97,15 @@
                     "allOf": [
                       {
                         "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "MicrosoftSQLServer"
+                        "equals": "Oracle"
                       },
                       {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "notLike": "SQL2008*"
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "6*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "7*"
                       }
                     ]
                   },
@@ -106,38 +113,15 @@
                     "allOf": [
                       {
                         "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "microsoft-dsvm"
+                        "equals": "RedHat"
                       },
                       {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "dsvm-win*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "microsoft-ads"
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "6*"
                       },
                       {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "in": [
-                          "standard-data-science-vm",
-                          "windows-data-science-vm"
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "batch"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "equals": "rendering-windows2016"
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "7*"
                       }
                     ]
                   },
@@ -149,7 +133,7 @@
                       },
                       {
                         "field": "Microsoft.Compute/imageOffer",
-                        "like": "cis-windows-server-201*"
+                        "notLike": "cis-win*"
                       }
                     ]
                   },
@@ -157,11 +141,11 @@
                     "allOf": [
                       {
                         "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "pivotal"
+                        "equals": "Suse"
                       },
                       {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "bosh-windows-server*"
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "11*"
                       }
                     ]
                   },
@@ -169,11 +153,59 @@
                     "allOf": [
                       {
                         "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "cloud-infrastructure-services"
+                        "equals": "Canonical"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "12*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "14*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "16*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "18*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-dsvm"
                       },
                       {
                         "field": "Microsoft.Compute/imageOffer",
-                        "like": "ad*"
+                        "notLike": "dsvm-win*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "cloudera"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "6*"
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.Compute/imagePublisher",
+                        "equals": "microsoft-ads"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageOffer",
+                        "like": "linux*"
                       }
                     ]
                   },
@@ -182,31 +214,36 @@
                       {
                         "anyOf": [
                           {
-                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                            "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
                             "exists": "true"
                           },
                           {
                             "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-                            "like": "Windows*"
+                            "like": "Linux*"
                           }
                         ]
                       },
                       {
                         "anyOf": [
                           {
-                            "field": "Microsoft.Compute/imageSKU",
+                            "field": "Microsoft.Compute/imagePublisher",
                             "exists": "false"
                           },
                           {
-                            "allOf": [
-                              {
-                                "field": "Microsoft.Compute/imageSKU",
-                                "notLike": "2008*"
-                              },
-                              {
-                                "field": "Microsoft.Compute/imageOffer",
-                                "notLike": "SQL2008*"
-                              }
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "notIn": [
+                              "OpenLogic",
+                              "RedHat",
+                              "credativ",
+                              "Suse",
+                              "Canonical",
+                              "microsoft-dsvm",
+                              "cloudera",
+                              "microsoft-ads",
+                              "center-for-internet-security-inc",
+                              "Oracle",
+                              "AzureDatabricks",
+                              "azureopenshift"
                             ]
                           }
                         ]
@@ -233,7 +270,7 @@
                       },
                       {
                         "field": "Microsoft.HybridCompute/imageOffer",
-                        "like": "windows*"
+                        "like": "linux*"
                       }
                     ]
                   },
@@ -245,7 +282,7 @@
                       },
                       {
                         "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
-                        "like": "windows*"
+                        "like": "linux*"
                       }
                     ]
                   }
@@ -259,7 +296,7 @@
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
-          "name": "AzureWindowsBaseline",
+          "name": "CISLinuxSecurityBaseline",
           "existenceCondition": {
             "allOf": [
               {
@@ -267,8 +304,8 @@
                 "equals": "Compliant"
               },
               {
-                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
-                "equals": "[base64(concat('AzureWindowsBaseline;BaselineSettings', '=', parameters('BaselineSettings')))]"
+                "value": "[parameters('BaselineSettings')]",
+                "notEquals": "{}"
               }
             ]
           }
@@ -276,10 +313,9 @@
       }
     },
     "versions": [
-      "2.1.0",
-      "2.0.0"
+      "1.0.0-PREVIEW"
     ]
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/72650e9f-97bc-4b2a-ab5f-9781a9fcecbc",
-  "name": "72650e9f-97bc-4b2a-ab5f-9781a9fcecbc"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a3be3bae-0be0-4903-a924-edb7375c1d2e",
+  "name": "a3be3bae-0be0-4903-a924-edb7375c1d2e"
 }

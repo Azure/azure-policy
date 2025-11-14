@@ -1,0 +1,94 @@
+{
+  "properties": {
+    "displayName": "Storage Account should Restrict Source and Destination Targets for Specified Storage Account Object Replication Policies",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict Source and Destination Targets for Specified Storage Account Object Replication Policies. storageAccountTargets is an array of objects with Storage Account Name, Source Storage Account Names, and Destination Storage Account Names. ",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "MissionPlatforms"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account should Restrict Source and Destination Targets for Specified Storage Account Object Replication Policies effect",
+          "description": "Enforce Storage Account should Restrict Source and Destination Targets for Specified Storage Account Object Replication Policies effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "storageAccountTargets": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of targeted Storage accounts",
+          "displayName": "Targeted Storage Accounts"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/objectReplicationPolicies"
+          },
+          {
+            "not": {
+              "anyOf": [
+                {
+                  "count": {
+                    "value": "[parameters('storageAccountTargets')]",
+                    "name": "storageAccountTargets",
+                    "where": {
+                      "field": "fullName",
+                      "like": "[concat(current('storageAccountTargets').saName,'/*')]"
+                    }
+                  },
+                  "equals": 0
+                },
+                {
+                  "count": {
+                    "value": "[parameters('storageAccountTargets')]",
+                    "name": "storageAccountTargets",
+                    "where": {
+                      "allOf": [
+                        {
+                          "field": "fullName",
+                          "like": "[concat(current('storageAccountTargets').saName,'/*')]"
+                        },
+                        {
+                          "value": "[split(field('Microsoft.Storage/storageAccounts/objectReplicationPolicies/sourceAccount'),'/')[8]]",
+                          "in": "[array(current('storageAccountTargets').sourceSAs)]"
+                        },
+                        {
+                          "value": "[split(field('Microsoft.Storage/storageAccounts/objectReplicationPolicies/destinationAccount'), '/')[8]]",
+                          "in": "[array(current('storageAccountTargets').destSAs)]"
+                        }
+                      ]
+                    }
+                  },
+                  "greater": 0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ac8b77ab-b2cb-457a-a5a7-db8f1dc6a6bc",
+  "name": "ac8b77ab-b2cb-457a-a5a7-db8f1dc6a6bc"
+}

@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Storage Account should external private endpoints link in this tenant",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy enforces tenant-level network isolation by denying the creation of private endpoints that link storage accounts to external tenants. It helps prevent unintended data exposure and ensures that private connectivity remains within approved boundaries of the organization. ",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "MissionPlatforms"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account tenant level isolation by enforcing Private EndPoints effect",
+          "description": "Specify Storage Account tenant level isolation by enforcing Private EndPoints effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubscriptionIDs": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of excluded Subscription Ids",
+          "displayName": "Excluded Subscription Ids"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.Storage/storageAccounts/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.Storage/storageAccounts/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubscriptionIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0b3466ff-021a-4090-9abd-570ed3a6018c",
+  "name": "0b3466ff-021a-4090-9abd-570ed3a6018c"
+}

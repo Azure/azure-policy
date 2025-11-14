@@ -1,0 +1,112 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Cognitive Services Deployments should only use allowed completion content filtering",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Mandate minimum levels of content filtering for completion content for model deployments within your organization.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "filterName": {
+        "type": "string",
+        "allowedValues": [
+          "Profanity",
+          "Protected Material Code",
+          "Protected Material Text"
+        ],
+        "metadata": {
+          "displayName": "Content Filter",
+          "description": "Content filter name."
+        }
+      },
+      "allowedEnabledForCompletion": {
+        "type": "Array",
+        "defaultValue": [
+          "true"
+        ],
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Allowed Enabled Configuration for Completion",
+          "description": "List of acceptable Enabled values for Completion. Can be set to true, false, or both. True implies that content filtering must be Enabled, False implies that content filtering must be disabled, and setting both true and false implies that either setting is okay."
+        }
+      },
+      "allowedBlockingForCompletion": {
+        "type": "Array",
+        "defaultValue": [
+          "true"
+        ],
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Allowed Blocking Configuration for Completion",
+          "description": "List of acceptable Blocking values for Completion. Can be set to true, false, or both. True implies that content filtering must be blocking, False implies that content filtering must not be blocking, and setting both true and false implies that either setting is okay."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/deployments"
+          },
+          {
+            "count": {
+              "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].name",
+                    "equals": "[parameters('filterName')]"
+                  },
+                  {
+                    "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].source",
+                    "equals": "Completion"
+                  },
+                  {
+                    "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].enabled",
+                    "in": "[parameters('allowedEnabledForCompletion')]"
+                  },
+                  {
+                    "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].blocking",
+                    "in": "[parameters('allowedBlockingForCompletion')]"
+                  }
+                ]
+              }
+            },
+            "equals": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/af253d37-136a-42f8-a1fc-30010c083d41",
+  "name": "af253d37-136a-42f8-a1fc-30010c083d41"
+}

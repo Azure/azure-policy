@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Cognitive Services Deployments Should Only Use Allowed Control Mode",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Mandate content filtering mode for model deployments within your organization.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "raiPolicyMode": {
+        "type": "Array",
+        "defaultValue": [
+          "Default",
+          "Asynchronous_filter"
+        ],
+        "allowedValues": [
+          "Default",
+          "Asynchronous_filter"
+        ],
+        "metadata": {
+          "displayName": "Streaming Mode",
+          "description": "The AllowedStreaming Model of the Filter, Default or Asynchronous_filter."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/deployments"
+          },
+          {
+            "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.mode",
+            "notIn": "[parameters('raiPolicyMode')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c1ad46c6-37f8-4af0-9c71-c208375c87dd",
+  "name": "c1ad46c6-37f8-4af0-9c71-c208375c87dd"
+}

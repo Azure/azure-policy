@@ -5,9 +5,9 @@
     "description": "NZISM v3.8. The New Zealand Information Security Manual (NZISM) details processes and controls essential for the protection of all New Zealand Government information and systems. This initiative includes policies that address a subset of NZISM controls. Additional policies will be added in upcoming releases. For full details on controls, please refer to https://www.nzism.gcsb.govt.nz/ism-document. This policy set includes definitions that have a Deny effect by default.",
     "metadata": {
       "category": "Regulatory Compliance",
-      "version": "1.9.0"
+      "version": "1.10.0"
     },
-    "version": "1.9.0",
+    "version": "1.10.0",
     "policyDefinitionGroups": [
       {
         "additionalMetadataId": "/providers/Microsoft.PolicyInsights/policyMetadata/New_Zealand_ISM_06.2.5.C.01",
@@ -397,7 +397,8 @@
           2048,
           3072,
           4096
-        ]
+        ],
+        "defaultValue": 2048
       },
       "IncludeArcMachines-1": {
         "type": "String",
@@ -569,7 +570,38 @@
       "audit_effect-1": {
         "type": "String",
         "metadata": {
-          "displayName": "Effect",
+          "displayName": "A deprecate audit effect parameter",
+          "description": "Enable or disable the execution of the policy",
+          "deprecated": true
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled"
+      },
+      "audit-effect-2": {
+        "type": "String",
+        "metadata": {
+          "displayName": "A deprecate audit or deny effect parameter",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy.",
+          "portalReview": true,
+          "deprecated": true
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled"
+      },
+      "auditEffectAzureKeyVaultsShouldUsePrivateLink": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for policy: Azure Key Vaults should use private link",
           "description": "Enable or disable the execution of the policy"
         },
         "allowedValues": [
@@ -578,10 +610,39 @@
         ],
         "defaultValue": "Audit"
       },
-      "audit-effect-2": {
+      "auditEffectAzureMachineLearningComputeInstancesShouldBeRecreated": {
         "type": "String",
         "metadata": {
-          "displayName": "Effect",
+          "displayName": "Effect for policy: Azure Machine Learning compute instances should be recreated to get the latest software updates",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "auditEffectKubernetesClusterShouldNotAllowPrivilegedContainers": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for policy: Kubernetes cluster should not allow privileged containers",
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy.",
+          "portalReview": true
+        },
+        "allowedValues": [
+          "audit",
+          "Audit",
+          "deny",
+          "Deny",
+          "disabled",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "auditEffectKubernetesClustersShouldBeAccessibleOnlyOverHTTPS": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect for policy: Kubernetes clusters should be accessible only over HTTPS",
           "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disable' turns off the policy.",
           "portalReview": true
         },
@@ -943,7 +1004,7 @@
         ],
         "parameters": {
           "audit_effect": {
-            "value": "[parameters('audit_effect-1')]"
+            "value": "[parameters('auditEffectAzureKeyVaultsShouldUsePrivateLink')]"
           }
         },
         "policyDefinitionReferenceId": "Azure Key Vaults should use private link",
@@ -1189,7 +1250,7 @@
         ],
         "parameters": {
           "effects": {
-            "value": "[parameters('audit_effect-1')]"
+            "value": "[parameters('auditEffectAzureMachineLearningComputeInstancesShouldBeRecreated')]"
           }
         },
         "policyDefinitionReferenceId": "Azure Machine Learning compute instances should be recreated to get the latest software updates",
@@ -1336,7 +1397,7 @@
             "value": "[parameters('namespaces-1')]"
           },
           "effect": {
-            "value": "[parameters('audit-effect-2')]"
+            "value": "[parameters('auditEffectKubernetesClusterShouldNotAllowPrivilegedContainers')]"
           }
         },
         "policyDefinitionReferenceId": "Kubernetes cluster should not allow privileged containers",
@@ -1364,7 +1425,7 @@
             "value": "[parameters('labelSelector-1')]"
           },
           "effect": {
-            "value": "[parameters('audit-effect-2')]"
+            "value": "[parameters('auditEffectKubernetesClustersShouldBeAccessibleOnlyOverHTTPS')]"
           }
         },
         "policyDefinitionReferenceId": "Kubernetes clusters should be accessible only over HTTPS",
@@ -2806,6 +2867,7 @@
       }
     ],
     "versions": [
+      "1.10.0",
       "1.9.0",
       "1.8.0",
       "1.7.0",

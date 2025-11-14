@@ -1,0 +1,217 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Cognitive Services Deployments should only use allowed control",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Mandate minimum levels of multi-severity content filtering for harmful content for model deployments within your organization.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "filterName": {
+        "type": "string",
+        "allowedValues": [
+          "Hate",
+          "Sexual",
+          "Violence",
+          "Selfharm"
+        ],
+        "metadata": {
+          "displayName": "Content Filter",
+          "description": "Multi-severity content filter name."
+        }
+      },
+      "allowedSeveritiesForPrompt": {
+        "type": "Array",
+        "defaultValue": [
+          "Medium",
+          "High"
+        ],
+        "allowedValues": [
+          "Low",
+          "Medium",
+          "High"
+        ],
+        "metadata": {
+          "displayName": "Allowed Severities for Prompt",
+          "description": "List of Severities for Prompt."
+        }
+      },
+      "allowedEnabledForPrompt": {
+        "type": "Array",
+        "defaultValue": [
+          "true"
+        ],
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Allowed Enabled Configuration for Prompt",
+          "description": "List of Enabled Configuration for Prompt. When the value is a list of true, only deployments with enabled field configured as true can be allowed. When the value is a list false, only deployments with enabled field configured as false can be allowed. When the value is a list true and false, fields where Enabled is configured as true or false are allowed"
+        }
+      },
+      "allowedBlockingForPrompt": {
+        "type": "Array",
+        "defaultValue": [
+          "true"
+        ],
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Allowed Blocking Configuration for Prompt",
+          "description": "List of Blocking Configuration for Prompt. When the value is a list of true, only deployments with blocking field configured as true can be allowed. When the value is a list false, only deployments with blocking field configured as false can be allowed. When the value is a list true and false, fields where Blocking is configured as true or false are allowed"
+        }
+      },
+      "allowedSeveritiesForCompletion": {
+        "type": "Array",
+        "defaultValue": [
+          "Medium",
+          "High"
+        ],
+        "allowedValues": [
+          "Low",
+          "Medium",
+          "High"
+        ],
+        "metadata": {
+          "displayName": "Allowed Severities for Completion",
+          "description": "List of Severities for Completion."
+        }
+      },
+      "allowedEnabledForCompletion": {
+        "type": "Array",
+        "defaultValue": [
+          "true"
+        ],
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Allowed Enabled Configuration Value for Completion",
+          "description": "List of Enabled Configuration for Completion. When the value is a list of true, only deployments with enabled field configured as true can be allowed. When the value is a list false, only deployments with enabled field configured as false can be allowed. When the value is a list true and false, fields where Enabled is configured as true or false are allowed"
+        }
+      },
+      "allowedBlockingForCompletion": {
+        "type": "Array",
+        "defaultValue": [
+          "true"
+        ],
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "metadata": {
+          "displayName": "Allowed Blocking Configuration for Completion",
+          "description": "List of Blocking Configuration for Completion. When the value is a list of true, only deployments with blocking field configured as true can be allowed. When the value is a list false, only deployments with blocking field configured as false can be allowed. When the value is a list true and false, fields where Blocking is configured as true or false are allowed"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/deployments"
+          },
+          {
+            "anyOf": [
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*]"
+                },
+                "equals": 0
+              },
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].severityThreshold",
+                        "in": "[parameters('allowedSeveritiesForPrompt')]"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].name",
+                        "equals": "[parameters('filterName')]"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].source",
+                        "equals": "Prompt"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].enabled",
+                        "in": "[parameters('allowedEnabledForPrompt')]"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].blocking",
+                        "in": "[parameters('allowedBlockingForPrompt')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 0
+              },
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].severityThreshold",
+                        "in": "[parameters('allowedSeveritiesForCompletion')]"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].name",
+                        "equals": "[parameters('filterName')]"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].source",
+                        "equals": "Completion"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].enabled",
+                        "in": "[parameters('allowedEnabledForCompletion')]"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/deployments/raiPolicy.contentFilters[*].blocking",
+                        "in": "[parameters('allowedBlockingForCompletion')]"
+                      }
+                    ]
+                  }
+                },
+                "equals": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/930f48f9-f07e-427c-9494-52603581c6a9",
+  "name": "930f48f9-f07e-427c-9494-52603581c6a9"
+}
