@@ -1,0 +1,98 @@
+{
+  "properties": {
+    "displayName": "Storage Account should enable Secure transfer",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy ensures that data transmitted to storage accounts is protected in transit by requiring secure transfer protocols. Enforcing secure transfer helps prevent unauthorized access and data interception, supporting compliance with security standards and protecting sensitive information.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "MissionPlatforms"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account should enable Secure transfer effect",
+          "description": "Enforce Storage Account should enable Secure transfer effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "ApplyToFileOnlyStorage": {
+        "type": "Boolean",
+        "metadata": {
+          "description": "Enable or Disable File Only Storage",
+          "displayName": "Enabled File Only Storage Accounts"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "kind",
+                "notequals": "FileStorage"
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "kind",
+                    "equals": "FileStorage"
+                  },
+                  {
+                    "value": "[parameters('ApplyToFileOnlyStorage')]",
+                    "equals": true
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "value": "[requestContext().apiVersion]",
+                    "less": "2019-04-01"
+                  },
+                  {
+                    "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                    "exists": "false"
+                  }
+                ]
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",
+                "equals": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f86a882d-7fe6-44e4-916d-ae8c3e792bb2",
+  "name": "f86a882d-7fe6-44e4-916d-ae8c3e792bb2"
+}

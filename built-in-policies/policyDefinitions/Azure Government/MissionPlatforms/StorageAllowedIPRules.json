@@ -1,0 +1,86 @@
+{
+  "properties": {
+    "displayName": "Storage Account should restrict IP Rules in Storage Account Firewalls.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "IP Rules in Storage Account Firewalls are restricted.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "MissionPlatforms"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account allowed IP Rules Effect",
+          "description": "Specify the IP rules effect for the Storage Account"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedAddressRanges": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of allowed IP address ranges (Allowed internet address ranges can be provided using CIDR notation in the form 10.0.0.0/24 or as individual IP addresses like 10.0.0.4)",
+          "displayName": "Allowed Address Ranges"
+        },
+        "defaultValue": []
+      },
+      "allowedVirtualNetworks": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of allowed Virtual Networks (Allowed Virtual Networks can be provided in Resource ID format)",
+          "displayName": "Allowed Virtual Networks"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules[*]",
+                  "where": {
+                    "field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules[*].value",
+                    "notin": "[parameters('allowedAddressRanges')]"
+                  }
+                },
+                "greater": 0
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Storage/storageAccounts/networkAcls.virtualNetworkRules[*]",
+                  "where": {
+                    "field": "Microsoft.Storage/storageAccounts/networkAcls.virtualNetworkRules[*].id",
+                    "notin": "[parameters('allowedVirtualNetworks')]"
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dad358fa-3aa7-4308-97ba-2c48617d929f",
+  "name": "dad358fa-3aa7-4308-97ba-2c48617d929f"
+}

@@ -5,17 +5,20 @@
     "mode": "Indexed",
     "description": "Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol. Machines are non-compliant if the machine is not configured correctly for one of the recommendations in the Azure compute security baseline.",
     "metadata": {
-      "version": "2.2.0",
+      "version": "2.3.0",
       "category": "Guest Configuration",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
       "guestConfiguration": {
         "name": "AzureLinuxBaseline",
-        "version": "1.*"
+        "version": "1.*",
+        "configurationParameter": {
+          "BaselineSettings": "AzureLinuxBaseline;BaselineSettings"
+        }
       }
     },
-    "version": "2.2.0",
+    "version": "2.3.0",
     "parameters": {
       "IncludeArcMachines": {
         "type": "string",
@@ -29,6 +32,15 @@
           "false"
         ],
         "defaultValue": "false"
+      },
+      "BaselineSettings": {
+        "type": "String",
+        "metadata": {
+          "description": "A customized Baseline Security JSON payload, for customizing security rules",
+          "displayName": "Baseline Settings",
+          "strongType": "MachineConfiguration/BaselineSettings"
+        },
+        "defaultValue": ""
       },
       "effect": {
         "type": "string",
@@ -265,13 +277,22 @@
           "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
           "name": "AzureLinuxBaseline",
           "existenceCondition": {
-            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
-            "equals": "Compliant"
+            "allOf": [
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                "equals": "Compliant"
+              },
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+                "equals": "[base64(concat('AzureLinuxBaseline;BaselineSettings', '=', parameters('BaselineSettings')))]"
+              }
+            ]
           }
         }
       }
     },
     "versions": [
+      "2.3.0",
       "2.2.0",
       "2.1.0"
     ]

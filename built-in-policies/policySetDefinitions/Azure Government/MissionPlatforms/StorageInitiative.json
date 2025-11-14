@@ -1,0 +1,294 @@
+{
+  "properties": {
+    "displayName": "Control the use of Storage Accounts in a Mission Platforms",
+    "policyType": "BuiltIn",
+    "description": "This policy is used specifically with Mission Platfrom Apps. This initiative deploys Azure policies for Storage Accounts ensuring boundary protection of this resource while it operates within the logically separated enclaves.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "MissionPlatforms"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "saAllowedIpRulesEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account allowed IP Rules Effect",
+          "description": "Specify the IP rules effect for the Storage Account"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedAddressRanges": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of allowed IP address ranges (Allowed internet address ranges can be provided using CIDR notation in the form 10.0.0.0/24 or as individual IP addresses like 10.0.0.4)",
+          "displayName": "Allowed Address Ranges"
+        },
+        "defaultValue": []
+      },
+      "allowedVirtualNetworks": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of allowed Virtual Networks (Allowed Virtual Networks can be provided in Resource ID format)",
+          "displayName": "Allowed Virtual Networks"
+        },
+        "defaultValue": []
+      },
+      "saSecureTransferEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Storage Account secure transfer effect",
+          "description": "Specify the secure transfer effect for the Storage Account"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "ApplyToFileOnlyStorage": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "File Only storage account application switch",
+          "description": "Specify if file only Storage account application"
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "encryptSaWithCmkEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Encrypt Storage Account with Customer Manged Key (CMK)",
+          "description": "Specify enforcment of Storage Account encryption with CMK."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "restrictExternalPeSaEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Restrict access of external private endpoints to a storage account",
+          "description": "Specify the enforcement to restirict access of external private endpoints to a storage account"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "restrictExternalPeSa_excludedSubscriptionIDs": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of excluded Subscription Ids",
+          "displayName": "Excluded Subscription Ids"
+        },
+        "defaultValue": []
+      },
+      "restrictSaRepltargetsEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Restrict storage account replication targets effect",
+          "description": "Specify the enforcement to restirict storage account replication targets effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "restrictSaRepltargets_storageAccountTargets": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Restrict storage account replication targets",
+          "description": "Specify the enforcement to restirict storage account replication targets"
+        },
+        "defaultValue": [
+          {
+            "saName": "",
+            "sourceSAs": [],
+            "destSAs": []
+          }
+        ]
+      },
+      "disableSaXtenantreplEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Disable extenal storage account replication",
+          "description": "Specify the enforcement to Disable extenal storage account replication"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Disabled"
+      },
+      "disableSaXtenantrepl_excludedStorageAccounts": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of excluded Storage accounts",
+          "displayName": "Excluded Storage Accounts"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6fac406b-40ca-413b-bf8e-0bf964659c25",
+        "policyDefinitionReferenceId": "StorageAccountShouldUseCmkForEncryption",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7809fda1-ba27-48c1-9c63-1f5aee46ba89",
+        "policyDefinitionReferenceId": "StorageAccountShouldRestrictPublicAccess",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/41a72361-06e3-4e80-832a-690bd0708bc1",
+        "policyDefinitionReferenceId": "StorageAccountShouldHaveRestrictedPublicAccess",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/404c3081-a854-4457-ae30-26a93ef643f9",
+        "policyDefinitionReferenceId": "StorageAccountShouldUseHttpsTrafficOnly",
+        "definitionVersion": "2.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fe83a0eb-a853-422d-aac2-1bffd182c5d0",
+        "policyDefinitionReferenceId": "StorageAccountShouldUseTls12",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "minimumTlsVersion": {
+            "value": "TLS1_2"
+          }
+        }
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/13502221-8df0-4414-9937-de9c5c4e396b",
+        "policyDefinitionReferenceId": "StorageAccountShouldDisablePublicBlobAccess",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b5ec538c-daa0-4006-8596-35468b9148e8",
+        "policyDefinitionReferenceId": "StorageAccountShouldUseCmkForEncryptionScopes",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7c322315-e26d-4174-a99e-f49d351b4688",
+        "policyDefinitionReferenceId": "StorageAccountShouldUseCmkForTableEncryption",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f0e5abd0-2554-4736-b7c0-4ffef23475ef",
+        "policyDefinitionReferenceId": "StorageAccountShouldUseCmkForQueueEncryption",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/6edd7eda-6dd8-40f7-810d-67160c639cd9",
+        "policyDefinitionReferenceId": "StorageAccountShouldUsePrivateLink",
+        "definitionVersion": "2.*.*"
+      },
+      {
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/308fbb08-4ab8-4e67-9b29-592e93fb94fa",
+        "policyDefinitionReferenceId": "StorageAccountShouldHaveDefenderEnabled",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionReferenceId": "StorageAllowedIPRules",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/dad358fa-3aa7-4308-97ba-2c48617d929f",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('saAllowedIpRulesEffect')]"
+          },
+          "allowedAddressRanges": {
+            "value": "[parameters('allowedAddressRanges')]"
+          },
+          "allowedVirtualNetworks": {
+            "value": "[parameters('allowedVirtualNetworks')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "StorageDisableExternalReplication",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/405abc16-652e-41d1-91cc-4b44389e03a1",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('disableSaXtenantreplEffect')]"
+          },
+          "excludedStorageAccounts": {
+            "value": "[parameters('disableSaXtenantrepl_excludedStorageAccounts')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "StorageEncryptWithCMK",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/72bd9189-863b-46e5-bc74-91cb3b25f2ed",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('encryptSaWithCmkEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "StorageResticExternalPrivateEndPoint",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0b3466ff-021a-4090-9abd-570ed3a6018c",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('restrictExternalPeSaEffect')]"
+          },
+          "excludedSubscriptionIDs": {
+            "value": "[parameters('restrictExternalPeSa_excludedSubscriptionIDs')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "StorageRestricReplicationTargets",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ac8b77ab-b2cb-457a-a5a7-db8f1dc6a6bc",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('restrictSaRepltargetsEffect')]"
+          },
+          "storageAccountTargets": {
+            "value": "[parameters('restrictSaRepltargets_storageAccountTargets')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "StorageSecureTransfer",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f86a882d-7fe6-44e4-916d-ae8c3e792bb2",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('saSecureTransferEffect')]"
+          },
+          "ApplyToFileOnlyStorage": {
+            "value": "[parameters('ApplyToFileOnlyStorage')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/d6514cac-bdaf-4db8-9f7c-69f09af6f733",
+  "name": "d6514cac-bdaf-4db8-9f7c-69f09af6f733"
+}

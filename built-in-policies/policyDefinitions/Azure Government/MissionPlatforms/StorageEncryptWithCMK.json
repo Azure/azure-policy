@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "Storage accounts should use customer-managed key for encryption with DENY Effect enfrorcment",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Secure your blob and file storage account with greater flexibility using customer-managed keys. When you specify a customer-managed key, that key is used to protect and control access to the key that encrypts your data. Using customer-managed keys provides additional capabilities to control rotation of the key encryption key or cryptographically erase data. Custom Version which adds Deny effect.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "MissionPlatforms"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/encryption.keySource",
+            "notEquals": "Microsoft.Keyvault"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/72bd9189-863b-46e5-bc74-91cb3b25f2ed",
+  "name": "72bd9189-863b-46e5-bc74-91cb3b25f2ed"
+}

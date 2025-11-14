@@ -1,0 +1,161 @@
+{
+  "properties": {
+    "displayName": "Configure SQL servers to have auditing enabled to Event Hub",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "To ensure SQL operations are captured, SQL servers should have auditing enabled. This policy enables auditing and configures diagnostic settings to send SQLSecurityAuditEvents to a specified Event Hub.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "eventHubName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Event Hub Instance Name",
+          "description": "The Event Hub instance name for Azure Diagnostics. e.g. insights-logs-sqlsecurityauditevents",
+          "assignPermissions": true
+        }
+      },
+      "eventHubRuleId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Event Hub Authorization Rule Id",
+          "description": "The Event Hub authorization rule Id for Azure Diagnostics. e.g. /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.EventHub/namespaces/{namespace}/authorizationrules/{ruleName}",
+          "strongType": "Microsoft.EventHub/Namespaces/AuthorizationRules",
+          "assignPermissions": true
+        }
+      },
+      "eventHubLocation": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Event Hub Destination Location",
+          "description": "Only SQL servers in this location will be configured to send diagnostics to the Event Hub.",
+          "strongType": "location"
+        },
+        "defaultValue": ""
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('eventHubLocation')]",
+                "equals": ""
+              },
+              {
+                "field": "location",
+                "equals": "[parameters('eventHubLocation')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/servers/auditingSettings",
+          "name": "Default",
+          "existenceCondition": {
+            "field": "Microsoft.Sql/servers/auditingSettings/state",
+            "equals": "Enabled"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/056cd41c-7e88-42e1-933e-88ba6a50c9c3",
+            "/providers/Microsoft.Authorization/roleDefinitions/92aaf0da-9dab-42b6-94a3-d43ce8d16293",
+            "/providers/Microsoft.Authorization/roleDefinitions/f526a384-b230-433a-b45c-95f59c4a2dec"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "eventHubName": {
+                    "type": "string"
+                  },
+                  "eventHubRuleId": {
+                    "type": "string",
+                    "minLength": 90
+                  }
+                },
+                "variables": {
+                  "diagnosticSettingsName": "SQLSecurityAuditEvents"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Sql/servers/databases/providers/diagnosticSettings",
+                    "name": "[concat(parameters('serverName'), '/master/microsoft.insights/', variables('diagnosticSettingsName'))]",
+                    "apiVersion": "2021-05-01-preview",
+                    "properties": {
+                      "eventHubAuthorizationRuleId": "[parameters('eventHubRuleId')]",
+                      "eventHubName": "[parameters('eventHubName')]",
+                      "logs": [
+                        {
+                          "category": "SQLSecurityAuditEvents",
+                          "enabled": true
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Sql/servers/auditingSettings",
+                    "name": "[concat(parameters('serverName'), '/Default')]",
+                    "apiVersion": "2017-03-01-preview",
+                    "dependsOn": [
+                      "[concat('Microsoft.Sql/servers/', parameters('serverName'), '/databases/master/providers/microsoft.insights/diagnosticSettings/', variables('diagnosticSettingsName'))]"
+                    ],
+                    "properties": {
+                      "State": "Enabled",
+                      "isAzureMonitorTargetEnabled": true
+                    }
+                  }
+                ]
+              },
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                },
+                "eventHubName": {
+                  "value": "[parameters('eventHubName')]"
+                },
+                "eventHubRuleId": {
+                  "value": "[parameters('eventHubRuleId')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9a04cb4d-8b47-4533-8e8e-b7a3c7742a0c",
+  "name": "9a04cb4d-8b47-4533-8e8e-b7a3c7742a0c"
+}
