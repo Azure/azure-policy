@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "Azure Maps Accounts should use private link.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to Maps Account, you can reduce data leakage risks.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Maps"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Maps/accounts"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Maps/accounts/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.Maps/accounts/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/cb26889c-214c-4b29-811e-6f2109a1959f",
+  "name": "cb26889c-214c-4b29-811e-6f2109a1959f"
+}
