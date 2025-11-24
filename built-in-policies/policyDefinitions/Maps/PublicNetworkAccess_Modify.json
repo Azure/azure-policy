@@ -1,0 +1,63 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Maps Accounts to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disable public network access for your Maps Account so that it's not accessible over the public internet. This can reduce data leakage risks. Learn more at: https://aka.ms/azmprivatelink",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Maps"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Maps/accounts"
+          },
+          {
+            "field": "Microsoft.Maps/accounts/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/dba33070-676a-4fb0-87fa-064dc56ff7fb"
+          ],
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2025-10-01-preview')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.Maps/accounts/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/bf9b1f7c-41ee-4de9-8eab-e3eb43aeea40",
+  "name": "bf9b1f7c-41ee-4de9-8eab-e3eb43aeea40"
+}

@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "Configure file share with Microsoft.FileShares to disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "The file share with Microsoft.FileShares internet-accessible public endpoint are disabled by your organizational policy. You may still access the file share via its private endpoint(s) or Service endpoint(s).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.FileShares/fileShares"
+          },
+          {
+            "field": "Microsoft.FileShares/fileShares/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "conflictEffect": "Audit",
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.FileShares/fileShares/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/32395e13-9837-458f-936d-4b21b1e37694",
+  "name": "32395e13-9837-458f-936d-4b21b1e37694"
+}
