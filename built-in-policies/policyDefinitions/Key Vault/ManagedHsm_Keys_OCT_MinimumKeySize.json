@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "policyType": "BuiltIn",
+    "displayName": "Azure Key Vault Managed HSM keys using AES cryptography should have a specified minimum key size",
+    "description": "To use this policy, you must first follow these instructions at https://aka.ms/mhsmgovernance. Set the minimum allowed key size for use with your Managed HSM. Use of AES keys with small key sizes is not a secure practice and doesn't meet many industry certification requirements.",
+    "metadata": {
+      "category": "Key Vault",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "mode": "Microsoft.ManagedHSM.Data",
+    "parameters": {
+      "effect": {
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit",
+        "metadata": {
+          "description": "'Audit' allows a non-compliant resource to be created, but flags it as non-compliant. 'Deny' blocks the resource creation. 'Disabled' turns off the policy.",
+          "displayName": "Effect"
+        },
+        "type": "String"
+      },
+      "minimumOCTKeySize": {
+        "allowedValues": [
+          128,
+          192,
+          256,
+          512
+        ],
+        "metadata": {
+          "description": "The minimum key size for OCT keys.",
+          "displayName": "Minimum OCT key size"
+        },
+        "type": "Integer",
+        "defaultValue": 128
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ManagedHSM.Data/managedHsms/keys"
+          },
+          {
+            "field": "Microsoft.ManagedHSM.Data/managedHsms/keys/keyType",
+            "equals": "oct-HSM"
+          },
+          {
+            "field": "Microsoft.ManagedHSM.Data/managedHsms/keys/keySize",
+            "exists": true
+          },
+          {
+            "field": "Microsoft.ManagedHSM.Data/managedHsms/keys/keySize",
+            "less": "[parameters('minimumOCTKeySize')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fa85a975-a142-46dc-a9ab-8cc69ecb358c",
+  "name": "fa85a975-a142-46dc-a9ab-8cc69ecb358c"
+}
