@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Configure Azure Arc-enabled Servers to enable automatic upgrades",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "The Automatic Upgrade feature allows servers to stay updated with no action from the user after opting in. This policy ensures that Azure Arc-enabled servers are configured to be opted in for automatic upgrades.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Azure Arc"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "field": "Microsoft.HybridCompute/machines/agentUpgrade.enableAutomaticUpgrade",
+            "notEquals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/48b40c6e-82e0-4eb3-90d5-19e40f49b624"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.HybridCompute/machines/agentUpgrade.enableAutomaticUpgrade",
+              "value": true
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f9dfba6f-7430-4214-a666-342b3d3d0d62",
+  "name": "f9dfba6f-7430-4214-a666-342b3d3d0d62"
+}
