@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Container Registry should restrict external private endpoints.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. It blocks approval of private endpoint connections to Container Registries from subscriptions outside the mission tenant (unless explicitly excluded) to preserve enclave boundaries and reduce data exposure risk. Learn more at https://learn.microsoft.com/azure/container-registry/container-registry-private-link.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Container registry external private endpoint Effect",
+          "description": "Specify the external private endpoint Effect for Container Registry"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubscriptionIDs": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of allowed subscription Ids (subscription Ids can be provided in Resource ID format)",
+          "displayName": "Allowed subscription Ids"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerRegistry/registries/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.ContainerRegistry/registries/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerRegistry/registries/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.ContainerRegistry/registries/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.ContainerRegistry/registries/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubscriptionIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/696cb1d3-2dcf-4b44-aa7a-caccd18b1b96",
+  "name": "696cb1d3-2dcf-4b44-aa7a-caccd18b1b96"
+}

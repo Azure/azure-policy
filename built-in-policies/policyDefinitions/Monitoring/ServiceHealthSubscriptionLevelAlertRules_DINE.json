@@ -5,11 +5,11 @@
     "mode": "All",
     "description": "Assignable at the subscription or management group level, this policy ensures that each subscription has a service health alert rule configured with alert conditions and mapping to action groups as specified in the policy parameters. By default creates a resource group, alert rule and action group configured to send emails to subscription owners for all service health events.",
     "metadata": {
-      "version": "1.3.0-preview",
+      "version": "1.4.0-preview",
       "category": "Monitoring",
       "preview": true
     },
-    "version": "1.3.0-preview",
+    "version": "1.4.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -63,6 +63,14 @@
           "Security Advisories"
         ]
       },
+      "customProperties": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Alert rule custom properties",
+          "description": "A key-value pair object of custom properties to be applied to the service health alert rule created by this policy. Custom properties are included with alert notifications and can be used to filter and route alerts"
+        },
+        "defaultValue": {}
+      },
       "actionGroups": {
         "type": "Array",
         "metadata": {
@@ -95,7 +103,7 @@
         "type": "Array",
         "metadata": {
           "displayName": "New action group roles to email",
-          "description": "Arm built-in roles to notify using the new action group. Updates/Compliance state changes do not trigger based on this parameter. Update alert rule parameters above or action group name to trigger an update"
+          "description": "Arm built-in roles to notify using the new action group. Updates/Compliance state changes do not trigger based on this parameter. Update alert rule parameters above or action group name to trigger an update/re-creation"
         },
         "allowedValues": [
           "Contributor",
@@ -112,7 +120,7 @@
         "type": "Object",
         "metadata": {
           "displayName": "New action group resources",
-          "description": "Resources to be used by the new action group to send alerts. Resources specified must already exist. Updates/Compliance state changes do not trigger based on this parameter. Update alert rule parameters above or action group name to trigger an update"
+          "description": "Resources to be used by the new action group to send alerts. Resources specified must already exist. Updates/Compliance state changes do not trigger based on this parameter. Update alert rule parameters above or action group name to trigger an update or create new respectively"
         },
         "defaultValue": {
           "actionGroupEmail": [],
@@ -253,14 +261,38 @@
                 "count": {
                   "field": "Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*]",
                   "where": {
-                    "anyOf": [
+                    "allOf": [
                       {
-                        "field": "Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*].actionGroupId",
-                        "in": "[parameters('actionGroups')]"
+                        "anyOf": [
+                          {
+                            "field": "Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*].actionGroupId",
+                            "in": "[parameters('actionGroups')]"
+                          },
+                          {
+                            "field": "Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*].actionGroupId",
+                            "equals": "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/actionGroups/{2}', subscription().subscriptionId, parameters('resourceGroupName'), parameters('newActionGroupName'))]"
+                          }
+                        ]
                       },
                       {
-                        "field": "Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*].actionGroupId",
-                        "equals": "[format('/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Insights/actionGroups/{2}', subscription().subscriptionId, parameters('resourceGroupName'), parameters('newActionGroupName'))]"
+                        "anyOf": [
+                          {
+                            "allOf": [
+                              {
+                                "value": "[empty(parameters('customProperties'))]",
+                                "equals": true
+                              },
+                              {
+                                "field": "Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*].webhookProperties",
+                                "exists": false
+                              }
+                            ]
+                          },
+                          {
+                            "value": "[equals(current('Microsoft.Insights/ActivityLogAlerts/actions.actionGroups[*].webhookProperties'), parameters('customProperties'))]",
+                            "equals": true
+                          }
+                        ]
                       }
                     ]
                   }
@@ -308,6 +340,9 @@
                     "type": "Array"
                   },
                   "actionGroupResources": {
+                    "type": "Object"
+                  },
+                  "customProperties": {
                     "type": "Object"
                   }
                 },
@@ -423,7 +458,8 @@
                       "name": "formattedActionGroups",
                       "count": "[length(parameters('actionGroups'))]",
                       "input": {
-                        "actionGroupId": "[parameters('actionGroups')[copyIndex('formattedActionGroups')]]"
+                        "actionGroupId": "[parameters('actionGroups')[copyIndex('formattedActionGroups')]]",
+                        "webhookProperties": "[parameters('customProperties')]"
                       }
                     },
                     {
@@ -588,6 +624,9 @@
                           },
                           "defaultAlertTag": {
                             "type": "object"
+                          },
+                          "customProperties": {
+                            "type": "object"
                           }
                         },
                         "variables": {},
@@ -615,7 +654,7 @@
                                 ]
                               },
                               "actions": {
-                                "actionGroups": "[concat(if(empty(parameters('actionGroups')), createArray(), parameters('actionGroups')), if(equals(parameters('createNewActionGroup'), 'false'), createArray(), createArray(createObject('actionGroupId', resourceId('Microsoft.Insights/actionGroups', parameters('newActionGroupName'))))))]"
+                                "actionGroups": "[concat(if(empty(parameters('actionGroups')), createArray(), parameters('actionGroups')), if(equals(parameters('createNewActionGroup'), 'false'), createArray(), createArray(createObject('actionGroupId', resourceId('Microsoft.Insights/actionGroups', parameters('newActionGroupName')), 'webhookProperties', parameters('customProperties')))))]"
                               }
                             }
                           }
@@ -645,6 +684,9 @@
                         },
                         "defaultAlertTag": {
                           "value": "[variables('varDefaultAlertTags')]"
+                        },
+                        "customProperties": {
+                          "value": "[parameters('customProperties')]"
                         }
                       }
                     }
@@ -684,6 +726,9 @@
                 },
                 "actionGroupResources": {
                   "value": "[parameters('actionGroupResources')]"
+                },
+                "customProperties": {
+                  "value": "[parameters('customProperties')]"
                 }
               }
             }
@@ -692,6 +737,7 @@
       }
     },
     "versions": [
+      "1.4.0-PREVIEW",
       "1.3.0-PREVIEW",
       "1.2.0-PREVIEW",
       "1.1.0-PREVIEW",

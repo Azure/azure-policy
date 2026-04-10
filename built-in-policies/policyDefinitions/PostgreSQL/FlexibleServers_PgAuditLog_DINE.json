@@ -1,0 +1,92 @@
+{
+  "properties": {
+    "displayName": "Configure pgaudit.log to include role, ddl, and misc for PostgreSQL flexible servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configures pgaudit.log to include role, ddl, and misc for PostgreSQL flexible servers to enable comprehensive auditing of role changes, DDL operations, and miscellaneous events.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "pgaudit.log",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+                "contains": "role"
+              },
+              {
+                "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+                "contains": "ddl"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+                    "apiVersion": "2022-12-01",
+                    "name": "[concat(parameters('serverName'), '/pgaudit.log')]",
+                    "properties": {
+                      "value": "role,ddl,misc",
+                      "source": "user-override"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/eadbb524-8644-4a87-8af6-549e1d125982",
+  "name": "eadbb524-8644-4a87-8af6-549e1d125982"
+}

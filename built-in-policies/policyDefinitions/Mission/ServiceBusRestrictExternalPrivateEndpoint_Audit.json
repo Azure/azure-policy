@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Service Bus should restrict access to external private endpoints",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Limiting private endpoint approvals to in-tenant subscriptions prevents cross-tenant data exfiltration and confines Service Bus connectivity to approved mission workloads; see https://learn.microsoft.com/azure/service-bus-messaging/private-endpoint-service.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubscriptionIDs": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of excluded Subscription Ids.",
+          "displayName": "Excluded subscription IDs"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ServiceBus/namespaces/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.ServiceBus/namespaces/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ServiceBus/namespaces/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.ServiceBus/namespaces/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.ServiceBus/namespaces/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubscriptionIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/d8d639f5-1c93-4893-8d3c-cd5106d3ebc4",
+  "name": "d8d639f5-1c93-4893-8d3c-cd5106d3ebc4"
+}

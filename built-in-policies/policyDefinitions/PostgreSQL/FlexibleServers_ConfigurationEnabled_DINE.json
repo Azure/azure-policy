@@ -1,0 +1,105 @@
+{
+  "properties": {
+    "displayName": "Configure PostgreSQL flexible server to enable specified configuration",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configures the specified PostgreSQL configuration setting to 'ON' for PostgreSQL flexible servers. This consolidated policy supports enabling log_checkpoints, log_connections, log_disconnections, connection_throttle.enable, or require_secure_transport. See https://aka.ms/postgresql-security",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "configurationName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Configuration Name",
+          "description": "The PostgreSQL configuration setting name to enable"
+        },
+        "allowedValues": [
+          "log_checkpoints",
+          "log_connections",
+          "log_disconnections",
+          "connection_throttle.enable",
+          "require_secure_transport"
+        ]
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "[parameters('configurationName')]",
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+            "equals": "ON"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                },
+                "configurationName": {
+                  "value": "[parameters('configurationName')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+                    "apiVersion": "2022-12-01",
+                    "name": "[concat(parameters('serverName'), '/', parameters('configurationName'))]",
+                    "properties": {
+                      "value": "ON",
+                      "source": "user-override"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a8f89ff4-3d6e-4d7b-8c5a-2e9b1f4c8d3a",
+  "name": "a8f89ff4-3d6e-4d7b-8c5a-2e9b1f4c8d3a"
+}

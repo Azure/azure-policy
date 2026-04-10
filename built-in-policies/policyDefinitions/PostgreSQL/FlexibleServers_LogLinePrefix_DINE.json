@@ -1,0 +1,106 @@
+{
+  "properties": {
+    "displayName": "Configure log_line_prefix with key identifiers for PostgreSQL flexible servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configures log_line_prefix to include timestamp, user, database, and session identifiers for PostgreSQL flexible servers to enable proper log correlation and auditing.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "logLinePrefix": {
+        "type": "String",
+        "defaultValue": "%t-%c-user=%u,db=%d,app=%a,client=%h",
+        "metadata": {
+          "displayName": "Log Line Prefix",
+          "description": "The log_line_prefix format string. Must include %u (user) and %d (database)."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "log_line_prefix",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+                "contains": "%u"
+              },
+              {
+                "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+                "contains": "%d"
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                },
+                "logLinePrefix": {
+                  "value": "[parameters('logLinePrefix')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  },
+                  "logLinePrefix": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+                    "apiVersion": "2022-12-01",
+                    "name": "[concat(parameters('serverName'), '/log_line_prefix')]",
+                    "properties": {
+                      "value": "[parameters('logLinePrefix')]",
+                      "source": "user-override"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3bf854e8-b34a-47fe-9f81-bc558c82b3bd",
+  "name": "3bf854e8-b34a-47fe-9f81-bc558c82b3bd"
+}

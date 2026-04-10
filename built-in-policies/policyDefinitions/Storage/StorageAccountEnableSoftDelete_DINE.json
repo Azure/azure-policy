@@ -1,0 +1,124 @@
+{
+  "properties": {
+    "displayName": "Configure soft delete for blobs and containers on Storage Accounts",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploys soft delete for both blobs and containers on Storage Accounts if not already enabled. This ensures data protection with a customizable retention period.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Storage"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect to enforce or audit the policy."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "blobRetentionDays": {
+        "type": "Integer",
+        "defaultValue": 7,
+        "metadata": {
+          "displayName": "Retention days for blob soft delete",
+          "description": "Number of days to retain deleted blobs. Default is 7."
+        }
+      },
+      "containerRetentionDays": {
+        "type": "Integer",
+        "defaultValue": 7,
+        "metadata": {
+          "displayName": "Retention days for container soft delete",
+          "description": "Number of days to retain deleted containers. Default is 7."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Storage/storageAccounts"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Storage/storageAccounts/blobServices",
+          "name": "default",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/deleteRetentionPolicy.enabled",
+                "equals": true
+              },
+              {
+                "field": "Microsoft.Storage/storageAccounts/blobServices/containerDeleteRetentionPolicy.enabled",
+                "equals": true
+              }
+            ]
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "resources": [
+                  {
+                    "type": "Microsoft.Storage/storageAccounts/blobServices",
+                    "apiVersion": "2022-09-01",
+                    "name": "[concat(parameters('storageAccountName'), '/default')]",
+                    "properties": {
+                      "deleteRetentionPolicy": {
+                        "enabled": true,
+                        "days": "[parameters('blobRetentionDays')]"
+                      },
+                      "containerDeleteRetentionPolicy": {
+                        "enabled": true,
+                        "days": "[parameters('containerRetentionDays')]"
+                      }
+                    }
+                  }
+                ],
+                "parameters": {
+                  "storageAccountName": {
+                    "type": "string"
+                  },
+                  "blobRetentionDays": {
+                    "type": "int"
+                  },
+                  "containerRetentionDays": {
+                    "type": "int"
+                  }
+                }
+              },
+              "parameters": {
+                "storageAccountName": {
+                  "value": "[field('name')]"
+                },
+                "blobRetentionDays": {
+                  "value": "[parameters('blobRetentionDays')]"
+                },
+                "containerRetentionDays": {
+                  "value": "[parameters('containerRetentionDays')]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9fbd64e3-67b8-489b-98e5-fa0007d17e76",
+  "name": "9fbd64e3-67b8-489b-98e5-fa0007d17e76"
+}

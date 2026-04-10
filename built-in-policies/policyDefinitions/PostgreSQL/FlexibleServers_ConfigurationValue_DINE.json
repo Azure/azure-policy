@@ -1,0 +1,110 @@
+{
+  "properties": {
+    "displayName": "Configure PostgreSQL flexible server configuration to specified value",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configures a specified PostgreSQL flexible server configuration setting to the specified value.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "configurationName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Configuration Name",
+          "description": "The PostgreSQL configuration setting name"
+        }
+      },
+      "configurationValue": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Configuration Value",
+          "description": "The value to set for the configuration"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "[parameters('configurationName')]",
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+            "equals": "[parameters('configurationValue')]"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                },
+                "configurationName": {
+                  "value": "[parameters('configurationName')]"
+                },
+                "configurationValue": {
+                  "value": "[parameters('configurationValue')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "configurationValue": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+                    "apiVersion": "2022-12-01",
+                    "name": "[concat(parameters('serverName'), '/', parameters('configurationName'))]",
+                    "properties": {
+                      "value": "[parameters('configurationValue')]",
+                      "source": "user-override"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a7d3e5b1-8c4f-4a2b-9d6e-1f3c5a8b2e7d",
+  "name": "a7d3e5b1-8c4f-4a2b-9d6e-1f3c5a8b2e7d"
+}

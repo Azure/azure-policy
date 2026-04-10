@@ -1,0 +1,98 @@
+{
+  "properties": {
+    "displayName": "Configure logfiles.retention_days to at least 7 days for PostgreSQL flexible servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configures logfiles.retention_days to at least 7 days for PostgreSQL flexible servers to ensure server logs are retained for sufficient time to support auditing and forensic investigations.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      },
+      "retentionDays": {
+        "type": "Integer",
+        "defaultValue": 7,
+        "metadata": {
+          "displayName": "Retention Days",
+          "description": "Minimum number of days to retain log files"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "logfiles.retention_days",
+          "existenceCondition": {
+            "value": "[if(equals(field('Microsoft.DBforPostgreSQL/flexibleServers/configurations/value'), ''), 0, int(field('Microsoft.DBforPostgreSQL/flexibleServers/configurations/value')))]",
+            "greaterOrEquals": "[parameters('retentionDays')]"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                },
+                "retentionDays": {
+                  "value": "[parameters('retentionDays')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "String"
+                  },
+                  "retentionDays": {
+                    "type": "Integer"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+                    "apiVersion": "2022-12-01",
+                    "name": "[concat(parameters('serverName'), '/logfiles.retention_days')]",
+                    "properties": {
+                      "value": "[string(parameters('retentionDays'))]",
+                      "source": "user-override"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f5ed3f7a-cf5d-4ee6-9ede-b5d5192ccf81",
+  "name": "f5ed3f7a-cf5d-4ee6-9ede-b5d5192ccf81"
+}
