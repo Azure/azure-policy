@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "Service Bus Premium namespaces should use a customer-managed key for encryption in mission platforms",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Requiring premium namespaces to encrypt with customer-managed keys keeps encryption-material control within the mission tenant and satisfies strict data-protection obligations.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ServiceBus/namespaces"
+          },
+          {
+            "field": "Microsoft.ServiceBus/namespaces/sku.tier",
+            "equals": "Premium"
+          },
+          {
+            "not": {
+              "field": "Microsoft.ServiceBus/namespaces/encryption.keySource",
+              "equals": "Microsoft.Keyvault"
+            }
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9c376cb6-0545-4233-a22c-074540d4d935",
+  "name": "9c376cb6-0545-4233-a22c-074540d4d935"
+}

@@ -1,0 +1,332 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Enforce Encryption-in-Transit across Azure Services - TLS Version",
+    "policyType": "BuiltIn",
+    "description": "Help restrict and audit Azure Services to use latest TLS versions",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true,
+      "SovereigntyLevel": "Level 2 - Encryption at-rest/in-transit"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect_deny": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect-Deny",
+          "description": "This effect applies to policies that support Deny or Audit effect."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      },
+      "effect_modify": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect-Modify",
+          "description": "This effect applies to policies that support Modify effect."
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      },
+      "effect_deployIfNotExists": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect-DeployIfNotExists",
+          "description": "This effect applies to policies that support DeployIfNotExists effect."
+        }
+      },
+      "effect_auditIfNotExists": {
+        "type": "String",
+        "defaultValue": "AuditIfNotExists",
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect-AuditIfNotExists",
+          "description": "This effect applies to policies that support AuditIfNotExists effect."
+        }
+      },
+      "includeArcMachines": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "fe83a0eb-a853-422d-aac2-1bffd182c5d0_minimumTlsVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Minimum TLS Version",
+          "description": "Minimum version of TLS required to access data in the storage account"
+        },
+        "allowedValues": [
+          "TLS1_0",
+          "TLS1_1",
+          "TLS1_2"
+        ],
+        "defaultValue": "TLS1_2"
+      },
+      "828ba269-bf7f-4082-83dd-633417bc391d_minimumServerTLSVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Minimum Machine TLS version",
+          "description": "The minimum machine TLS protocol version that should be enabled. Windows machines with lower TLS versions will be set to the desired version."
+        },
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ],
+        "defaultValue": "1.2"
+      },
+      "828ba269-bf7f-4082-83dd-633417bc391d_minimumClientTLSVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Minimum Client TLS version",
+          "description": "The minimum client TLS protocol version that should be enabled. Windows machines with lower client TLS versions will be set to desired version."
+        },
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ],
+        "defaultValue": "1.2"
+      },
+      "5752e6d6-1206-46d8-8ab1-ecc2f71a8112_minimumTLSVersion": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Minimum TLS version",
+          "description": "The minimum TLS protocol version that should be enabled. Windows machines with lower TLS versions will be marked as non-compliant."
+        },
+        "allowedValues": [
+          "1.1",
+          "1.2"
+        ],
+        "defaultValue": "1.2"
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "minTLSOnSynapseDedicatedSQLModify",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/8b5c654c-fb07-471b-aa8f-15fea733f140",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_modify')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "minTLSOnSynapseWorkspaceSQL",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/cb3738a6-82a2-4a18-b87b-15217b9deff4",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deny')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnWebAppSlotDINE",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/014664e7-e348-41a3-aeb9-566e4ff6a9df",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deployIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnWebAppSlot",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4ee5b817-627a-435a-8932-116193268172",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_auditIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnWebAppDINE",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ae44c1d1-0df2-4ca9-98fa-a3d3ae5b409d",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deployIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnWebApp",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f0e6e85b-9b9f-4a4b-b67b-f730d42f1b0b",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_auditIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnFunctionAppSlotDINE",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fa3a6357-c6d6-4120-8429-855577ec0063",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deployIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnFunctionAppSlot",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/deb528de-8f89-4101-881c-595899253102",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_auditIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnFunctionAppDINE",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1f01f1c7-539c-49b5-9ef4-d4ffa37d22e0",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deployIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "latestTLSOnFunctionApp",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f9d614c5-c173-4d56-95a7-b4437057d193",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_auditIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "disableTLS10And11OnASE",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d6545c6b-dd9d-4265-91e6-0b451e2f1c50",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deny')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "minTLSOnStorageAccount",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fe83a0eb-a853-422d-aac2-1bffd182c5d0",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deny')]"
+          },
+          "minimumTlsVersion": {
+            "value": "[parameters('fe83a0eb-a853-422d-aac2-1bffd182c5d0_minimumTlsVersion')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "tlsOnAADDomainServices",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/3aa87b5a-7813-4b57-8a43-42dd9df5aaa7",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deny')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "minTLSOnSQLServer",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/32e6bbec-16b6-44c2-be37-c5b672d103cf",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deny')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "minTLSOnPostgreSQLFlexibleServer",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/a43d5475-c569-45ce-a268-28fa79f4e87a",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_auditIfNotExists')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "minTLSOnAzureFrontDoor",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/679da822-78a7-4eff-8fff-a899454a9970",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deny')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "tlsOnWindowsMachines",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/828ba269-bf7f-4082-83dd-633417bc391d",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_deployIfNotExists')]"
+          },
+          "MinimumClientTLSVersion": {
+            "value": "[parameters('828ba269-bf7f-4082-83dd-633417bc391d_minimumClientTLSVersion')]"
+          },
+          "MinimumServerTLSVersion": {
+            "value": "[parameters('828ba269-bf7f-4082-83dd-633417bc391d_minimumServerTLSVersion')]"
+          },
+          "IncludeArcMachines": {
+            "value": "[parameters('includeArcMachines')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "secureWebProtocolAINEGuestConfig",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5752e6d6-1206-46d8-8ab1-ecc2f71a8112",
+        "definitionVersion": "4.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect_auditIfNotExists')]"
+          },
+          "IncludeArcMachines": {
+            "value": "[parameters('includeArcMachines')]"
+          },
+          "MinimumTLSVersion": {
+            "value": "[parameters('5752e6d6-1206-46d8-8ab1-ecc2f71a8112_minimumTLSVersion')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/f1fe6a81-eee9-47b8-9f7f-80685141209e",
+  "name": "f1fe6a81-eee9-47b8-9f7f-80685141209e"
+}

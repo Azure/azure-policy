@@ -1,0 +1,100 @@
+{
+  "properties": {
+    "displayName": "CosmosDB should restrict public access but allow access from certain IP addresses",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. This policy restricts Cosmos DB public network access while permitting connectivity from designated IP address ranges required for essential platform operations.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedIPRules": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "The list of allowed IP ranges on the IP rules",
+          "description": "List of IP address ranges that are permitted for Cosmos DB public network access."
+        },
+        "defaultValue": [
+          "52.244.48.71",
+          "52.176.6.30",
+          "52.169.50.45",
+          "52.187.184.26"
+        ]
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts"
+          },
+          {
+            "field": "Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess",
+            "notEquals": "Disabled"
+          },
+          {
+            "field": "Microsoft.DocumentDB/databaseAccounts/isVirtualNetworkFilterEnabled",
+            "equals": false
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[empty(field('Microsoft.DocumentDB/databaseAccounts/ipRules'))]",
+                "equals": true
+              },
+              {
+                "count": {
+                  "field": "Microsoft.DocumentDB/databaseAccounts/ipRules[*]",
+                  "where": {
+                    "field": "Microsoft.DocumentDB/databaseAccounts/ipRules[*].ipAddressOrRange",
+                    "notIn": "[parameters('allowedIPRules')]"
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+            "/providers/Microsoft.Authorization/roleDefinitions/5bd9cd88-fe45-4216-938b-f97437e15450"
+          ],
+          "conflictEffect": "audit",
+          "operations": [
+            {
+              "condition": "[greaterOrEquals(requestContext().apiVersion, '2021-01-15')]",
+              "operation": "addOrReplace",
+              "field": "Microsoft.DocumentDB/databaseAccounts/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/65e3adf0-0793-4cd2-af1f-134216ad5ce1",
+  "name": "65e3adf0-0793-4cd2-af1f-134216ad5ce1"
+}

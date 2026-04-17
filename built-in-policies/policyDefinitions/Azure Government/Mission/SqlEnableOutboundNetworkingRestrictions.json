@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Azure SQL should disable or enforce restrictions for Outbound networking",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. It enforces Azure SQL server outbound network restrictions so workloads communicate only through approved private channels and limit lateral movement risk (see https://learn.microsoft.com/azure/azure-sql/database/connectivity-architecture).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers"
+          },
+          {
+            "field": "Microsoft.Sql/servers/restrictOutboundNetworkAccess",
+            "notEquals": "Enabled"
+          },
+          {
+            "value": "[resourceGroup().managedBy]",
+            "notContains": "/providers/Microsoft.Synapse/"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/eae5dab1-5078-4686-a091-fce0e1e13d3b",
+  "name": "eae5dab1-5078-4686-a091-fce0e1e13d3b"
+}

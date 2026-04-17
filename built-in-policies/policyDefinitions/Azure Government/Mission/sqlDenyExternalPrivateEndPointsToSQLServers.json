@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Azure SQL servers in this tenant should deny private endpoints in external subscriptions",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. It blocks approval of SQL private endpoint connections from subscriptions outside the mission tenant to preserve enclave boundaries and prevent data exfiltration (see https://learn.microsoft.com/azure/private-link/private-link-overview).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubIDs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded Subscription IDs",
+          "description": "List or array of the excluded subscription IDs"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.SQL/servers/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.SQL/servers/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.SQL/servers/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.SQL/servers/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.SQL/servers/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b9ea0c2d-5c16-4d86-8e09-af82a239a0a4",
+  "name": "b9ea0c2d-5c16-4d86-8e09-af82a239a0a4"
+}

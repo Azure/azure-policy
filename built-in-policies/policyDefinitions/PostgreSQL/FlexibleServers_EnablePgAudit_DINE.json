@@ -1,0 +1,84 @@
+{
+  "properties": {
+    "displayName": "Configure shared_preload_libraries to include pgaudit for PostgreSQL flexible servers",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Configures shared_preload_libraries to include 'pgaudit' for PostgreSQL flexible servers to enable PgAudit extension for comprehensive auditing. See https://aka.ms/postgresql-security",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "PostgreSQL"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.DBforPostgreSQL/flexibleServers"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+          "name": "shared_preload_libraries",
+          "existenceCondition": {
+            "field": "Microsoft.DBforPostgreSQL/flexibleServers/configurations/value",
+            "contains": "pgaudit"
+          },
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "serverName": {
+                  "value": "[field('name')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "serverName": {
+                    "type": "string"
+                  }
+                },
+                "variables": {},
+                "resources": [
+                  {
+                    "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+                    "apiVersion": "2022-12-01",
+                    "name": "[concat(parameters('serverName'), '/shared_preload_libraries')]",
+                    "properties": {
+                      "value": "pgaudit",
+                      "source": "user-override"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dd626066-39f5-4f72-aba8-06a99fabf278",
+  "name": "dd626066-39f5-4f72-aba8-06a99fabf278"
+}

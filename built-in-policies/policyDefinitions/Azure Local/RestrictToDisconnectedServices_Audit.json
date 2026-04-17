@@ -1,0 +1,143 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Restrict resource types to Azure services supported in Azure Local disconnected operations",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Restrict the use of Azure services to those supported in Azure Local disconnected operations.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Azure Local",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "listOfResourceTypesSupportedInAldoStrict": {
+        "type": "Array",
+        "defaultValue": [
+          "Microsoft.Advisor/recommendations",
+          "Microsoft.Authorization/denyAssignments",
+          "Microsoft.Authorization/locks",
+          "Microsoft.Authorization/policyAssignments",
+          "Microsoft.Authorization/policyDefinitions",
+          "Microsoft.Authorization/policyExemptions",
+          "Microsoft.Authorization/policySetDefinitions",
+          "Microsoft.Authorization/roleAssignments",
+          "Microsoft.Authorization/roleDefinitions",
+          "Microsoft.AzureStackHCI/*",
+          "Microsoft.ContainerRegistry/registries",
+          "Microsoft.ContainerRegistry/registries/*",
+          "Microsoft.ContainerService/managedClusters",
+          "Microsoft.ContainerService/managedClusters/*",
+          "Microsoft.ExtendedLocation/customLocations",
+          "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "Microsoft.HybridCompute/machines",
+          "Microsoft.HybridCompute/machines/*",
+          "Microsoft.HybridContainerService/*",
+          "Microsoft.KeyVault/vaults",
+          "Microsoft.KeyVault/vaults/*",
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.Kubernetes/connectedClusters/*",
+          "Microsoft.Resources/deployments",
+          "Microsoft.Resources/resourceGroups",
+          "Microsoft.Resources/subscriptions/resourceGroups",
+          "Microsoft.Resources/tags",
+          "Microsoft.Storage/storageAccounts",
+          "Microsoft.Storage/storageAccounts/*"
+        ],
+        "metadata": {
+          "description": "The list of Azure services supported in Azure Local disconnected operations.",
+          "displayName": "Azure Local disconnected operations Supported Services Strict",
+          "strongType": "resourceTypes"
+        }
+      },
+      "listOfResourceTypesSupportedInAldoMatched": {
+        "type": "Array",
+        "defaultValue": [
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.Compute/disks",
+          "Microsoft.Network/networkSecurityGroups",
+          "Microsoft.Network/networkSecurityGroups/*"
+        ],
+        "metadata": {
+          "description": "The list of Azure services in Azure public that are matchable to what is supported in Azure Local disconnected operations.",
+          "displayName": "Azure Local disconnected operations Supported Services Matched",
+          "strongType": "resourceTypes"
+        }
+      },
+      "includeMatchedServices": {
+        "type": "Boolean",
+        "defaultValue": false,
+        "metadata": {
+          "description": "Set to true to include Azure public services that are matchable to services supported in Azure Local disconnected operations clusters. Set to false to only include services that are strictly supported in Azure Local disconnected operations.",
+          "displayName": "Include Azure Public Services that are matchable to services supported in Azure Local disconnected operations clusters."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "value": "[parameters('includeMatchedServices')]",
+                "equals": true
+              },
+              {
+                "count": {
+                  "value": "[union(parameters('listOfResourceTypesSupportedInAldoStrict'), parameters('listOfResourceTypesSupportedInAldoMatched'))]",
+                  "name": "allowedType",
+                  "where": {
+                    "value": "[field('type')]",
+                    "like": "[current('allowedType')]"
+                  }
+                },
+                "equals": 0
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "value": "[parameters('includeMatchedServices')]",
+                "equals": false
+              },
+              {
+                "count": {
+                  "value": "[parameters('listOfResourceTypesSupportedInAldoStrict')]",
+                  "name": "allowedType",
+                  "where": {
+                    "value": "[field('type')]",
+                    "like": "[current('allowedType')]"
+                  }
+                },
+                "equals": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/dabf7c7f-5354-42de-a92a-8367f538dd71",
+  "name": "dabf7c7f-5354-42de-a92a-8367f538dd71"
+}

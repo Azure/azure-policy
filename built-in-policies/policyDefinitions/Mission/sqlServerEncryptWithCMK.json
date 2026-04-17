@@ -1,0 +1,82 @@
+{
+  "properties": {
+    "displayName": "[Mission] SQL servers should use customer-managed keys to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. It mandates customer-managed Transparent Data Encryption keys for Azure SQL servers to maintain control over cryptographic material and satisfy mission compliance requirements (see https://learn.microsoft.com/azure/azure-sql/database/transparent-data-encryption-byok-overview).",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Sql/servers"
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Synapse/"
+              },
+              {
+                "anyOf": [
+                  {
+                    "field": "Microsoft.Sql/servers/keyid",
+                    "exists": false
+                  },
+                  {
+                    "field": "Microsoft.Sql/servers/keyid",
+                    "equals": ""
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Sql/servers/encryptionProtector"
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Synapse/"
+              },
+              {
+                "field": "Microsoft.Sql/servers/encryptionProtector/serverKeyType",
+                "notEquals": "AzureKeyVault"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5105a3c5-4ad7-44fd-be94-149ca62920b7",
+  "name": "5105a3c5-4ad7-44fd-be94-149ca62920b7"
+}

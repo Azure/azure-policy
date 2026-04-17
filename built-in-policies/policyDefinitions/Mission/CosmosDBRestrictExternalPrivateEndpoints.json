@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "CosmosDB should restrict external private endpoints access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. This policy enforces restrictions on external private endpoints linked to Cosmos DB to maintain network isolation and prevent unauthorized cross-tenant access.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "CosmosDB external private endpoints access effect",
+          "description": "Specify the access restriction of private endpoints to a CosmosDB effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubscriptionIDs": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of excluded Subscription Ids.",
+          "displayName": "Excluded subscription IDs"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.DocumentDB/databaseAccounts/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubscriptionIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ea79b84d-f538-475d-a6ef-7951747a3455",
+  "name": "ea79b84d-f538-475d-a6ef-7951747a3455"
+}

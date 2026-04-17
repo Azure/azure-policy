@@ -4,10 +4,10 @@
     "description": "Resource logs should be enabled to track activities and events that take place on your resources and give you visibility and insights into any changes that occur. This policy deploys a diagnostic setting using a category group to route logs to a Log Analytics workspace for Virtual networks (microsoft.network/virtualnetworks).",
     "mode": "Indexed",
     "policyType": "BuiltIn",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "metadata": {
       "category": "Monitoring",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     "parameters": {
       "effect": {
@@ -26,8 +26,7 @@
       "diagnosticSettingName": {
         "type": "String",
         "metadata": {
-          "displayName": "Diagnostic Setting Name",
-          "description": "Diagnostic Setting Name"
+          "displayName": "Diagnostic Setting Name"
         },
         "defaultValue": "setByPolicy-LogAnalytics"
       },
@@ -61,6 +60,18 @@
           "strongType": "omsWorkspace",
           "assignPermissions": true
         }
+      },
+      "metricsEnabled": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Enable metrics",
+          "description": "Whether to enable supported diagnostic metrics for Virtual Networks."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": true
       }
     },
     "policyRule": {
@@ -68,7 +79,7 @@
         "allOf": [
           {
             "field": "type",
-            "equals": "microsoft.network/virtualnetworks"
+            "equals": "Microsoft.Network/virtualNetworks"
           },
           {
             "anyOf": [
@@ -101,7 +112,7 @@
                         "equals": "[equals(parameters('categoryGroup'), 'allLogs')]"
                       },
                       {
-                        "field": "microsoft.insights/diagnosticSettings/logs[*].categoryGroup",
+                        "field": "Microsoft.Insights/diagnosticSettings/logs[*].categoryGroup",
                         "equals": "allLogs"
                       }
                     ]
@@ -136,23 +147,36 @@
                   },
                   "resourceName": {
                     "type": "string"
+                  },
+                  "metricsEnabled": {
+                    "type": "bool"
                   }
                 },
                 "variables": {},
                 "resources": [
                   {
-                    "type": "microsoft.network/virtualnetworks/providers/diagnosticSettings",
+                    "type": "Microsoft.Network/virtualNetworks/providers/diagnosticSettings",
                     "apiVersion": "2021-05-01-preview",
                     "name": "[concat(parameters('resourceName'), '/', 'Microsoft.Insights/', parameters('diagnosticSettingName'))]",
                     "properties": {
                       "workspaceId": "[parameters('logAnalytics')]",
+                      "logAnalyticsDestinationType": "Dedicated",
                       "logs": [
                         {
                           "categoryGroup": "allLogs",
                           "enabled": "[equals(parameters('categoryGroup'), 'allLogs')]"
                         }
                       ],
-                      "metrics": []
+                      "metrics": [
+                        {
+                          "category": "AllMetrics",
+                          "enabled": "[parameters('metricsEnabled')]",
+                          "retentionPolicy": {
+                            "enabled": false,
+                            "days": 0
+                          }
+                        }
+                      ]
                     }
                   }
                 ],
@@ -175,6 +199,9 @@
                 },
                 "resourceName": {
                   "value": "[field('name')]"
+                },
+                "metricsEnabled": {
+                  "value": "[parameters('metricsEnabled')]"
                 }
               }
             }
@@ -183,6 +210,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },

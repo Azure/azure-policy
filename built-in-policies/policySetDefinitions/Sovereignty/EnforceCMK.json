@@ -1,0 +1,472 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Enforce Encryption-at-Rest with Customer Managed Keys (CMK) with Azure Key Vault Premium Keys across Azure Services",
+    "policyType": "BuiltIn",
+    "description": "Help restrict and audit Azure Services to use CMK with Azure Key Vault Premium keys",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true,
+      "SovereigntyLevel": "Level 2 - Encryption at-rest/in-transit"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "This parameter lets you choose the effect of the policy. If you choose Audit, the policy will only audit resources for compliance. If you choose Deny (default), the policy will deny the creation of non-compliant resources. If you choose Disabled, the policy will not enforce compliance (useful, for example, as a second assignment to ignore a subset of non-compliant resources in a single resource group)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Deny"
+      },
+      "86efb160-8de7-451d-bc08-5d475b0aadae_supportedSKUs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Supported SKUs for Azure Data Box Jobs",
+          "description": "The list of SKUs that support customer-managed key encryption key for Azure Data Box Jobs"
+        },
+        "allowedValues": [
+          "DataBox",
+          "DataBoxHeavy"
+        ],
+        "defaultValue": [
+          "DataBox",
+          "DataBoxHeavy"
+        ]
+      },
+      "2e94d99a-8a36-4563-bc77-810d8893b671_enableDoubleEncryption": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Double encryption should be enabled on Azure Recovery Services vaults for Backup",
+          "description": "Check if double encryption is enabled on Azure Recovery Services vaults for Backup.  For more details refer to https://aka.ms/AB-InfraEncryption."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "d6588149-9f06-462c-a076-56aece45b5ba_checkInfrastructureEncryption": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Check if Infrastructure Encryption is enabled on AzureBackup vaults.",
+          "description": "Check if Infrastructure Encryption is enabled on Azure Backup Vaults. For more details refer to https://aka.ms/az-backup-vault-infra-encryption-at-rest-with-cmk."
+        },
+        "allowedValues": [
+          true,
+          false
+        ],
+        "defaultValue": false
+      },
+      "67121cc7-ff39-4ab8-b7e3-95b84dab487d_excludedKinds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded Kinds in Azure AI Services",
+          "description": "The list of excluded API kinds for customer-managed key, default is the list of API kinds that don't have data stored in Cognitive Services"
+        },
+        "defaultValue": [
+          "CognitiveServices",
+          "ContentSafety",
+          "ImmersiveReader",
+          "HealthInsights",
+          "LUIS.Authoring",
+          "LUIS",
+          "QnAMaker",
+          "QnAMaker.V2",
+          "AIServices",
+          "MetricsAdvisor",
+          "SpeechTranslation",
+          "Internal.AllInOne",
+          "ConversationalLanguageUnderstanding",
+          "knowledge",
+          "TranscriptionIntelligence",
+          "HealthDecisionSupport"
+        ]
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnSynapseWorkspace",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f7d52b2d-e161-4dfa-a82b-55e564167385",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnStreamAnalytics",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/87ba29ef-1ab3-4d82-b763-87fcd4f531f7",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnCosmosDB",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1f905d99-2ab7-462c-a6b0-f709acca6c8f",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnDataBox",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/86efb160-8de7-451d-bc08-5d475b0aadae",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "supportedSKUs": {
+            "value": "[parameters('86efb160-8de7-451d-bc08-5d475b0aadae_supportedSKUs')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnContainerRegistry",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/5b9159ae-1701-4a6f-9a7a-aa9c8ddd0580",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnContainerInstance",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0aa61e00-0a01-4a3c-9945-e93cffedf0e6",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnLogSearchAlerts",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/94c1f94d-33b0-4062-bd04-1cdc3e7eece2",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnRecoveryServicesVault",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2e94d99a-8a36-4563-bc77-810d8893b671",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "enableDoubleEncryption": {
+            "value": "[parameters('2e94d99a-8a36-4563-bc77-810d8893b671_enableDoubleEncryption')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnSavedQueriesInAzureMonitor",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fa298e57-9444-42ba-bf04-86e8470e32c7",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnOSAndDataDisk",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/702dd420-7fcc-42c5-afe8-4026edd20fe0",
+        "definitionVersion": "3.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAzureMonitorLogClusters",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1f68a601-6e6d-4e42-babf-3f643a047ea2",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAzureDataExplorer",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/81e74cea-30fd-40d5-802f-d72103c2aaaa",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnLogAnalyticsClustersDoubleEncryption",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ea0dfaed-95fb-448c-934e-d6e713ce393d",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAutomationAccount",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/56a5ee18-2ae6-4810-86f7-18e39ce5629b",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnMachineLearningWorkspace",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ba769a63-b8cc-4b2d-abf6-ac33c7204be8",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysInAKSOnOSAndDataDisk",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7d7be79c-23ba-4033-84dd-45e2a5ccdd67",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnIoTHub",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2d7e144b-159c-44fc-95c1-ac3dbf5e6e54",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnIoTDPS",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/47031206-ce96-41f8-861b-6a915f3de284",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnHDInsight",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/64d314f6-6062-4780-a861-c23e8951bee5",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAIServices",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/67121cc7-ff39-4ab8-b7e3-95b84dab487d",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "excludedKinds": {
+            "value": "[parameters('67121cc7-ff39-4ab8-b7e3-95b84dab487d_excludedKinds')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnStorageTable",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7c322315-e26d-4174-a99e-f49d351b4688",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAzureBatch",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/99e9ccd8-3db9-4592-b0d1-14b1715a4d8a",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnStorageQueue",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f0e5abd0-2554-4736-b7c0-4ffef23475ef",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnDataFactory",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/4ec52d6d-beb7-40c4-9a9e-fe753254690e",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAppConfiguration",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/967a4b4b-2da9-43c1-b7d0-f98d0d74d0b1",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnPostgreSQLFlexibleServers",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/12c74c95-0efd-48da-b8d9-2a7d68470c92",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnSQLServer",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/0a370ff3-6cab-4e85-8995-295fd854c5b8",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnSQLManagedInstance",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/ac01ad65-10e5-46df-bdd9-6b0cad13e1d2",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnStorageEncryptionScopes",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/b5ec538c-daa0-4006-8596-35468b9148e8",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnHPCCacheAccounts",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/970f84d8-71b6-4091-9979-ace7e3fb6dbb",
+        "definitionVersion": "2.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnAzureLoadTesting",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/65c4f833-1f2e-426c-8780-f6d7593bed7a",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnBotService",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/51522a96-0869-4791-82f3-981000c2c67f",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnBackupVault",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/d6588149-9f06-462c-a076-56aece45b5ba",
+        "definitionVersion": "1.*.*-preview",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          },
+          "checkInfrastructureEncryption": {
+            "value": "[parameters('d6588149-9f06-462c-a076-56aece45b5ba_checkInfrastructureEncryption')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnRedisCacheEnterprise",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/09aa11bb-87ec-409f-bf0b-49b7c1561a87",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnDeviceUpdate",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/43c323f6-0329-4f7c-a19a-6e5a5690d042",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "customerManagedKeysOnLogicAppsISE",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1fafeaf6-7927-4059-a50a-8eb2a7a6f2b5",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('effect')]"
+          }
+        }
+      }
+    ],
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/f15f4d95-c59c-4395-9317-be6978d0743f",
+  "name": "f15f4d95-c59c-4395-9317-be6978d0743f"
+}
