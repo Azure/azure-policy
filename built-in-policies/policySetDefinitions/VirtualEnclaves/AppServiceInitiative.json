@@ -4,11 +4,11 @@
     "policyType": "BuiltIn",
     "description": "This initiative deploys Azure policies for App Service ensuring boundary protection of this resource while it operates within the logically separated structure of Azure Virtual Enclaves. https://aka.ms/VirtualEnclaves",
     "metadata": {
-      "version": "1.1.0-preview",
+      "version": "1.2.0-preview",
       "category": "VirtualEnclaves",
       "preview": true
     },
-    "version": "1.1.0-preview",
+    "version": "1.2.0-preview",
     "parameters": {
       "linuxJavaVersion": {
         "type": "String",
@@ -33,6 +33,83 @@
           "description": "Specify a supported Python version for App Service"
         },
         "defaultValue": "3.11"
+      },
+      "appPrivateLinkEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "App Service: Require private endpoint",
+          "description": "Effect for requiring App Service apps to use private link (private endpoint)."
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      },
+      "appPrivateLinkSkuEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "App Service: Require private-link-capable SKU",
+          "description": "Effect for requiring App Service apps to use a SKU that supports private link."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "appSlotVnetIntegrationEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "App Service Slots: Require VNet integration",
+          "description": "Effect for requiring App Service app slots to be injected into a virtual network."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "appVnetConfigRoutingEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "App Service: Require VNet configuration routing",
+          "description": "Effect for requiring App Service apps to route configuration traffic (image pull, content share) through VNet integration."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "appVnetIntegrationEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "App Service: Require VNet integration",
+          "description": "Effect for requiring App Service apps to be injected into a virtual network (outbound VNet integration)."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "functionSlotVnetConfigRoutingEffect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Function App Slots: Require VNet configuration routing",
+          "description": "Effect for requiring Function app slots to route configuration traffic through VNet integration."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
       }
     },
     "policyDefinitions": [
@@ -275,9 +352,70 @@
         "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/2374605e-3e0b-492b-9046-229af202562c",
         "policyDefinitionReferenceId": "AppServiceDisablePublicNetworkAccess",
         "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionReferenceId": "appServiceRequirePrivateLink",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/687aa49d-0982-40f8-bf6b-66d1da97a04b",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('appPrivateLinkEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "appServiceRequirePrivateLinkSku",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/546fe8d2-368d-4029-a418-6af48a7f61e5",
+        "definitionVersion": "4.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('appPrivateLinkSkuEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "appServiceRequireVnetIntegration",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/72d04c29-f87d-4575-9731-419ff16a2757",
+        "definitionVersion": "3.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('appVnetIntegrationEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "appServiceSlotRequireVnetIntegration",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/24b7a1c6-44fe-40cc-a2e6-242d2ef70e98",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('appSlotVnetIntegrationEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "appServiceRequireVnetConfigRouting",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/801543d1-1953-4a90-b8b0-8cf6d41473a5",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('appVnetConfigRoutingEffect')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "functionAppSlotRequireVnetConfigRouting",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/f380edf5-de79-4862-bd57-ee407d8bd8b6",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "effect": {
+            "value": "[parameters('functionSlotVnetConfigRoutingEffect')]"
+          }
+        }
       }
     ],
     "versions": [
+      "1.2.0-PREVIEW",
       "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
