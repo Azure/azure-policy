@@ -1,0 +1,128 @@
+{
+  "properties": {
+    "displayName": "Managed Disks and Images should use customer-managed keys for encryption at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Use customer-managed keys to manage the encryption at rest of the contents of your managed disks and images. By default, the data is encrypted at rest with platform-managed keys, but customer-managed keys are commonly required to meet regulatory compliance standards.",
+    "metadata": {
+      "category": "Mission",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "customer-managed keys to manage the encryption at rest effect",
+          "description": "Enable or disable the customer-managed keys to manage the encryption at rest effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/disks"
+              },
+              {
+                "field": "Microsoft.Compute/disks/encryption.diskEncryptionSetId",
+                "exists": "False"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/galleries/images/versions"
+              },
+              {
+                "value": "[length(field('Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*].encryption.osDiskImage.diskEncryptionSetId'))]",
+                "notEquals": "[length(field('Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*]'))]"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/galleries/images/versions"
+              },
+              {
+                "value": "[length(field('Microsoft.Compute/galleries/images/versions/storageProfile.dataDiskImages[*]'))]",
+                "greater": 0
+              },
+              {
+                "anyOf": [
+                  {
+                    "count": {
+                      "field": "Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*]",
+                      "where": {
+                        "value": "[length(current('Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*].encryption.dataDiskImages[*].diskEncryptionSetId'))]",
+                        "notEquals": "[length(field('Microsoft.Compute/galleries/images/versions/storageProfile.dataDiskImages[*]'))]"
+                      }
+                    },
+                    "greater": 0
+                  },
+                  {
+                    "not": {
+                      "field": "Microsoft.Compute/galleries/images/versions/publishingProfile.targetRegions[*].encryption.dataDiskImages[*].diskEncryptionSetId",
+                      "exists": "true"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/images"
+              },
+              {
+                "field": "Microsoft.Compute/images/storageProfile.osDisk.diskEncryptionSet.id",
+                "exists": "False"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/images"
+              },
+              {
+                "value": "[length(field('Microsoft.Compute/images/storageProfile.dataDisks[*]'))]",
+                "greater": 0
+              },
+              {
+                "not": {
+                  "field": "Microsoft.Compute/images/storageProfile.dataDisks[*].diskEncryptionSet.id",
+                  "exists": "true"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/59953f11-df7f-48b1-870f-1780ed07348e",
+  "name": "59953f11-df7f-48b1-870f-1780ed07348e"
+}

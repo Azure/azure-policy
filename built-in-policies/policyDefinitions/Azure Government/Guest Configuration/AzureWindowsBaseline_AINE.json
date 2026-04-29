@@ -6,28 +6,42 @@
     "description": "Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol. Machines are non-compliant if the machine is not configured correctly for one of the recommendations in the Azure compute security baseline.",
     "metadata": {
       "category": "Guest Configuration",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
       "guestConfiguration": {
         "name": "AzureWindowsBaseline",
-        "version": "1.*"
+        "version": "1.*",
+        "configurationParameter": {
+          "BaselineSettings": "AzureWindowsBaseline;BaselineSettings"
+        }
       }
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "IncludeArcMachines": {
         "type": "string",
         "metadata": {
           "displayName": "Include Arc connected servers",
-          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine."
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
         },
         "allowedValues": [
           "true",
           "false"
         ],
         "defaultValue": "false"
+      },
+      "BaselineSettings": {
+        "type": "String",
+        "metadata": {
+          "description": "A customized Baseline Security JSON payload, for customizing security rules",
+          "displayName": "Baseline Settings",
+          "strongType": "MachineConfiguration/BaselineSettings",
+          "portalReview": "true"
+        },
+        "defaultValue": ""
       },
       "effect": {
         "type": "string",
@@ -97,7 +111,7 @@
                       },
                       {
                         "field": "Microsoft.Compute/imageOffer",
-                        "equals": "dsvm-windows"
+                        "like": "dsvm-win*"
                       }
                     ]
                   },
@@ -228,13 +242,22 @@
           "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
           "name": "AzureWindowsBaseline",
           "existenceCondition": {
-            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
-            "equals": "Compliant"
+            "allOf": [
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+                "equals": "Compliant"
+              },
+              {
+                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
+                "equals": "[base64(concat('AzureWindowsBaseline;BaselineSettings', '=', parameters('BaselineSettings')))]"
+              }
+            ]
           }
         }
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },

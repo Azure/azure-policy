@@ -3,12 +3,12 @@
     "displayName": "Function apps should enable configuration routing to Azure Virtual Network",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "By default, app configuration like pulling container images and mounting content storage is not routed through regional VNET integration. For API versions before 2024-11-01, set 'vnetImagePullEnabled' and 'vnetContentShareEnabled' to true. For 2024-11-01+, set 'outboundVnetRouting.imagePullTraffic' and 'outboundVnetRouting.contentShareTraffic' to true. Not for Flex/Consumption plans. Learn more: https://aka.ms/appservice-vnet-configuration-routing.",
+    "description": "By default, configuration traffic (image pull, content share, backup/restore) is not routed through regional VNET integration. For API < 2024-11-01, set 'vnetImagePullEnabled', 'vnetContentShareEnabled', 'vnetBackupRestoreEnabled' to true. For API >= 2024-11-01, set the corresponding 'outboundVnetRouting' properties or 'outboundVnetRouting.allTraffic' to true. Not for Flex/Consumption plans. Learn more: https://aka.ms/appservice-vnet-configuration-routing.",
     "metadata": {
-      "version": "1.2.0",
+      "version": "1.3.0",
       "category": "App Service"
     },
-    "version": "1.2.0",
+    "version": "1.3.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -60,6 +60,10 @@
                       {
                         "field": "Microsoft.Web/sites/vnetContentShareEnabled",
                         "notEquals": "true"
+                      },
+                      {
+                        "field": "Microsoft.Web/sites/vnetBackupRestoreEnabled",
+                        "notEquals": "true"
                       }
                     ]
                   }
@@ -72,6 +76,10 @@
                     "greaterOrEquals": "2024-11-01"
                   },
                   {
+                    "field": "Microsoft.Web/sites/outboundVnetRouting.allTraffic",
+                    "notEquals": "true"
+                  },
+                  {
                     "anyOf": [
                       {
                         "field": "Microsoft.Web/sites/outboundVnetRouting.imagePullTraffic",
@@ -79,6 +87,10 @@
                       },
                       {
                         "field": "Microsoft.Web/sites/outboundVnetRouting.contentShareTraffic",
+                        "notEquals": "true"
+                      },
+                      {
+                        "field": "Microsoft.Web/sites/outboundVnetRouting.backupRestoreTraffic",
                         "notEquals": "true"
                       }
                     ]
@@ -94,6 +106,7 @@
       }
     },
     "versions": [
+      "1.3.0",
       "1.2.0",
       "1.1.0",
       "1.0.0"

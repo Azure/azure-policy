@@ -1,27 +1,28 @@
 {
   "properties": {
-    "displayName": "Linux machines should meet requirements for the Azure compute security baseline",
+    "displayName": "[Preview]: Linux Workloads should comply with the Official CIS Security Benchmark",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol. Machines are non-compliant if the machine is not configured correctly for one of the recommendations in the Azure compute security baseline.",
+    "description": "This policy provides you the ability to customize and deploy CIS Security Benchmarks for audit purposes to your Linux workloads across Azure, on-premises and hybrid environments. The contents of the CIS Security Benchmarks are in parity with the benchmarks published at https://cisecurity.org. The policy is powered by azure-osconfig. Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
     "metadata": {
-      "version": "1.6.0",
+      "version": "1.0.0-preview",
       "category": "Guest Configuration",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
+      "preview": true,
       "guestConfiguration": {
-        "name": "AzureLinuxBaseline",
+        "name": "CISLinuxSecurityBaseline",
         "version": "1.*",
         "configurationParameter": {
-          "BaselineSettings": "AzureLinuxBaseline;BaselineSettings"
+          "BaselineSettings": "CISLinuxSecurityBaseline;BaselineSettings"
         }
       }
     },
-    "version": "1.6.0",
+    "version": "1.0.0-preview",
     "parameters": {
       "IncludeArcMachines": {
-        "type": "string",
+        "type": "String",
         "metadata": {
           "displayName": "Include Arc connected servers",
           "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
@@ -40,11 +41,10 @@
           "displayName": "Baseline Settings",
           "strongType": "MachineConfiguration/BaselineSettings",
           "portalReview": "true"
-        },
-        "defaultValue": ""
+        }
       },
       "effect": {
-        "type": "string",
+        "type": "String",
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of this policy"
@@ -102,6 +102,10 @@
                       {
                         "field": "Microsoft.Compute/imageSKU",
                         "notLike": "6*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "7*"
                       }
                     ]
                   },
@@ -114,6 +118,10 @@
                       {
                         "field": "Microsoft.Compute/imageSKU",
                         "notLike": "6*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "7*"
                       }
                     ]
                   },
@@ -150,6 +158,18 @@
                       {
                         "field": "Microsoft.Compute/imageSKU",
                         "notLike": "12*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "14*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "16*"
+                      },
+                      {
+                        "field": "Microsoft.Compute/imageSKU",
+                        "notLike": "18*"
                       }
                     ]
                   },
@@ -241,12 +261,20 @@
                 "equals": "true"
               },
               {
-                "field": "type",
-                "equals": "Microsoft.HybridCompute/machines"
-              },
-              {
-                "field": "Microsoft.HybridCompute/imageOffer",
-                "like": "linux*"
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "field": "type",
+                        "equals": "Microsoft.HybridCompute/machines"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/imageOffer",
+                        "like": "linux*"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           }
@@ -256,7 +284,7 @@
         "effect": "[parameters('effect')]",
         "details": {
           "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
-          "name": "AzureLinuxBaseline",
+          "name": "CISLinuxSecurityBaseline",
           "existenceCondition": {
             "allOf": [
               {
@@ -264,8 +292,8 @@
                 "equals": "Compliant"
               },
               {
-                "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/parameterHash",
-                "equals": "[base64(concat('AzureLinuxBaseline;BaselineSettings', '=', parameters('BaselineSettings')))]"
+                "value": "[parameters('BaselineSettings')]",
+                "notEquals": "{}"
               }
             ]
           }
@@ -273,11 +301,9 @@
       }
     },
     "versions": [
-      "1.6.0",
-      "1.5.0",
-      "1.4.0"
+      "1.0.0-PREVIEW"
     ]
   },
-  "id": "/providers/Microsoft.Authorization/policyDefinitions/fc9b3da7-8347-4380-8e70-0a0361d8dedd",
-  "name": "fc9b3da7-8347-4380-8e70-0a0361d8dedd"
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a3be3bae-0be0-4903-a924-edb7375c1d2e",
+  "name": "a3be3bae-0be0-4903-a924-edb7375c1d2e"
 }

@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Azure Virtual Desktop Workspaces should not allow links to external private endpoints",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Ensures that Azure Virtual Desktop Workspaces do not have approved private endpoint connections from subscriptions outside the current subscription, unless explicitly excluded via the excludedSubIDs parameter, helping maintain network boundary protection.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubIDs": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Excluded Subscription IDs",
+          "description": "List of subscription IDs excluded from the external private endpoint restriction"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.DesktopVirtualization/workspaces/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/50e1ddbd-eb12-470b-a2a0-a61aa15c5951",
+  "name": "50e1ddbd-eb12-470b-a2a0-a61aa15c5951"
+}

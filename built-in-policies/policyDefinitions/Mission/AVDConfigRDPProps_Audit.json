@@ -1,0 +1,65 @@
+{
+  "properties": {
+    "displayName": "Azure Virtual Desktop Host Pools should restrict RDP property configurations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Ensures that Azure Virtual Desktop Host Pools enforce approved RDP property configurations, reducing the attack surface by limiting remote desktop protocol settings.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": " The desired effect of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "requiredRdpProperties": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Required RDP Properties",
+          "description": "List of required RDP properties to enforce on host pools"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DesktopVirtualization/hostPools"
+          },
+          {
+            "count": {
+              "value": "[parameters('requiredRdpProperties')]",
+              "name": "property",
+              "where": {
+                "value": "[current('property')]",
+                "notin": "[split(field('Microsoft.DesktopVirtualization/hostPools/customRdpProperty'),';')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f0a5beeb-4b9b-4a3f-ba85-4f4b06afb598",
+  "name": "f0a5beeb-4b9b-4a3f-ba85-4f4b06afb598"
+}
