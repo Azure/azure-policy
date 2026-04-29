@@ -1,15 +1,14 @@
 {
   "properties": {
-    "displayName": "[Preview]: Configure subscriptions to enable service health alert monitoring rule",
+    "displayName": "Configure subscriptions to enable service health alert monitoring rule",
     "policyType": "BuiltIn",
     "mode": "All",
     "description": "Assignable at the subscription or management group level, this policy ensures that each subscription has a service health alert rule configured with alert conditions and mapping to action groups as specified in the policy parameters. By default creates a resource group, alert rule and action group configured to send emails to subscription owners for all service health events.",
     "metadata": {
-      "version": "1.4.0-preview",
-      "category": "Monitoring",
-      "preview": true
+      "version": "1.5.0",
+      "category": "Monitoring"
     },
-    "version": "1.4.0-preview",
+    "version": "1.5.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -136,7 +135,7 @@
         "type": "String",
         "metadata": {
           "displayName": "Resource group name",
-          "description": "Resource group name used if neccesary to create the alert rule or action group. If this is updated after resources are created it can result in duplicate alert rules and action groups. Please set \"Alert rule enabled\" parameter to false and remediate before updating this value"
+          "description": "Resource group name used if necessary to create the alert rule or action group. If this is updated after resources are created it can result in duplicate alert rules and action groups. Please set \"Alert rule enabled\" parameter to false and remediate before updating this value"
         },
         "defaultValue": "rg-serviceHealthAlert"
       },
@@ -187,11 +186,11 @@
                   "where": {
                     "allOf": [
                       {
-                        "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field",
+                        "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].field')]",
                         "equals": "category"
                       },
                       {
-                        "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].equals",
+                        "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].equals')]",
                         "equals": "ServiceHealth"
                       }
                     ]
@@ -203,7 +202,7 @@
                 "count": {
                   "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*]",
                   "where": {
-                    "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].field",
+                    "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].field')]",
                     "equals": "properties.incidentType"
                   }
                 },
@@ -215,33 +214,33 @@
                   "where": {
                     "allOf": [
                       {
-                        "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].field",
+                        "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].field')]",
                         "equals": "properties.incidentType"
                       },
                       {
                         "anyOf": [
                           {
-                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals",
+                            "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals')]",
                             "in": "[if(contains(parameters('eventTypes'), 'Service Issues'), createArray('Incident'), createArray())]"
                           },
                           {
-                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals",
+                            "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals')]",
                             "in": "[if(contains(parameters('eventTypes'), 'Planned Maintenance'), createArray('Maintenance'), createArray())]"
                           },
                           {
-                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals",
+                            "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals')]",
                             "in": "[if(contains(parameters('eventTypes'), 'Security Advisories'), createArray('Security'), createArray())]"
                           },
                           {
-                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals",
+                            "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals')]",
                             "in": "[if(contains(parameters('eventTypes'), 'Health Advisories'), createArray('Informational'), createArray())]"
                           },
                           {
-                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals",
+                            "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals')]",
                             "in": "[if(contains(parameters('eventTypes'), 'Health Advisories'), createArray('ActionRequired'), createArray())]"
                           },
                           {
-                            "field": "Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals",
+                            "value": "[current('Microsoft.Insights/ActivityLogAlerts/condition.allOf[*].anyOf[*].equals')]",
                             "in": "[if(contains(parameters('eventTypes'), 'Health Advisories'), createArray('Retirement'), createArray())]"
                           }
                         ]
@@ -368,8 +367,8 @@
                     ],
                     "Health Advisories": [
                       "ActionRequired",
-                      "Retirement",
-                      "Informational"
+                      "Informational",
+                      "Retirement"
                     ],
                     "Security Advisories": [
                       "Security"
@@ -737,6 +736,7 @@
       }
     },
     "versions": [
+      "1.5.0",
       "1.4.0-PREVIEW",
       "1.3.0-PREVIEW",
       "1.2.0-PREVIEW",

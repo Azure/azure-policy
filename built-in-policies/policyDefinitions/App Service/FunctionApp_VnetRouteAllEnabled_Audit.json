@@ -1,14 +1,14 @@
 {
   "properties": {
-    "displayName": "Function apps should enable outbound non-RFC 1918 traffic to Azure Virtual Network",
+    "displayName": "Function apps should enable outbound application traffic routing to Azure Virtual Network",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "By default, if one uses regional Azure Virtual Network (VNET) integration, the app only routes RFC1918 traffic into that respective virtual network. For API versions prior to 2024-11-01, set 'vnetRouteAllEnabled' to true to enable all outbound traffic into the Azure Virtual Network. For API version 2024-11-01 and later, set 'outboundVnetRouting.applicationTraffic' to true. Note that this policy should only be applied to function apps that are not running on the Flex Consumption or Consumption hosting plans.",
+    "description": "By default, regional VNET integration routes only RFC1918 traffic. Set 'vnetRouteAllEnabled' (API < 2024-11-01) or 'outboundVnetRouting.applicationTraffic' (API >= 2024-11-01) to route application traffic via the virtual network. Alternatively, set 'outboundVnetRouting.allTraffic' to route all traffic. Configuration traffic is handled separately by the configuration routing policy. Not for Flex/Consumption plans.",
     "metadata": {
-      "version": "1.2.0",
+      "version": "1.3.0",
       "category": "App Service"
     },
-    "version": "1.2.0",
+    "version": "1.3.0",
     "parameters": {
       "effect": {
         "type": "string",
@@ -66,6 +66,10 @@
                   {
                     "field": "Microsoft.Web/sites/outboundVnetRouting.applicationTraffic",
                     "notEquals": "true"
+                  },
+                  {
+                    "field": "Microsoft.Web/sites/outboundVnetRouting.allTraffic",
+                    "notEquals": "true"
                   }
                 ]
               }
@@ -78,6 +82,7 @@
       }
     },
     "versions": [
+      "1.3.0",
       "1.2.0",
       "1.1.0",
       "1.0.0"
