@@ -242,7 +242,11 @@ There are also scenarios in which policy evaluation is skipped for resources in 
   - Policy evaluation is skipped for these scenarios, which occur at creation time when the Databricks RP deploys locked resources needed to power the service within the managed RG. This is done so that customer policy assignments do not lead to partial deployment of these resources, which could cause unintended billing and inability to modify. 
   - Databricks resources will have policy enforcement post-creation, when requests are made within the same tenant.
   - To provide feedback on this deployment experience, please leverage the [Databricks UserVoice](https://feedback.azure.com/forums/909463-azure-databricks). 
-- Cross-tenant requests in RGs managed by `Microsoft.Solutions/applications`
+- Cross-tenant requests in RGs managed by `Microsoft.Solutions/applications` (also known as Azure Managed Applications).
+
+In such cases, policy assignment compliance will still be available for these resources. Customers can also subscribe to [compliance state change notifications via Event Grid](https://learn.microsoft.com/azure/governance/policy/concepts/event-overview?tabs=event-grid-event-schema) to take actions based on compliance states.
+
+ 
 
 ### Resource types that exceed current enforcement and compliance scale
 
