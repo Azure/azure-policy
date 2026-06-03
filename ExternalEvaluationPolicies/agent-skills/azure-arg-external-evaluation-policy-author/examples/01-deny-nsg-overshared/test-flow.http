@@ -1,0 +1,286 @@
+# test-flow.http — Example 01: deny NSG over-sharing.
+# Replace the @-variables, then send requests in order.
+
+### Variables
+
+# User auth token with the "Bearer" prefix. Can be acquired via `armclient token` (requires http://aka.ms/armclient)
+@tok = Bearer <token>
+@host = https://management.azure.com
+@subId = <your-subscription-id>
+@rgName = <your-resource-group-name>
+@vnetName = vnet
+@nsgNamePrefix = nsg
+@policyName = deny-nsg-overshared
+@argApiVersion = 2022-10-01
+
+###############################################################################
+### 1. Create resource group
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}?api-version=2021-04-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "eastus"
+}
+
+###############################################################################
+### 2. Create VNet with 2 subnets
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "name": "{{vnetName}}",
+  "location": "eastus",
+  "properties": {
+    "addressSpace": { "addressPrefixes": [ "172.16.0.0/16" ] },
+    "subnets": [
+      { "name": "subnetA", "properties": { "addressPrefix": "172.16.1.0/24" } },
+      { "name": "subnetB", "properties": { "addressPrefix": "172.16.2.0/24" } }
+    ]
+  }
+}
+
+###############################################################################
+### 2.1 Get the VNet
+###############################################################################
+GET {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+
+###############################################################################
+### 3. Create NSG A
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}A?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "name": "{{nsgNamePrefix}}A",
+  "location": "eastus",
+  "properties": { "securityRules": [] }
+}
+
+###############################################################################
+### 3.1 Get NSG A
+###############################################################################
+GET {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}A?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+###############################################################################
+### 4. Attach NSG A to subnetA
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetA?api-version=2025-03-01
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "name": "subnetA",
+  "location": "eastus",
+  "properties": {
+    "addressPrefix": "172.16.1.0/24",
+    "networkSecurityGroup": { "id": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}A" }
+  }
+}
+
+###############################################################################
+### 4.1 Get subnetA
+###############################################################################
+GET {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetA?api-version=2025-03-01
+Authorization: {{tok}}
+Content-Type: application/json
+
+
+###############################################################################
+### 5. Create NSG B
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}B?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "name": "{{nsgNamePrefix}}B",
+  "location": "eastus",
+  "properties": { "securityRules": [] }
+}
+
+
+###############################################################################
+### 5.1 Get NSG B
+###############################################################################
+GET {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}B?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+###############################################################################
+### 6. Create policy definition at the subscription scope
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+< ./policy-definition.json
+
+###############################################################################
+### 7. Assign policy to the resource group
+###############################################################################
+# Body is inlined (rather than `< ./policy-assignment.json`) because the REST
+# Client extension does not expand @-variables inside files included via `<`.
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Authorization/policyAssignments/{{policyName}}?api-version=2025-03-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "properties": {
+    "displayName": "Assign — deny NSG over-sharing",
+    "policyDefinitionId": "/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}",
+    "parameters": {
+      "effect": { "value": "deny" }
+    }
+  },
+  "name": "{{policyName}}",
+  "location": "eastus",
+  "identity": { "type": "systemassigned" }
+}
+
+### Note: queryWithUserIdentity: true is set on the definition, so the assignment's
+### MSI is not used at ARG-call time. No role-assignment step is needed — the caller's
+### identity (the {{tok}} bearer) needs Reader on the resources the query reads.
+
+###############################################################################
+### 8. Attempt to attach NSG A to subnetB without token — expect deny
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB?api-version=2025-03-01
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "name": "subnetB",
+  "location": "eastus",
+  "properties": {
+    "addressPrefix": "172.16.2.0/24",
+    "networkSecurityGroup": { "id": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}A" }
+  }
+}
+
+### Expected: 403 RequestDisallowedByPolicy. The missingPolicyTokenDetails block carries endpoint metadata; the acquirePolicyToken URL is a constant ARM path (see step 9).
+
+###############################################################################
+### 9. Acquire token for attaching NSG A to subnetB — expect deny, no token
+###############################################################################
+
+### Preview the ARG query the policy will run for this case — expect otherSubnetsCount: 1
+### (subnetA still uses NSG A, so attaching NSG A to subnetB is over-sharing).
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id == '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}A' | mv-expand subnet = properties['subnets'] | where isnotnull(subnet['id']) | where subnet['id'] !~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB' | summarize otherSubnetsCount = count()"
+}
+
+### Expected: .data[0].otherSubnetsCount == 1.
+
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-11-01
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB?api-version=2024-07-01",
+    "httpMethod": "PUT",
+    "content": {
+      "name": "subnetB",
+      "location": "eastus",
+      "properties": {
+        "addressPrefix": "172.16.2.0/24",
+        "networkSecurityGroup": { "id": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}A" }
+      }
+    }
+  }
+}
+
+### Expected: 200 with results[0].policyAction == "Deny" and no token field. claims.otherSubnetsCount > 0 (NSG A is on subnetA already).
+
+###############################################################################
+### 10. Attempt to attach NSG B to subnetB without token — expect deny
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB?api-version=2025-03-01
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "name": "subnetB",
+  "location": "eastus",
+  "properties": {
+    "addressPrefix": "172.16.2.0/24",
+    "networkSecurityGroup": { "id": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}B" }
+  }
+}
+
+### Expected: 403 RequestDisallowedByPolicy (no token attached yet).
+
+###############################################################################
+### 11. Acquire token for attaching NSG B to subnetB — expect allow + token
+###############################################################################
+
+### Preview the ARG query for this case — expect otherSubnetsCount: 0
+### (NSG B is fresh, not on any subnet → not over-sharing).
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id == '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}B' | mv-expand subnet = properties['subnets'] | where isnotnull(subnet['id']) | where subnet['id'] !~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB' | summarize otherSubnetsCount = count()"
+}
+
+### Expected: .data[0].otherSubnetsCount == 0.
+
+# @name token
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-11-01
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB?api-version=2024-07-01",
+    "httpMethod": "PUT",
+    "content": {
+      "name": "subnetB",
+      "location": "eastus",
+      "properties": {
+        "addressPrefix": "172.16.2.0/24",
+        "networkSecurityGroup": { "id": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}B" }
+      }
+    }
+  }
+}
+
+### Expected: 200 with results[0].policyAction == "Allow" and a token field prefixed "PoP ". claims.otherSubnetsCount == 0 (NSG B is on no other subnet).
+
+###############################################################################
+### 12. Attach NSG B to subnetB with token — expect success
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/virtualNetworks/{{vnetName}}/subnets/subnetB?api-version=2025-03-01
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-policy-external-evaluations: {{token.response.body.$.token}}
+
+{
+  "name": "subnetB",
+  "location": "eastus",
+  "properties": {
+    "addressPrefix": "172.16.2.0/24",
+    "networkSecurityGroup": { "id": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgNamePrefix}}B" }
+  }
+}
+
+### Expected: subnet PUT succeeds.

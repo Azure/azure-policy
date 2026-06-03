@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Deny attaching an NSG to subnet if the NSG is already attached to a different subnet",
+    "description": "Denies attaching a Network Security Group to a subnet when the same NSG is already attached to a different subnet in the subscription. Triggers on subnet PUT/PATCH operations that set a networkSecurityGroup reference; subnet operations without an NSG reference, and unrelated NSG updates, are unaffected.",
+    "policyType": "Custom",
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": { "displayName": "Effect" },
+        "allowedValues": [ "audit", "deny", "disabled" ],
+        "defaultValue": "audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/virtualNetworks/subnets"
+          },
+          {
+            "field": "Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id",
+            "notEquals": ""
+          },
+          {
+            "value": "[claims().otherSubnetsCount]",
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "externalEvaluationEnforcementSettings": {
+      "missingTokenAction": "deny",
+      "resultLifespan": "PT1H",
+      "roleDefinitionIds": [
+        "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7"
+      ],
+      "endpointSettings": {
+        "kind": "AzureResourceGraph",
+        "details": {
+          "query": "[format('resources | where type =~ \"microsoft.network/networksecuritygroups\" | where id == \"{0}\" | mv-expand subnet = properties[\"subnets\"] | where isnotnull(subnet[\"id\"]) | where subnet[\"id\"] !~ \"{1}\" | summarize otherSubnetsCount = count()', field('Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id'), field('id'))]",
+          "queryProjectedClaims": [
+            "otherSubnetsCount"
+          ],
+          "queryWithUserIdentity": true
+        }
+      }
+    }
+  }
+}

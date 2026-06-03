@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "displayName": "Block delete of an Action Group that is still referenced by alert rules",
+    "description": "Denies DELETE of Microsoft.Insights/actionGroups when any metric alert, scheduled query rule, or activity log alert in the same subscription still references the action group. Prevents silently breaking on-call paging by orphaning alert rule action targets.",
+    "policyType": "Custom",
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": { "displayName": "Effect" },
+        "allowedValues": [ "auditAction", "denyAction", "disabled" ],
+        "defaultValue": "auditAction"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Insights/actionGroups"
+          },
+          {
+            "value": "[bool(coalesce(claims().isReferenced, false()))]",
+            "equals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "actionNames": [ "delete" ]
+        }
+      }
+    },
+    "externalEvaluationEnforcementSettings": {
+      "missingTokenAction": "deny",
+      "resultLifespan": "PT1H",
+      "roleDefinitionIds": [
+        "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7"
+      ],
+      "endpointSettings": {
+        "kind": "AzureResourceGraph",
+        "details": {
+          "query": "[format('resources | where type in~ (\"microsoft.insights/metricalerts\",\"microsoft.insights/scheduledqueryrules\",\"microsoft.insights/activitylogalerts\") | where tostring(properties) contains \"{0}\" | summarize refCount = count() | project isReferenced = refCount > 0', field('id'))]",
+          "queryProjectedClaims": [
+            "isReferenced"
+          ],
+          "queryWithUserIdentity": true
+        }
+      }
+    }
+  }
+}

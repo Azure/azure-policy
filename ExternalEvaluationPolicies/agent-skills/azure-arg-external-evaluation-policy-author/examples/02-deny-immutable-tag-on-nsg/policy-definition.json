@@ -1,0 +1,57 @@
+{
+  "properties": {
+    "displayName": "Deny changing or removing an immutable tag on an NSG",
+    "description": "Once a Network Security Group has the specified tag set, the policy denies any PUT/PATCH that changes the tag's value or removes it. New NSGs created without the tag are allowed, as are updates to existing NSGs that don't yet carry the tag.",
+    "policyType": "Custom",
+    "mode": "All",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": { "displayName": "Effect" },
+        "allowedValues": [ "audit", "deny", "disabled" ],
+        "defaultValue": "audit"
+      },
+      "tagName": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Tag name",
+          "description": "The tag whose value must remain immutable once set on the NSG."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/networkSecurityGroups"
+          },
+          {
+            "value": "[bool(coalesce(claims().isImmutableViolation, false()))]",
+            "equals": true
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "externalEvaluationEnforcementSettings": {
+      "missingTokenAction": "deny",
+      "resultLifespan": "PT1H",
+      "roleDefinitionIds": [
+        "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7"
+      ],
+      "endpointSettings": {
+        "kind": "AzureResourceGraph",
+        "details": {
+          "query": "[format('resources | where type =~ \"microsoft.network/networksecuritygroups\" | where id =~ \"{0}\" | extend existingTag = tostring(tags[\"{1}\"]) | project isImmutableViolation = isnotempty(existingTag) and existingTag != \"{2}\"', field('id'), parameters('tagName'), coalesce(field(concat('tags[', parameters('tagName'), ']')), ''))]",
+          "queryProjectedClaims": [
+            "isImmutableViolation"
+          ],
+          "queryWithUserIdentity": true
+        }
+      }
+    }
+  }
+}

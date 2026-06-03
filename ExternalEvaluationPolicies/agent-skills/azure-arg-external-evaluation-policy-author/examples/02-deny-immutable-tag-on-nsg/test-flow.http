@@ -1,0 +1,315 @@
+# test-flow.http — Deny changing or removing an immutable tag on an NSG.
+# Replace the @-variables below, then send requests in order.
+
+### Variables
+
+# User auth token with the "Bearer " prefix. Acquire via `armclient token` (http://aka.ms/armclient).
+@tok = Bearer <token>
+@host = https://management.azure.com
+@subId = <your-subscription-id>
+@rgName = <your-resource-group-name>
+@nsgName = nsg-immutable-test
+@tagName = immutableIdentifier
+@tagValueOriginal = 123
+@tagValueDifferent = 456
+@policyName = deny-immutable-tag-on-nsg
+@apiVersion = 2025-03-01
+@tokenApiVersion = 2025-11-01
+@argApiVersion = 2022-10-01
+
+###############################################################################
+### 1. Create resource group
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}?api-version=2021-04-01
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "eastus"
+}
+
+###############################################################################
+### 2. Create policy definition at the subscription scope
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+< ./policy-definition.json
+
+###############################################################################
+### 3. Assign policy to the resource group
+###############################################################################
+# Body is inlined (rather than `< ./policy-assignment.json`) because the REST
+# Client extension does not expand @-variables inside files included via `<`.
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Authorization/policyAssignments/{{policyName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "properties": {
+    "displayName": "Assign — deny immutable tag changes on NSG",
+    "policyDefinitionId": "/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}",
+    "parameters": {
+      "effect":  { "value": "deny" },
+      "tagName": { "value": "{{tagName}}" }
+    }
+  },
+  "name": "{{policyName}}",
+  "location": "eastus",
+  "identity": { "type": "systemassigned" }
+}
+
+### Note: queryWithUserIdentity: true is set on the definition, so the assignment's
+### MSI is not used at ARG-call time. The caller's identity ({{tok}}) needs Reader on
+### the NSG the query reads.
+
+###############################################################################
+### 4. CASE A — Create a new NSG WITHOUT the immutable tag.
+###    Expect: allowed. The NSG isn't in ARG yet → 0 rows → null claim →
+###    coalesce → false → policy doesn't fire.
+###############################################################################
+
+###############################################################################
+### 4.1 First PUT without a token — expect 403 (missingTokenAction: deny)
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "eastus",
+  "properties": { "securityRules": [] }
+}
+
+### Expected: 403 RequestDisallowedByPolicy.
+
+###############################################################################
+### 4.2 Acquire token for creating the NSG without tag — expect Allow + token
+###############################################################################
+
+### Preview the ARG query the policy will run for this case — expect 0 rows
+### (NSG not in ARG yet → claim is null → coalesce → false → policy doesn't fire).
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id =~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}' | extend existingTag = tostring(tags['{{tagName}}']) | project isImmutableViolation = isnotempty(existingTag) and existingTag != ''"
+}
+
+### Expected: .data is empty (NSG not yet in ARG). At policy-eval time the
+### claim will be null; the policyRule coalesces it to false → allow.
+
+# @name tokenCreateNoTag
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}",
+    "httpMethod": "PUT",
+    "content": {
+      "location": "eastus",
+      "properties": { "securityRules": [] }
+    }
+  }
+}
+
+### Expected: 200 with .results[0].policyAction == "Allow" and a token prefixed "PoP ".
+###           .results[0].claims.isImmutableViolation is null (NSG not in ARG yet).
+
+###############################################################################
+### 4.3 Retry the PUT with the token — expect success
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+x-ms-policy-external-evaluations: {{tokenCreateNoTag.response.body.$.token}}
+
+{
+  "location": "eastus",
+  "properties": { "securityRules": [] }
+}
+
+### Expected: 200/201. NSG created. Wait for ARG eventual consistency before next step.
+
+###############################################################################
+### 5. CASE B — Add the immutable tag for the first time on the existing NSG.
+###    Expect: allowed. ARG row exists but existingTag is empty → false → allow.
+###############################################################################
+
+### Preview the ARG query for this case — expect isImmutableViolation: false
+### (NSG row exists with no tag → existingTag empty → isnotempty=false).
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id =~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}' | extend existingTag = tostring(tags['{{tagName}}']) | project isImmutableViolation = isnotempty(existingTag) and existingTag != '{{tagValueOriginal}}'"
+}
+
+### Expected: .data[0].isImmutableViolation == false (or 0).
+
+# @name tokenAddTag
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}",
+    "httpMethod": "PUT",
+    "content": {
+      "location": "eastus",
+      "tags": { "{{tagName}}": "{{tagValueOriginal}}" },
+      "properties": { "securityRules": [] }
+    }
+  }
+}
+
+### Expected: Allow + token. claims.isImmutableViolation == false.
+
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+x-ms-policy-external-evaluations: {{tokenAddTag.response.body.$.token}}
+
+{
+  "location": "eastus",
+  "tags": { "{{tagName}}": "{{tagValueOriginal}}" },
+  "properties": { "securityRules": [] }
+}
+
+### Expected: 200. NSG now has immutableIdentifier=123. Wait for ARG consistency.
+
+###############################################################################
+### 6. CASE C — Same value re-PUT (idempotent). Expect: allowed.
+###############################################################################
+
+### Preview the ARG query for this case — expect isImmutableViolation: false
+### (existingTag == incoming value → not a violation).
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id =~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}' | extend existingTag = tostring(tags['{{tagName}}']) | project isImmutableViolation = isnotempty(existingTag) and existingTag != '{{tagValueOriginal}}'"
+}
+
+### Expected: .data[0].isImmutableViolation == false.
+
+# @name tokenSameValue
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}",
+    "httpMethod": "PUT",
+    "content": {
+      "location": "eastus",
+      "tags": { "{{tagName}}": "{{tagValueOriginal}}" },
+      "properties": { "securityRules": [] }
+    }
+  }
+}
+
+### Expected: Allow + token. existingTag == incoming → not a violation.
+
+###############################################################################
+### 7. CASE D — Attempt to CHANGE the tag value. Expect: denied, no token.
+###############################################################################
+
+### Preview the ARG query for this case — expect isImmutableViolation: true
+### (existingTag '{{tagValueOriginal}}' != incoming '{{tagValueDifferent}}').
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id =~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}' | extend existingTag = tostring(tags['{{tagName}}']) | project isImmutableViolation = isnotempty(existingTag) and existingTag != '{{tagValueDifferent}}'"
+}
+
+### Expected: .data[0].isImmutableViolation == true (or 1).
+
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}",
+    "httpMethod": "PUT",
+    "content": {
+      "location": "eastus",
+      "tags": { "{{tagName}}": "{{tagValueDifferent}}" },
+      "properties": { "securityRules": [] }
+    }
+  }
+}
+
+### Expected: 200 with .results[0].policyAction == "Deny" and no token.
+###           claims.isImmutableViolation == true.
+
+###############################################################################
+### 8. CASE E — Attempt to REMOVE the tag entirely. Expect: denied.
+###############################################################################
+
+### Preview the ARG query for this case — expect isImmutableViolation: true.
+### The policy coalesces the missing incoming tag to '' so the materialized
+### KQL compares existingTag ('{{tagValueOriginal}}') against the empty string.
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type =~ 'microsoft.network/networksecuritygroups' | where id =~ '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}' | extend existingTag = tostring(tags['{{tagName}}']) | project isImmutableViolation = isnotempty(existingTag) and existingTag != ''"
+}
+
+### Expected: .data[0].isImmutableViolation == true.
+
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}",
+    "httpMethod": "PUT",
+    "content": {
+      "location": "eastus",
+      "properties": { "securityRules": [] }
+    }
+  }
+}
+
+### Expected: 200 with .results[0].policyAction == "Deny" and no token.
+###           Incoming tag value coalesces to "" → existingTag ("123") != "" → violation.
+
+###############################################################################
+### 9. CASE F — Direct PUT without token attempting the change — expect 403.
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Network/networkSecurityGroups/{{nsgName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "eastus",
+  "tags": { "{{tagName}}": "{{tagValueDifferent}}" },
+  "properties": { "securityRules": [] }
+}
+
+### Expected: 403 RequestDisallowedByPolicy.

@@ -1,0 +1,282 @@
+# test-flow.http — Block DELETE of an Action Group still referenced by alert rules.
+# Self-contained e2e test: creates RG, creates 3 test resources, creates and assigns
+# the policy, runs deny/allow cases, cleans up.
+# Replace the @-variables below, then send requests in order.
+
+### Variables
+
+# User auth token with the "Bearer " prefix. Acquire via `armclient token` (http://aka.ms/armclient).
+@tok = Bearer <token>
+@host = https://management.azure.com
+@subId = <your-subscription-id>
+@rgName = <your-resource-group-name>
+@location = eastus
+@agReferenced = ag-referenced
+@agOrphan = ag-orphan
+@alertName = alert-test
+@policyName = denyaction-actiongroup-in-use
+@apiVersion = 2025-03-01
+@tokenApiVersion = 2025-11-01
+@agApiVersion = 2023-01-01
+@alertApiVersion = 2020-10-01
+@rgApiVersion = 2021-04-01
+@argApiVersion = 2022-10-01
+
+###############################################################################
+### 1. Create the test resource group
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}?api-version={{rgApiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "{{location}}"
+}
+
+###############################################################################
+### 2. Create the action group that WILL be referenced (ag-referenced)
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}?api-version={{agApiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "Global",
+  "properties": {
+    "groupShortName": "agref",
+    "enabled": true
+  }
+}
+
+###############################################################################
+### 3. Create the orphan action group (ag-orphan)
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agOrphan}}?api-version={{agApiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "Global",
+  "properties": {
+    "groupShortName": "agorph",
+    "enabled": true
+  }
+}
+
+###############################################################################
+### 4. Create an activity log alert pointing at ag-referenced.
+###    This is what makes ag-referenced "in use" from ARG's perspective.
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/activityLogAlerts/{{alertName}}?api-version={{alertApiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "location": "Global",
+  "properties": {
+    "scopes": [ "/subscriptions/{{subId}}" ],
+    "condition": {
+      "allOf": [
+        { "field": "category", "equals": "Administrative" },
+        { "field": "level", "equals": "Error" }
+      ]
+    },
+    "actions": {
+      "actionGroups": [
+        { "actionGroupId": "/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}" }
+      ]
+    },
+    "enabled": true
+  }
+}
+
+### Wait ~30-60s for ARG eventual consistency before proceeding — newly created
+### alert rules need to be indexed before the policy's ARG query will see them.
+
+###############################################################################
+### 5. Create policy definition at the subscription scope
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+< ./policy-definition.json
+
+###############################################################################
+### 6. Assign policy to the test resource group with effect=denyAction
+###############################################################################
+# Body is inlined (rather than `< ./policy-assignment.json`) because the REST
+# Client extension does not expand @-variables inside files included via `<`.
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Authorization/policyAssignments/{{policyName}}?api-version={{apiVersion}}
+Content-Type: application/json
+Authorization: {{tok}}
+
+{
+  "properties": {
+    "displayName": "Assign — block delete of in-use Action Groups",
+    "policyDefinitionId": "/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}",
+    "parameters": {
+      "effect": { "value": "denyAction" }
+    }
+  },
+  "name": "{{policyName}}",
+  "location": "{{location}}",
+  "identity": { "type": "systemassigned" }
+}
+
+### Note: queryWithUserIdentity: true is set on the definition, so the caller's
+### identity ({{tok}}) needs Reader on the alert rules being scanned.
+
+###############################################################################
+### 7. CASE A — DELETE the orphan action group. Expect: allowed.
+###    No alert references it → refCount = 0 → isReferenced = false → policy doesn't fire.
+###############################################################################
+
+### 7.1 First DELETE without a token — expect 403 (missingTokenAction: deny)
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agOrphan}}?api-version={{agApiVersion}}
+Authorization: {{tok}}
+
+### Expected: 403 RequestDisallowedByPolicy.
+
+### 7.2 Acquire token for deleting the orphan — expect Allow + token
+
+### Preview the ARG query the policy will run for this DELETE — expect isReferenced: false
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type in~ ('microsoft.insights/metricalerts','microsoft.insights/scheduledqueryrules','microsoft.insights/activitylogalerts') | where tostring(properties) contains '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agOrphan}}' | summarize refCount = count() | project isReferenced = refCount > 0"
+}
+
+### Expected: .data[0].isReferenced == false (or 0). No alerts point at ag-orphan.
+
+# @name tokenDeleteOrphan
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agOrphan}}?api-version={{agApiVersion}}",
+    "httpMethod": "DELETE"
+  }
+}
+
+### Expected: 200 with .results[0].policyAction == "Allow" and a token prefixed "PoP ".
+###           .results[0].claims.isReferenced == false (no alert references ag-orphan).
+
+### 7.3 Retry the DELETE with the token — expect 200/204
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agOrphan}}?api-version={{agApiVersion}}
+Authorization: {{tok}}
+x-ms-policy-external-evaluations: {{tokenDeleteOrphan.response.body.$.token}}
+
+### Expected: 200/204. ag-orphan is gone.
+
+###############################################################################
+### 8. CASE B — Attempt to DELETE the referenced action group. Expect: denied.
+###    alert-test references ag-referenced → refCount = 1 → isReferenced = true → deny.
+###############################################################################
+
+### Preview the ARG query the policy will run for this DELETE — expect isReferenced: true
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type in~ ('microsoft.insights/metricalerts','microsoft.insights/scheduledqueryrules','microsoft.insights/activitylogalerts') | where tostring(properties) contains '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}' | summarize refCount = count() | project isReferenced = refCount > 0"
+}
+
+### Expected: .data[0].isReferenced == true (or 1). alert-test points at ag-referenced.
+
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}?api-version={{agApiVersion}}",
+    "httpMethod": "DELETE"
+  }
+}
+
+### Expected: 200 with .results[0].policyAction == "Deny" and no token.
+###           claims.isReferenced == true.
+###           additionalInfo.requestBody.query shows the materialized KQL.
+
+###############################################################################
+### 9. CASE C — Direct DELETE on the referenced AG without token. Expect: 403.
+###############################################################################
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}?api-version={{agApiVersion}}
+Authorization: {{tok}}
+
+### Expected: 403 RequestDisallowedByPolicy.
+
+###############################################################################
+### 10. CASE D — Remove the reference, then DELETE the AG. Expect: allowed.
+###     Proves the policy is reacting to the reference and not to the AG itself.
+###############################################################################
+
+### 10.1 Delete the alert that references ag-referenced.
+### Note: deleting the alert itself is a DELETE on activityLogAlerts, which the
+### policy does NOT guard (it only guards Microsoft.Insights/actionGroups).
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/activityLogAlerts/{{alertName}}?api-version={{alertApiVersion}}
+Authorization: {{tok}}
+
+### Expected: 200/204. Wait ~30-60s for ARG eventual consistency before next step.
+
+### 10.2 Acquire token to delete the now-unreferenced AG — expect Allow + token
+
+### Preview the ARG query — expect isReferenced: false now that alert-test is gone.
+### If this still shows true, ARG hasn't caught up yet; wait longer.
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "resources | where type in~ ('microsoft.insights/metricalerts','microsoft.insights/scheduledqueryrules','microsoft.insights/activitylogalerts') | where tostring(properties) contains '/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}' | summarize refCount = count() | project isReferenced = refCount > 0"
+}
+
+### Expected: .data[0].isReferenced == false (or 0).
+
+# @name tokenDeleteAfterUnref
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{tok}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}?api-version={{agApiVersion}}",
+    "httpMethod": "DELETE"
+  }
+}
+
+### Expected: Allow + token. claims.isReferenced == false.
+### If still Deny, give ARG more time and retry — eventual consistency.
+
+### 10.3 Retry the DELETE with the token — expect 200/204
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Insights/actionGroups/{{agReferenced}}?api-version={{agApiVersion}}
+Authorization: {{tok}}
+x-ms-policy-external-evaluations: {{tokenDeleteAfterUnref.response.body.$.token}}
+
+### Expected: 200/204. ag-referenced is gone.
+
+###############################################################################
+### 11. Cleanup — remove the policy artifacts and the test RG
+###############################################################################
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Authorization/policyAssignments/{{policyName}}?api-version={{apiVersion}}
+Authorization: {{tok}}
+
+###
+DELETE {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{policyName}}?api-version={{apiVersion}}
+Authorization: {{tok}}
+
+###
+DELETE {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}?api-version={{rgApiVersion}}
+Authorization: {{tok}}

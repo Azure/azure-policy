@@ -1,0 +1,131 @@
+# External Evaluation + ARG end-to-end test flow.
+# Replace the @-variables below with values from your environment, then send
+# the requests top-to-bottom. There are no automatic waits — if a step fails
+# due to ARM propagation, resend it.
+#
+# Assumes queryWithUserIdentity: true (the skill's default), so the assignment's
+# MSI is not used at ARG-call time and no role-assignment step is needed.
+
+### Variables
+@host = https://management.azure.com
+@subId = <your-subscription-id>
+@rgName = <your-resource-group-name>
+@defName = <your-policy-definition-name>
+@assignName = <your-policy-assignment-name>
+@apiVersion = 2025-03-01
+@tokenApiVersion = 2025-11-01
+@argApiVersion = 2022-10-01
+# User auth token with the "Bearer " prefix. Can be acquired via `armclient token` (requires http://aka.ms/armclient)
+@armToken = Bearer <token>
+
+###############################################################################
+### Step 1 — Create the policy definition
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{defName}}?api-version={{apiVersion}}
+Authorization: {{armToken}}
+Content-Type: application/json
+
+< ./policy-definition.json
+
+### Expected: 201 Created.
+
+###############################################################################
+### Step 2 — Create the assignment
+###############################################################################
+# Body is inlined (rather than `< ./policy-assignment.json`) because the REST
+# Client extension does not expand @-variables inside files included via `<`.
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/Microsoft.Authorization/policyAssignments/{{assignName}}?api-version={{apiVersion}}
+Authorization: {{armToken}}
+Content-Type: application/json
+
+{
+  "properties": {
+    "displayName": "<assignment display name>",
+    "policyDefinitionId": "/subscriptions/{{subId}}/providers/Microsoft.Authorization/policyDefinitions/{{defName}}",
+    "parameters": {
+      "effect": { "value": "<enforcement-side effect, e.g. deny or denyAction>" }
+    }
+  },
+  "name": "{{assignName}}",
+  "location": "<your-location>",
+  "identity": { "type": "systemassigned" }
+}
+
+### Expected: 201 Created.
+
+###############################################################################
+### Step 3 — Attempt the guarded operation WITHOUT a token (expect 403)
+###############################################################################
+# Replace the line below with your actual guarded ARM call.
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/<RP>/<TYPE>/<NAME>?api-version=<RP_API_VERSION>
+Authorization: {{armToken}}
+Content-Type: application/json
+
+{
+  "location": "<LOCATION>",
+  "properties": { }
+}
+
+### Expected: 403 RequestDisallowedByPolicy. The `missingPolicyTokenDetails`
+### block in the response body carries the endpoint metadata; the acquirePolicyToken
+### URL itself is a constant ARM path (see Step 4).
+
+###############################################################################
+### Step 4 — Acquire a policy token (mirrors step 3 byte-for-byte)
+###############################################################################
+# The `# @name token` directive lets step 5 reference this response as
+# {{token.response.body.$.token}} without copy/paste.
+
+### Preview the ARG query the policy will run for this case. Paste the
+### materialized KQL (with the same field/parameter substitutions the policy
+### would make for this exact request) into the query string below. Lets you
+### tell apart "wrong query" from "wrong policy / wrong token / wrong wiring"
+### in one extra send before acquirePolicyToken.
+POST {{host}}/providers/Microsoft.ResourceGraph/resources?api-version={{argApiVersion}}
+Authorization: {{armToken}}
+Content-Type: application/json
+
+{
+  "subscriptions": [ "{{subId}}" ],
+  "query": "<paste the materialized KQL here, with the same inputs the policy will substitute for this case>"
+}
+
+### Expected: a single-row response whose .data[0].<claimName> matches what
+### the corresponding acquirePolicyToken below will report under
+### .results[0].claims.<claimName>.
+
+# @name token
+POST {{host}}/subscriptions/{{subId}}/providers/Microsoft.Authorization/acquirePolicyToken?api-version={{tokenApiVersion}}
+Authorization: {{armToken}}
+Content-Type: application/json
+x-ms-force-sync: true
+
+{
+  "operation": {
+    "uri": "{{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/<RP>/<TYPE>/<NAME>?api-version=<RP_API_VERSION>",
+    "httpMethod": "PUT",
+    "content": {
+      "location": "<LOCATION>",
+      "properties": { }
+    }
+  }
+}
+
+### Expected (2025-11-01): 200 with .result == "Succeeded".
+###   .results[0].policyAction == "Allow" or "Audit" → .token returned, prefixed "PoP "
+###   .results[0].policyAction == "Deny"             → no token; do not retry
+###   .results[0].claims                              → debug: what your KQL projected
+###   .results[0].additionalInfo.requestBody.query    → debug: materialized KQL ARG saw
+
+###############################################################################
+### Step 5 — Retry the guarded ARM op WITH the token
+###############################################################################
+PUT {{host}}/subscriptions/{{subId}}/resourceGroups/{{rgName}}/providers/<RP>/<TYPE>/<NAME>?api-version=<RP_API_VERSION>
+Authorization: {{armToken}}
+x-ms-policy-external-evaluations: {{token.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "location": "<LOCATION>",
+  "properties": { }
+}
