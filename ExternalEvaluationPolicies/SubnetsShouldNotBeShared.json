@@ -1,0 +1,38 @@
+{
+    "mode": "All",
+    "policyRule": {
+        "if": {
+            "allOf": [
+                {
+                    "field": "type",
+                    "equals": "Microsoft.Network/virtualNetworks/subnets"
+                },
+                {
+                    "field": "Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id",
+                    "notEquals": ""
+                },
+                {
+                    "value": "[claims().otherSubnetsCount]",
+                    "greater": 0
+                }
+            ]
+        },
+        "then": {
+            "effect": "deny"
+        }
+    },
+    "externalEvaluationEnforcementSettings": {
+        "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+        ],
+        "endpointSettings": {
+            "kind": "AzureResourceGraph",
+            "details": {
+                "query": "[format('resources\n| where type =~ \"microsoft.network/networksecuritygroups\"\n| where id == \"{0}\"\n| mv-expand subnet = properties[\"subnets\"]\n| where isnotnull(subnet[\"id\"]) and subnet[\"id\"] !~ \"{1}\"\n| summarize otherSubnetsCount = count()',\n field('Microsoft.Network/virtualNetworks/subnets/networkSecurityGroup.id'),\n field('id'))]",
+                "queryProjectedClaims": [
+                    "otherSubnetsCount"
+                ]
+            }
+        }
+    }
+}
