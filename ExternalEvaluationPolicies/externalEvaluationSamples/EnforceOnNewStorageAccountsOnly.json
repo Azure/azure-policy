@@ -1,0 +1,38 @@
+{
+    "mode": "Indexed",
+    "policyRule": {
+        "if": {
+            "allOf": [
+                {
+                    "field": "type",
+                    "equals": "Microsoft.Storage/storageAccounts"
+                },
+                {
+                    "field": "Microsoft.Storage/storageAccounts/publicNetworkAccess",
+                    "equals": "Enabled"
+                },
+                {
+                    "value": "[bool(coalesce(claims().exists, false()))]",
+                    "equals": false
+                }
+            ]
+        },
+        "then": {
+            "effect": "deny"
+        }
+    },
+    "externalEvaluationEnforcementSettings": {
+        "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7"
+        ],
+        "endpointSettings": {
+            "kind": "AzureResourceGraph",
+            "details": {
+                "query": "[format('resources \n| where id =~ \"{0}\"\n| summarize exists = count() > 0', field('id'))]",
+                "queryProjectedClaims": [
+                    "exists"
+                ]
+            }
+        }
+    }
+}
