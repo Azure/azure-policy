@@ -37,6 +37,14 @@
         ],
         "defaultValue": true
       },
+      "resourceGroupTags": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Resource group tags",
+          "description": "Tags to apply to the resource group. Existing tags are preserved and merged with these values."
+        },
+        "defaultValue": {}
+      },
       "exportedDataTypes": {
         "type": "Array",
         "metadata": {
@@ -332,6 +340,9 @@
                   "createResourceGroup": {
                     "type": "bool"
                   },
+                  "resourceGroupTags": {
+                    "type": "object"
+                  },
                   "exportedDataTypes": {
                     "type": "array"
                   },
@@ -534,7 +545,8 @@
                     "name": "[parameters('resourceGroupName')]",
                     "type": "Microsoft.Resources/resourceGroups",
                     "apiVersion": "2019-10-01",
-                    "location": "[parameters('resourceGroupLocation')]"
+                    "location": "[parameters('resourceGroupLocation')]",
+                    "tags": "[parameters('resourceGroupTags')]"
                   },
                   {
                     "type": "Microsoft.Resources/deployments",
@@ -546,19 +558,36 @@
                     ],
                     "properties": {
                       "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "inner"
+                      },
                       "template": {
                         "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
-                        "parameters": {},
+                        "parameters": {
+                          "resourceGroupTags": {
+                            "type": "object"
+                          }
+                        },
                         "variables": {},
                         "resources": [
                           {
-                            "tags": {},
+                            "apiVersion": "2021-04-01",
+                            "name": "default",
+                            "type": "Microsoft.Resources/tags",
+                            "properties": {
+                              "tags": "[if(equals(resourceGroup().tags, json('null')), parameters('resourceGroupTags'), union(resourceGroup().tags, parameters('resourceGroupTags')))]"
+                            }
+                          },
+                          {
+                            "tags": "[resourceGroup().tags]",
                             "apiVersion": "2019-01-01-preview",
-                            "location": "[parameters('resourceGroupLocation')]",
+                            "location": "[resourceGroup().location]",
                             "name": "exportToEventHub",
                             "type": "Microsoft.Security/automations",
-                            "dependsOn": [],
+                            "dependsOn": [
+                              "[resourceId('Microsoft.Resources/tags', 'default')]"
+                            ],
                             "properties": {
                               "description": "Export Microsoft Defender for Cloud data to Event Hub via policy",
                               "isEnabled": true,
@@ -579,6 +608,11 @@
                             }
                           }
                         ]
+                      },
+                      "parameters": {
+                        "resourceGroupTags": {
+                          "value": "[parameters('resourceGroupTags')]"
+                        }
                       }
                     }
                   }
@@ -593,6 +627,9 @@
                 },
                 "createResourceGroup": {
                   "value": "[parameters('createResourceGroup')]"
+                },
+                "resourceGroupTags": {
+                  "value": "[parameters('resourceGroupTags')]"
                 },
                 "exportedDataTypes": {
                   "value": "[parameters('exportedDataTypes')]"
