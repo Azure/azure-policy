@@ -48,9 +48,7 @@ Supported tools:
 - Azure CLI — global `--acquire-policy-token` flag was added to all commands starting from version 2.85.0.
 
 Known client issues:
-- Tag updates via `Microsoft.Resources/tags` are not evaluated.
-	- When tags are updated via the [tags-as-a-resource API](https://learn.microsoft.com/en-us/rest/api/resources/tags/update-at-scope?view=rest-resources-2021-04-01), which is used by major clients like Azure Portal, the token acquisition will be performed against the tag "resource" instead of the underlying resource actually containing the tags. This essentially means that external evaluation policies that target resource tags (e.g. `../examples/02-deny-immutable-tag-on-nsg/policy-definition.json`) are incompatible with this API and the tag update operations will always be blocked.
-	- *Fix status:* Policy team is working to make the tags API invoke-policy-aware
+- None
 
 ### Platform limits
 
