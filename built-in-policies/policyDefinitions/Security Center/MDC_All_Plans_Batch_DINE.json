@@ -1,0 +1,515 @@
+{
+  "properties": {
+    "displayName": "Configure selected Microsoft Defender for Cloud plans with managed extensions",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Configures selected Defender for Cloud plans through Microsoft.Security/batchPricings/global. Unselected plans remain unchanged. Extensions managed by this policy are enabled for selected plans.",
+    "metadata": {
+      "category": "Security Center",
+      "version": "1.0.0"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Deploy the selected Defender plans through the batch pricing endpoint, or disable policy execution."
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "enableCloudPosture": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender CSPM",
+          "description": "Set true to configure CloudPosture as Standard; set false to leave it unchanged. Selecting this plan enables all 8 supported extensions."
+        },
+        "defaultValue": false
+      },
+      "enableContainers": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Containers",
+          "description": "Set true to configure Containers as Standard; set false to leave it unchanged. Selecting this plan enables all 5 supported extensions."
+        },
+        "defaultValue": false
+      },
+      "enableAi": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for AI Services",
+          "description": "Set true to configure AI as Standard; set false to leave it unchanged. Selecting this plan enables all 3 supported extensions."
+        },
+        "defaultValue": false
+      },
+      "enableStorageAccounts": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Storage",
+          "description": "Set true to configure StorageAccounts as Standard; set false to leave it unchanged. Selecting this plan enables all 2 supported extensions."
+        },
+        "defaultValue": false
+      },
+      "enableVirtualMachines": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Servers",
+          "description": "Set true to configure VirtualMachines as Standard and enable AgentlessVmScanning; set false to leave it unchanged."
+        },
+        "defaultValue": false
+      },
+      "enableSqlServerVirtualMachines": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for SQL servers on machines",
+          "description": "Set true to configure SqlServerVirtualMachines as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableAppServices": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for App Service",
+          "description": "Set true to configure AppServices as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableSqlServers": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Azure SQL databases",
+          "description": "Set true to configure SqlServers as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableKeyVaults": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Key Vault",
+          "description": "Set true to configure KeyVaults as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableArm": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Resource Manager",
+          "description": "Set true to configure Arm as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableOpenSourceRelationalDatabases": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for open-source relational databases",
+          "description": "Set true to configure OpenSourceRelationalDatabases as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableCosmosDbs": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for Cosmos DB",
+          "description": "Set true to configure CosmosDbs as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      },
+      "enableApi": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Configure Defender for APIs",
+          "description": "Set true to configure Api as Standard; set false to leave it unchanged. This plan has no extensions."
+        },
+        "defaultValue": false
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Resources/subscriptions"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('enableCloudPosture')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableContainers')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableAi')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableStorageAccounts')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableVirtualMachines')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableSqlServerVirtualMachines')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableAppServices')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableSqlServers')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableKeyVaults')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableArm')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableOpenSourceRelationalDatabases')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableCosmosDbs')]",
+                "equals": true
+              },
+              {
+                "value": "[parameters('enableApi')]",
+                "equals": true
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Security/batchPricings",
+          "name": "global",
+          "existenceScope": "subscription",
+          "deploymentScope": "subscription",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/fb1c8493-542b-48eb-b624-b4c8fea62acd",
+            "/providers/Microsoft.Authorization/roleDefinitions/18d7d88d-d35e-4fb5-a5c3-7773c20a72d9"
+          ],
+          "existenceCondition": {
+            "count": {
+              "field": "Microsoft.Security/batchPricings/plansConfigurations[*]",
+              "where": {
+                "anyOf": [
+                  {
+                    "allOf": [
+                      {
+                        "value": "[and(parameters('enableCloudPosture'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'CloudPosture'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                        "equals": true
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*]",
+                          "where": {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].isEnabled",
+                                "equals": "True"
+                              },
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].name",
+                                "in": [
+                                  "SensitiveDataDiscovery",
+                                  "ContainerRegistriesVulnerabilityAssessments",
+                                  "AgentlessDiscoveryForKubernetes",
+                                  "AgentlessVmScanning",
+                                  "EntraPermissionsManagement",
+                                  "ApiPosture",
+                                  "AgentlessServerlessPosture",
+                                  "ServerlessContainers"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "equals": 8
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[and(parameters('enableContainers'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'Containers'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                        "equals": true
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*]",
+                          "where": {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].isEnabled",
+                                "equals": "True"
+                              },
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].name",
+                                "in": [
+                                  "ContainerRegistriesVulnerabilityAssessments",
+                                  "AgentlessDiscoveryForKubernetes",
+                                  "AgentlessVmScanning",
+                                  "ContainerSensor",
+                                  "ContainerIntegrityContribution"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "equals": 5
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[and(parameters('enableAi'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'AI'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                        "equals": true
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*]",
+                          "where": {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].isEnabled",
+                                "equals": "True"
+                              },
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].name",
+                                "in": [
+                                  "AIPromptEvidence",
+                                  "AIPromptSharingWithPurview",
+                                  "AIModelScanner"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "equals": 3
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[and(parameters('enableStorageAccounts'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'StorageAccounts'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].subPlan'),'DefenderForStorageV2'))]",
+                        "equals": true
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*]",
+                          "where": {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].isEnabled",
+                                "equals": "True"
+                              },
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].name",
+                                "in": [
+                                  "OnUploadMalwareScanning",
+                                  "SensitiveDataDiscovery"
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "equals": 2
+                      }
+                    ]
+                  },
+                  {
+                    "allOf": [
+                      {
+                        "value": "[and(parameters('enableVirtualMachines'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'VirtualMachines'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].subPlan'),'P2'))]",
+                        "equals": true
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*]",
+                          "where": {
+                            "allOf": [
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].isEnabled",
+                                "equals": "True"
+                              },
+                              {
+                                "field": "Microsoft.Security/batchPricings/plansConfigurations[*].extensions[*].name",
+                                "equals": "AgentlessVmScanning"
+                              }
+                            ]
+                          }
+                        },
+                        "equals": 1
+                      }
+                    ]
+                  },
+                  {
+                    "value": "[and(parameters('enableSqlServerVirtualMachines'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'SqlServerVirtualMachines'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableAppServices'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'AppServices'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableSqlServers'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'SqlServers'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableKeyVaults'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'KeyVaults'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].subPlan'),'PerKeyVault'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableArm'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'Arm'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].subPlan'),'PerSubscription'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableOpenSourceRelationalDatabases'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'OpenSourceRelationalDatabases'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableCosmosDbs'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'CosmosDbs'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'))]",
+                    "equals": true
+                  },
+                  {
+                    "value": "[and(parameters('enableApi'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].planName'),'Api'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].pricingTier'),'Standard'),equals(current('Microsoft.Security/batchPricings/plansConfigurations[*].subPlan'),'P5'))]",
+                    "equals": true
+                  }
+                ]
+              }
+            },
+            "equals": "[add(add(add(add(add(add(add(add(add(add(add(add(if(parameters('enableCloudPosture'),1,0),if(parameters('enableContainers'),1,0)),if(parameters('enableAi'),1,0)),if(parameters('enableStorageAccounts'),1,0)),if(parameters('enableVirtualMachines'),1,0)),if(parameters('enableSqlServerVirtualMachines'),1,0)),if(parameters('enableAppServices'),1,0)),if(parameters('enableSqlServers'),1,0)),if(parameters('enableKeyVaults'),1,0)),if(parameters('enableArm'),1,0)),if(parameters('enableOpenSourceRelationalDatabases'),1,0)),if(parameters('enableCosmosDbs'),1,0)),if(parameters('enableApi'),1,0))]"
+          },
+          "deployment": {
+            "location": "westeurope",
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "enableCloudPosture": {
+                  "value": "[parameters('enableCloudPosture')]"
+                },
+                "enableContainers": {
+                  "value": "[parameters('enableContainers')]"
+                },
+                "enableAi": {
+                  "value": "[parameters('enableAi')]"
+                },
+                "enableStorageAccounts": {
+                  "value": "[parameters('enableStorageAccounts')]"
+                },
+                "enableVirtualMachines": {
+                  "value": "[parameters('enableVirtualMachines')]"
+                },
+                "enableSqlServerVirtualMachines": {
+                  "value": "[parameters('enableSqlServerVirtualMachines')]"
+                },
+                "enableAppServices": {
+                  "value": "[parameters('enableAppServices')]"
+                },
+                "enableSqlServers": {
+                  "value": "[parameters('enableSqlServers')]"
+                },
+                "enableKeyVaults": {
+                  "value": "[parameters('enableKeyVaults')]"
+                },
+                "enableArm": {
+                  "value": "[parameters('enableArm')]"
+                },
+                "enableOpenSourceRelationalDatabases": {
+                  "value": "[parameters('enableOpenSourceRelationalDatabases')]"
+                },
+                "enableCosmosDbs": {
+                  "value": "[parameters('enableCosmosDbs')]"
+                },
+                "enableApi": {
+                  "value": "[parameters('enableApi')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "enableCloudPosture": {
+                    "type": "bool"
+                  },
+                  "enableContainers": {
+                    "type": "bool"
+                  },
+                  "enableAi": {
+                    "type": "bool"
+                  },
+                  "enableStorageAccounts": {
+                    "type": "bool"
+                  },
+                  "enableVirtualMachines": {
+                    "type": "bool"
+                  },
+                  "enableSqlServerVirtualMachines": {
+                    "type": "bool"
+                  },
+                  "enableAppServices": {
+                    "type": "bool"
+                  },
+                  "enableSqlServers": {
+                    "type": "bool"
+                  },
+                  "enableKeyVaults": {
+                    "type": "bool"
+                  },
+                  "enableArm": {
+                    "type": "bool"
+                  },
+                  "enableOpenSourceRelationalDatabases": {
+                    "type": "bool"
+                  },
+                  "enableCosmosDbs": {
+                    "type": "bool"
+                  },
+                  "enableApi": {
+                    "type": "bool"
+                  }
+                },
+                "variables": {
+                  "plansConfigurations": "[concat(if(parameters('enableCloudPosture'),createArray(createObject('planName','CloudPosture','properties',createObject('pricingTier','Standard','extensions',createArray(createObject('name','SensitiveDataDiscovery','isEnabled','true'),createObject('name','ContainerRegistriesVulnerabilityAssessments','isEnabled','true'),createObject('name','AgentlessDiscoveryForKubernetes','isEnabled','true'),createObject('name','AgentlessVmScanning','isEnabled','true'),createObject('name','EntraPermissionsManagement','isEnabled','true'),createObject('name','ApiPosture','isEnabled','true'),createObject('name','AgentlessServerlessPosture','isEnabled','true'),createObject('name','ServerlessContainers','isEnabled','true'))))),createArray()),if(parameters('enableContainers'),createArray(createObject('planName','Containers','properties',createObject('pricingTier','Standard','extensions',createArray(createObject('name','ContainerRegistriesVulnerabilityAssessments','isEnabled','true'),createObject('name','AgentlessDiscoveryForKubernetes','isEnabled','true'),createObject('name','AgentlessVmScanning','isEnabled','true'),createObject('name','ContainerSensor','isEnabled','true'),createObject('name','ContainerIntegrityContribution','isEnabled','true'))))),createArray()),if(parameters('enableAi'),createArray(createObject('planName','AI','properties',createObject('pricingTier','Standard','extensions',createArray(createObject('name','AIPromptEvidence','isEnabled','true'),createObject('name','AIPromptSharingWithPurview','isEnabled','true'),createObject('name','AIModelScanner','isEnabled','true'))))),createArray()),if(parameters('enableStorageAccounts'),createArray(createObject('planName','StorageAccounts','properties',createObject('pricingTier','Standard','subPlan','DefenderForStorageV2','extensions',createArray(createObject('name','OnUploadMalwareScanning','isEnabled','true'),createObject('name','SensitiveDataDiscovery','isEnabled','true'))))),createArray()),if(parameters('enableVirtualMachines'),createArray(createObject('planName','VirtualMachines','properties',createObject('pricingTier','Standard','subPlan','P2','extensions',createArray(createObject('name','AgentlessVmScanning','isEnabled','true'))))),createArray()),if(parameters('enableSqlServerVirtualMachines'),createArray(createObject('planName','SqlServerVirtualMachines','properties',createObject('pricingTier','Standard'))),createArray()),if(parameters('enableAppServices'),createArray(createObject('planName','AppServices','properties',createObject('pricingTier','Standard'))),createArray()),if(parameters('enableSqlServers'),createArray(createObject('planName','SqlServers','properties',createObject('pricingTier','Standard'))),createArray()),if(parameters('enableKeyVaults'),createArray(createObject('planName','KeyVaults','properties',createObject('pricingTier','Standard','subPlan','PerKeyVault'))),createArray()),if(parameters('enableArm'),createArray(createObject('planName','Arm','properties',createObject('pricingTier','Standard','subPlan','PerSubscription'))),createArray()),if(parameters('enableOpenSourceRelationalDatabases'),createArray(createObject('planName','OpenSourceRelationalDatabases','properties',createObject('pricingTier','Standard'))),createArray()),if(parameters('enableCosmosDbs'),createArray(createObject('planName','CosmosDbs','properties',createObject('pricingTier','Standard'))),createArray()),if(parameters('enableApi'),createArray(createObject('planName','Api','properties',createObject('pricingTier','Standard','subPlan','P5'))),createArray()))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Security/batchPricings",
+                    "apiVersion": "2026-07-01",
+                    "name": "global",
+                    "properties": {
+                      "plansConfigurations": "[variables('plansConfigurations')]"
+                    }
+                  }
+                ],
+                "outputs": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/27ac9ca0-9bc7-4f82-be36-a9023a132e01",
+  "name": "27ac9ca0-9bc7-4f82-be36-a9023a132e01"
+}

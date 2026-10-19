@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Azure Event Grid namespaces should be running TLS version 1.2 or newer",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Setting the minimum TLS version to 1.2 or newer improves security by ensuring your Azure Event Grid namespace can only be accessed from clients using TLS 1.2 or newer. Using versions of TLS less than 1.2 is not recommended since they have well documented security vulnerabilities.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Event Grid"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventGrid/namespaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.EventGrid/namespaces/minimumTlsVersionAllowed",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.EventGrid/namespaces/minimumTlsVersionAllowed",
+                "less": "1.2"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/786761a8-5b7f-4b82-bfb1-df2d008c16fc",
+  "name": "786761a8-5b7f-4b82-bfb1-df2d008c16fc"
+}

@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "displayName": "Configure key vaults to disable unrestricted public network access in Mission Platform products and services",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Disable public network access to Key Vaults in Mission Platforms only when the firewall default action is Allow. Vaults restricted to selected virtual networks and IP addresses are left unchanged. Existing firewall rules and trusted-service bypass settings are preserved. Configure required private connectivity and service access before remediation to avoid disrupting workloads.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Modify",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "not": {
+              "field": "Microsoft.KeyVault/vaults/createMode",
+              "equals": "recover"
+            }
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/publicNetworkAccess",
+            "notEquals": "Disabled"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/networkAcls.defaultAction",
+            "notEquals": "Deny"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "conflictEffect": "audit",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/f25e0fa2-a7c8-4377-a976-54943a77a395"
+          ],
+          "operations": [
+            {
+              "operation": "addOrReplace",
+              "field": "Microsoft.KeyVault/vaults/publicNetworkAccess",
+              "value": "Disabled"
+            }
+          ]
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/fb759c06-d992-42c0-b099-9e09cf902093",
+  "name": "fb759c06-d992-42c0-b099-9e09cf902093"
+}

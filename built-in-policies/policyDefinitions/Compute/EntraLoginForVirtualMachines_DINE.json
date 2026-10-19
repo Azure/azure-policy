@@ -1,0 +1,147 @@
+{
+  "properties": {
+    "displayName": "Configure Windows and Linux virtual machines to use Microsoft Entra ID for sign-in",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Deploys the Microsoft Entra ID login extension (AADLoginForWindows on Windows VMs, AADSSHLoginForLinux on Linux VMs) and enables a system-assigned managed identity on Azure virtual machines, so users can sign in with their Microsoft Entra credentials. Learn more at https://aka.ms/AzureADLoginVMs.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Compute"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "DeployIfNotExists",
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Compute/virtualMachines"
+          },
+          {
+            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+            "in": [
+              "Windows",
+              "Linux"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/9980e02c-c2be-4d73-94e8-173b1dc7cf3c"
+          ],
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/publisher",
+                "equals": "Microsoft.Azure.ActiveDirectory"
+              },
+              {
+                "field": "Microsoft.Compute/virtualMachines/extensions/type",
+                "in": [
+                  "AADLoginForWindows",
+                  "AADSSHLoginForLinux"
+                ]
+              }
+            ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "osType": {
+                  "value": "[field('Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "osType": {
+                    "type": "string",
+                    "allowedValues": [
+                      "Windows",
+                      "Linux"
+                    ]
+                  }
+                },
+                "variables": {
+                  "extensionMap": {
+                    "Windows": {
+                      "type": "AADLoginForWindows",
+                      "typeHandlerVersion": "2.0"
+                    },
+                    "Linux": {
+                      "type": "AADSSHLoginForLinux",
+                      "typeHandlerVersion": "1.0"
+                    }
+                  },
+                  "ext": "[variables('extensionMap')[parameters('osType')]]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "name": "[parameters('vmName')]",
+                    "apiVersion": "2023-09-01",
+                    "location": "[parameters('location')]",
+                    "identity": {
+                      "type": "SystemAssigned"
+                    }
+                  },
+                  {
+                    "type": "Microsoft.Compute/virtualMachines/extensions",
+                    "name": "[concat(parameters('vmName'), '/', variables('ext').type)]",
+                    "apiVersion": "2023-09-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+                    ],
+                    "properties": {
+                      "publisher": "Microsoft.Azure.ActiveDirectory",
+                      "type": "[variables('ext').type]",
+                      "typeHandlerVersion": "[variables('ext').typeHandlerVersion]",
+                      "autoUpgradeMinorVersion": true
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3d9a4145-9197-45fa-afcd-84b887b4e2d3",
+  "name": "3d9a4145-9197-45fa-afcd-84b887b4e2d3"
+}

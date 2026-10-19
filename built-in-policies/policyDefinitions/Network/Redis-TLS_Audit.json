@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "displayName": "Azure Cache for Redis should be running TLS version 1.2 or newer",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Setting the minimum TLS version to 1.2 or newer improves security by ensuring your Azure Cache for Redis can only be accessed from clients using TLS 1.2 or newer. Using versions of TLS less than 1.2 is not recommended since they have well documented security vulnerabilities.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Network"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Cache/redis"
+          },
+          {
+            "field": "Microsoft.Cache/redis/minimumTlsVersion",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.Cache/redis/minimumTlsVersion",
+            "less": "1.2"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f38646be-b908-491a-bc9b-fd507154f709",
+  "name": "f38646be-b908-491a-bc9b-fd507154f709"
+}

@@ -1,0 +1,61 @@
+{
+  "properties": {
+    "displayName": "Function app slots should have Client Certificates (Incoming client certificates) enabled",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Client certificates allow for the app to request a certificate for incoming requests. Only clients that have a valid certificate will be able to reach the app. This policy applies to function app slots.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Service"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "string",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Web/sites/slots"
+          },
+          {
+            "field": "kind",
+            "contains": "functionapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "workflowapp"
+          },
+          {
+            "field": "kind",
+            "notContains": "azurecontainerapps"
+          },
+          {
+            "field": "Microsoft.Web/sites/slots/clientCertEnabled",
+            "notEquals": "true"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f123aa67-1877-4e49-9aa6-33b38fa0bfe4",
+  "name": "f123aa67-1877-4e49-9aa6-33b38fa0bfe4"
+}

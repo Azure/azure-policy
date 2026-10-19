@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Azure IoT Hub should be running TLS version 1.2 or newer",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Setting the minimum TLS version to 1.2 or newer improves security by ensuring your Azure IoT Hub can only be accessed from clients using TLS 1.2 or newer. Using versions of TLS less than 1.2 is not recommended since they have well documented security vulnerabilities.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Internet of Things"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Devices/IotHubs"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Devices/IotHubs/minTlsVersion",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Devices/IotHubs/minTlsVersion",
+                "less": "1.2"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/74d00793-ec3a-4504-94e3-0ec66963833b",
+  "name": "74d00793-ec3a-4504-94e3-0ec66963833b"
+}

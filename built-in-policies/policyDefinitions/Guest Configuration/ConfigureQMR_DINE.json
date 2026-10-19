@@ -1,0 +1,131 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Configure Quick Machine Recovery (QMR) on Windows machines",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Creates a Guest Configuration assignment to configure Quick Machine Recovery (QMR) on Windows machines. Important: Currently, only wired and WPA/WPA2 password-based Wi-Fi networks are supported. Ensure that your network uses this configuration for compatibility.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Guest Configuration",
+      "requiredProviders": [
+        "Microsoft.GuestConfiguration"
+      ],
+      "preview": true,
+      "guestConfiguration": {
+        "name": "ConfigureQMR",
+        "version": "1.*"
+      }
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "IncludeArcMachines": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Include Arc connected servers",
+          "description": "By selecting this option, you agree to be charged monthly per Arc connected machine.",
+          "portalReview": "true"
+        },
+        "allowedValues": [
+          "true",
+          "false"
+        ],
+        "defaultValue": "false"
+      },
+      "effect": {
+        "type": "string",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of this policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HybridCompute/machines"
+          },
+          {
+            "value": "[parameters('IncludeArcMachines')]",
+            "equals": "true"
+          },
+          {
+            "field": "Microsoft.HybridCompute/imageOffer",
+            "like": "windows*"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
+          "name": "ConfigureQMR",
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31"
+          ],
+          "existenceCondition": {
+            "field": "Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus",
+            "equals": "Compliant"
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "configurationName": {
+                  "value": "ConfigureQMR"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "assignmentType": "ApplyAndMonitor"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e117c61a-cbc6-4f07-9c63-e9f93e5c0b69",
+  "name": "e117c61a-cbc6-4f07-9c63-e9f93e5c0b69"
+}

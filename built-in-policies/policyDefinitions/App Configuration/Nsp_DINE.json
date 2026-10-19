@@ -1,0 +1,137 @@
+{
+  "properties": {
+    "displayName": "Configure Azure App Configuration resources to associate with NSP (Network Security Perimeter)",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Associating Azure App Configuration resources with an NSP improves the security by ensuring its access is controlled only via NSP access rules.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "App Configuration"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "DeployIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "DeployIfNotExists"
+      },
+      "nspAssociationMode": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Network Security Perimeter Association Mode",
+          "description": "NSP association mode to associate Azure App Configuration resources during creation."
+        },
+        "allowedValues": [
+          "Enforced",
+          "Learning"
+        ],
+        "defaultValue": "Learning"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.AppConfiguration/configurationStores"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.AppConfiguration/configurationStores/networkSecurityPerimeterConfigurations",
+          "existenceCondition": {
+            "field": "Microsoft.AppConfiguration/configurationStores/networkSecurityPerimeterConfigurations/networkSecurityPerimeter.id",
+            "exists": "true"
+          },
+          "roleDefinitionIds": [
+            "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+            "/providers/Microsoft.Authorization/roleDefinitions/fe86443c-f201-4fc4-9d2a-ac61149fbda0"
+          ],
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "paasResourceId": {
+                    "type": "String"
+                  },
+                  "paasResourceLocation": {
+                    "type": "String"
+                  },
+                  "nspAssociationMode": {
+                    "type": "String"
+                  }
+                },
+                "variables": {
+                  "networkSecurityPerimeterName": "[concat('nsp-', parameters('paasResourceLocation'))]",
+                  "resourceAssociationName": "[guid(parameters('paasResourceId'))]"
+                },
+                "resources": [
+                  {
+                    "type": "Microsoft.Network/networkSecurityPerimeters",
+                    "apiVersion": "2024-07-01",
+                    "name": "[variables('networkSecurityPerimeterName')]",
+                    "location": "[resourceGroup().location]",
+                    "properties": {}
+                  },
+                  {
+                    "type": "Microsoft.Network/networkSecurityPerimeters/profiles",
+                    "apiVersion": "2024-07-01",
+                    "name": "[concat(variables('networkSecurityPerimeterName'), '/appconfigProfile')]",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Network/networkSecurityPerimeters', variables('networkSecurityPerimeterName'))]"
+                    ],
+                    "properties": {}
+                  },
+                  {
+                    "type": "Microsoft.Network/networkSecurityPerimeters/resourceAssociations",
+                    "apiVersion": "2024-07-01",
+                    "name": "[concat(variables('networkSecurityPerimeterName'), '/', variables('resourceAssociationName'))]",
+                    "properties": {
+                      "privateLinkResource": {
+                        "id": "[parameters('paasResourceId')]"
+                      },
+                      "profile": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityPerimeters/profiles', variables('networkSecurityPerimeterName'), 'appconfigProfile')]"
+                      },
+                      "accessMode": "[parameters('nspAssociationMode')]"
+                    },
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Network/networkSecurityPerimeters', variables('networkSecurityPerimeterName'))]",
+                      "[resourceId('Microsoft.Network/networkSecurityPerimeters/profiles', variables('networkSecurityPerimeterName'), 'appconfigProfile')]"
+                    ]
+                  }
+                ]
+              },
+              "parameters": {
+                "paasResourceId": {
+                  "value": "[field('id')]"
+                },
+                "paasResourceLocation": {
+                  "value": "[field('location')]"
+                },
+                "nspAssociationMode": {
+                  "value": "[parameters('nspAssociationMode')]"
+                }
+              }
+            }
+          },
+          "evaluationDelay": "AfterProvisioningSuccess"
+        }
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c6d24366-daf2-401a-bfd5-73cd3d3a01dc",
+  "name": "c6d24366-daf2-401a-bfd5-73cd3d3a01dc"
+}

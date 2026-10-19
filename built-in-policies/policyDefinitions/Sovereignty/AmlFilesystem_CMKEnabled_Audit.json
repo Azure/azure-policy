@@ -1,0 +1,71 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Managed Lustre file systems should use customer-managed keys for encryption",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage encryption at rest for Azure Managed Lustre file systems. Customer-managed keys enable data to be encrypted with Azure Key Vault keys that you own and manage.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.StorageCache/amlFilesystems"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "identity.type",
+                "notEquals": "UserAssigned"
+              },
+              {
+                "field": "Microsoft.StorageCache/amlFilesystems/encryptionSettings.keyEncryptionKey.keyUrl",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.StorageCache/amlFilesystems/encryptionSettings.keyEncryptionKey.keyUrl",
+                "equals": ""
+              },
+              {
+                "field": "Microsoft.StorageCache/amlFilesystems/encryptionSettings.keyEncryptionKey.sourceVault.id",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.StorageCache/amlFilesystems/encryptionSettings.keyEncryptionKey.sourceVault.id",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/49af39b4-9394-4043-b153-f4a67201368b",
+  "name": "49af39b4-9394-4043-b153-f4a67201368b"
+}

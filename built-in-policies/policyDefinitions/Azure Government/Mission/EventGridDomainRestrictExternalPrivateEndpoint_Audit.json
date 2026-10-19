@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Event Grid Domain should restrict external private endpoints",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Restricting approved Event Grid Domain private endpoint connections to the current subscription or explicitly excluded subscriptions helps prevent unintended cross-subscription access.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubIDs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded Subscription IDs",
+          "description": "List of subscription IDs excluded from the external private endpoint restriction"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.EventGrid/domains/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.EventGrid/domains/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.EventGrid/domains/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.EventGrid/domains/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.EventGrid/domains/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/3c2b2a2f-630f-44c5-bea3-b8f094412ea3",
+  "name": "3c2b2a2f-630f-44c5-bea3-b8f094412ea3"
+}

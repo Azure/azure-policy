@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "[Preview]: API Management gateway hostname configurations should use TLS version 1.2 or newer",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Enforcing TLS 1.2 or newer improves security by ensuring API Management gateway hostname configurations do not accept connections over TLS 1.0 or 1.1, which have well documented security vulnerabilities. This policy audits gateway hostname configurations where TLS 1.0 or TLS 1.1 is explicitly enabled.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Network",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service/gateways/hostnameConfigurations"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ApiManagement/service/gateways/hostnameConfigurations/tls10Enabled",
+                "equals": "true"
+              },
+              {
+                "field": "Microsoft.ApiManagement/service/gateways/hostnameConfigurations/tls11Enabled",
+                "equals": "true"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c8656c68-eb4e-4f72-a90a-54b6bfbd3c33",
+  "name": "c8656c68-eb4e-4f72-a90a-54b6bfbd3c33"
+}

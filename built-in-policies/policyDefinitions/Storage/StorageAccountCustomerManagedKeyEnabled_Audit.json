@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Secure your blob and file storage account with greater flexibility using customer-managed keys. When you specify a customer-managed key, that key is used to protect and control access to the key that encrypts your data. Using customer-managed keys provides additional capabilities to control rotation of the key encryption key or cryptographically erase data.",
     "metadata": {
-      "version": "1.0.3",
+      "version": "1.1.0",
       "category": "Storage"
     },
-    "version": "1.0.3",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -21,6 +21,20 @@
           "Disabled"
         ],
         "defaultValue": "Audit"
+      },
+      "excludedManagedByResourceProviders": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Managed services to exclude",
+          "description": "Select managed services whose storage accounts should be excluded from this policy, or select all managed resource groups. Leave empty to evaluate all storage accounts."
+        },
+        "allowedValues": [
+          "Azure Red Hat OpenShift",
+          "Azure Databricks",
+          "Microsoft Purview",
+          "All managed resource groups"
+        ],
+        "defaultValue": []
       }
     },
     "policyRule": {
@@ -29,6 +43,54 @@
           {
             "field": "type",
             "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'Azure Red Hat OpenShift')]",
+                "equals": false
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.RedHatOpenShift/"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'Azure Databricks')]",
+                "equals": false
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Databricks/"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'Microsoft Purview')]",
+                "equals": false
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Purview/"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'All managed resource groups')]",
+                "equals": false
+              },
+              {
+                "value": "[empty(resourcegroup().managedBy)]",
+                "equals": true
+              }
+            ]
           },
           {
             "not": {
@@ -43,6 +105,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.3"
     ]
   },

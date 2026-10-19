@@ -1,0 +1,68 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Red Hat OpenShift clusters should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public access to the API server and ingress endpoints improves security by ensuring that Azure Red Hat OpenShift clusters aren't exposed on the public internet.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RedHatOpenShift/openShiftClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.RedHatOpenShift/openShiftClusters/apiserverProfile.visibility",
+                "notEquals": "Private"
+              },
+              {
+                "value": "[empty(field('Microsoft.RedHatOpenShift/openShiftClusters/ingressProfiles'))]",
+                "equals": true
+              },
+              {
+                "count": {
+                  "field": "Microsoft.RedHatOpenShift/openShiftClusters/ingressProfiles[*]",
+                  "where": {
+                    "value": "[current('Microsoft.RedHatOpenShift/openShiftClusters/ingressProfiles[*].visibility')]",
+                    "notEquals": "Private"
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a88d4a2c-216a-4fdb-8df0-b8ad54354f57",
+  "name": "a88d4a2c-216a-4fdb-8df0-b8ad54354f57"
+}

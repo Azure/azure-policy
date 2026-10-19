@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Communication Services should disable public network access",
+    "description": "Disabling public network access helps reduce exposure of Azure Communication Services resources to the public internet.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Communication/CommunicationServices"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Communication/communicationServices/publicNetworkAccess",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.Communication/communicationServices/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c4225fe7-a11b-4e6b-8f9c-989dd2907bd2",
+  "name": "c4225fe7-a11b-4e6b-8f9c-989dd2907bd2"
+}

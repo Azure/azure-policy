@@ -1,0 +1,86 @@
+{
+  "properties": {
+    "displayName": "Key Vault should restrict IP and virtual network rules in mission platforms",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Restrict Key Vault firewall IP and virtual network rules to approved entries to reduce access from unapproved networks. Only entries explicitly included in the configured allowlists are permitted.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Choose whether to audit, deny, or disable evaluation of unapproved Key Vault firewall rules."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "allowedAddressRanges": {
+        "type": "Array",
+        "metadata": {
+          "description": "Approved public IPv4 addresses or CIDR entries to match against Key Vault firewall IP rules. Entries are matched as values, not by subnet containment; an empty list permits no IP rules.",
+          "displayName": "Allowed IP address ranges"
+        },
+        "defaultValue": []
+      },
+      "allowedVirtualNetworks": {
+        "type": "Array",
+        "metadata": {
+          "description": "Approved subnet resource IDs to match against Key Vault virtual network firewall rules. An empty list permits no virtual network rules.",
+          "displayName": "Allowed virtual network subnet IDs"
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults"
+          },
+          {
+            "anyOf": [
+              {
+                "count": {
+                  "field": "Microsoft.KeyVault/vaults/networkAcls.ipRules[*]",
+                  "where": {
+                    "field": "Microsoft.KeyVault/vaults/networkAcls.ipRules[*].value",
+                    "notIn": "[parameters('allowedAddressRanges')]"
+                  }
+                },
+                "greater": 0
+              },
+              {
+                "count": {
+                  "field": "Microsoft.KeyVault/vaults/networkAcls.virtualNetworkRules[*]",
+                  "where": {
+                    "field": "Microsoft.KeyVault/vaults/networkAcls.virtualNetworkRules[*].id",
+                    "notIn": "[parameters('allowedVirtualNetworks')]"
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/db98217a-80f5-4cbd-bc9c-91640765ed90",
+  "name": "db98217a-80f5-4cbd-bc9c-91640765ed90"
+}

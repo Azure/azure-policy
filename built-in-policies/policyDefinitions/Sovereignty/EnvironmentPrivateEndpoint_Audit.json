@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Container Apps environments should use private endpoints",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Private Link lets you connect your virtual networks to Azure services without a public IP address at the source or destination. By mapping private endpoints to Azure Container Apps environments, you can reduce data leakage risks.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Sovereignty"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.App/managedEnvironments"
+          },
+          {
+            "count": {
+              "field": "Microsoft.App/managedEnvironments/privateEndpointConnections[*]",
+              "where": {
+                "field": "Microsoft.App/managedEnvironments/privateEndpointConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "Approved"
+              }
+            },
+            "less": 1
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ec9fea60-a9ec-4efb-8115-3c3c5e061510",
+  "name": "ec9fea60-a9ec-4efb-8115-3c3c5e061510"
+}

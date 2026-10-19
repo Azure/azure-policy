@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Databricks workspaces should use customer-managed keys for managed services",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage encryption for Azure Databricks managed services. Customer-managed keys enable data to be encrypted with an Azure Key Vault key created and owned by you, giving you control over the key lifecycle, including rotation and management.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Sovereignty"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Databricks/workspaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Databricks/workspaces/encryption.entities.managedServices.keyVaultProperties.keyVaultUri",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.Databricks/workspaces/encryption.entities.managedServices.keyVaultProperties.keyVaultUri",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e687207c-8d66-460e-a8a5-12f95256116c",
+  "name": "e687207c-8d66-460e-a8a5-12f95256116c"
+}

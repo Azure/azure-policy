@@ -1,0 +1,177 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Microsoft Foundry agents and toolboxes should only use approved tools",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Restricts Microsoft Foundry agents and toolboxes to tool types, MCP endpoints, and MCP connectors approved by your organization.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "approvedToolTypes": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Approved Tool Types",
+          "description": "List of tool types that agents and toolboxes are allowed to use."
+        }
+      },
+      "approvedMcpEndpoints": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Approved MCP Endpoints",
+          "description": "List of MCP server endpoint URLs that agents and toolboxes are allowed to use. Values are matched case-insensitively and support the '*' wildcard, for example 'https://mcp.contoso.com/*'."
+        }
+      },
+      "approvedMcpConnectors": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Approved MCP Connectors",
+          "description": "List of MCP connector identifiers that agents and toolboxes are allowed to use."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "anyOf": [
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.CognitiveServices.Data/accounts/projects/agents"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/tools[*]",
+                  "where": {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/tools[*].type",
+                          "in": "[parameters('approvedToolTypes')]"
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/tools[*].type",
+                              "equals": "mcp"
+                            },
+                            {
+                              "count": {
+                                "value": "[parameters('approvedMcpEndpoints')]",
+                                "name": "endpointPatternAgents",
+                                "where": {
+                                  "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/tools[*].serverUrl",
+                                  "like": "[current('endpointPatternAgents')]"
+                                }
+                              },
+                              "greater": 0
+                            }
+                          ]
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/tools[*].type",
+                              "equals": "mcp"
+                            },
+                            {
+                              "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/tools[*].connectorId",
+                              "in": "[parameters('approvedMcpConnectors')]"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "field": "type",
+                "equals": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes/tools[*]",
+                  "where": {
+                    "not": {
+                      "anyOf": [
+                        {
+                          "field": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes/tools[*].type",
+                          "in": "[parameters('approvedToolTypes')]"
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "field": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes/tools[*].type",
+                              "equals": "mcp"
+                            },
+                            {
+                              "count": {
+                                "value": "[parameters('approvedMcpEndpoints')]",
+                                "name": "endpointPatternToolboxes",
+                                "where": {
+                                  "field": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes/tools[*].serverUrl",
+                                  "like": "[current('endpointPatternToolboxes')]"
+                                }
+                              },
+                              "greater": 0
+                            }
+                          ]
+                        },
+                        {
+                          "allOf": [
+                            {
+                              "field": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes/tools[*].type",
+                              "equals": "mcp"
+                            },
+                            {
+                              "field": "Microsoft.CognitiveServices.Data/accounts/projects/toolboxes/tools[*].connectorId",
+                              "in": "[parameters('approvedMcpConnectors')]"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e7352ad2-6c86-4a07-9573-47f67b557ba8",
+  "name": "e7352ad2-6c86-4a07-9573-47f67b557ba8"
+}
