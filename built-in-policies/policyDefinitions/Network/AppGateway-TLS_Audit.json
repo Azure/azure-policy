@@ -1,0 +1,107 @@
+{
+  "properties": {
+    "displayName": "Azure Application Gateway should be running TLS version 1.2 or newer",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Setting the minimum TLS protocol version to 1.2 or newer improves security by ensuring your Azure Application Gateway only negotiates TLS 1.2 or newer with clients. This policy evaluates the gateway-wide TLS policy as well as the listener-specific TLS policies configured on SSL profiles, for both predefined and custom TLS policies. Using versions of TLS less than 1.2 is not recommended since they have well documented security vulnerabilities.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Network"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "The effect determines what happens when the policy rule is evaluated to match"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Network/applicationGateways"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Network/applicationGateways/sslPolicy.minProtocolVersion",
+                "in": [
+                  "TLSv1_0",
+                  "TLSv1_1"
+                ]
+              },
+              {
+                "field": "Microsoft.Network/applicationGateways/sslPolicy.policyName",
+                "in": [
+                  "AppGwSslPolicy20150501",
+                  "AppGwSslPolicy20170401"
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.Network/applicationGateways/sslPolicy.minProtocolVersion",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Network/applicationGateways/sslPolicy.policyName",
+                    "exists": "false"
+                  },
+                  {
+                    "field": "Microsoft.Network/applicationGateways/defaultPredefinedSslPolicy",
+                    "in": [
+                      "AppGwSslPolicy20150501",
+                      "AppGwSslPolicy20170401"
+                    ]
+                  }
+                ]
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Network/applicationGateways/sslProfiles[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.Network/applicationGateways/sslProfiles[*].sslPolicy.minProtocolVersion",
+                        "in": [
+                          "TLSv1_0",
+                          "TLSv1_1"
+                        ]
+                      },
+                      {
+                        "field": "Microsoft.Network/applicationGateways/sslProfiles[*].sslPolicy.policyName",
+                        "in": [
+                          "AppGwSslPolicy20150501",
+                          "AppGwSslPolicy20170401"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6313cbe8-6fb7-451b-a9e3-3f23b59843ca",
+  "name": "6313cbe8-6fb7-451b-a9e3-3f23b59843ca"
+}

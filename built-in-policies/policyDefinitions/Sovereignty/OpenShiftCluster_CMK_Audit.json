@@ -1,0 +1,77 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Red Hat OpenShift clusters should use customer-managed keys to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage encryption at rest for Azure Red Hat OpenShift clusters. Customer-managed keys enable data to be encrypted using a disk encryption set that you control, including key rotation and management. Existing clusters created without customer-managed keys for master nodes cannot enable them later and must be recreated to comply.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Sovereignty"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.RedHatOpenShift/openShiftClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.RedHatOpenShift/openShiftClusters/masterProfile.diskEncryptionSetId",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.RedHatOpenShift/openShiftClusters/masterProfile.diskEncryptionSetId",
+                "equals": ""
+              },
+              {
+                "value": "[length(field('Microsoft.RedHatOpenShift/openShiftClusters/workerProfiles[*]'))]",
+                "equals": 0
+              },
+              {
+                "value": "[length(field('Microsoft.RedHatOpenShift/openShiftClusters/workerProfiles[*].diskEncryptionSetId'))]",
+                "notEquals": "[length(field('Microsoft.RedHatOpenShift/openShiftClusters/workerProfiles[*]'))]"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.RedHatOpenShift/openShiftClusters/workerProfiles[*]",
+                  "where": {
+                    "value": "[current('Microsoft.RedHatOpenShift/openShiftClusters/workerProfiles[*].diskEncryptionSetId')]",
+                    "equals": ""
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/ea4d0edd-1555-4917-8d8f-042f98fa6a0e",
+  "name": "ea4d0edd-1555-4917-8d8f-042f98fa6a0e"
+}

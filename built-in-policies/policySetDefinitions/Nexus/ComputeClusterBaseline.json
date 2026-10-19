@@ -4,11 +4,11 @@
     "policyType": "BuiltIn",
     "description": "This initiative includes policies designed to reflect the security baseline expectations of Nexus Compute Clusters. It ensures that the cluster configurations adhere to specific security controls that are critical for maintaining a secure environment.",
     "metadata": {
-      "version": "2.0.0-preview",
+      "version": "2.1.0-preview",
       "preview": true,
       "category": "Nexus"
     },
-    "version": "2.0.0-preview",
+    "version": "2.1.0-preview",
     "parameters": {
       "effect": {
         "type": "string",
@@ -45,6 +45,9 @@
           "allowedServicePortsList": {
             "value": [
               "1022",
+              "10660",
+              "10661",
+              "10665",
               "111",
               "123",
               "20048",
@@ -53,6 +56,7 @@
               "3128",
               "32803",
               "3443",
+              "4316",
               "4317",
               "4318",
               "4319",
@@ -60,12 +64,16 @@
               "443",
               "4954",
               "5001",
+              "50051",
               "5050",
               "5473",
               "6060",
               "6385",
               "659",
               "662",
+              "6641",
+              "6642",
+              "6643",
               "80",
               "8080",
               "8081",
@@ -298,6 +306,10 @@
                   "readOnly": false
                 },
                 {
+                  "pathPrefix": "/var/opt/microsoft",
+                  "readOnly": false
+                },
+                {
                   "pathPrefix": "/var/log/microsoft/mdatp",
                   "readOnly": true
                 },
@@ -307,6 +319,30 @@
                 },
                 {
                   "pathPrefix": "/var/run",
+                  "readOnly": false
+                },
+                {
+                  "pathPrefix": "/etc/origin/openvswitch",
+                  "readOnly": false
+                },
+                {
+                  "pathPrefix": "/etc/origin/ovn",
+                  "readOnly": false
+                },
+                {
+                  "pathPrefix": "/run/openvswitch",
+                  "readOnly": false
+                },
+                {
+                  "pathPrefix": "/run/ovn",
+                  "readOnly": false
+                },
+                {
+                  "pathPrefix": "/etc/containerd/certs.d",
+                  "readOnly": false
+                },
+                {
+                  "pathPrefix": "/opt/local-path-provisioner",
                   "readOnly": false
                 }
               ]
@@ -344,7 +380,7 @@
             "value": "[parameters('effect')]"
           },
           "allowedContainerImagesRegex": {
-            "value": "^(mcr\\.microsoft\\.com|nfaprodglobalacr\\.azurecr\\.io|nfaimagespublic\\.azurecr\\.io)\\/.+$"
+            "value": "^(mcr\\.microsoft\\.com|nfaprodglobalacr\\.azurecr\\.io|nfaimagespublic\\.azurecr\\.io|local\\-vm\\-image\\-registry\\.nc\\-system\\.svc\\.networkcloud\\.local(:[0-9]+)?)\\/.+$"
           }
         }
       },
@@ -398,7 +434,10 @@
             "value": [
               "action-command-container",
               "addons",
+              "azlocal-dispatcher",
+              "azlocal-vmo",
               "busybox",
+              "ca-distributor",
               "cache-builder",
               "calico-apiserver",
               "calico-csi",
@@ -414,7 +453,9 @@
               "cleaner",
               "clusterctl-init-move",
               "clusterctl-init-upgrade",
+              "cni-server",
               "compute",
+              "container-disk-binary",
               "csi-node-driver-registrar",
               "csi-resizer",
               "csn-dns",
@@ -436,6 +477,7 @@
               "guest-console-log",
               "helper-pod",
               "hook-sidecar-0",
+              "hostpath-init",
               "host-image",
               "hotplug-disk",
               "identity-enforcer",
@@ -452,11 +494,15 @@
               "ironic-monitor",
               "ironic-static",
               "kube-fledged",
+              "kube-ovn-controller",
+              "kube-ovn-monitor",
               "kube-rbac-proxy",
               "kubectl",
               "manager",
               "mdm",
               "mdsd",
+              "microsoft-defender-pod-collector",
+              "microsoft-defender-publisher",
               "migrate-sts",
               "mise-sidecar",
               "msi-adapter",
@@ -466,8 +512,11 @@
               "nfs-server",
               "nginx",
               "old-file-cleaner",
+              "openvswitch",
               "otel-collector",
               "otel-pipeline",
+              "ovn-central",
+              "pinger",
               "pod-collector",
               "proxy",
               "publisher",
@@ -483,17 +532,21 @@
               "telegraf",
               "tigera-operator",
               "toolbox",
+              "uc-volume-controller",
               "virt-api",
               "virt-controller",
               "virt-handler",
               "virt-launcher",
               "virt-launcher-image-holder",
               "virt-operator",
+              "volumevmc-iso",
+              "volumevmc-iso-init",
               "volume-migrator",
               "wait",
               "wait-for-certificates",
               "watcher",
-              "workload-cluster-versionbundles"
+              "workload-cluster-versionbundles",
+              "xfs-repair"
             ]
           },
           "excludedImages": {
@@ -537,6 +590,7 @@
           "excludedContainers": {
             "value": [
               "controller",
+              "cni-server",
               "csi-node-exporter",
               "csn-ntp",
               "dnsmasq",
@@ -550,6 +604,7 @@
               "nginx",
               "node",
               "node-driver-registrar",
+              "openvswitch",
               "otel-pipeline"
             ]
           }
@@ -578,7 +633,9 @@
               "action-command-container",
               "arc-for-servers-connect-agent",
               "arc-for-servers-connect-agent-init",
+              "azlocal-vmo",
               "busybox",
+              "ca-distributor",
               "calico-apiserver",
               "calico-csi",
               "calico-node",
@@ -593,6 +650,7 @@
               "etcd-snapshotter-distribution",
               "flexvol-driver",
               "host-sync",
+              "hostpath-init",
               "identity-enforcer",
               "idrac-exporter",
               "install-cni",
@@ -615,7 +673,8 @@
               "virt-launcher",
               "volume-migrator",
               "vulnerability-operator-health-check",
-              "vulnerability-server"
+              "vulnerability-server",
+              "xfs-repair"
             ]
           },
           "excludedImages": {
@@ -636,7 +695,9 @@
           },
           "excludedImages": {
             "value": [
-              "mcr.microsoft.com/azurelinux/base/cluster-api-provider-kubevirt:*"
+              "mcr.microsoft.com/azurelinux/base/cluster-api-provider-kubevirt:*",
+              "mcr.microsoft.com/networkcloud/cluster-api-provider-kubevirt/cluster-api-provider-kubevirt:*",
+              "mcr.microsoft.com/networkcloud/nc-common-charts/credactor:*"
             ]
           }
         }
@@ -651,31 +712,40 @@
           },
           "excludedContainers": {
             "value": [
+              "apply",
               "calico-csi",
               "calico-node",
               "chronyd",
               "controller",
+              "credactor",
               "csi-node-driver-registrar",
               "dnsmasq",
               "etcd-snapshotter",
               "etcd-snapshotter-cleaner",
               "etcd-snapshotter-distribution",
               "flexvol-driver",
+              "hostpath-init",
               "install-cni",
+              "kube-ovn-controller",
+              "kube-ovn-monitor",
               "migrate-sts",
               "mise-sidecar",
               "nfs",
               "nfs-server",
               "node",
               "node-exporter",
+              "openvswitch",
               "otel-collector",
               "otel-pipeline",
+              "ovn-central",
+              "pinger",
               "process-exporter",
               "proxy",
               "pure-storage-exporter",
               "reloader",
               "sa-alerts-exporter",
               "sa-metrics-exporter",
+              "scaleup",
               "syslog",
               "toolbox",
               "vulnerability-server"
@@ -683,8 +753,7 @@
           },
           "excludedImages": {
             "value": [
-              "mcr.microsoft.com/networkcloud/nc-platform-operator/afo-action-command:*",
-              "nccacheacr.azurecr.io/networkcloud/nc-platform-operator/afo-action-command:*"
+              "mcr.microsoft.com/networkcloud/nc-platform-operator/afo-action-command:*"
             ]
           }
         }
@@ -722,6 +791,7 @@
       }
     ],
     "versions": [
+      "2.1.0-PREVIEW",
       "2.0.0-PREVIEW",
       "1.3.0-PREVIEW",
       "1.2.0-PREVIEW",

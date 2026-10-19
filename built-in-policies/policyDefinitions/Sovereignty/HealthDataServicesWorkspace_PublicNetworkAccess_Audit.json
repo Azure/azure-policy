@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Health Data Services workspaces should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access improves security by ensuring that Azure Health Data Services workspaces aren't exposed on the public internet. You can limit exposure of your workspaces by creating private endpoints instead.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.HealthcareApis/workspaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.HealthcareApis/workspaces/publicNetworkAccess",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.HealthcareApis/workspaces/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/093e16cd-84e0-4332-b550-82f55cf85f28",
+  "name": "093e16cd-84e0-4332-b550-82f55cf85f28"
+}

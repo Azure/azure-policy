@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Deploy Association to link Linux virtual machines, virtual machine scale sets, and Arc machines to the specified Data Collection Rule or the specified Data Collection Endpoint. The list of locations and OS images are updated over time as support is increased.",
     "metadata": {
-      "version": "6.9.0",
+      "version": "6.15.0",
       "category": "Monitoring"
     },
-    "version": "6.9.0",
+    "version": "6.15.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -68,6 +68,14 @@
     "policyRule": {
       "if": {
         "allOf": [
+          {
+            "field": "type",
+            "in": [
+              "Microsoft.HybridCompute/machines",
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.Compute/virtualMachineScaleSets"
+            ]
+          },
           {
             "field": "location",
             "in": [
@@ -151,15 +159,10 @@
               {
                 "allOf": [
                   {
-                    "anyOf": [
-                      {
-                        "field": "type",
-                        "equals": "Microsoft.Compute/virtualMachines"
-                      },
-                      {
-                        "field": "type",
-                        "equals": "Microsoft.Compute/virtualMachineScaleSets"
-                      }
+                    "field": "type",
+                    "in": [
+                      "Microsoft.Compute/virtualMachines",
+                      "Microsoft.Compute/virtualMachineScaleSets"
                     ]
                   },
                   {
@@ -301,6 +304,10 @@
                                     "anyOf": [
                                       {
                                         "field": "Microsoft.Compute/imageOffer",
+                                        "equals": "sles-12-sp5"
+                                      },
+                                      {
+                                        "field": "Microsoft.Compute/imageOffer",
                                         "like": "sles-15*"
                                       },
                                       {
@@ -345,6 +352,10 @@
                               {
                                 "field": "Microsoft.Compute/imageOffer",
                                 "like": "ubuntu-24_04-lts*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageOffer",
+                                "like": "ubuntu-26_04-lts*"
                               }
                             ]
                           },
@@ -414,6 +425,10 @@
                               },
                               {
                                 "field": "Microsoft.Compute/imageSku",
+                                "like": "ol10*"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imageSku",
                                 "like": "9*"
                               }
                             ]
@@ -421,6 +436,22 @@
                           {
                             "field": "Microsoft.Compute/imageSku",
                             "notContains": "arm64"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Oracle"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "Oracle-Linux"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "equals": "ol10-arm64-lvm-gen2"
                           }
                         ]
                       },
@@ -451,8 +482,36 @@
                                     "notContains": "arm"
                                   }
                                 ]
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "equals": "almalinux-x86_64"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSku",
+                                    "equals": "10-gen2"
+                                  }
+                                ]
                               }
                             ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "almalinux"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "almalinux-arm"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "equals": "10-arm64-gen2"
                           }
                         ]
                       },
@@ -472,7 +531,9 @@
                               "rocky-community-8-arm",
                               "rocky-community-9-arm",
                               "rocky-community-8",
-                              "rocky-community-9"
+                              "rocky-community-9",
+                              "rocky-community-10",
+                              "rocky-community-10-arm"
                             ]
                           }
                         ]
@@ -491,7 +552,9 @@
                             "field": "Microsoft.Compute/imageSku",
                             "in": [
                               "8-lvm",
-                              "9-base"
+                              "9-base",
+                              "10-base",
+                              "10-lvm"
                             ]
                           }
                         ]
@@ -511,7 +574,9 @@
                             "in": [
                               "rockylinux-aarch64-8",
                               "rockylinux-aarch64-9",
-                              "rockylinux-aarch64-9-lvm"
+                              "rockylinux-aarch64-9-lvm",
+                              "10-base",
+                              "10-lvm"
                             ]
                           }
                         ]
@@ -591,6 +656,25 @@
                                 "field": "Microsoft.Compute/imageSku",
                                 "like": "azure-linux-3*"
                               }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoftazurelinux"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "equals": "azurelinux-4"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSku",
+                            "in": [
+                              "4",
+                              "4-arm64"
                             ]
                           }
                         ]
@@ -783,6 +867,12 @@
       }
     },
     "versions": [
+      "6.15.0",
+      "6.14.0",
+      "6.13.0",
+      "6.12.0",
+      "6.11.0",
+      "6.10.0",
       "6.9.0",
       "6.8.0",
       "6.7.0",

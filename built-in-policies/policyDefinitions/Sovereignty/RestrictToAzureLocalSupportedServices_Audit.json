@@ -1,0 +1,89 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Restrict resource types to Azure services supported in Azure Local",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict the use of Azure services to those that run on Azure Local or have a supported migration path to Azure Local.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "listOfResourceTypesSupportedInAzureLocal": {
+        "type": "Array",
+        "defaultValue": [
+          "Microsoft.AzureArcData/*",
+          "Microsoft.AzureStackHCI/*",
+          "Microsoft.Compute/disks",
+          "Microsoft.Compute/virtualMachines",
+          "Microsoft.Compute/virtualMachines/*",
+          "Microsoft.ContainerRegistry/registries",
+          "Microsoft.ContainerRegistry/registries/*",
+          "Microsoft.ContainerService/managedClusters",
+          "Microsoft.ContainerService/managedClusters/*",
+          "Microsoft.ExtendedLocation/customLocations",
+          "Microsoft.HybridCompute/machines",
+          "Microsoft.HybridCompute/machines/*",
+          "Microsoft.HybridContainerService/*",
+          "Microsoft.KeyVault/vaults",
+          "Microsoft.KeyVault/vaults/*",
+          "Microsoft.Kubernetes/connectedClusters",
+          "Microsoft.Kubernetes/connectedClusters/*",
+          "Microsoft.Network/loadBalancers",
+          "Microsoft.Network/natGateways",
+          "Microsoft.Network/networkInterfaces",
+          "Microsoft.Network/networkSecurityGroups",
+          "Microsoft.Network/networkSecurityGroups/*",
+          "Microsoft.Network/publicIPAddresses",
+          "Microsoft.Network/virtualNetworks",
+          "Microsoft.Network/virtualNetworks/*",
+          "Microsoft.Sql/managedInstances",
+          "Microsoft.Sql/managedInstances/*",
+          "Microsoft.Sql/servers",
+          "Microsoft.Sql/servers/*"
+        ],
+        "metadata": {
+          "description": "The list of Azure resource types that run on Azure Local or have a supported migration path to Azure Local, including the Azure Arc resource types that Azure Local projects into Azure.",
+          "displayName": "Azure Local supported services",
+          "strongType": "resourceTypes"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "count": {
+          "value": "[parameters('listOfResourceTypesSupportedInAzureLocal')]",
+          "name": "allowedType",
+          "where": {
+            "value": "[field('type')]",
+            "like": "[current('allowedType')]"
+          }
+        },
+        "equals": 0
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9d35b50d-a1a5-4d67-a7ab-5115442bbfbb",
+  "name": "9d35b50d-a1a5-4d67-a7ab-5115442bbfbb"
+}

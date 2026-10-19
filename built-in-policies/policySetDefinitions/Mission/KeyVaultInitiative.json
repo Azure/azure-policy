@@ -1,0 +1,88 @@
+{
+  "properties": {
+    "displayName": "Key Vault should enforce network and access guardrails in mission platforms",
+    "policyType": "BuiltIn",
+    "description": "This policy set applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Apply Key Vault network restrictions, soft-delete checks, and RBAC permission-model checks to reduce unintended access and data loss. The modifier disables unrestricted public access while audit policies report configurations that require review.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "allowedAddressRanges": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed IP address ranges",
+          "description": "Approved public IPv4 addresses or CIDR entries for Key Vault firewall IP rules. Entries are matched as values, not by subnet containment; an empty list permits no IP rules."
+        },
+        "defaultValue": []
+      },
+      "allowedVirtualNetworks": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed virtual network subnet IDs",
+          "description": "Approved subnet resource IDs for Key Vault virtual network firewall rules. An empty list permits no virtual network rules."
+        },
+        "defaultValue": []
+      },
+      "restrictExternalPeKv_excludedEndpointSubIds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded private endpoint subscription IDs",
+          "description": "Subscription IDs permitted to host private endpoints connected to Key Vaults in addition to each vault's own subscription. An empty list grants no cross-subscription exceptions."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyDefinitions": [
+      {
+        "policyDefinitionReferenceId": "kvEnableFirewall",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/fb759c06-d992-42c0-b099-9e09cf902093",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionReferenceId": "kvAllowedIpRules",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/db98217a-80f5-4cbd-bc9c-91640765ed90",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "allowedAddressRanges": {
+            "value": "[parameters('allowedAddressRanges')]"
+          },
+          "allowedVirtualNetworks": {
+            "value": "[parameters('allowedVirtualNetworks')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "restrictExternalPeKv",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/7671c803-6fb1-4a5f-a127-1eb7cf83bea2",
+        "definitionVersion": "1.*.*",
+        "parameters": {
+          "excludedEndpointSubIds": {
+            "value": "[parameters('restrictExternalPeKv_excludedEndpointSubIds')]"
+          }
+        }
+      },
+      {
+        "policyDefinitionReferenceId": "KeyVaultShouldEnableSoftDelete",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/1e66c121-a66a-4b1f-9b83-0fd99bf0fc2d",
+        "definitionVersion": "3.*.*"
+      },
+      {
+        "policyDefinitionReferenceId": "KeyVaultShouldDisablePublicNetworkAccess",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/405c5871-3e91-4644-8a63-58e19d68ff5b",
+        "definitionVersion": "1.*.*"
+      },
+      {
+        "policyDefinitionReferenceId": "KeyVaultShouldUseRBAC",
+        "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/12d4fa5e-1f9f-4c21-97a9-b99b3c6611b5",
+        "definitionVersion": "1.*.*"
+      }
+    ],
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policySetDefinitions/d7e9a08c-cb4e-4f50-9c66-4ec2e5c47596",
+  "name": "d7e9a08c-cb4e-4f50-9c66-4ec2e5c47596"
+}

@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Azure Private Link lets you connect your virtual network to Azure services without a public IP address at the source or destination. The Private Link platform handles the connectivity between the consumer and services over the Azure backbone network. By mapping private endpoints to your storage account, data leakage risks are reduced. Learn more about private links at - https://aka.ms/azureprivatelinkoverview",
     "metadata": {
-      "version": "2.0.0",
+      "version": "2.1.0",
       "category": "Storage"
     },
-    "version": "2.0.0",
+    "version": "2.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -21,12 +21,78 @@
           "Disabled"
         ],
         "defaultValue": "AuditIfNotExists"
+      },
+      "excludedManagedByResourceProviders": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Managed services to exclude",
+          "description": "Select managed services whose storage accounts should be excluded from this policy, or select all managed resource groups. Leave empty to evaluate all storage accounts."
+        },
+        "allowedValues": [
+          "Azure Red Hat OpenShift",
+          "Azure Databricks",
+          "Microsoft Purview",
+          "All managed resource groups"
+        ],
+        "defaultValue": []
       }
     },
     "policyRule": {
       "if": {
-        "field": "type",
-        "equals": "Microsoft.Storage/storageAccounts"
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'Azure Red Hat OpenShift')]",
+                "equals": false
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.RedHatOpenShift/"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'Azure Databricks')]",
+                "equals": false
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Databricks/"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'Microsoft Purview')]",
+                "equals": false
+              },
+              {
+                "value": "[resourcegroup().managedBy]",
+                "notContains": "/providers/Microsoft.Purview/"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[contains(parameters('excludedManagedByResourceProviders'), 'All managed resource groups')]",
+                "equals": false
+              },
+              {
+                "value": "[empty(resourcegroup().managedBy)]",
+                "equals": true
+              }
+            ]
+          }
+        ]
       },
       "then": {
         "effect": "[parameters('effect')]",
@@ -40,6 +106,7 @@
       }
     },
     "versions": [
+      "2.1.0",
       "2.0.0"
     ]
   },

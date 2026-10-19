@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Key Vault should restrict external private endpoints in mission platforms",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Restrict approved Key Vault private endpoint connections with missing endpoint IDs or endpoints in other subscriptions unless those subscriptions are explicitly excluded. This reduces access through unapproved private network paths.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Choose whether to audit, deny, or disable evaluation of unapproved Key Vault private endpoint connections."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedEndpointSubIds": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded private endpoint subscription IDs",
+          "description": "Subscription IDs permitted to host private endpoints connected to the vault in addition to its own subscription. An empty list grants no cross-subscription exceptions."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/vaults/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.KeyVault/vaults/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.KeyVault/vaults/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.KeyVault/vaults/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.KeyVault/vaults/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedEndpointSubIds')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/7671c803-6fb1-4a5f-a127-1eb7cf83bea2",
+  "name": "7671c803-6fb1-4a5f-a127-1eb7cf83bea2"
+}
