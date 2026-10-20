@@ -3,10 +3,26 @@
     "displayName": "Add system-assigned managed identity to enable Guest Configuration assignments on virtual machines with no identities",
     "policyType": "BuiltIn",
     "mode": "Indexed",
-    "description": "This policy adds a system-assigned managed identity to virtual machines hosted in Azure that are supported by Guest Configuration but do not have any managed identities. A system-assigned managed identity is a prerequisite for all Guest Configuration assignments and must be added to machines before using any Guest Configuration policy definitions. For more information on Guest Configuration, visit https://aka.ms/gcpol.",
+    "description": "This policy adds a system-assigned managed identity to virtual machines hosted in Azure that are supported by Guest Configuration but do not have any managed identities. A system-assigned managed identity is needed to enable Guest Configuration assignments on the machine.",
     "metadata": {
       "category": "Guest Configuration",
       "version": "4.1.0"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy.",
+          "category": "General"
+        },
+        "allowedValues": [
+          "Modify",
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Modify"
+      }
     },
     "version": "4.1.0",
     "policyRule": {
@@ -357,7 +373,7 @@
         ]
       },
       "then": {
-        "effect": "modify",
+        "effect": "[parameters('effect')]",
         "details": {
           "roleDefinitionIds": [
             "/providers/microsoft.authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
