@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure HorizonDB clusters should use private endpoints",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Private endpoints enable private connectivity to Azure HorizonDB clusters from a virtual network using Azure Private Link. An approved connection is required for private access; public network access must be disabled separately to restrict access to private endpoints.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "HorizonDB",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.HorizonDb/clusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.HorizonDb/clusters/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.HorizonDb/clusters/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/6ba69446-e019-4750-a1be-c3f05871b99b",
+  "name": "6ba69446-e019-4750-a1be-c3f05871b99b"
+}

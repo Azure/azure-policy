@@ -5,7 +5,7 @@
     "mode": "Indexed",
     "description": "This policy provides you the ability to customize and deploy STIG Guides for audit purposes to your Linux workloads across Azure, on-premises and hybrid environments. The contents of the STIG Guides  are in parity with the benchmarks published at https://www.cyber.mil/stigs/. The policy is powered by kompli - https://github.com/microsoft/kompli. Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
     "metadata": {
-      "version": "1.0.0-preview",
+      "version": "1.2.0-preview",
       "category": "Guest Configuration",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
@@ -19,7 +19,7 @@
         }
       }
     },
-    "version": "1.0.0-preview",
+    "version": "1.2.0-preview",
     "parameters": {
       "IncludeArcMachines": {
         "type": "String",
@@ -34,6 +34,66 @@
         ],
         "defaultValue": "false"
       },
+      "ArcKind": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Arc machine cloud provider kind",
+          "description": "Optional filter applied to every evaluated resource (Azure VM and Arc machine). Only resources whose 'kind' matches this value are evaluated. Use 'None' to disable this filter. Azure VMs do not have a 'kind' value, so setting this to AWS/GCP will exclude them from evaluation."
+        },
+        "allowedValues": [
+          "AWS",
+          "GCP",
+          "None"
+        ],
+        "defaultValue": "None"
+      },
+      "tagFilter": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Inclusion Tags",
+          "description": "Optional inclusion tags filtering to limit which resources the policy applies to. Add any number of name/value pairs to the 'tags' array. Use AnyTags when any one tag can match, or AllTags when all specified tags must match. Leave 'tags' empty to apply the policy to all matching resources."
+        },
+        "defaultValue": {
+          "mode": "AnyTags",
+          "tags": []
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "AnyTags",
+                "AllTags"
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "mode",
+            "tags"
+          ],
+          "additionalProperties": false
+        }
+      },
       "BaselineSettings": {
         "type": "String",
         "metadata": {
@@ -47,195 +107,211 @@
         "type": "String",
         "metadata": {
           "displayName": "Effect",
-          "description": "Enable or disable the execution of this policy"
+          "description": "Enable or disable the execution of this policy",
+          "portalReview": "true"
         },
         "allowedValues": [
+          "DeployIfNotExists",
           "AuditIfNotExists",
           "Disabled"
         ],
         "defaultValue": "AuditIfNotExists"
+      },
+      "RemediationLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Remediation Location",
+          "strongType": "location",
+          "description": "Locations in which deployed assignments use TargetedDeployAndAutoCorrect. Use '*' to include all locations. Leave empty to deploy Audit assignments only, including when running a remediation task.",
+          "portalReview": "true"
+        },
+        "defaultValue": []
       }
     },
     "policyRule": {
       "if": {
-        "anyOf": [
+        "allOf": [
           {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "type",
-                "equals": "Microsoft.Compute/virtualMachines"
-              },
-              {
-                "anyOf": [
+                "allOf": [
                   {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "in": [
-                      "microsoft-aks",
-                      "qubole-inc",
-                      "datastax",
-                      "couchbase",
-                      "scalegrid",
-                      "checkpoint",
-                      "paloaltonetworks",
-                      "debian",
-                      "credativ"
-                    ]
+                    "field": "type",
+                    "equals": "Microsoft.Compute/virtualMachines"
                   },
                   {
-                    "allOf": [
+                    "anyOf": [
                       {
                         "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "OpenLogic"
+                        "in": [
+                          "microsoft-aks",
+                          "qubole-inc",
+                          "datastax",
+                          "couchbase",
+                          "scalegrid",
+                          "checkpoint",
+                          "paloaltonetworks",
+                          "debian",
+                          "credativ"
+                        ]
                       },
                       {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "6*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "Oracle"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "6*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "7*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "RedHat"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "6*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "7*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "center-for-internet-security-inc"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "notLike": "cis-win*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "Canonical"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "12*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "14*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "16*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "18*"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "20*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "microsoft-dsvm"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "notLike": "dsvm-win*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "cloudera"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "6*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "microsoft-ads"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "linux*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "anyOf": [
+                        "allOf": [
                           {
-                            "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
-                            "exists": "true"
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "OpenLogic"
                           },
                           {
-                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-                            "like": "Linux*"
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "6*"
                           }
                         ]
                       },
                       {
-                        "anyOf": [
+                        "allOf": [
                           {
                             "field": "Microsoft.Compute/imagePublisher",
-                            "exists": "false"
+                            "equals": "Oracle"
                           },
                           {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "6*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "7*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
                             "field": "Microsoft.Compute/imagePublisher",
-                            "notIn": [
-                              "OpenLogic",
-                              "RedHat",
-                              "credativ",
-                              "Suse",
-                              "Canonical",
-                              "microsoft-dsvm",
-                              "cloudera",
-                              "microsoft-ads",
-                              "center-for-internet-security-inc",
-                              "Oracle",
-                              "AzureDatabricks",
-                              "azureopenshift"
+                            "equals": "RedHat"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "6*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "7*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "center-for-internet-security-inc"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "notLike": "cis-win*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "Canonical"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "12*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "14*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "16*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "18*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "20*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-dsvm"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "notLike": "dsvm-win*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "cloudera"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "6*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "microsoft-ads"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageOffer",
+                            "like": "linux*"
+                          }
+                        ]
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration",
+                                "exists": "true"
+                              },
+                              {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                "like": "Linux*"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "field": "Microsoft.Compute/imagePublisher",
+                                "exists": "false"
+                              },
+                              {
+                                "field": "Microsoft.Compute/imagePublisher",
+                                "notIn": [
+                                  "OpenLogic",
+                                  "RedHat",
+                                  "credativ",
+                                  "Suse",
+                                  "Canonical",
+                                  "microsoft-dsvm",
+                                  "cloudera",
+                                  "microsoft-ads",
+                                  "center-for-internet-security-inc",
+                                  "Oracle",
+                                  "AzureDatabricks",
+                                  "azureopenshift"
+                                ]
+                              }
                             ]
                           }
                         ]
@@ -243,42 +319,80 @@
                     ]
                   }
                 ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.HybridCompute/machines"
+                  },
+                  {
+                    "field": "Microsoft.HybridCompute/imageOffer",
+                    "like": "linux*"
+                  },
+                  {
+                    "value": "[parameters('IncludeArcMachines')]",
+                    "equals": "true"
+                  }
+                ]
               }
             ]
           },
           {
-            "allOf": [
+            "anyOf": [
               {
-                "anyOf": [
+                "value": "[parameters('ArcKind')]",
+                "equals": "None"
+              },
+              {
+                "field": "kind",
+                "equals": "[parameters('ArcKind')]"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[length(parameters('tagFilter').tags)]",
+                "equals": 0
+              },
+              {
+                "allOf": [
                   {
-                    "allOf": [
-                      {
-                        "field": "type",
-                        "equals": "Microsoft.HybridCompute/machines"
-                      },
-                      {
-                        "field": "Microsoft.HybridCompute/imageOffer",
-                        "like": "linux*"
-                      }
-                    ]
+                    "value": "[parameters('tagFilter').mode]",
+                    "equals": "AnyTags"
                   },
                   {
-                    "allOf": [
-                      {
-                        "field": "type",
-                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
-                      },
-                      {
-                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
-                        "like": "linux*"
+                    "count": {
+                      "value": "[parameters('tagFilter').tags]",
+                      "name": "tagItem",
+                      "where": {
+                        "value": "[if(contains(string(field('tags')), concat('\"', current('tagItem').name, '\":\"', current('tagItem').value, '\"')), equals(substring(string(field('tags')), add(indexOf(string(field('tags')), concat('\"', current('tagItem').name, '\":\"')), add(length(current('tagItem').name), 4)), length(current('tagItem').value)), current('tagItem').value), false())]",
+                        "equals": true
                       }
-                    ]
+                    },
+                    "greater": 0
                   }
                 ]
               },
               {
-                "value": "[parameters('IncludeArcMachines')]",
-                "equals": "true"
+                "allOf": [
+                  {
+                    "value": "[parameters('tagFilter').mode]",
+                    "equals": "AllTags"
+                  },
+                  {
+                    "count": {
+                      "value": "[parameters('tagFilter').tags]",
+                      "name": "tagItem",
+                      "where": {
+                        "value": "[if(contains(string(field('tags')), concat('\"', current('tagItem').name, '\":\"', current('tagItem').value, '\"')), equals(substring(string(field('tags')), add(indexOf(string(field('tags')), concat('\"', current('tagItem').name, '\":\"')), add(length(current('tagItem').name), 4)), length(current('tagItem').value)), current('tagItem').value), false())]",
+                        "equals": true
+                      }
+                    },
+                    "equals": "[length(parameters('tagFilter').tags)]"
+                  }
+                ]
               }
             ]
           }
@@ -287,6 +401,9 @@
       "then": {
         "effect": "[parameters('effect')]",
         "details": {
+          "roleDefinitionIds": [
+            "/providers/microsoft.authorization/roleDefinitions/088ab73d-1256-47ae-bea9-9de8e7131f31"
+          ],
           "type": "Microsoft.GuestConfiguration/guestConfigurationAssignments",
           "name": "STIGLinuxSecurityBaseline",
           "existenceCondition": {
@@ -300,11 +417,148 @@
                 "notEquals": "{}"
               }
             ]
+          },
+          "deployment": {
+            "properties": {
+              "mode": "incremental",
+              "parameters": {
+                "vmName": {
+                  "value": "[field('name')]"
+                },
+                "location": {
+                  "value": "[field('location')]"
+                },
+                "type": {
+                  "value": "[field('type')]"
+                },
+                "tags": {
+                  "value": "[field('tags')]"
+                },
+                "configurationName": {
+                  "value": "STIGLinuxSecurityBaseline"
+                },
+                "BaselineSettings": {
+                  "value": "[parameters('BaselineSettings')]"
+                },
+                "InclusionLocations": {
+                  "value": "[parameters('RemediationLocations')]"
+                }
+              },
+              "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "vmName": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "tags": {
+                    "type": "object",
+                    "defaultValue": {}
+                  },
+                  "configurationName": {
+                    "type": "string"
+                  },
+                  "BaselineSettings": {
+                    "type": "string"
+                  },
+                  "InclusionLocations": {
+                    "type": "array",
+                    "defaultValue": []
+                  }
+                },
+                "variables": {
+                  "locationFilterConfigured": "[not(empty(parameters('InclusionLocations')))]",
+                  "locationMatches": "[if(variables('locationFilterConfigured'), or(contains(parameters('InclusionLocations'), '*'), contains(parameters('InclusionLocations'), toLower(parameters('location')))), true())]",
+                  "isIncluded": "[and(variables('locationFilterConfigured'), variables('locationMatches'))]",
+                  "assignmentType": "[if(variables('isIncluded'), 'TargetedDeployAndAutoCorrect', 'Audit')]"
+                },
+                "outputs": {
+                  "locationFilterConfigured": {
+                    "type": "bool",
+                    "value": "[variables('locationFilterConfigured')]"
+                  },
+                  "locationMatches": {
+                    "type": "bool",
+                    "value": "[variables('locationMatches')]"
+                  },
+                  "isIncluded": {
+                    "type": "bool",
+                    "value": "[variables('isIncluded')]"
+                  },
+                  "assignmentType": {
+                    "type": "string",
+                    "value": "[variables('assignmentType')]"
+                  },
+                  "resourceLocation": {
+                    "type": "string",
+                    "value": "[parameters('location')]"
+                  },
+                  "resourceTags": {
+                    "type": "object",
+                    "value": "[parameters('tags')]"
+                  },
+                  "configuredLocation": {
+                    "type": "array",
+                    "value": "[parameters('InclusionLocations')]"
+                  }
+                },
+                "resources": [
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('microsoft.hybridcompute/machines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.HybridCompute/machines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "assignmentType": "[variables('assignmentType')]",
+                        "configurationParameter": [
+                          {
+                            "name": "STIGLinuxSecurityBaseline;BaselineSettings",
+                            "value": "[parameters('BaselineSettings')]"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "condition": "[equals(toLower(parameters('type')), toLower('Microsoft.Compute/virtualMachines'))]",
+                    "apiVersion": "2018-11-20",
+                    "type": "Microsoft.Compute/virtualMachines/providers/guestConfigurationAssignments",
+                    "name": "[concat(parameters('vmName'), '/Microsoft.GuestConfiguration/', parameters('configurationName'))]",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                      "guestConfiguration": {
+                        "name": "[parameters('configurationName')]",
+                        "version": "1.*",
+                        "assignmentType": "[variables('assignmentType')]",
+                        "configurationParameter": [
+                          {
+                            "name": "STIGLinuxSecurityBaseline;BaselineSettings",
+                            "value": "[parameters('BaselineSettings')]"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
           }
         }
       }
     },
     "versions": [
+      "1.2.0-PREVIEW",
+      "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },

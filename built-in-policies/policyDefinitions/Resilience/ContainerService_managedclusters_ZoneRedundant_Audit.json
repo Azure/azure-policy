@@ -6,10 +6,10 @@
     "description": "Azure Kubernetes Service Managed Clusters can be configured to be Zone Redundant or not. The policy checks the node pools in the cluster and ensures that avaialbilty zones are set for all the node pools.",
     "metadata": {
       "category": "Resilience",
-      "version": "1.0.0-preview",
+      "version": "1.1.0-preview",
       "preview": true
     },
-    "version": "1.0.0-preview",
+    "version": "1.1.0-preview",
     "parameters": {
       "effect": {
         "type": "String",
@@ -38,10 +38,22 @@
                 "count": {
                   "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
                   "where": {
-                    "count": {
-                      "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].availabilityZones[*]"
-                    },
-                    "less": 3
+                    "allOf": [
+                      {
+                        "value": "[coalesce(tryGet(current('Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]'), 'mode'), '')]",
+                        "notEquals": "Machines"
+                      },
+                      {
+                        "value": "[coalesce(tryGet(current('Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]'), 'type'), '')]",
+                        "notEquals": "FlexNodes"
+                      },
+                      {
+                        "count": {
+                          "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].availabilityZones[*]"
+                        },
+                        "less": 3
+                      }
+                    ]
                   }
                 },
                 "greater": 0
@@ -50,8 +62,20 @@
                 "count": {
                   "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
                   "where": {
-                    "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].count",
-                    "less": 3
+                    "allOf": [
+                      {
+                        "value": "[coalesce(tryGet(current('Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]'), 'mode'), '')]",
+                        "notEquals": "Machines"
+                      },
+                      {
+                        "value": "[coalesce(tryGet(current('Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]'), 'type'), '')]",
+                        "notEquals": "FlexNodes"
+                      },
+                      {
+                        "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].count",
+                        "less": 3
+                      }
+                    ]
                   }
                 },
                 "greater": 0
@@ -65,6 +89,7 @@
       }
     },
     "versions": [
+      "1.1.0-PREVIEW",
       "1.0.0-PREVIEW"
     ]
   },

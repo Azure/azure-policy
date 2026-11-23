@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Kubernetes Service clusters should disable public network access",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Disabling public network access improves security by preventing Azure Kubernetes Service cluster API servers from being accessed over public networks. Ensure that a private access path is configured before disabling public network access.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ContainerService/managedClusters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.ContainerService/managedClusters/publicNetworkAccess",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.ContainerService/managedClusters/publicNetworkAccess",
+                "notEquals": "Disabled"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f6c2ab23-7f3b-47db-a0dc-24fc64d658fa",
+  "name": "f6c2ab23-7f3b-47db-a0dc-24fc64d658fa"
+}

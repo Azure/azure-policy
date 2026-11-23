@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Container Apps environments should use customer-managed keys to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage encryption at rest for Container Apps environments. Customer-managed keys enable data to be encrypted with an Azure Key Vault key created and owned by you, giving you control over the key lifecycle, including rotation and management.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Sovereignty"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.App/managedEnvironments"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.App/managedEnvironments/diskEncryptionConfiguration.keyVaultConfiguration.keyUrl",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.App/managedEnvironments/diskEncryptionConfiguration.keyVaultConfiguration.keyUrl",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0253f0dc-b6de-4795-97ae-1ee0b4ffe3a6",
+  "name": "0253f0dc-b6de-4795-97ae-1ee0b4ffe3a6"
+}

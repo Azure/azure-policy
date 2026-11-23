@@ -1,14 +1,14 @@
 {
   "properties": {
     "displayName": "Deploy VNet Flow Logs with Traffic Analytics for VNets with regional Storage and centralized Log Analytics",
-    "description": "Deploy VNet Flow Logs with Traffic Analytics for VNets with regional Storage and centralized Log Analytics. Before remediation ensure that the resourceGroupName Resource Group, Storage Account, Log Analytics Workspace, Network Watcher are all deployed already.",
     "policyType": "BuiltIn",
     "mode": "Indexed",
+    "description": "Deploy VNet Flow Logs with Traffic Analytics for VNets with regional Storage and centralized Log Analytics. Before remediation ensure that the resourceGroupName Resource Group, Storage Account, Log Analytics Workspace, Network Watcher are all deployed already.",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Network"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -129,7 +129,11 @@
             ]
           },
           "roleDefinitionIds": [
-            "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7"
+            "/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+            "/providers/Microsoft.Authorization/roleDefinitions/749f88d5-cbae-40b8-bcfc-e573ddc772fa",
+            "/providers/Microsoft.Authorization/roleDefinitions/17d1049b-9a84-46fb-8f53-869881c3d3ab",
+            "/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7",
+            "/providers/Microsoft.Authorization/roleDefinitions/3913510d-42f4-4e42-8a64-420c390055eb"
           ],
           "deployment": {
             "properties": {
@@ -138,6 +142,9 @@
                 "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "parameters": {
+                  "location": {
+                    "type": "String"
+                  },
                   "workspaceRegion": {
                     "type": "String"
                   },
@@ -168,7 +175,7 @@
                 },
                 "variables": {
                   "resourceGroupName": "[if(equals(parameters('resourceGroupName'), 'nwtarg'), concat('nwtarg-', subscription().subscriptionId), parameters('resourceGroupName'))]",
-                  "storageAccountName": "[toLower(concat('nwtasa', uniqueString(concat(subscription().subscriptionId, field('location')))))]",
+                  "storageAccountName": "[toLower(concat('nwtasa', uniqueString(concat(subscription().subscriptionId, parameters('location')))))]",
                   "storageAccountResourceId": "[resourceId(subscription().subscriptionId, variables('resourceGroupName'), 'Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
                   "workspaceName": "[toLower(concat('nwtaws', uniqueString(concat(subscription().subscriptionId, parameters('workspaceRegion')))))]",
                   "workspaceResourceId": "[resourceId(subscription().subscriptionId, variables('resourceGroupName'), 'Microsoft.OperationalInsights/workspaces', variables('workspaceName'))]"
@@ -177,9 +184,12 @@
                   {
                     "type": "Microsoft.Resources/deployments",
                     "apiVersion": "2021-04-01",
-                    "name": "[concat('deployFlowLogToNetworkWatcherRG', uniqueString(concat(subscription().subscriptionId, field('location'))))]",
+                    "name": "[concat('deployFlowLogToNetworkWatcherRG', uniqueString(concat(subscription().subscriptionId, parameters('location'))))]",
                     "properties": {
                       "mode": "Incremental",
+                      "expressionEvaluationOptions": {
+                        "scope": "outer"
+                      },
                       "template": {
                         "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                         "contentVersion": "1.0.0.0",
@@ -189,7 +199,7 @@
                             "type": "Microsoft.Network/networkWatchers/flowLogs",
                             "apiVersion": "2022-09-01",
                             "name": "[concat(parameters('networkWatcherName'), '/', parameters('flowlogName'))]",
-                            "location": "[field('location')]",
+                            "location": "[parameters('location')]",
                             "properties": {
                               "enabled": true,
                               "targetResourceId": "[parameters('targetVnetId')]",
@@ -220,6 +230,9 @@
                 ]
               },
               "parameters": {
+                "location": {
+                  "value": "[field('location')]"
+                },
                 "workspaceRegion": {
                   "value": "[parameters('workspaceRegion')]"
                 },
@@ -254,6 +267,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },

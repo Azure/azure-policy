@@ -1,0 +1,58 @@
+{
+  "properties": {
+    "displayName": "Playwright Workspaces should use virtual network injection",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Require Playwright Workspaces to specify a subnet for virtual network injection. This enables cloud-hosted browsers to access applications on private networks and allows network traffic to be controlled through the virtual network. The subnet cannot be changed after workspace creation; existing workspaces without a subnet must be recreated to comply.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Playwright Workspaces"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.LoadTestService/playwrightWorkspaces"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.LoadTestService/playwrightWorkspaces/subnetId",
+                "exists": "false"
+              },
+              {
+                "field": "Microsoft.LoadTestService/playwrightWorkspaces/subnetId",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/f241cc0d-68e6-413b-8235-f7490ef17294",
+  "name": "f241cc0d-68e6-413b-8235-f7490ef17294"
+}

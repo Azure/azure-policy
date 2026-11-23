@@ -1,0 +1,55 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Stream Analytics clusters should have a fully configured managed private endpoint connection",
+    "description": "Managed private endpoints enable private outbound connectivity from Azure Stream Analytics clusters to supported input and output resources. This policy audits clusters that do not have at least one managed private endpoint with a completed setup.",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.StreamAnalytics/clusters"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.StreamAnalytics/clusters/privateEndpoints",
+          "existenceCondition": {
+            "count": {
+              "field": "Microsoft.StreamAnalytics/clusters/privateEndpoints/manualPrivateLinkServiceConnections[*]",
+              "where": {
+                "field": "Microsoft.StreamAnalytics/clusters/privateEndpoints/manualPrivateLinkServiceConnections[*].privateLinkServiceConnectionState.status",
+                "equals": "SetUpComplete"
+              }
+            },
+            "greaterOrEquals": 1
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/53ed4ed6-59b1-4f85-b6b3-36178fe76759",
+  "name": "53ed4ed6-59b1-4f85-b6b3-36178fe76759"
+}

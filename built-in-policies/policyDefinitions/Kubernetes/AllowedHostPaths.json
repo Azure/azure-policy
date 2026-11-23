@@ -5,10 +5,10 @@
     "mode": "Microsoft.Kubernetes.Data",
     "description": "Limit pod HostPath volume mounts to the allowed host paths in a Kubernetes Cluster. This policy is generally available for Kubernetes Service (AKS), and Azure Arc enabled Kubernetes. For more information, see https://aka.ms/kubepolicydoc.",
     "metadata": {
-      "version": "6.4.0",
+      "version": "8.0.0",
       "category": "Kubernetes"
     },
-    "version": "6.4.0",
+    "version": "8.0.0",
     "parameters": {
       "source": {
         "type": "String",
@@ -214,6 +214,14 @@
         },
         "defaultValue": true
       },
+      "requireRecursiveReadOnly": {
+        "type": "Boolean",
+        "metadata": {
+          "displayName": "Require recursive read-only for read-only host paths",
+          "description": "When enabled, a host path allowed with readOnly must be mounted with recursiveReadOnly set to 'Enabled' (Kubernetes 1.30+). A plain readOnly mount only makes the top-level mount read-only and leaves nested submounts writable. Only 'Enabled' is accepted because it is the only value that guarantees recursive read-only. Defaults to false to preserve behavior and avoid breaking workloads or nodes without recursive read-only support."
+        },
+        "defaultValue": false
+      },
       "excludedContainers": {
         "type": "Array",
         "metadata": {
@@ -227,6 +235,15 @@
         "metadata": {
           "displayName": "Image exclusions",
           "description": "The list of InitContainers and Containers to exclude from policy evaluation. The identifier is the image of container. Prefix-matching can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository.",
+          "deprecated": true
+        },
+        "defaultValue": []
+      },
+      "excludedWorkloads": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Workload exclusions",
+          "description": "The list of InitContainers and Containers to exclude from policy evaluation. Each entry is an object with `image`, `namespace` and `serviceAccount`; a container is excluded only when all three match. Prefix-matching on the image can be signified with `*`. For example: `myregistry.azurecr.io/istio:*`. It is recommended that users use the fully-qualified Docker image name (e.g. start with a domain name) in order to avoid unexpectedly exempting images from an untrusted repository. The namespace and service account scope the exclusion to a specific workload identity, so that naming an excluded image is not on its own sufficient to skip evaluation. In public-cloud policy version 8.0.0 and later, excludedImages is retained only for assignment compatibility and is ignored. Before upgrading, migrate each image exclusion to an entry here with an explicitly approved namespace and service account, and validate in Audit before enabling Deny.",
           "portalReview": true
         },
         "defaultValue": []
@@ -247,7 +264,7 @@
           "warn": "[parameters('warn')]",
           "templateInfo": {
             "sourceType": "PublicURL",
-            "url": "https://store.policy.core.windows.net/kubernetes/allowed-host-paths/v5/template.yaml"
+            "url": "https://store.policy.core.windows.net/kubernetes/allowed-host-paths/v7/template.yaml"
           },
           "apiGroups": [
             ""
@@ -262,13 +279,16 @@
             "allowedHostPaths": "[parameters('allowedHostPaths').paths]",
             "windowsAllowedHostPaths": "[parameters('windowsAllowedHostPaths').paths]",
             "blockSocketMountPaths": "[parameters('blockSocketMountPaths')]",
+            "requireRecursiveReadOnly": "[parameters('requireRecursiveReadOnly')]",
             "excludedContainers": "[parameters('excludedContainers')]",
-            "excludedImages": "[parameters('excludedImages')]"
+            "excludedWorkloads": "[parameters('excludedWorkloads')]"
           }
         }
       }
     },
     "versions": [
+      "8.0.0",
+      "7.0.0",
       "6.4.0",
       "6.3.0",
       "6.2.0",

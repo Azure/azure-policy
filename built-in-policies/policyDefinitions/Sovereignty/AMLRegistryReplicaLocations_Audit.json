@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Machine Learning registry replica locations should use allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict the regions where Azure Machine Learning registries provision replicated backing resources to meet data residency and sovereignty requirements. This policy evaluates the locations configured in the registry region details.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedReplicaLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed replica locations",
+          "description": "The list of locations where Azure Machine Learning registries are allowed to provision replicated backing resources.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.MachineLearningServices/registries"
+          },
+          {
+            "count": {
+              "field": "Microsoft.MachineLearningServices/registries/regionDetails[*]",
+              "where": {
+                "value": "[replace(toLower(current('Microsoft.MachineLearningServices/registries/regionDetails[*].location')), ' ', '')]",
+                "notIn": "[parameters('allowedReplicaLocations')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/c58f681b-52c4-4935-820b-e2ced188a98c",
+  "name": "c58f681b-52c4-4935-820b-e2ced188a98c"
+}

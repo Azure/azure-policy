@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure IoT Hub disaster recovery secondary locations should use allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit Azure IoT hubs when their Microsoft-managed disaster recovery secondary location is outside the list of allowed locations. This policy does not evaluate the hub's primary location.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedSecondaryLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed disaster recovery secondary locations",
+          "description": "The list of locations where Azure IoT Hub disaster recovery secondaries are allowed.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Devices/IotHubs"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Devices/IotHubs/locations[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "value": "[toLower(current('Microsoft.Devices/IotHubs/locations[*].role'))]",
+                    "equals": "secondary"
+                  },
+                  {
+                    "value": "[replace(toLower(current('Microsoft.Devices/IotHubs/locations[*].location')), ' ', '')]",
+                    "notIn": "[parameters('allowedSecondaryLocations')]"
+                  }
+                ]
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/93fc07ef-f4b9-418a-9190-6e2628e72856",
+  "name": "93fc07ef-f4b9-418a-9190-6e2628e72856"
+}

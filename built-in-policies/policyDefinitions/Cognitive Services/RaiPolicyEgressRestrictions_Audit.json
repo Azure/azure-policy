@@ -1,0 +1,448 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure AI Services RAI policies should enforce egress baseline and endpoint restrictions",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Require present RAI egress policies to use enforced runtime mode, default deny, permitted FQDN actions, and source host/path scopes that are explicitly permitted and not denied. Does not validate rewrite targets or header credentials.",
+    "metadata": {
+      "version": "1.0.1-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.1-preview",
+    "parameters": {
+      "permittedDestinations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Permitted destinations",
+          "description": "Use host, host/path, or host/path/*; for example, api.contoso.com, api.contoso.com/public/item, or *.contoso.com/public/*. A bare hostname covers all paths. A leading *. includes the apex and subdomains. Host and path comparisons are case-insensitive. Do not include schemes, ports, queries, fragments, user information, spaces, or backslashes. An empty list permits no traffic-permitting scopes. Maximum 100 entries per list under the standard value-count iteration limit."
+        }
+      },
+      "deniedDestinations": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Denied destinations",
+          "description": "Excluded scopes using host, host/path, or host/path/*; for example, api.contoso.com/admin/*. A bare hostname covers all paths. A leading *. includes the apex and subdomains. Host and path comparisons are case-insensitive. Do not include schemes, ports, queries, fragments, user information, spaces, or backslashes. An approval does not override a denial. Maximum 100 entries per list under the standard value-count iteration limit."
+        }
+      },
+      "allowedActionTypes": {
+        "type": "Array",
+        "allowedValues": [
+          "Allow",
+          "Deny",
+          "Transform",
+          "Rewrite"
+        ],
+        "defaultValue": [
+          "Allow",
+          "Deny",
+          "Transform",
+          "Rewrite"
+        ],
+        "metadata": {
+          "displayName": "Allowed actions",
+          "description": "Actions developers may configure. Every enabled traffic-permitting action must satisfy destination restrictions."
+        }
+      },
+      "effect": {
+        "type": "String",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Audit, deny, or disable these authoring checks. Does not change runtime egress mode."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices/accounts/raiPolicies"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy",
+                    "exists": "true"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.mode",
+                        "notEquals": "Enforced"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.defaultAction",
+                        "notEquals": "Deny"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "count": {
+                      "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*]",
+                      "where": {
+                        "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].action.actionType",
+                        "in": [
+                          "Allow",
+                          "Transform",
+                          "Rewrite"
+                        ]
+                      }
+                    },
+                    "greater": 0
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "count": {
+                          "value": "[parameters('permittedDestinations')]",
+                          "name": "permittedSyntax",
+                          "where": {
+                            "anyOf": [
+                              {
+                                "value": "[empty(first(split(current('permittedSyntax'), '/')))]",
+                                "equals": true
+                              },
+                              {
+                                "value": "[if(startsWith(first(split(current('permittedSyntax'), '/')), '*.'), or(lessOrEquals(length(first(split(current('permittedSyntax'), '/'))), 2), contains(skip(first(split(current('permittedSyntax'), '/')), 2), '*')), contains(first(split(current('permittedSyntax'), '/')), '*'))]",
+                                "equals": true
+                              },
+                              {
+                                "value": "[or(contains(current('permittedSyntax'), ':'), contains(current('permittedSyntax'), '?'), contains(current('permittedSyntax'), '#'), contains(current('permittedSyntax'), '@'), contains(current('permittedSyntax'), ' '), contains(current('permittedSyntax'), '\\'))]",
+                                "equals": true
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "value": "[skip(current('permittedSyntax'), length(first(split(current('permittedSyntax'), '/'))))]",
+                                    "contains": "*"
+                                  },
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "value": "[endsWith(current('permittedSyntax'), '/*')]",
+                                        "equals": false
+                                      },
+                                      {
+                                        "value": "[length(split(skip(current('permittedSyntax'), length(first(split(current('permittedSyntax'), '/')))), '*'))]",
+                                        "notEquals": 2
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "greater": 0
+                      },
+                      {
+                        "count": {
+                          "value": "[parameters('deniedDestinations')]",
+                          "name": "deniedSyntax",
+                          "where": {
+                            "anyOf": [
+                              {
+                                "value": "[empty(first(split(current('deniedSyntax'), '/')))]",
+                                "equals": true
+                              },
+                              {
+                                "value": "[if(startsWith(first(split(current('deniedSyntax'), '/')), '*.'), or(lessOrEquals(length(first(split(current('deniedSyntax'), '/'))), 2), contains(skip(first(split(current('deniedSyntax'), '/')), 2), '*')), contains(first(split(current('deniedSyntax'), '/')), '*'))]",
+                                "equals": true
+                              },
+                              {
+                                "value": "[or(contains(current('deniedSyntax'), ':'), contains(current('deniedSyntax'), '?'), contains(current('deniedSyntax'), '#'), contains(current('deniedSyntax'), '@'), contains(current('deniedSyntax'), ' '), contains(current('deniedSyntax'), '\\'))]",
+                                "equals": true
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "value": "[skip(current('deniedSyntax'), length(first(split(current('deniedSyntax'), '/'))))]",
+                                    "contains": "*"
+                                  },
+                                  {
+                                    "anyOf": [
+                                      {
+                                        "value": "[endsWith(current('deniedSyntax'), '/*')]",
+                                        "equals": false
+                                      },
+                                      {
+                                        "value": "[length(split(skip(current('deniedSyntax'), length(first(split(current('deniedSyntax'), '/')))), '*'))]",
+                                        "notEquals": 2
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "greater": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*]",
+                  "where": {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].ruleType",
+                        "notEquals": "Fqdn"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].action.actionType",
+                        "notIn": "[parameters('allowedActionTypes')]"
+                      },
+                      {
+                        "allOf": [
+                          {
+                            "field": "Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].action.actionType",
+                            "in": [
+                              "Allow",
+                              "Transform",
+                              "Rewrite"
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "value": "[empty(trim(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.host'))))]",
+                                "equals": true
+                              },
+                              {
+                                "value": "[string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.host'))]",
+                                "contains": "*"
+                              },
+                              {
+                                "count": {
+                                  "value": "[parameters('permittedDestinations')]",
+                                  "name": "permittedDestination",
+                                  "where": {
+                                    "allOf": [
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "value": "[toLower(trim(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.host'))))]",
+                                            "like": "[first(split(current('permittedDestination'), '/'))]"
+                                          },
+                                          {
+                                            "value": "[if(startsWith(current('permittedDestination'), '*.'), equals(toLower(trim(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.host')))), toLower(skip(first(split(current('permittedDestination'), '/')), 2))), false())]",
+                                            "equals": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "value": "[skip(current('permittedDestination'), length(first(split(current('permittedDestination'), '/'))))]",
+                                            "in": [
+                                              "",
+                                              "/*"
+                                            ]
+                                          },
+                                          {
+                                            "allOf": [
+                                              {
+                                                "value": "[empty(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')))]",
+                                                "equals": false
+                                              },
+                                              {
+                                                "anyOf": [
+                                                  {
+                                                    "allOf": [
+                                                      {
+                                                        "value": "[endsWith(current('permittedDestination'), '/*')]",
+                                                        "equals": true
+                                                      },
+                                                      {
+                                                        "value": "[startsWith(first(split(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')), first(split(skip(current('permittedDestination'), length(first(split(current('permittedDestination'), '/')))), '*')))]",
+                                                        "equals": true
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "allOf": [
+                                                      {
+                                                        "value": "[endsWith(current('permittedDestination'), '/*')]",
+                                                        "equals": false
+                                                      },
+                                                      {
+                                                        "value": "[contains(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')]",
+                                                        "equals": false
+                                                      },
+                                                      {
+                                                        "value": "[string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path'))]",
+                                                        "equals": "[skip(current('permittedDestination'), length(first(split(current('permittedDestination'), '/'))))]"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "equals": 0
+                              },
+                              {
+                                "count": {
+                                  "value": "[parameters('deniedDestinations')]",
+                                  "name": "deniedDestination",
+                                  "where": {
+                                    "allOf": [
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "value": "[toLower(trim(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.host'))))]",
+                                            "like": "[first(split(current('deniedDestination'), '/'))]"
+                                          },
+                                          {
+                                            "value": "[if(startsWith(current('deniedDestination'), '*.'), equals(toLower(trim(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.host')))), toLower(skip(first(split(current('deniedDestination'), '/')), 2))), false())]",
+                                            "equals": true
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "anyOf": [
+                                          {
+                                            "value": "[skip(current('deniedDestination'), length(first(split(current('deniedDestination'), '/'))))]",
+                                            "in": [
+                                              "",
+                                              "/*"
+                                            ]
+                                          },
+                                          {
+                                            "value": "[empty(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')))]",
+                                            "equals": true
+                                          },
+                                          {
+                                            "allOf": [
+                                              {
+                                                "value": "[contains(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')]",
+                                                "equals": false
+                                              },
+                                              {
+                                                "anyOf": [
+                                                  {
+                                                    "allOf": [
+                                                      {
+                                                        "value": "[endsWith(current('deniedDestination'), '/*')]",
+                                                        "equals": true
+                                                      },
+                                                      {
+                                                        "value": "[startsWith(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), first(split(skip(current('deniedDestination'), length(first(split(current('deniedDestination'), '/')))), '*')))]",
+                                                        "equals": true
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "allOf": [
+                                                      {
+                                                        "value": "[endsWith(current('deniedDestination'), '/*')]",
+                                                        "equals": false
+                                                      },
+                                                      {
+                                                        "value": "[string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path'))]",
+                                                        "equals": "[skip(current('deniedDestination'), length(first(split(current('deniedDestination'), '/'))))]"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "allOf": [
+                                              {
+                                                "value": "[contains(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')]",
+                                                "equals": true
+                                              },
+                                              {
+                                                "anyOf": [
+                                                  {
+                                                    "allOf": [
+                                                      {
+                                                        "value": "[endsWith(current('deniedDestination'), '/*')]",
+                                                        "equals": true
+                                                      },
+                                                      {
+                                                        "anyOf": [
+                                                          {
+                                                            "value": "[startsWith(first(split(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')), first(split(skip(current('deniedDestination'), length(first(split(current('deniedDestination'), '/')))), '*')))]",
+                                                            "equals": true
+                                                          },
+                                                          {
+                                                            "value": "[startsWith(first(split(skip(current('deniedDestination'), length(first(split(current('deniedDestination'), '/')))), '*')), first(split(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')))]",
+                                                            "equals": true
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "allOf": [
+                                                      {
+                                                        "value": "[endsWith(current('deniedDestination'), '/*')]",
+                                                        "equals": false
+                                                      },
+                                                      {
+                                                        "value": "[startsWith(skip(current('deniedDestination'), length(first(split(current('deniedDestination'), '/')))), first(split(string(current('Microsoft.CognitiveServices/accounts/raiPolicies/egressPolicy.rules[*].match.path')), '*')))]",
+                                                        "equals": true
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                },
+                                "greater": 0
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "greater": 0
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.1-PREVIEW",
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0cfd954d-079f-447f-91bf-89889e9d1de0",
+  "name": "0cfd954d-079f-447f-91bf-89889e9d1de0"
+}

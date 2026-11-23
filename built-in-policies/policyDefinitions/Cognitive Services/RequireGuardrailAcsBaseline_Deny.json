@@ -1,0 +1,88 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Microsoft Foundry Guardrails should satisfy an ACS policy baseline without automatic changes",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Check whether an ACS-format Guardrail already satisfies the whole baseline selected by its full ARM resource ID. Deny blocks a noncompliant write without changing the candidate. Audit reports noncompliance without blocking or modifying the Guardrail.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true,
+      "guardrailRequirements": {
+        "profileVersion": "guardrail-controls-v2",
+        "reconciliationMode": "Manual"
+      }
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Audit, deny, or disable this requirement."
+        },
+        "defaultValue": "Deny",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ]
+      },
+      "policyId": {
+        "type": "String",
+        "metadata": {
+          "displayName": "ACS baseline ARM resource ID",
+          "description": "Full ARM resource ID of the existing accounts/raiPolicies ACS baseline whose entire policy must already be satisfied. This is a resource reference, not a local manifest key or a single-point binding."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/raiPolicies"
+          },
+          {
+            "field": "Microsoft.CognitiveServices.Data/accounts/raiPolicies/format",
+            "equals": "ACS"
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[parameters('policyId')]",
+                "notLike": "/subscriptions/*"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.CognitiveServices.Data/accounts/raiPolicies/policyEvaluation.acs.bindings[*]",
+                  "where": {
+                    "allOf": [
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/raiPolicies/policyEvaluation.acs.bindings[*].point",
+                        "exists": "false"
+                      },
+                      {
+                        "field": "Microsoft.CognitiveServices.Data/accounts/raiPolicies/policyEvaluation.acs.bindings[*].policyId",
+                        "equals": "[parameters('policyId')]"
+                      }
+                    ]
+                  }
+                },
+                "less": 1
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/11f7e854-02de-41b2-a10e-0bad91fcea42",
+  "name": "11f7e854-02de-41b2-a10e-0bad91fcea42"
+}

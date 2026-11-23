@@ -1,0 +1,90 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure NetApp Files volumes should replicate only with volumes in allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict the locations of Azure NetApp Files replication partners to meet data residency and sovereignty requirements. A volume in a replication relationship is non-compliant when the remote volume's region is outside the allowed replica locations, or when the volume is a replication destination outside the allowed replica locations. Volumes without replication are not evaluated. A source volume's own location is not evaluated.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedReplicaLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed replica locations",
+          "description": "The list of locations where Azure NetApp Files volume replicas and their replication partners are allowed.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes"
+          },
+          {
+            "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/dataProtection.replication.remoteVolumeResourceId",
+            "exists": "true"
+          },
+          {
+            "anyOf": [
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/dataProtection.replication.remoteVolumeRegion",
+                    "exists": "true"
+                  },
+                  {
+                    "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/dataProtection.replication.remoteVolumeRegion",
+                    "notEquals": ""
+                  },
+                  {
+                    "value": "[replace(toLower(field('Microsoft.NetApp/netAppAccounts/capacityPools/volumes/dataProtection.replication.remoteVolumeRegion')), ' ', '')]",
+                    "notIn": "[parameters('allowedReplicaLocations')]"
+                  }
+                ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/dataProtection.replication.endpointType",
+                    "equals": "Dst"
+                  },
+                  {
+                    "value": "[replace(toLower(field('location')), ' ', '')]",
+                    "notIn": "[parameters('allowedReplicaLocations')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9860282b-3c80-4538-8bd7-dbc8cf012c6e",
+  "name": "9860282b-3c80-4538-8bd7-dbc8cf012c6e"
+}

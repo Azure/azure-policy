@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Service Bus geo-replication locations should use allowed regions",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict the Azure regions where Service Bus data is actively replicated, including primary and secondary regions, to meet data residency and sovereignty requirements.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedGeoReplicationLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed geo-replication locations",
+          "description": "The list of Azure regions where Service Bus data may be actively replicated.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ServiceBus/namespaces"
+          },
+          {
+            "count": {
+              "field": "Microsoft.ServiceBus/namespaces/geoDataReplication.locations[*]",
+              "where": {
+                "value": "[replace(toLower(current('Microsoft.ServiceBus/namespaces/geoDataReplication.locations[*].locationName')), ' ', '')]",
+                "notIn": "[parameters('allowedGeoReplicationLocations')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/9bf20ff2-0f28-47ea-ab41-0d070cf1d73b",
+  "name": "9bf20ff2-0f28-47ea-ab41-0d070cf1d73b"
+}
