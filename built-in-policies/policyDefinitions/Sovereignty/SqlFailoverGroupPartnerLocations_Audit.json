@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure SQL Database failover groups should use allowed partner locations",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Keep Azure SQL Database failover-group partners within approved regions to help meet data residency requirements. Only configured partner server locations are evaluated; database default secondary locations, standalone active geo-replication links, and backup locations are not evaluated.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedPartnerLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed partner locations",
+          "description": "The list of Azure regions where Azure SQL Database failover-group partner servers are allowed.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/failoverGroups"
+          },
+          {
+            "count": {
+              "field": "Microsoft.Sql/servers/failoverGroups/partnerServers[*]",
+              "where": {
+                "value": "[replace(toLower(string(current('Microsoft.Sql/servers/failoverGroups/partnerServers[*].location'))), ' ', '')]",
+                "notIn": "[parameters('allowedPartnerLocations')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e4bff06e-8af8-455b-8bec-58515205f65b",
+  "name": "e4bff06e-8af8-455b-8bec-58515205f65b"
+}

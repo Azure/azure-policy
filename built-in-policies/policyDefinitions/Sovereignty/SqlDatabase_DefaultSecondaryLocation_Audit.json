@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure SQL databases with a default secondary location should use an allowed location",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit Azure SQL databases with a default secondary location when that location is not in the list of allowed locations.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedDefaultSecondaryLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed default secondary locations",
+          "description": "The list of allowed default secondary locations for Azure SQL databases.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/servers/databases"
+          },
+          {
+            "field": "Microsoft.Sql/servers/databases/defaultSecondaryLocation",
+            "exists": true
+          },
+          {
+            "field": "Microsoft.Sql/servers/databases/defaultSecondaryLocation",
+            "notIn": "[parameters('allowedDefaultSecondaryLocations')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/4778c705-6ec3-4a0e-86bb-01b7da8a5bf4",
+  "name": "4778c705-6ec3-4a0e-86bb-01b7da8a5bf4"
+}

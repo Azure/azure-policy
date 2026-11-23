@@ -1,0 +1,62 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Log Analytics workspace replicas should use allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict the locations of Log Analytics workspace replicas to meet data residency and sovereignty requirements. A workspace with replication enabled is non-compliant when its replication location is missing or outside the allowed replica locations. Workspaces without replication enabled are compliant. The workspace's primary location is not evaluated.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedReplicaLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed replica locations",
+          "description": "The list of locations where Log Analytics workspace replicas are allowed.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.OperationalInsights/workspaces"
+          },
+          {
+            "field": "Microsoft.OperationalInsights/workspaces/replication.enabled",
+            "equals": "true"
+          },
+          {
+            "value": "[if(empty(field('Microsoft.OperationalInsights/workspaces/replication.location')), '', replace(toLower(field('Microsoft.OperationalInsights/workspaces/replication.location')), ' ', ''))]",
+            "notIn": "[parameters('allowedReplicaLocations')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/1ab7fa8d-5574-4983-97ed-2a184ca9526e",
+  "name": "1ab7fa8d-5574-4983-97ed-2a184ca9526e"
+}

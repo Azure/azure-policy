@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Microsoft Foundry agents should not use denied agent kinds",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Helps organizations prevent Microsoft Foundry agent kinds that are prohibited by organizational requirements.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "deniedAgentKinds": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Denied Agent Kinds",
+          "description": "List of agent kinds that Microsoft Foundry agents are not allowed to use."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/projects/agents"
+          },
+          {
+            "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/agentKind",
+            "in": "[parameters('deniedAgentKinds')]"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b6ca2367-8597-4a3f-ab19-48f58d6d9278",
+  "name": "b6ca2367-8597-4a3f-ab19-48f58d6d9278"
+}

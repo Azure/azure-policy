@@ -1,0 +1,72 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Key Vault Managed HSM extended regions should use allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Audit Azure Key Vault Managed HSM pools when a multi-region replication extended (secondary) region is outside the list of allowed locations. This policy does not evaluate the pool's primary region.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedReplicaLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed extended region locations",
+          "description": "The list of locations where Azure Key Vault Managed HSM extended (secondary) regions are allowed.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.KeyVault/managedHSMs"
+          },
+          {
+            "count": {
+              "field": "Microsoft.KeyVault/managedHSMs/regions[*]",
+              "where": {
+                "allOf": [
+                  {
+                    "field": "Microsoft.KeyVault/managedHSMs/regions[*].isPrimary",
+                    "equals": false
+                  },
+                  {
+                    "value": "[replace(toLower(current('Microsoft.KeyVault/managedHSMs/regions[*].name')), ' ', '')]",
+                    "notIn": "[parameters('allowedReplicaLocations')]"
+                  }
+                ]
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/0eb02880-8961-46b2-a106-107bb2058f00",
+  "name": "0eb02880-8961-46b2-a106-107bb2058f00"
+}

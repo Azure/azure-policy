@@ -1,0 +1,59 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure NetApp Files accounts should use customer-managed keys to encrypt data at rest",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Use customer-managed keys to manage encryption at rest for Azure NetApp Files accounts. Customer-managed keys enable data to be encrypted with an Azure Key Vault key created and owned by you, giving you control over the key lifecycle, including rotation and management.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "preview": true,
+      "category": "Sovereignty"
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.NetApp/netAppAccounts"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/encryption.keyVaultProperties.keyVaultUri",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.NetApp/netAppAccounts/encryption.keyVaultProperties.keyVaultUri",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/8855a114-45dd-4bb9-9953-4cc527764c90",
+  "name": "8855a114-45dd-4bb9-9953-4cc527764c90"
+}

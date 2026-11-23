@@ -1,16 +1,15 @@
 {
   "properties": {
-    "displayName": "[Preview]: Center for Internet Security (CIS) Benchmarks for Windows Server",
+    "displayName": "Center for Internet Security (CIS) Benchmarks for Windows Server",
     "policyType": "BuiltIn",
     "mode": "Indexed",
     "description": "This policy provides you the ability to customize and deploy CIS Security Benchmarks for audit purposes to your Windows Server across Azure, on-premises and hybrid environments. The contents of the CIS Security Benchmarks are in parity with the benchmarks published at https://cisecurity.org. Requires that prerequisites are deployed to the policy assignment scope. For details, visit https://aka.ms/gcpol.",
     "metadata": {
       "category": "Guest Configuration",
-      "version": "1.0.1-preview",
+      "version": "2.0.1",
       "requiredProviders": [
         "Microsoft.GuestConfiguration"
       ],
-      "preview": true,
       "guestConfiguration": {
         "name": "CISWindowsSecurityBaseline",
         "version": "1.*",
@@ -19,7 +18,7 @@
         }
       }
     },
-    "version": "1.0.1-preview",
+    "version": "2.0.1",
     "parameters": {
       "IncludeArcMachines": {
         "type": "string",
@@ -34,6 +33,66 @@
         ],
         "defaultValue": "false"
       },
+      "ArcKind": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Arc machine cloud provider kind",
+          "description": "Optional filter applied to every evaluated resource (Azure VM and Arc machine). Only resources whose 'kind' matches this value are evaluated. Use 'None' to disable this filter. Azure VMs do not have a 'kind' value, so setting this to AWS/GCP will exclude them from evaluation."
+        },
+        "allowedValues": [
+          "AWS",
+          "GCP",
+          "None"
+        ],
+        "defaultValue": "None"
+      },
+      "tagFilter": {
+        "type": "Object",
+        "metadata": {
+          "displayName": "Inclusion Tags",
+          "description": "Optional inclusion tags filtering to limit which resources the policy applies to. Add any number of name/value pairs to the 'tags' array. Use AnyTags when any one tag can match, or AllTags when all specified tags must match. Leave 'tags' empty to apply the policy to all matching resources."
+        },
+        "defaultValue": {
+          "mode": "AnyTags",
+          "tags": []
+        },
+        "schema": {
+          "type": "object",
+          "properties": {
+            "mode": {
+              "type": "string",
+              "enum": [
+                "AnyTags",
+                "AllTags"
+              ]
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "value": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "mode",
+            "tags"
+          ],
+          "additionalProperties": false
+        }
+      },
       "BaselineSettings": {
         "type": "String",
         "metadata": {
@@ -41,11 +100,10 @@
           "displayName": "Baseline Settings",
           "strongType": "MachineConfiguration/BaselineSettings",
           "portalReview": "true"
-        },
-        "defaultValue": ""
+        }
       },
       "effect": {
-        "type": "String",
+        "type": "string",
         "metadata": {
           "displayName": "Effect",
           "description": "Enable or disable the execution of this policy"
@@ -59,170 +117,91 @@
     },
     "policyRule": {
       "if": {
-        "anyOf": [
+        "allOf": [
           {
-            "allOf": [
+            "field": "type",
+            "in": [
+              "Microsoft.Compute/virtualMachines",
+              "Microsoft.HybridCompute/machines"
+            ]
+          },
+          {
+            "anyOf": [
               {
-                "field": "type",
-                "in": [
-                  "Microsoft.Compute/virtualMachines",
-                  "Microsoft.Compute/virtualMachineScaleSets"
-                ]
-              },
-              {
-                "value": "[resourcegroup().managedBy]",
-                "notContains": "/providers/Microsoft.ContainerService/"
-              },
-              {
-                "anyOf": [
+                "allOf": [
                   {
-                    "field": "Microsoft.Compute/imagePublisher",
-                    "in": [
-                      "esri",
-                      "incredibuild",
-                      "MicrosoftDynamicsAX",
-                      "MicrosoftSharepoint",
-                      "MicrosoftVisualStudio",
-                      "MicrosoftWindowsDesktop",
-                      "MicrosoftWindowsServerHPCPack"
-                    ]
+                    "field": "type",
+                    "equals": "Microsoft.Compute/virtualMachines"
                   },
                   {
-                    "allOf": [
+                    "anyOf": [
                       {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "MicrosoftWindowsServer"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageSKU",
-                        "notLike": "2008*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "MicrosoftSQLServer"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "notLike": "SQL2008*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "microsoft-dsvm"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "dsvm-win*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "microsoft-ads"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "in": [
-                          "standard-data-science-vm",
-                          "windows-data-science-vm"
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "batch"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "equals": "rendering-windows2016"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "center-for-internet-security-inc"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "cis-windows-server-201*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "pivotal"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "bosh-windows-server*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "field": "Microsoft.Compute/imagePublisher",
-                        "equals": "cloud-infrastructure-services"
-                      },
-                      {
-                        "field": "Microsoft.Compute/imageOffer",
-                        "like": "ad*"
-                      }
-                    ]
-                  },
-                  {
-                    "allOf": [
-                      {
-                        "anyOf": [
+                        "allOf": [
                           {
-                            "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
-                            "exists": true
+                            "field": "Microsoft.Compute/imagePublisher",
+                            "equals": "MicrosoftWindowsServer"
                           },
                           {
-                            "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
-                            "like": "Windows*"
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2008*"
                           },
                           {
-                            "field": "Microsoft.Compute/VirtualMachineScaleSets/osProfile.windowsConfiguration",
-                            "exists": true
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2012*"
                           },
                           {
-                            "field": "Microsoft.Compute/virtualMachineScaleSets/virtualMachineProfile.storageProfile.osDisk.osType",
-                            "like": "Windows*"
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2016*"
+                          },
+                          {
+                            "field": "Microsoft.Compute/imageSKU",
+                            "notLike": "2019*"
                           }
                         ]
                       },
                       {
-                        "anyOf": [
+                        "allOf": [
                           {
-                            "field": "Microsoft.Compute/imageSKU",
-                            "exists": false
-                          },
-                          {
-                            "allOf": [
+                            "anyOf": [
                               {
-                                "field": "Microsoft.Compute/imageOffer",
-                                "notLike": "SQL2008*"
+                                "field": "Microsoft.Compute/virtualMachines/osProfile.windowsConfiguration",
+                                "exists": true
                               },
                               {
+                                "field": "Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType",
+                                "like": "Windows*"
+                              }
+                            ]
+                          },
+                          {
+                            "anyOf": [
+                              {
                                 "field": "Microsoft.Compute/imageSKU",
-                                "notLike": "2008*"
+                                "exists": false
+                              },
+                              {
+                                "allOf": [
+                                  {
+                                    "field": "Microsoft.Compute/imageOffer",
+                                    "notLike": "SQL2008*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "notLike": "2008*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "notLike": "2012*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "notLike": "2016*"
+                                  },
+                                  {
+                                    "field": "Microsoft.Compute/imageSKU",
+                                    "notLike": "2019*"
+                                  }
+                                ]
                               }
                             ]
                           }
@@ -231,47 +210,86 @@
                     ]
                   }
                 ]
+              },
+              {
+                "allOf": [
+                  {
+                    "field": "type",
+                    "equals": "Microsoft.HybridCompute/machines"
+                  },
+                  {
+                    "value": "[parameters('IncludeArcMachines')]",
+                    "equals": "true"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.HybridCompute/machines/osSku",
+                        "like": "Windows Server 2022*"
+                      },
+                      {
+                        "field": "Microsoft.HybridCompute/machines/osSku",
+                        "like": "Windows Server 2025*"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
           {
-            "allOf": [
+            "anyOf": [
               {
-                "field": "type",
-                "in": [
-                  "Microsoft.HybridCompute/machines",
-                  "Microsoft.ConnectedVMwarevSphere/virtualMachines"
+                "value": "[parameters('ArcKind')]",
+                "equals": "None"
+              },
+              {
+                "field": "kind",
+                "equals": "[parameters('ArcKind')]"
+              }
+            ]
+          },
+          {
+            "anyOf": [
+              {
+                "value": "[length(parameters('tagFilter').tags)]",
+                "equals": 0
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[parameters('tagFilter').mode]",
+                    "equals": "AnyTags"
+                  },
+                  {
+                    "count": {
+                      "value": "[parameters('tagFilter').tags]",
+                      "name": "tagItem",
+                      "where": {
+                        "value": "[if(contains(string(field('tags')), concat('\"', current('tagItem').name, '\":\"', current('tagItem').value, '\"')), equals(substring(string(field('tags')), add(indexOf(string(field('tags')), concat('\"', current('tagItem').name, '\":\"')), add(length(current('tagItem').name), 4)), length(current('tagItem').value)), current('tagItem').value), false())]",
+                        "equals": true
+                      }
+                    },
+                    "greater": 0
+                  }
                 ]
               },
               {
-                "value": "[parameters('IncludeArcMachines')]",
-                "equals": "true"
-              },
-              {
-                "anyOf": [
+                "allOf": [
                   {
-                    "allOf": [
-                      {
-                        "field": "type",
-                        "equals": "Microsoft.HybridCompute/machines"
-                      },
-                      {
-                        "field": "Microsoft.HybridCompute/imageOffer",
-                        "like": "windows*"
-                      }
-                    ]
+                    "value": "[parameters('tagFilter').mode]",
+                    "equals": "AllTags"
                   },
                   {
-                    "allOf": [
-                      {
-                        "field": "type",
-                        "equals": "Microsoft.ConnectedVMwarevSphere/virtualMachines"
-                      },
-                      {
-                        "field": "Microsoft.ConnectedVMwarevSphere/virtualMachines/osProfile.osType",
-                        "like": "windows*"
+                    "count": {
+                      "value": "[parameters('tagFilter').tags]",
+                      "name": "tagItem",
+                      "where": {
+                        "value": "[if(contains(string(field('tags')), concat('\"', current('tagItem').name, '\":\"', current('tagItem').value, '\"')), equals(substring(string(field('tags')), add(indexOf(string(field('tags')), concat('\"', current('tagItem').name, '\":\"')), add(length(current('tagItem').name), 4)), length(current('tagItem').value)), current('tagItem').value), false())]",
+                        "equals": true
                       }
-                    ]
+                    },
+                    "equals": "[length(parameters('tagFilter').tags)]"
                   }
                 ]
               }
@@ -300,6 +318,8 @@
       }
     },
     "versions": [
+      "2.0.1",
+      "2.0.0-PREVIEW",
       "1.0.1-PREVIEW",
       "1.0.0-PREVIEW"
     ]

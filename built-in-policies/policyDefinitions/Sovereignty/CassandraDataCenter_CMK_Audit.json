@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Managed Instance for Apache Cassandra data centers should use customer-managed keys to encrypt disks and backup storage",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "Use customer-managed keys to manage encryption at rest for managed disks and backup storage in Azure Managed Instance for Apache Cassandra data centers. Customer-managed keys enable data to be encrypted with Azure Key Vault keys that you own and manage.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.DocumentDB/cassandraClusters/dataCenters"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.DocumentDB/cassandraClusters/dataCenters/managedDiskCustomerKeyUri",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.DocumentDB/cassandraClusters/dataCenters/managedDiskCustomerKeyUri",
+                "equals": ""
+              },
+              {
+                "field": "Microsoft.DocumentDB/cassandraClusters/dataCenters/backupStorageCustomerKeyUri",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.DocumentDB/cassandraClusters/dataCenters/backupStorageCustomerKeyUri",
+                "equals": ""
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/e1d59f09-0884-4a5b-80cc-5ec5ed5cb984",
+  "name": "e1d59f09-0884-4a5b-80cc-5ec5ed5cb984"
+}

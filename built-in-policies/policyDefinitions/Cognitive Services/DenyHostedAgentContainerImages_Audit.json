@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Microsoft Foundry hosted agents should not use denied container images",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Helps organizations prevent hosted agents from using container images prohibited by organizational supply-chain requirements.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "deniedContainerImages": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Denied Container Images",
+          "description": "List of full container image references or case-insensitive patterns that hosted agents are not allowed to use. Use a registry hostname followed by '/*', such as 'contoso.azurecr.io/*', to deny images from that registry."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/projects/agents"
+          },
+          {
+            "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/agentKind",
+            "equals": "hosted"
+          },
+          {
+            "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/hostedAgent.sourceType",
+            "equals": "container"
+          },
+          {
+            "count": {
+              "value": "[parameters('deniedContainerImages')]",
+              "name": "imagePattern",
+              "where": {
+                "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/hostedAgent.containerImage",
+                "like": "[current('imagePattern')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/215c2c77-3afb-4f55-be2f-709b60dc8d53",
+  "name": "215c2c77-3afb-4f55-be2f-709b60dc8d53"
+}

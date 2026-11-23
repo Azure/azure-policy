@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "displayName": "SRE Agents should not be configured in Autonomous mode",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Require human approval before SRE Agents perform write actions on Azure resources, reducing the risk of unintended autonomous changes.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "SRE Agent"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable, deny, or disable the execution of the policy."
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.App/agents"
+          },
+          {
+            "field": "Microsoft.App/agents/actionConfiguration.mode",
+            "equals": "Autonomous"
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/b9f8555f-abee-4709-be6b-cc34789f6cc8",
+  "name": "b9f8555f-abee-4709-be6b-cc34789f6cc8"
+}

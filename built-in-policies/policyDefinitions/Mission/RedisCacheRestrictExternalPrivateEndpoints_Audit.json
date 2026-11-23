@@ -1,0 +1,78 @@
+{
+  "properties": {
+    "displayName": "Redis Cache should restrict external private endpoints in mission platforms",
+    "policyType": "BuiltIn",
+    "mode": "All",
+    "description": "This policy applies exclusively to Mission Platform products and services; usage outside of these scopes is not supported. Restricting approved Redis Cache private endpoint connections to the current or explicitly excluded subscriptions helps prevent unauthorized cross-subscription access and data exfiltration.",
+    "metadata": {
+      "version": "1.0.0",
+      "category": "Mission"
+    },
+    "version": "1.0.0",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      },
+      "excludedSubIDs": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Excluded subscription IDs",
+          "description": "The subscription IDs allowed to host private endpoints connected to the Redis cache in addition to its own subscription."
+        },
+        "defaultValue": []
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Cache/redis/privateEndpointConnections"
+          },
+          {
+            "field": "Microsoft.Cache/redis/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.Cache/redis/privateEndpointConnections/privateEndpoint.id",
+                "exists": false
+              },
+              {
+                "allOf": [
+                  {
+                    "value": "[split(concat(field('Microsoft.Cache/redis/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notEquals": "[subscription().subscriptionId]"
+                  },
+                  {
+                    "value": "[split(concat(field('Microsoft.Cache/redis/privateEndpointConnections/privateEndpoint.id'), '//'), '/')[2]]",
+                    "notIn": "[parameters('excludedSubIDs')]"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/91de0ea5-83b9-4110-a7dd-3d5053465b11",
+  "name": "91de0ea5-83b9-4110-a7dd-3d5053465b11"
+}

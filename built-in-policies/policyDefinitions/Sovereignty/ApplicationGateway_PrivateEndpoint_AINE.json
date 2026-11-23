@@ -1,0 +1,49 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure Application Gateway should use private link",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Azure Application Gateway instances should have at least one approved private endpoint connection. Clients in a virtual network can securely access resources that have private endpoint connections through private links.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Network/applicationGateways"
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Network/applicationGateways/privateEndpointConnections",
+          "existenceCondition": {
+            "field": "Microsoft.Network/applicationGateways/privateEndpointConnections/privateLinkServiceConnectionState.status",
+            "equals": "Approved"
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/5204629f-8140-4a58-90a7-de4e04957a97",
+  "name": "5204629f-8140-4a58-90a7-de4e04957a97"
+}

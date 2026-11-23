@@ -1,0 +1,87 @@
+{
+  "properties": {
+    "displayName": "[Preview]: SQL Managed Instance databases should use failover groups with partner regions in allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict the partner regions of failover groups referenced by Azure SQL Managed Instance databases to meet data residency and sovereignty requirements. Databases without a failover-group reference are not evaluated. A referenced failover group that cannot be found is non-compliant. The database and local region are not restricted.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "listOfAllowedLocations": {
+        "type": "Array",
+        "metadata": {
+          "description": "The list of locations that can be specified when deploying resources.",
+          "strongType": "location",
+          "displayName": "Allowed locations"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "AuditIfNotExists",
+          "Disabled"
+        ],
+        "defaultValue": "AuditIfNotExists"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Sql/managedInstances/databases"
+          },
+          {
+            "field": "Microsoft.Sql/managedInstances/databases/failoverGroupId",
+            "exists": "true"
+          },
+          {
+            "field": "Microsoft.Sql/managedInstances/databases/failoverGroupId",
+            "notEquals": ""
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]",
+        "details": {
+          "type": "Microsoft.Sql/locations/instanceFailoverGroups",
+          "name": "[if(greaterOrEquals(length(split(string(field('Microsoft.Sql/managedInstances/databases/failoverGroupId')), '/')), 11), concat(split(string(field('Microsoft.Sql/managedInstances/databases/failoverGroupId')), '/')[8], '/', last(split(string(field('Microsoft.Sql/managedInstances/databases/failoverGroupId')), '/'))), '__no-linked-resource__/__no-linked-resource__')]",
+          "resourceGroupName": "[if(greaterOrEquals(length(split(string(field('Microsoft.Sql/managedInstances/databases/failoverGroupId')), '/')), 9), split(string(field('Microsoft.Sql/managedInstances/databases/failoverGroupId')), '/')[4], resourceGroup().name)]",
+          "existenceScope": "ResourceGroup",
+          "evaluationDelay": "AfterProvisioningSuccess",
+          "existenceCondition": {
+            "allOf": [
+              {
+                "field": "id",
+                "equals": "[coalesce(field('Microsoft.Sql/managedInstances/databases/failoverGroupId'), '__no-linked-resource__')]"
+              },
+              {
+                "count": {
+                  "field": "Microsoft.Sql/locations/instanceFailoverGroups/partnerRegions[*]",
+                  "where": {
+                    "value": "[replace(toLower(coalesce(current('Microsoft.Sql/locations/instanceFailoverGroups/partnerRegions[*].location'), '')), ' ', '')]",
+                    "notIn": "[parameters('listOfAllowedLocations')]"
+                  }
+                },
+                "equals": 0
+              }
+            ]
+          }
+        }
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/99645d66-5f63-4f02-b947-46de4e9a040e",
+  "name": "99645d66-5f63-4f02-b947-46de4e9a040e"
+}

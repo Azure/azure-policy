@@ -5,10 +5,10 @@
     "mode": "Indexed",
     "description": "Disable SSH gives you the ability to secure your cluster and reduce the attack surface. To learn more, visit: aka.ms/aks/disablessh",
     "metadata": {
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "Kubernetes"
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "parameters": {
       "effect": {
         "type": "String",
@@ -35,14 +35,26 @@
             "count": {
               "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]",
               "where": {
-                "anyOf": [
+                "allOf": [
                   {
-                    "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].securityProfile.sshAccess",
-                    "exists": "False"
+                    "value": "[coalesce(tryGet(current('Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]'), 'mode'), '')]",
+                    "notEquals": "Machines"
                   },
                   {
-                    "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].securityProfile.sshAccess",
-                    "equals": "localuser"
+                    "value": "[coalesce(tryGet(current('Microsoft.ContainerService/managedClusters/agentPoolProfiles[*]'), 'type'), '')]",
+                    "notEquals": "FlexNodes"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].securityProfile.sshAccess",
+                        "exists": "False"
+                      },
+                      {
+                        "field": "Microsoft.ContainerService/managedClusters/agentPoolProfiles[*].securityProfile.sshAccess",
+                        "equals": "localuser"
+                      }
+                    ]
                   }
                 ]
               }
@@ -56,6 +68,7 @@
       }
     },
     "versions": [
+      "1.1.0",
       "1.0.0"
     ]
   },

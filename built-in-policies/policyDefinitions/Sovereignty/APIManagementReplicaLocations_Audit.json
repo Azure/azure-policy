@@ -1,0 +1,64 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Azure API Management additional gateway locations should use allowed locations",
+    "policyType": "BuiltIn",
+    "mode": "Indexed",
+    "description": "Restrict Azure API Management additional gateway locations to approved regions to meet data residency and sovereignty requirements. This policy evaluates secondary multi-region deployments and does not evaluate the service's primary location.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Sovereignty",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "allowedReplicaLocations": {
+        "type": "Array",
+        "metadata": {
+          "displayName": "Allowed replica locations",
+          "description": "The list of locations where Azure API Management additional gateways are allowed.",
+          "strongType": "location"
+        }
+      },
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy"
+        },
+        "allowedValues": [
+          "Audit",
+          "Disabled"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.ApiManagement/service"
+          },
+          {
+            "count": {
+              "field": "Microsoft.ApiManagement/service/additionalLocations[*]",
+              "where": {
+                "value": "[replace(toLower(current('Microsoft.ApiManagement/service/additionalLocations[*].location')), ' ', '')]",
+                "notIn": "[parameters('allowedReplicaLocations')]"
+              }
+            },
+            "greater": 0
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/a2713d30-18dc-48a3-8e2f-0966c2133989",
+  "name": "a2713d30-18dc-48a3-8e2f-0966c2133989"
+}

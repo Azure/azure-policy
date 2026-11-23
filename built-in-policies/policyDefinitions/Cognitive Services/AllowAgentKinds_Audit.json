@@ -1,0 +1,67 @@
+{
+  "properties": {
+    "displayName": "[Preview]: Microsoft Foundry agents should only use allowed agent kinds",
+    "policyType": "BuiltIn",
+    "mode": "Microsoft.CognitiveServices.Data",
+    "description": "Helps organizations govern Microsoft Foundry agent creation by restricting agents to explicitly allowed kinds.",
+    "metadata": {
+      "version": "1.0.0-preview",
+      "category": "Cognitive Services",
+      "preview": true
+    },
+    "version": "1.0.0-preview",
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "defaultValue": "Audit",
+        "allowedValues": [
+          "Audit",
+          "Deny",
+          "Disabled"
+        ],
+        "metadata": {
+          "displayName": "Effect",
+          "description": "Enable or disable the execution of the policy."
+        }
+      },
+      "allowedAgentKinds": {
+        "type": "Array",
+        "defaultValue": [],
+        "metadata": {
+          "displayName": "Allowed Agent Kinds",
+          "description": "List of agent kinds that Microsoft Foundry agents are allowed to use."
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.CognitiveServices.Data/accounts/projects/agents"
+          },
+          {
+            "anyOf": [
+              {
+                "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/agentKind",
+                "exists": false
+              },
+              {
+                "field": "Microsoft.CognitiveServices.Data/accounts/projects/agents/agentKind",
+                "notIn": "[parameters('allowedAgentKinds')]"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "[parameters('effect')]"
+      }
+    },
+    "versions": [
+      "1.0.0-PREVIEW"
+    ]
+  },
+  "id": "/providers/Microsoft.Authorization/policyDefinitions/85455646-5d02-433e-a42d-265151140427",
+  "name": "85455646-5d02-433e-a42d-265151140427"
+}
